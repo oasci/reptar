@@ -1,0 +1,18 @@
+charge: 0
+mult: 1
+n_ele: 60
+basis_n_func: 258
+hf_type: RHF
+scf_grid_level: 2
+dipole_moment:
+- 2.5265211700823
+- -0.5830003327751
+- 1.2353903376292001
+energy_scf: -12419.360138637763
+energy_nuc_repul: 303.86837335
+energy_scf_one_ele: -1235.80976552
+energy_scf_two_ele: 475.53830516
+ele_frozen: 12
+energy_correl_mp2: -1.558244926
+md5: 6527423396392b9aab78a9fd49a2ad61
+md5_data: 439cdc88332dfcaaf645c2ba17d32216

@@ -1,0 +1,34 @@
+outputs:
+  charges_lowdin:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  charges_mulliken:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  dipole_moment:
+    description: >+
+      Dipole moment vector in Debyes.
+    storage:
+      - dataset
+    type: float
+  spin_sqrd_uhf_calc:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  spin_sqrd_uhf_ideal:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  

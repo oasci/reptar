@@ -1,0 +1,322 @@
+definitions:
+  identification:
+    md5:
+      description: "Unique string determined by all group attributes and datasets.\n"
+      storage:
+      - attribute
+      type: str
+    md5_data:
+      description: "Unique string determined by all group datasets (no attributes\
+        \ are included). This is a data-focused MD5 that will not be affected by adding\
+        \ or changing less-important attributes. Use this for breadcrumb purposes.\n"
+      storage:
+      - attribute
+      type: str
+  system_info:
+    atomic_numbers:
+      description: "Number of protons in the nucleus of each atom.\n"
+      storage:
+      - dataset
+      type: int
+    charge:
+      description: "Number of protons in the nucleus of each atom.\n"
+      storage:
+      - attribute
+      type: int
+    geometry:
+      description: "Numerical coordinates specifying the three-dimensional positions\
+        \ of each atom.\n"
+      storage:
+      - dataset
+      type: float
+    comp_ids:
+      description: "Relates ``entity_id`` to a fragment label for chemical components\
+        \ or species. Labels could be WAT or h2o for water, MeOH for methanol, bz\
+        \ for benzene, etc. There are no standardized labels for species. The index\
+        \ of the label is the respective ``entity_id``. For example, a water and methanol\
+        \ molecule could be ``['h2o', 'meoh']``.\n"
+      storage:
+      - dataset
+      type: str
+    comp_ids_num:
+      description: "Specifies the number of component IDs as an attribute. For example,\
+        \ ``{'H2O': 1, 'MEOH': 120}``\n"
+      storage:
+      - attribute
+      type: dict
+    entity_ids:
+      description: "A uniquely identifying label specifying what atoms belong to which\
+        \ entities. Entities can be a related set of atoms, molecules, or functional\
+        \ group. For example, a water and methanol molecule could be ``[0, 0, 0, 1,\
+        \ 1, 1, 1, 1, 1]``.\n"
+      storage:
+      - dataset
+      type: int
+    mult:
+      description: "System multiplicity.\n"
+      storage:
+      - attribute
+      type: int
+    n_ele:
+      description: "Total number of electrons in the system.\n"
+      storage:
+      - attribute
+      type: int
+  runtime_info:
+    calc_driver:
+      description: "The purpose of the calculation such as calculate energies, frequencies,\
+        \ gradients, or perform optimizations. Possible values include: ``energy``,\
+        \ ``frequency``, ``gradient``, ``optimization``, ``molecular_dynamics``.\n"
+      storage:
+      - attribute
+      type: str
+    prov:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    prov_version:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    success:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: bool
+    approx_cosx:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: bool
+    approx_rij:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: bool
+    approx_rijk:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: bool
+    basis_aux:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    basis_n_func:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    ele_frozen:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: int
+    hamiltonian:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    hf_type:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    scf_grid_level:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    scf_grid_level_final:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    temp_thermochem:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+  outputs:
+    conv_targ_geo_energy:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    conv_targ_geo_grad:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    conv_targ_geo_grad_max:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    conv_val_geo_energy:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    conv_val_geo_grad:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    conv_val_geo_grad_max:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    correc_enthalpy:
+      description: "Enthalpic energy correction to the electronic energy.\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    correc_entropy:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    correc_thermal:
+      description: "Thermal energy correction to electronic energy.\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    correc_zpe:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    diag_t1:
+      description: "T1 diagnostic\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    dipole_moment:
+      description: "Dipole moment vector in Debyes.\n"
+      storage:
+      - dataset
+      type: float
+    energy_ccsd:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_ccsd(t):
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_correl_mp2:
+      description: "Correlation energy from MP2.\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_ele:
+      description: "Total electronic energy.\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_mos:
+      description: "Energies of molecular orbitals. The array is of length 1 for restricted\
+        \ calculations, but length 2 for unrestricted calculations.\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_nuc_repul:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_scf:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_scf_one_ele:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_scf_two_ele:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    energy_scf_xc:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    atomic_gradient:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    energy_pot:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    forces:
+      description: "Atomic forces.\n"
+      storage:
+      - dataset
+      type: float
+    freq_vib:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    grads:
+      description: "Atomic gradients.\n"
+      storage:
+      - dataset
+      type: float
+    normal_modes:
+      description: "Normalized, mass-weighted normal modes, q.\n"
+      storage:
+      - dataset
+      type: float
+    charges_lowdin:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    charges_mulliken:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    spin_sqrd_uhf_calc:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    spin_sqrd_uhf_ideal:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float

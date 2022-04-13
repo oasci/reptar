@@ -1,0 +1,17 @@
+charge: 0
+mult: 1
+prov: xTB
+prov_version: 6.4.1
+calc_driver: molecular_dynamics
+hamiltonian: GFN2-xTB
+md_duration: 10.0
+t_step: 1.0
+xtb_scc_accuracy: 1
+temp_thermostat: 500.0
+md_steps_dump: 50.0
+success: true
+md5: c0a90109190dda650568bf01a2785812
+md5_data: bf256a8b5a6a9cd05a3d0ad0d9cc95e9
+comp_ids_num:
+  MET: 120
+  WAT: 1

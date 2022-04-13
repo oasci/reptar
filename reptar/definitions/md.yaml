@@ -1,0 +1,34 @@
+runtime_info:
+  md_duration:
+    description: >+
+      TODO in ps
+    storage:
+      - attribute
+    type: float
+  t_step:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: float
+  thermostat_temp:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: float
+outputs:
+  energy_ke:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  velcs:
+    description: >+
+      TODO velocities
+    storage:
+      - dataset
+    type: float
+

@@ -1,0 +1,152 @@
+definitions:
+  identification:
+    md5:
+      description: "Unique string determined by all group attributes and datasets.\n"
+      storage:
+      - attribute
+      type: str
+    md5_data:
+      description: "Unique string determined by all group datasets (no attributes\
+        \ are included). This is a data-focused MD5 that will not be affected by adding\
+        \ or changing less-important attributes. Use this for breadcrumb purposes.\n"
+      storage:
+      - attribute
+      type: str
+  system_info:
+    atomic_numbers:
+      description: "Number of protons in the nucleus of each atom.\n"
+      storage:
+      - dataset
+      type: int
+    charge:
+      description: "Number of protons in the nucleus of each atom.\n"
+      storage:
+      - attribute
+      type: int
+    geometry:
+      description: "Numerical coordinates specifying the three-dimensional positions\
+        \ of each atom.\n"
+      storage:
+      - dataset
+      type: float
+    comp_ids:
+      description: "Relates ``entity_id`` to a fragment label for chemical components\
+        \ or species. Labels could be WAT or h2o for water, MeOH for methanol, bz\
+        \ for benzene, etc. There are no standardized labels for species. The index\
+        \ of the label is the respective ``entity_id``. For example, a water and methanol\
+        \ molecule could be ``['h2o', 'meoh']``.\n"
+      storage:
+      - dataset
+      type: str
+    comp_ids_num:
+      description: "Specifies the number of component IDs as an attribute. For example,\
+        \ ``{'H2O': 1, 'MEOH': 120}``\n"
+      storage:
+      - attribute
+      type: dict
+    entity_ids:
+      description: "A uniquely identifying label specifying what atoms belong to which\
+        \ entities. Entities can be a related set of atoms, molecules, or functional\
+        \ group. For example, a water and methanol molecule could be ``[0, 0, 0, 1,\
+        \ 1, 1, 1, 1, 1]``.\n"
+      storage:
+      - dataset
+      type: int
+    mult:
+      description: "System multiplicity.\n"
+      storage:
+      - attribute
+      type: int
+    n_ele:
+      description: "Total number of electrons in the system.\n"
+      storage:
+      - attribute
+      type: int
+  runtime_info:
+    calc_driver:
+      description: "The purpose of the calculation such as calculate energies, frequencies,\
+        \ gradients, or perform optimizations. Possible values include: ``energy``,\
+        \ ``frequency``, ``gradient``, ``optimization``, ``molecular_dynamics``.\n"
+      storage:
+      - attribute
+      type: str
+    prov:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    prov_version:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: str
+    success:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: bool
+    md_duration:
+      description: "TODO in ps\n"
+      storage:
+      - attribute
+      type: float
+    t_step:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: float
+    thermostat_temp:
+      description: "TODO\n"
+      storage:
+      - attribute
+      type: float
+    xtb_scc_accuracy:
+      description: "SCC accuracy level in MD. Every 10th step the SCC is properly\
+        \ converged at sccconv=1.0. sccmd should be < 5 in critical cases, effects\
+        \ may show up as bad thermostating\n"
+      storage:
+      - attribute
+      type: float
+  outputs:
+    energy_ke:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    velcs:
+      description: "TODO velocities\n"
+      storage:
+      - dataset
+      type: float
+    atomic_gradient:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    energy_pot:
+      description: "TODO\n"
+      storage:
+      - attribute
+      - dataset
+      type: float
+    forces:
+      description: "Atomic forces.\n"
+      storage:
+      - dataset
+      type: float
+    freq_vib:
+      description: "TODO\n"
+      storage:
+      - dataset
+      type: float
+    grads:
+      description: "Atomic gradients.\n"
+      storage:
+      - dataset
+      type: float
+    normal_modes:
+      description: "Normalized, mass-weighted normal modes, q.\n"
+      storage:
+      - dataset
+      type: float
