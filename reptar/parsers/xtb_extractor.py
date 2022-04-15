@@ -20,8 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# TODO: Go through and return the dict info instead of updating parsed_info
-
 class extractorXTB:
     """
 
