@@ -40,13 +40,11 @@ def test_6h2o_temelso_engrad():
     """
     """
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    exdir_path = dir_path
+    exdir_path = dir_path + '.exdir'
 
     repman = manager()
-    repman.get_file(exdir_path, mode='w', allow_remove=True)
+    repman.load(exdir_path, mode='w', allow_remove=True)
     repman.add_definitions(definitions=['qc', 'pes', 'molprop'])
-    repman.create_group('engrad', parent=repman.File, out_path=out_path)
+    repman.create_group('/engrad', out_path=out_path)
 
     # TODO: write tests
-    
-

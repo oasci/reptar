@@ -51,7 +51,7 @@ system_info:
     type: dict
   entity_ids:
     description: >+
-      A uniquely identifying label specifying what atoms belong to which entities.
+      A uniquely identifying integer specifying what atoms belong to which entities.
       Entities can be a related set of atoms, molecules, or functional group.
       For example, a water and methanol molecule could be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
     storage:

@@ -25,7 +25,12 @@ import shutil
 
 def pytest_sessionstart(session):  # pytest_configure(config)
     """Creates a tmp directory for writing files."""
-    os.mkdir('./tests/tmp')
+    path = './tests/tmp'
+    if not os.path.exists(path):
+        os.makedirs(path)
+    else:
+        shutil.rmtree(path)           # Removes all the subdirectories!
+        os.makedirs(path)
 
 def pytest_sessionfinish(session):  # pytest_unconfigure(config)
     """Removes tmp directory."""

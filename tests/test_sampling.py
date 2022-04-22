@@ -43,54 +43,55 @@ def test_1h2o_120meoh_prod_sampling():
     dest_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
 
     source = manager()
-    source.get_file(source_path, mode='r')
-    grp_source = source.File['prod_1']
+    source.load(source_path, mode='r')
+    source_key = '/prod_1'
 
     dest = manager()
-    dest.get_file(dest_path, mode='w', allow_remove=True)
-    grp_dest = dest.create_group('wat.2met-pes')
+    dest.load(dest_path, mode='w', allow_remove=True)
+    dest_key = '/wat.2met-pes'
+    dest.data.init_group(dest_key)
 
     quantity = 100
     comp_labels = ('WAT', 'MET', 'MET')
 
     add_structures_to_group(
-        grp_source, grp_dest, quantity, comp_labels,
-        center_structures=False, copy_EF=False, write=True
+        source.data, source_key, dest.data, dest_key, quantity,
+        comp_labels, center_structures=False, copy_EF=False, write=True
     )
     assert np.array_equal(
-        grp_dest['atomic_numbers'],
+        dest.data.get(f'{dest_key}/atomic_numbers'),
         np.array([8, 1, 1, 8, 1, 6, 1, 1, 1, 8, 1, 6, 1, 1, 1])
     )
     assert np.array_equal(
-        grp_dest['entity_ids'],
+        dest.data.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     )
-    assert grp_dest['geometry'].data.shape == (100, 15, 3)
-    assert grp_dest['r_prov_specs'].data.shape == (100, 5)
-    assert len(dict(grp_dest.attrs['r_prov_ids'])) == 1
-    assert grp_dest.attrs['r_centered'] == False
+    assert dest.data.get(f'{dest_key}/geometry').shape == (100, 15, 3)
+    assert dest.data.get(f'{dest_key}/r_prov_specs').shape == (100, 5)
+    assert len(dest.data.get(f'{dest_key}/r_prov_ids')) == 1
+    assert dest.data.get(f'{dest_key}/r_centered') == False
     assert np.array_equal(
-        grp_dest['comp_ids'].data, np.array(comp_labels)
+        dest.data.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
 
     add_structures_to_group(
-        grp_source, grp_dest, quantity, comp_labels,
-        center_structures=True, copy_EF=False, write=True
+        source.data, source_key, dest.data, dest_key,
+        quantity, comp_labels, center_structures=True, copy_EF=False, write=True
     )
     assert np.array_equal(
-        grp_dest['atomic_numbers'],
+        dest.data.get(f'{dest_key}/atomic_numbers'),
         np.array([8, 1, 1, 8, 1, 6, 1, 1, 1, 8, 1, 6, 1, 1, 1])
     )
     assert np.array_equal(
-        grp_dest['entity_ids'],
+        dest.data.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     )
-    assert grp_dest['geometry'].data.shape == (200, 15, 3)
-    assert grp_dest['r_prov_specs'].data.shape == (200, 5)
-    assert len(dict(grp_dest.attrs['r_prov_ids'])) == 1
-    assert grp_dest.attrs['r_centered'] == True
+    assert dest.data.get(f'{dest_key}/geometry').shape == (200, 15, 3)
+    assert dest.data.get(f'{dest_key}/r_prov_specs').shape == (200, 5)
+    assert len(dest.data.get(f'{dest_key}/r_prov_ids')) == 1
+    assert dest.data.get(f'{dest_key}/r_centered') == True
     assert np.array_equal(
-        grp_dest['comp_ids'].data, np.array(comp_labels)
+        dest.data.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
 
 def test_sampling_from_wat_2met_pes():
@@ -99,24 +100,25 @@ def test_sampling_from_wat_2met_pes():
     src_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
 
     source = manager()
-    source.get_file(src_path, mode='a')
-    grp_source = source.File['wat.2met-pes']
-    grp_dest = source.create_group('wat.met-pes')
+    source.load(src_path, mode='a')
+    source_key = '/wat.2met-pes'
+    dest_key = '/wat.met-pes'
+    source.data.init_group(dest_key)
 
     quantity = 100
     comp_labels = ('WAT', 'MET')
 
     add_structures_to_group(
-        grp_source, grp_dest, quantity, comp_labels,
-        center_structures=True, copy_EF=False
+        source.data, source_key, source.data, dest_key,
+        quantity, comp_labels, center_structures=True, copy_EF=False
     )
 
     assert np.array_equal(
-        grp_dest['entity_ids'],
+        source.data.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1])
     )
-    assert len(dict(grp_dest.attrs['r_prov_ids'])) == 1
-    assert grp_dest.attrs['r_centered'] == True
+    assert len(source.data.get(f'{dest_key}/r_prov_ids')) == 1
+    assert source.data.get(f'{dest_key}/r_centered') == True
     assert np.array_equal(
-        grp_dest['comp_ids'].data, np.array(comp_labels)
+        source.data.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
