@@ -36,7 +36,7 @@ from .paths import *
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 @pytest.mark.order(0)
-def test_6h2o_temelso_engrad():
+def test_6h2o_temelso_engrad_exdir():
     """
     """
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
@@ -46,5 +46,19 @@ def test_6h2o_temelso_engrad():
     repman.load(exdir_path, mode='w', allow_remove=True)
     repman.add_definitions(definitions=['qc', 'pes', 'molprop'])
     repman.create_group('/engrad', out_path=out_path)
+
+    # TODO: write tests
+
+@pytest.mark.order(0)
+def test_6h2o_temelso_engrad_json():
+    """
+    """
+    dir_path, out_path = get_6h2o_temelso_pr_engrad()
+    json_path = dir_path + '.json'
+
+    repman = manager()
+    repman.load(json_path, mode='w')
+    repman.create_group('/', out_path=out_path)
+    repman.data.save()
 
     # TODO: write tests

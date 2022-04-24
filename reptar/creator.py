@@ -105,19 +105,21 @@ class creator:
         assert hasattr(self, 'data')
         parsed_info = self.parsed_info
 
-        self.data.init_group(group_key)
+        if self.data.ftype == 'exdir':
+            self.data.init_group(group_key)
+        
         # Loop through each category of data.
         for cat_key in parsed_info.keys():
             for data_key in parsed_info[cat_key].keys():
                 data = parsed_info[cat_key][data_key]
                 self.data.add(f'{group_key}/{data_key}', data)
         
-        md5 = get_md5(self.data.get(group_key))
+        md5 = get_md5(self.data, group_key)
         self.data.add(f'{group_key}/md5', md5)
         
         try:
-            md5_group = get_md5(self.data.get(group_key), only_dataset=True)
-            self.data.add(f'{group_key}/md5_data', md5_group)
+            md5_group = get_md5(self.data, group_key, only_arrays=True)
+            self.data.add(f'{group_key}/md5_arrays', md5_group)
         except Exception:
             pass
 

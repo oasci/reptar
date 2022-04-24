@@ -5,7 +5,7 @@ identification:
     storage:
       - attribute
     type: str
-  md5_data:
+  md5_arrays:
     description: >+
       Unique string determined by all group datasets (no attributes are included).
       This is a data-focused MD5 that will not be affected by adding or changing less-important attributes.

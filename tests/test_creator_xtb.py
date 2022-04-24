@@ -36,7 +36,7 @@ from .paths import get_1h2o_120meoh_eq_paths, get_1h2o_120meoh_prod_paths
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 @pytest.mark.order(0)
-def test_1h2o_120meoh_md():
+def test_1h2o_120meoh_md_exdir():
     """
     """
     dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
@@ -86,4 +86,60 @@ def test_1h2o_120meoh_md():
     assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
     assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
 
+@pytest.mark.order(0)
+def test_1h2o_120meoh_md_json():
+    """
+    """
+    dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
+    _, _, out_path_prod, geom_path_prod, traj_path_prod = get_1h2o_120meoh_prod_paths()
+    json_path = dir_path + '.json'
+
+    num_waters = 1
+    atoms_per_water = 3
+    num_methanols = 120
+    atoms_per_methanol = 6
+
+    # For water molecules.
+    entity_ids = gen_entity_ids(atoms_per_water, num_waters)
+    comp_ids = gen_comp_ids('WAT', num_waters, entity_ids)
+    # For methanol molecules.
+    entity_ids = gen_entity_ids(
+        atoms_per_methanol, num_methanols, starting_idx=np.max(entity_ids)+1,
+        add_to=entity_ids
+    )
+    comp_ids = gen_comp_ids(
+        'MET', num_methanols, entity_ids, add_to=comp_ids
+    )
+
+    repman = manager()
+    repman.load(json_path, mode='w')
+    repman.create_group(
+        '/eq_1', out_path=out_path_eq,
+        geom_path=geom_path_eq, traj_path=traj_path_eq
+    )
+    repman.add_ids('/eq_1', entity_ids, comp_ids)
+    repman.create_group(
+        'prod_1', out_path=out_path_prod,
+        geom_path=geom_path_prod, traj_path=traj_path_prod
+    )
+    repman.add_ids('prod_1', entity_ids, comp_ids)
+
+    assert repman.data.get('prod_1/geometry').shape == (1001, 723, 3)
+    assert repman.data.get('prod_1/geometry')[0][3][1] == -2.64576119977354
+    assert repman.data.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
+    assert repman.data.get('prod_1/energy_pot').shape == (1001,)
+    assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
+    assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
+
+    repman.data.save(json_prettify=True)
+
+    repman = manager()
+    repman.load(json_path, mode='r')
+
+    assert repman.data.get('prod_1/geometry').shape == (1001, 723, 3)
+    assert repman.data.get('prod_1/geometry')[0][3][1] == -2.64576119977354
+    assert repman.data.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
+    assert repman.data.get('prod_1/energy_pot').shape == (1001,)
+    assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
+    assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
 
