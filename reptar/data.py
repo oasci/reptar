@@ -64,11 +64,22 @@ class data:
                     File = json.load(f)
             else:
                 File = defaultdict(lambda: defaultdict(dict))
+        elif f_ext == '.npz':
+            if exists:
+                File = dict(np.load(file_path, allow_pickle=True))
+                # Since everything is stored in arrays, we clean up array data.
+                for k,v in File.items():
+                    if self._is_iter(v):
+                        v = self.simplify_iter_data(v)
+                        File[k] = v
+            else:
+                File = defaultdict(lambda: defaultdict(dict))
         else:
             raise TypeError(f'{f_ext} is not supported.')
         
         self.fpath = file_path
         self.ftype = f_ext[1:]
+        self.fmode = mode
         self.File = File
     
     def clean_key(self, key):
@@ -176,7 +187,7 @@ class data:
         if self.ftype == 'exdir':
             keys.extend(list(sorted(group.attrs.keys())))
             keys.extend(list(sorted(group.keys())))
-        elif self.ftype == 'json':
+        elif self.ftype == 'json' or self.ftype == 'npz':
             keys.extend(list(group.keys()))
         return keys
 
@@ -200,7 +211,7 @@ class data:
         key = self.clean_key(key)
         if self.ftype == 'exdir':
             data = self._get_from_exdir(key)
-        elif self.ftype == 'json':
+        elif self.ftype == 'json' or self.ftype == 'npz':
             data = self._get_from_dict(key)
         return data
     
@@ -332,7 +343,7 @@ class data:
         key = self.clean_key(key)
         if self.ftype == 'exdir':
             self._add_to_exdir(key, data)
-        elif self.ftype == 'json':
+        elif self.ftype == 'json' or self.ftype == 'npz':
             self._add_to_dict(key, data)
     
     def init_group(self, key):
@@ -359,6 +370,7 @@ class data:
             Indents JSON objects if True. If false the JSON file is only one
             line.
         """
+        assert self.fmode == 'w'
         if self.ftype == 'json':
             json_dict = self.File
 
@@ -374,4 +386,6 @@ class data:
                 )
             with open(self.fpath, 'w') as f:
                 f.write(json_string)
-    
+        elif self.ftype == 'npz':
+            npz_dict = self.File
+            np.savez_compressed(self.fpath, **npz_dict)
