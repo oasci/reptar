@@ -37,15 +37,18 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
 def test_pdb_writer_1h2o_120meoh_prod():
-    """Sampling from xTB MD reptar file.
+    """Writing short PDB file from exdir file.
     """
     exdir_path = '../examples/xtb/v6.4.1/md/1h2o.120meoh.pm.gfn2.exdir'
 
     repman = manager()
-    repman.get_file(exdir_path, mode='r')
+    repman.load(exdir_path, mode='r')
 
     writer = pdbWriter()
-    writer.write(repman.File['prod_1'], save_dir='./tmp', R_limits=(None, 5))
+    writer.write(
+        repman.data, '/prod_1', file_name='prod_1',
+        save_dir='./tmp', R_limits=(None, 5)
+    )
 
     # TODO: Write any tests?
 

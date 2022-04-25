@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class extractorORCA:
-    """
+from .extractor import extractor
+
+class extractorORCA(extractor):
+    """ORCA extractor
 
     Attributes
     ----------
@@ -30,10 +32,28 @@ class extractorORCA:
         The trigger is a lambda function that returns True or False depending
         on the criteria and the name of the extractor method.
     parsed_info : :obj:`dict`
-        Extracted information from the file from this object.
+        Information parsed from files. Contains the following keys.
+
+        ``system_info``
+            Information specifying the system prior to any computation. Such
+            as the initial cartesian coordinates, total system charge and
+            multiplicity, etc.
+        
+        ``runtime_info``
+            Contains information about setting up the job/calculation or running
+            the job. Defining convergence criteria, parameters, etc.
+        
+        ``outputs``
+            Results, requested or not, of the job. For example, SCF
+            cycle values, optimized coordinates, trajectory, number of
+            electrons, generated structures, etc.
     """
     def __init__(self):
-        self.triggers = (
+        super().__init__()
+    
+    @property
+    def triggers(self):
+        trig = (
             (lambda line: True if ('Your calculation utilizes the auxiliary basis: ' in line.strip()) else False, 'aux_basis'),
             (lambda line: True if ('DFT GRID GENERATION' == line.strip() or 'Setting up the final grid:' == line.strip()) else False, 'grid_info'),
             (lambda line: True if ('CPCM SOLVATION MODEL' == line.strip()) else False, 'implicit_solvent'),
@@ -55,11 +75,7 @@ class extractorORCA:
             (lambda line: True if ('Thermal Enthalpy correction       ...' in line) else False, 'enthalpic_corr'),
             (lambda line: True if ('Final entropy term                ...' in line) else False, 'entropic_corr'),
         )
-        self.parsed_info = {
-            'system_info': {},
-            'runtime_info': {},
-            'outputs': {}
-        }
+        return trig
 
     def aux_basis(self, f, line):
         """Information about auxiliary basis sets used in the calculation.

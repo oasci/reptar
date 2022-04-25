@@ -31,30 +31,40 @@ class pdbWriter(reptarWriter):
         super().__init__()
     
     def write(
-        self, group, atom_type='HETATM', file_name=None, save_dir=None,
+        self, data, group_key, atom_type='HETATM', file_name=None, save_dir=None,
         R_limits=None
     ):
         """Parses trajectory file and extracts information.
 
         Parameters
         ----------
+        data : ``reptar.data``
+            A reptar data object.
+        group_key : :obj:`str`
+            Key to the desired group.
+        atom_type : :obj:`str`, optional
+            The PDB atom type to be used. Should almost always be ``HETATM``.
+        file_name : :obj:`str`, optional
+            Name of the PDB file. Defaults to ``'structure'``.
+        save_dir : :obj:`str`, optional
+            Directory to save the PDB file. Defaults to the current directory.
         R_limits : :obj:`tuple` (:obj:`int`), optional
             Slicing limits specifying start and stop index. If ``None`` is used
             it does not change the beginning or end of the array. For example,
             ``(None, 100)`` would only print the first 100 structures.
         """
-        R = group['geometry'].data
+        R = data.get(f'{group_key}/geometry')
         if R.ndim == 2:
             R = np.array([R])
         if R_limits is not None:
             R = R[slice(*R_limits)]
-        Z = group['atomic_numbers'].data
+        Z = data.get(f'{group_key}/atomic_numbers')
         atom_labels = [z_to_element[i] for i in Z]
-        entity_ids = group['entity_ids'].data
-        comp_ids = group['comp_ids'].data
+        entity_ids = data.get(f'{group_key}/entity_ids')
+        comp_ids = data.get(f'{group_key}/comp_ids')
         
         if file_name is None:
-            file_name = group.object_name
+            file_name = 'structure'
         if save_dir is None:
             save_dir = '.'
         else:

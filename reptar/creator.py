@@ -55,8 +55,18 @@ triggers = [
     (parserXTB, ["x T B"], True)
 ]
 
-class creator():
-    """"""
+class creator:
+    """Handles creating reptar data files.
+
+    Parameters
+    ----------
+    data : ``reptar.data``, optional
+        An initialized data object.
+    """
+
+    def __init__(self, data=None):
+        if data is not None:
+            self.data = data
 
     def parse_output(
         self, out_path, geom_path=None, traj_path=None, extractors=None
@@ -84,76 +94,34 @@ class creator():
         )
         self.parsed_info = self.parser.parse()
     
-    def create_group(self, name, parent):
-        """Create exdir group using parsed information.
+    def create_group(self, group_key):
+        """Create group using parsed information.
         
         Parameters
         ----------
-        name : :obj:`str`
-            New group name.
-        parent : ``obj``
-            An exdir File or Group this new Group will be nested under.
+        group_key : :obj:`str`
+            Key to the desired new group (including parent).
         """
+        assert hasattr(self, 'data')
         parsed_info = self.parsed_info
 
-        grp = parent.create_group(name)
-
+        if self.data.ftype == 'exdir':
+            self.data.init_group(group_key)
+        
         # Loop through each category of data.
         for cat_key in parsed_info.keys():
-            cat_info = parsed_info[cat_key]
-            for data_key in cat_info.keys():
-                data = cat_info[data_key]
-                
-                # Custom handling of parsed data to ensure logical behavior.
-                if data_key == 'dipole_moment':
-                    if isinstance(data, np.ndarray):
-                        data = data.tolist()
-                    grp.attrs[data_key] = data
-                    continue
-
-                # If data is not array/list or array/list of one dimension and
-                # length we make it an exdir attribute.
-                # We make anything else an exdir dataset.
-                if isinstance(data, np.ndarray) or isinstance(data, list) or isinstance(data, tuple):
-                    # If data is a list we check the types of data it contains.
-                    # If all of them are strings, we do not convert to array.
-                    if not isinstance(data, np.ndarray):
-                        # If there is only one item in the list we can likely
-                        # just store it as an attribute. However, we have
-                        # to be careful when the single item is an array.
-                        if len(data) == 1:
-                            data = data[0]
-                            if isinstance(data, np.ndarray):
-                                grp.create_dataset(data_key, data=data)
-                            else:
-                                grp.attrs[data_key] = data
-                        # If all the items are not all strings then we make
-                        # the dataset.
-                        elif not all(isinstance(i, str) for i in data):
-                            data = np.array(data)
-                            grp.create_dataset(data_key, data=data)
-                        # At this point only data that contains all strings
-                        # should be left. We put these as attributes (i.e., 
-                        # comp_ids)
-                        else:
-                            grp.attrs[data_key] = data
-                    # Handling arrays.
-                    else:
-                        # If only one item we store it as an attribute.
-                        # Otherwise we create the dataset.
-                        if data.shape == (1,):
-                            grp.attrs[data_key] = data[0].item()
-                        else:
-                            grp.create_dataset(data_key, data=data)
-                # Handles all non iterable data. 
-                else:
-                    grp.attrs[data_key] = data
+            for data_key in parsed_info[cat_key].keys():
+                data = parsed_info[cat_key][data_key]
+                self.data.add(f'{group_key}/{data_key}', data)
         
-        grp.attrs['md5'] = get_md5(grp)
+        md5 = get_md5(self.data, group_key)
+        self.data.add(f'{group_key}/md5', md5)
+        
         try:
-            grp.attrs['md5_data'] = get_md5(grp, only_dataset=True)
+            md5_group = get_md5(self.data, group_key, only_arrays=True)
+            self.data.add(f'{group_key}/md5_arrays', md5_group)
         except Exception:
             pass
 
-        return grp
+        return self.data.get(group_key)
 

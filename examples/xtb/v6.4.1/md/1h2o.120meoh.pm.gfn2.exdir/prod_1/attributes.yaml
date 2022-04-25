@@ -11,7 +11,7 @@ temp_thermostat: 500.0
 md_steps_dump: 5.0
 success: true
 md5: 755f68f71c5d9317838f51a4d9a0957a
-md5_data: 90b09304fcd0d0585a2f7b49627354ff
+md5_arrays: 90b09304fcd0d0585a2f7b49627354ff
 comp_ids_num:
   MET: 120
   WAT: 1
