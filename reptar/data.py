@@ -46,11 +46,28 @@ class data:
         Validation mode for exdir group names. Defaults to ``'thorough'``.
     plugins : :obj:`list`, optional
         A list of instantiated exdir plugins. Defaults to ``None``.
+    from_dict : :obj:`dict`, optional
+        Load data from a dictionary.
     """
 
     def __init__(self, file_path, mode='r', allow_remove=False,
-        name_validation='thorough', plugins=None
+        name_validation='thorough', plugins=None, from_dict=None
     ):
+        if from_dict is None:
+            self._from_path(
+                file_path, mode, allow_remove, name_validation, plugins
+            )
+        else:
+            self._from_dict(
+                file_path, from_dict, mode, allow_remove,
+                name_validation, plugins
+            )
+    
+    def _from_path(
+        self, file_path, mode, allow_remove, name_validation, plugins
+    ):
+        """Populates the data object from a file path.
+        """
         exists = os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
 
@@ -81,6 +98,37 @@ class data:
         self.ftype = f_ext[1:]
         self.fmode = mode
         self.File = File
+    
+    def _from_dict(
+        self, file_path, group_dict, mode, allow_remove, name_validation, plugins
+    ):
+        """Populates the data object from a dictionary.
+
+        Parameters
+        ----------
+        file_path : :obj`str`
+            Path to a file supported by reptar. If it does not exist, then one
+            will be created if possible.
+        group_dict : :obj:`str`
+            Dictionary to populate the data object with.
+        """
+        exists = os.path.exists(file_path)
+        _, f_ext = os.path.splitext(file_path)
+        
+        if f_ext == '.exdir':
+            self.File = exdir.File(
+                file_path, mode, allow_remove, name_validation, plugins
+            )
+        elif f_ext == '.json' or f_ext == '.npz':
+            self.File = defaultdict(lambda: defaultdict(dict))
+        self.fpath = file_path
+        self.ftype = f_ext[1:]
+        self.fmode = mode
+
+        for pair in self._iter_dict(group_dict):
+            key = '/'.join(pair[:-1])
+            data = pair[-1]
+            self.add(key, data)
     
     def clean_key(self, key):
         """Clean key and remove any common mistakes in keys.
@@ -346,6 +394,27 @@ class data:
         elif self.ftype == 'json' or self.ftype == 'npz':
             self._add_to_dict(key, data)
     
+    def _iter_dict(self, dic):
+        """Iterate over nested dictionary.
+
+        Parameters
+        ----------
+        dic : :obj:`dict`
+            An arbitrarily nested dictionary.
+        
+        Yields
+        ------
+        A :obj:`tuple` of keys where the last element is the value.
+        """
+        for k, v in dic.items():
+            if isinstance(v, dict):
+                # If value is dict then iterate over all its values
+                for pair in self._iter_dict(v):
+                    yield (k, *pair)
+            else:
+                # If value is not dict type then yield the value
+                yield (k, v)
+    
     def init_group(self, key):
         """Create a new group with the specified key.
 
@@ -360,6 +429,30 @@ class data:
             parent = self.get(parent_key)
             group = parent.create_group(group_key)
         return group
+    
+    def as_dict(self, group_key):
+        """Get a group as a dictionary.
+
+        Parameters
+        ----------
+        group_key : :obj:`str`
+            Desired group.
+        
+        Returns
+        -------
+        :obj:`dict`
+            The desired group as a dictionary.
+        """
+        group = self.get(group_key)
+        if self.ftype == 'json' or self.ftype == 'npz':
+            return group
+        elif self.ftype == 'exdir':
+            group_dict = {}
+            data_keys = self.get_keys(group_key)
+            get_keys = [f'{group_key}/{d_key}' for d_key in data_keys]
+            for d_key,g_key in zip(data_keys, get_keys):
+                group_dict[d_key] = self.get(g_key)
+            return group_dict
     
     def save(self, json_prettify=True):
         """Saves non-exdir files.

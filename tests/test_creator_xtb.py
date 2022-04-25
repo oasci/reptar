@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import manager
+from reptar import manager, data
 from reptar.utils import get_md5, gen_entity_ids, gen_comp_ids
 
 import sys
@@ -143,3 +143,24 @@ def test_1h2o_120meoh_md_json():
     assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
     assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
 
+@pytest.mark.order(0)
+def test_1h2o_120meoh_md_prod_exdir_to_npz():
+    """
+    """
+    dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
+    exdir_path = dir_path + '.exdir'
+    npz_path = dir_path + '-prod.npz'
+
+    repman_exdir = manager()
+    repman_exdir.load(exdir_path, mode='r')
+    prod_dict = repman_exdir.data.as_dict('prod_1')
+    
+    data_npz = data(npz_path, mode='w', from_dict=prod_dict)
+    data_npz.save()
+
+    assert data_npz.get('geometry').shape == (1001, 723, 3)
+    assert data_npz.get('geometry')[0][3][1] == -2.64576119977354
+    assert data_npz.get('geometry')[-1][-1][0] == -1.62420092727186
+    assert data_npz.get('energy_pot').shape == (1001,)
+    assert data_npz.get('energy_pot')[0] == -991.881189902216
+    assert data_npz.get('energy_pot')[-1] == -991.818996146108
