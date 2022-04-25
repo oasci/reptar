@@ -37,6 +37,8 @@ class parser(ABC):
     ----------
     out_path : :obj:`str`
         Path to output file.
+    extractors : :obj:`list`
+        Additional extractors for the parser to use.
     
     Attributes
     ----------
@@ -62,7 +64,7 @@ class parser(ABC):
             electrons, generated structures, etc.
     """
 
-    def __init__(self, out_path, extractors, extension='out', recursive=False):
+    def __init__(self, out_path, extractors):
         self.out_path = out_path
         self.file_name = '.'.join(self.out_path.split('/')[-1].split('.')[:-1])
         self.parsed_info = {

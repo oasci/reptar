@@ -7,3 +7,4 @@ from . import writers
 from .creator import creator
 from .manager import manager
 from .sampler import *
+from .data import data

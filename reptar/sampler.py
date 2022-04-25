@@ -201,11 +201,11 @@ def _generate_structure_samples(
                 yield selection
 
 def sample_structures(
-    source, quantity, comp_labels, R_prov_ids, source_R_prov_specs,
-    Z=None, R=None, R_prov_specs=None, structure_idxs=None, criteria=None,
-    z_slice=None, cutoff=None, center_structures=False, sampling_updates=False,
-    copy_EF=False, E=None, F=None, energy_label='energy_ele',
-    force_label='forces'
+    source_data, source_key, quantity, comp_labels, R_prov_ids, source_R_prov_specs,
+    Z=None, R=None, R_prov_specs=None, structure_idxs=None,
+    criteria=None, z_slice=None, cutoff=None, center_structures=False,
+    sampling_updates=False, copy_EF=False, E=None, F=None,
+    energy_label='energy_ele', force_label='forces'
 ):
     """Randomly samples structures from a source.
 
@@ -215,10 +215,12 @@ def sample_structures(
 
     Parameters
     ----------
-    source : ``exdir.Group``
+    source_data : ``exdir.Group``
         A loaded ``exdir.Group`` to sample structures from. Must contain
         ``z``, ``r``, ``entity_ids``, and
         ``comp_ids``.
+    source_key : :obj:`str`
+        Key to the desired source group.
     quantity : :obj:`str`
         Number of structures to sample from the structure set. For example,
         ``'100'``, ``'452'``, or even ``'all'``.
@@ -301,10 +303,10 @@ def sample_structures(
         ``R_prov_specs`` of the structures.
     """
     # Get data from structure source.
-    Z_source = source['atomic_numbers'].data
-    R_source = source['geometry'].data
-    entity_ids_source = source['entity_ids'].data
-    comp_ids_source = source['comp_ids'].data
+    Z_source = source_data.get(f'{source_key}/atomic_numbers')
+    R_source = source_data.get(f'{source_key}/geometry')
+    entity_ids_source = source_data.get(f'{source_key}/entity_ids')
+    comp_ids_source = source_data.get(f'{source_key}/comp_ids')
 
     # If source_R_prov_specs is None, then this is an original source.
     # Which means there should only be one R_prov_id (we store this for later).
@@ -314,8 +316,8 @@ def sample_structures(
 
     if copy_EF:
         try:
-            E_source = source[energy_label_source].data
-            F_source = source[force_label_source].data
+            E_source = source_data.get(f'{source_key}/{energy_label_source}')
+            F_source = source_data.get(f'{source_key}/{force_label_source}')
         except Exception:
             E_source = None
             F_source = None
@@ -476,23 +478,26 @@ def sample_structures(
     )
 
 def add_structures_to_group(
-    source, destination, quantity, comp_labels, structure_idxs=None,
-    consistent_entities=None, criteria=None, z_slice=[], cutoff=[],
-    center_structures=False, sampling_updates=False, copy_EF=False,
-    energy_label='energy_ele', force_label='forces', write=True
+    source_data, source_key, dest_data, dest_key, quantity,
+    comp_labels, structure_idxs=None, consistent_entities=None, criteria=None,
+    z_slice=[], cutoff=[], center_structures=False, sampling_updates=False,
+    copy_EF=False, energy_label='energy_ele', force_label='forces', write=True
 ):
     """Adds randomly sampled structures to a ``exdir.Group``.
 
     Parameters
     ----------
-    source : ``exdir.Object``
-        A loaded exdir ``File`` or ``Group`` to sample structures from. Must
-        contain ``Z``, ``R``, ``entity_ids``, and
-        ``comp_ids``. If it does not contain a ``md5_data`` one will be
-        created and saved.
-    destination : ``exdir.Object``
-        The ``Group`` to add the sampled structures to. The ``Group`` must
-        already exist.
+    source_data : ``reptar.data``
+        A reptar data object to sample structures from. Must contain
+        ``atomic_numbers``, ``geometry``, ``entity_ids``, and ``comp_ids``.
+        If it does not contain a ``md5_arrays`` one will be created and saved.
+    source_key : :obj:`str`
+        Key to the desired source group.
+    dest_data : ``reptar.data``
+        A reptar data object to add sampled structures to.
+    dest_key : :obj:`str`
+        Key to the desired destination group. If it does not
+        exist then it will be created.
     quantity : :obj:`str` or :obj:`int`
         Number of structures to sample from the data. For example,
         ``'100'``, ``452``, or ``'all'``.
@@ -546,12 +551,12 @@ def add_structures_to_group(
     """
     # Grabs data from destination if exists.
     try:
-        Z = destination['atomic_numbers'].data
+        Z = dest_data.get(f'{dest_key}/atomic_numbers')
     except Exception:
         Z = None
     
     try:
-        R = destination['geometry'].data
+        R = dest_data.get(f'{dest_key}/geometry')
     except Exception:
         R = None
     
@@ -559,34 +564,30 @@ def add_structures_to_group(
     # TODO: perform check if we should copy energies and forces based on if the
     # sampled structure is the entire source structure.
     if copy_EF:
-        E = destination[energy_label].data
-        F = destination[force_label].data
+        E = dest_data.get(f'{dest_key}/{energy_label}')
+        F = dest_data.get(f'{dest_key}/{force_label}')
     else:
         E = None
         F = None
 
     try:
-        R_prov_ids = dict(destination.attrs['r_prov_ids'])
-        R_prov_specs = destination['r_prov_specs'].data
+        R_prov_ids = dest_data.get(f'{dest_key}/r_prov_ids')
+        R_prov_specs = dest_data.get(f'{dest_key}/r_prov_specs')
     except Exception as e:
         R_prov_ids = None
         R_prov_specs = None
     
     try:
-        entity_ids = destination['entity_ids'].data
-        comp_ids = destination['comp_ids'].data
+        entity_ids = dest_data.get(f'{dest_key}/entity_ids')
+        comp_ids = dest_data.get(f'{dest_key}/comp_ids')
     except Exception:
         entity_ids = None
         comp_ids = None
     
     # Handle if source already has r_prov_ids
     try:
-        source_R_prov_ids = dict(
-            source.attrs['r_prov_ids']
-        )
-        source_R_prov_specs = source[
-            'r_prov_specs'
-        ]
+        source_R_prov_ids = source_data.get(f'{source_key}/r_prov_ids')
+        source_R_prov_specs = source_data.get(f'{source_key}/r_prov_specs')
     except Exception as e:
         # This source is an original (was not created from sampling).
         source_R_prov_ids = None
@@ -613,10 +614,10 @@ def add_structures_to_group(
     # Original source (not from sampled)
     if source_R_prov_ids is None:
         try:
-            md5_source = source.attrs['md5_data']
+            md5_source = source_data.get(f'{source_key}/md5_arrays')
         except Exception:
-            md5_source = get_md5(source, only_dataset=True)
-            source.attrs['md5_data'] = md5_source
+            md5_source = get_md5(source_data, source_key, only_arrays=True)
+            source_data.add(f'{source_key}/md5_arrays', md5_source)
         
         # Create pseudo source_R_prov_ids.
         source_R_prov_ids = {0: md5_source}
@@ -675,12 +676,12 @@ def add_structures_to_group(
     
     # Begin sampling.
     Z, R, E, F, entity_ids_sampled, R_prov_specs = sample_structures(
-        source, quantity, comp_labels, new_R_prov_ids, source_R_prov_specs,
-        Z=Z, R=R, R_prov_specs=R_prov_specs, structure_idxs=structure_idxs,
-        criteria=criteria, z_slice=z_slice, cutoff=cutoff,
-        center_structures=center_structures, sampling_updates=sampling_updates,
-        copy_EF=copy_EF, E=E, F=F, energy_label=energy_label, 
-        force_label=force_label
+        source_data, source_key, quantity, comp_labels, new_R_prov_ids,
+        source_R_prov_specs, Z=Z, R=R, R_prov_specs=R_prov_specs,
+        structure_idxs=structure_idxs, criteria=criteria, z_slice=z_slice,
+        cutoff=cutoff, center_structures=center_structures,
+        sampling_updates=sampling_updates, copy_EF=copy_EF, E=E, F=F,
+        energy_label=energy_label, force_label=force_label
     )
 
     # Check that entity_ids are the same.
@@ -695,22 +696,25 @@ def add_structures_to_group(
         entity_ids = entity_ids_sampled
     
     if write:
-        destination['atomic_numbers'] = Z
-        destination['geometry'] = R
+        dest_data.add(f'{dest_key}/atomic_numbers', Z)
+        dest_data.add(f'{dest_key}/geometry', R)
         if copy_EF:
-            destination[energy_label] = E
-            destination[force_label] = F
-        destination['entity_ids'] = entity_ids
-        destination.attrs['r_prov_ids'] = new_R_prov_ids
-        destination['r_prov_specs'] = R_prov_specs
-        destination.attrs['r_centered'] = center_structures
-        destination['comp_ids'] = comp_ids
+            dest_data.add(f'{dest_key}/{energy_label}', E)
+            dest_data.add(f'{dest_key}/{force_label}', F)
+        dest_data.add(f'{dest_key}/entity_ids', entity_ids)
+        dest_data.add(f'{dest_key}/r_prov_ids', new_R_prov_ids)
+        dest_data.add(f'{dest_key}/r_prov_specs', R_prov_specs)
+        dest_data.add(f'{dest_key}/r_centered', center_structures)
+        dest_data.add(f'{dest_key}/comp_ids', comp_ids)
 
-        destination.attrs['md5'] = get_md5(destination)
-        destination.attrs['md5_data'] = get_md5(
-            destination, only_dataset=True
+        dest_data.add(
+            f'{dest_key}/md5',
+            get_md5(dest_data, dest_key)
+        )
+        dest_data.add(
+            f'{dest_key}/md5_arrays', get_md5(
+                dest_data, dest_key, only_arrays=True
+            )
         )
 
-    return (
-        Z, R, E, F, entity_ids, comp_ids, new_R_prov_ids, R_prov_specs
-    )
+    return dest_data

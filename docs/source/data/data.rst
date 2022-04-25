@@ -24,7 +24,7 @@ identification
 *Type:* string
     Unique string determined by all group attributes and datasets.
 
-``md5_data``
+``md5_arrays``
 ------------
 
 *Type:* string
@@ -37,7 +37,7 @@ identification
 
 *Type:* dict
     Species an ID (``int``) to uniquely identifying labels for each structure if it originated from another reptar file.
-    Labels are usually ``md5_data``.
+    Labels are usually ``md5_arrays``.
     For example, ``{0: '6038e101da7fc0085978741832ebc7ad', 1: 'eeaf93dec698de3ecb55e9292bd9dfcb'}``.
 
 ``r_prov_specs``

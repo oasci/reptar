@@ -22,6 +22,7 @@
 
 import hashlib
 import numpy as np
+import collections.abc
 
 element_to_z = {
     'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9,
@@ -185,14 +186,14 @@ def parse_stringfile(stringfile_path):
                     data[-1].append([float(i) for i in line_split[1:]])
     return Z, comments, data
 
-def get_md5(group, only_dataset=False):
+def get_md5(data, group_key, only_arrays=False):
     """Creates MD5 hash for a set of data.
 
     Parameters
     ----------
     group : ``exdir.Object``
         An exdir object (``File`` or ``Group``)
-    only_dataset : :obj:`bool`, optional
+    only_arrays : :obj:`bool`, optional
         Compute the MD5 using only the datasets. This creates a data-centered
         MD5 that is not affected by attributes that are commonly added or
         changed. Defaults to ``False``.
@@ -203,16 +204,20 @@ def get_md5(group, only_dataset=False):
         MD5 hash of exdir group.
     """
     md5_hash = hashlib.md5()
-
-    if not only_dataset:
-        for attr_name in sorted(group.attrs.keys()):
-            if 'md5' not in attr_name:
-                d = group.attrs[attr_name]
+    # TODO: Figure out why different formats have different MD5s.
+    keys = data.get_keys(group_key)
+    for key in keys:
+        if 'md5' in key:
+            continue
+        d = data.get(f'{group_key}/{key}')
+        if isinstance(d, np.ndarray):
+            d = d.ravel()
+            md5_hash.update(hashlib.md5(d).digest())
+        else:
+            if only_arrays:
+                continue
+            else:
                 md5_hash.update(repr(d).encode())
-    for dset_name in sorted(group.keys()):
-        d = group[dset_name].data
-        d = d.ravel()
-        md5_hash.update(hashlib.md5(d).digest())
     
     return md5_hash.hexdigest()
 
@@ -285,7 +290,7 @@ def center_structures(Z, R):
 
     Parameters
     ----------
-    z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`
         Atomic numbers of the atoms in every structure.
     R : :obj:`numpy.ndarray`
         Cartesian atomic coordinates of data set structures.
@@ -313,3 +318,12 @@ def center_structures(Z, R):
         return R[0]
     else:
         return R
+
+def combine_dicts(dict1, dict2):
+    """Combine two dictionaries"""
+    for k, v in dict2.items():
+        if isinstance(v, collections.abc.Mapping):
+            dict1[k] = combine_dicts(dict1.get(k, {}), v)
+        else:
+            dict1[k] = v
+    return dict1
