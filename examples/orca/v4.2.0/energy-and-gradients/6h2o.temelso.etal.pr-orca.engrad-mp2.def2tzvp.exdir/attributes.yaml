@@ -267,11 +267,6 @@ definitions:
       - attribute
       - dataset
       type: float
-    atomic_gradient:
-      description: "TODO\n"
-      storage:
-      - dataset
-      type: float
     energy_pot:
       description: "TODO\n"
       storage:

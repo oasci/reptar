@@ -1,10 +1,4 @@
 outputs:
-  atomic_gradient:
-    description: >+
-      TODO
-    storage:
-      - dataset
-    type: float
   energy_pot:
     description: >+
       TODO
