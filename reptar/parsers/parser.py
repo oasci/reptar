@@ -127,7 +127,7 @@ class parser(ABC):
                         int(cclib_data.mult)
                 
                 if attr == 'grads':
-                    parsed_info['outputs']['atomic_gradient'] = \
+                    parsed_info['outputs']['grads'] = \
                         cclib_data.grads
                 
                 if attr == 'moenergies':
