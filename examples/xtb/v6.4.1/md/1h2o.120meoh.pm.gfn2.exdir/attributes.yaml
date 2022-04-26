@@ -107,6 +107,11 @@ definitions:
       storage:
       - attribute
       type: float
+    wall_potential:
+      description: "Confining potential for MD simulations.\n"
+      storage:
+      - attribute
+      type: float
   outputs:
     energy_ke:
       description: "TODO\n"

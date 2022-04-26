@@ -38,6 +38,7 @@ class extractorXTB:
             (lambda line: True if ('program call               :' in line.strip()) else False, 'run_type'),
             (lambda line: True if ('charge                     :' in line.strip()) else False, 'charge'),
             (lambda line: True if ('spin                       :' in line.strip()) else False, 'multiplicity'),
+            (lambda line: True if ('> wall' == line.strip()) else False, 'wall_pot'),
             (lambda line: True if (':  Hamiltonian ' in line.strip()) else False, 'hamiltonian'),
             (lambda line: True if ('::                     SUMMARY                     ::' in line.strip()) else False, 'summary_energies'),
             (lambda line: True if ('|               Molecular Dynamics                |' in line.strip()) else False, 'md_setup'),
@@ -142,6 +143,64 @@ class extractorXTB:
         _, _, spin = line.strip().split()
         mult = 2 * float(spin) + 1
         self.parsed_info['system_info']['mult'] = int(mult)
+    
+    def wall_pot(self, f, line):
+        """Wall potentials.
+
+        Parameters
+        ----------
+        f : :obj:`io.TextIOWrapper`
+            Buffered text stream of the output file.
+        line : :obj:`str`
+            Parsed line from ``f``.
+        
+        Notes
+        -----
+        Example trigger text for this extractor.
+        .. code-block:: text
+
+            > wall
+            -> potential = logfermi
+            -> sphere: 23.62158, all
+            --> 1: 23.62158
+            --> 2: all
+        """
+        if 'wall_potential' in self.parsed_info.keys():
+            pots = self.parsed_info['runtime_info']['wall_potential']
+        else:
+            pots = []
+        
+        line = next(f)
+        pot_type = line.split()[3]
+
+        line = next(f)
+        while '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$' not in line:
+            if '-> sphere:' == line[:10]:
+                shape_type = line.split(':')[0].split(' ')[1]
+                line = next(f)
+                line = next(f)
+                atoms_constrained = ''
+                while 'spherical wallpotenial' != line[:22]:
+                    line_split = line.strip().split()
+                    if 'all' == line_split[-1]:
+                        atoms_constrained = 'all'
+                    else:
+                        atoms_constrained += f'{line_split[-1]},'
+                    line = next(f)
+                sphere_radius = float(line.split()[-2])
+                pots.append(
+                    {
+                        'shape': shape_type,
+                        'sphere_radius': sphere_radius,
+                        'atoms_constrained': atoms_constrained,
+                    }
+                )
+            elif '-> ellipsoid:' == line[:13]:
+                pass
+                
+            line = next(f)
+
+        self.parsed_info['runtime_info']['wall_potential'] = pots
     
     def hamiltonian(self, f, line):
         """The xTB hamiltonian used for the calculation.

@@ -85,6 +85,7 @@ def test_1h2o_120meoh_md_exdir():
     assert repman.data.get('prod_1/energy_pot').shape == (1001,)
     assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
     assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
+    assert repman.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_json():
@@ -130,6 +131,7 @@ def test_1h2o_120meoh_md_json():
     assert repman.data.get('prod_1/energy_pot').shape == (1001,)
     assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
     assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
+    assert repman.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
     repman.data.save(json_prettify=True)
 
@@ -142,6 +144,7 @@ def test_1h2o_120meoh_md_json():
     assert repman.data.get('prod_1/energy_pot').shape == (1001,)
     assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
     assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
+    assert repman.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_prod_exdir_to_npz():
@@ -164,3 +167,4 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
     assert data_npz.get('energy_pot').shape == (1001,)
     assert data_npz.get('energy_pot')[0] == -991.881189902216
     assert data_npz.get('energy_pot')[-1] == -991.818996146108
+    assert data_npz.get('wall_potential')[0]['sphere_radius'] == 12.500003

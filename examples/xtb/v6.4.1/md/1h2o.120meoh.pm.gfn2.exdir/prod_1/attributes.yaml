@@ -3,6 +3,13 @@ mult: 1
 prov: xTB
 prov_version: 6.4.1
 calc_driver: molecular_dynamics
+wall_potential:
+- shape: sphere
+  sphere_radius: 12.500003
+  atoms_constrained: all
+- shape: sphere
+  sphere_radius: 1.5000006
+  atoms_constrained: 1,2,3,
 hamiltonian: GFN2-xTB
 md_duration: 5.0
 t_step: 1.0
@@ -10,7 +17,7 @@ xtb_scc_accuracy: 1
 temp_thermostat: 500.0
 md_steps_dump: 5.0
 success: true
-md5: 755f68f71c5d9317838f51a4d9a0957a
+md5: 013627e70bc1366a5dc44a2c26c4598b
 md5_arrays: 90b09304fcd0d0585a2f7b49627354ff
 comp_ids_num:
   MET: 120

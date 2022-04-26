@@ -42,8 +42,6 @@ class data:
     allow_remove : :obj:`bool`, optional
         Allow the removal of exdir groups in ``w`` operation. Defaults to
         ``False``.
-    name_validation : :obj:`str`, optional
-        Validation mode for exdir group names. Defaults to ``'thorough'``.
     plugins : :obj:`list`, optional
         A list of instantiated exdir plugins. Defaults to ``None``.
     from_dict : :obj:`dict`, optional
@@ -51,20 +49,19 @@ class data:
     """
 
     def __init__(self, file_path, mode='r', allow_remove=False,
-        name_validation='thorough', plugins=None, from_dict=None
+        plugins=None, from_dict=None
     ):
         if from_dict is None:
             self._from_path(
-                file_path, mode, allow_remove, name_validation, plugins
+                file_path, mode, allow_remove, plugins
             )
         else:
             self._from_dict(
-                file_path, from_dict, mode, allow_remove,
-                name_validation, plugins
+                file_path, from_dict, mode, allow_remove, plugins
             )
     
     def _from_path(
-        self, file_path, mode, allow_remove, name_validation, plugins
+        self, file_path, mode, allow_remove, plugins
     ):
         """Populates the data object from a file path.
         """
@@ -73,7 +70,7 @@ class data:
 
         if f_ext == '.exdir':
             File = exdir.File(
-                file_path, mode, allow_remove, name_validation, plugins
+                file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json':
             if exists:
@@ -100,7 +97,7 @@ class data:
         self.File = File
     
     def _from_dict(
-        self, file_path, group_dict, mode, allow_remove, name_validation, plugins
+        self, file_path, group_dict, mode, allow_remove, plugins
     ):
         """Populates the data object from a dictionary.
 
@@ -117,7 +114,7 @@ class data:
         
         if f_ext == '.exdir':
             self.File = exdir.File(
-                file_path, mode, allow_remove, name_validation, plugins
+                file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json' or f_ext == '.npz':
             self.File = defaultdict(lambda: defaultdict(dict))
@@ -188,7 +185,9 @@ class data:
         for k in keys[1:]:
             data = data[k]
         if isinstance(data, list):
-            data = np.array(data)
+            data_array = np.array(data)
+            if data_array.dtype != 'O':
+                data = data_array
         return data
     
     def _get_from_exdir(self, key):
@@ -288,7 +287,12 @@ class data:
             # If all the items are not all strings then we make
             # the dataset.
             elif not all(isinstance(i, str) for i in data):
-                data = np.array(data)
+                data_array = np.array(data)
+                # Sometimes we have a list of objects that cannot be easily
+                # converted to numpy data types. Numpy will use an object
+                # dtype, so we only convert to array if its not an 'O' dtype.
+                if data_array.dtype != 'O':
+                    data = data_array
             # At this point only data that contains all strings
             # should be left. We put these as attributes (i.e., 
             # comp_ids)
@@ -349,6 +353,9 @@ class data:
         if data_key == 'dipole_moment':
             if isinstance(data, np.ndarray):
                 data = data.tolist()
+            group.attrs[data_key] = data
+            return None
+        elif data_key == 'wall_potential':
             group.attrs[data_key] = data
             return None
 
