@@ -44,6 +44,7 @@ class extractorXTB:
             (lambda line: True if ('::                     SUMMARY                     ::' in line.strip()) else False, 'summary_energies'),
             (lambda line: True if ('|               Molecular Dynamics                |' in line.strip()) else False, 'md_setup'),
             (lambda line: True if ('A N C O P T' == line.strip('| \n') or 'L-ANC optimizer' == line.strip('| \n')) else False, 'opt_data'),
+            (lambda line: True if ('average properties' == line.strip()) else False, 'md_avg_props'),
             (lambda line: True if ('thermostating problem' == line.strip()) else False, 'thermostat_prob'),
             (lambda line: True if ('normal termination of xtb' == line.strip()) else False, 'success'),
         )
@@ -452,6 +453,35 @@ class extractorXTB:
                     energy_scf
                 )
             line = next(f)
+    
+    def md_avg_props(self, f, line):
+        """Average MD properties.
+
+        Parameters
+        ----------
+        f : :obj:`io.TextIOWrapper`
+            Buffered text stream of the output file.
+        line : :obj:`str`
+            Parsed line from ``f``.
+        
+        Notes
+        -----
+        Example trigger text for this extractor.
+        .. code-block:: text
+
+            average properties 
+            Epot               :  -991.673089209627     
+            Epot (accurate SCC):  -991.771829504958     
+            Ekin               :   1.79432794141482     
+            Etot               :  -989.878761268212     
+            T                  :   522.456878068899  
+        """
+        while 'T                  :' not in line:
+            if 'Etot               :' in line:
+                self.parsed_info['outputs']['avg_energy_tot'] = float(line.split()[-1])
+            line = next(f)
+        
+        self.parsed_info['outputs']['avg_temp'] = float(line.split()[-1])
         
     def thermostat_prob(self, f, line):
         """If there was an issue with the thermostat.

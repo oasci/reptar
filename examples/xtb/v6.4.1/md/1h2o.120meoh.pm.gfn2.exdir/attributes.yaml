@@ -147,6 +147,16 @@ definitions:
       - attribute
       type: float
   outputs:
+    avg_energy_tot:
+      description: "Average total energy during a MD simulation.\n"
+      storage:
+      - attribute
+      type: float
+    avg_temp:
+      description: "Average temperature during a MD simulation.\n"
+      storage:
+      - attribute
+      type: float
     energy_ke:
       description: "TODO\n"
       storage:
