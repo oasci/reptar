@@ -41,7 +41,7 @@ For more detailed information, please read this [*Front. Neuroinform.* article a
 
 # TODO
 
-- [ ] Write scripts that create the typical files (i.e., xyz and pbd) from groups.
+- [ ] Write scripts that create the typical files (i.e., xyz and pdb) from groups.
 - [ ] Documenting default definition YAML files.
 - [ ] Function that skips n lines.
 

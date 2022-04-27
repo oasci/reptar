@@ -41,8 +41,7 @@ class manager:
 
     # TODO: Change this to load any supported file types: JSON, npz, and exdir
     def load(
-        self, file_path, mode='r', allow_remove=False, name_validation=None,
-        plugins=None
+        self, file_path, mode='r', allow_remove=False, plugins=None
     ):
         """Creates a data object.
 
@@ -57,14 +56,11 @@ class manager:
         allow_remove : :obj:`bool`, optional
             Allow the removal of exdir groups in ``w`` operation. Defaults to
             ``False``.
-        name_validation : :obj:`str`, optional
-            Validation mode for exdir group names. Defaults to ``'thorough'``.
         plugins : :obj:`list`, optional
             A list of instantiated exdir plugins. Defaults to ``None``.
         """
         self.data = data(
-            file_path, mode=mode, allow_remove=allow_remove,
-            name_validation=name_validation, plugins=plugins
+            file_path, mode=mode, allow_remove=allow_remove, plugins=plugins
         )
     
     # TODO: Need to change this to handle creating other data types?
