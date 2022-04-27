@@ -233,7 +233,12 @@ class data:
         
         if self.ftype == 'exdir':
             keys.extend(list(sorted(group.attrs.keys())))
-            keys.extend(list(sorted(group.keys())))
+            keys.extend(
+                list(sorted(
+                    key for key in group.keys() if not \
+                    isinstance(group[key], exdir.core.raw.Raw)
+                ))
+            )
         elif self.ftype == 'json' or self.ftype == 'npz':
             keys.extend(list(group.keys()))
         return keys

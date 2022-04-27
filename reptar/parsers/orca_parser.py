@@ -64,6 +64,7 @@ class parserORCA(parser):
     """
 
     def __init__(self, out_path, geom_path=None, traj_path=None, extractors=None):
+        self.package = 'orca'
         if extractors is None:
             extractors = []
         extractors.insert(0, extractorORCA())

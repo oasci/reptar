@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import os
+import shutil
 import numpy as np
 from .parsers import parserORCA, parserXTB
 from .utils import get_md5
@@ -94,6 +95,33 @@ class creator:
         )
         self.parsed_info = self.parser.parse()
     
+    def _create_extras_xtb(self, group_key):
+        """Extra actions for groups created from xtb calculations.
+
+        Parameters
+        ----------
+        group_key : :obj:`str`
+            Key to the desired new group (including parent).
+        """
+        out_dir = os.path.dirname(self.out_path)
+        group = self.data.get(group_key)
+        
+        if self.data.ftype == 'exdir':
+            md_restart_path = f'{out_dir}/mdrestart'
+            if os.path.exists(md_restart_path):
+                raw = group.require_raw('restart_files')
+                raw_path = os.path.join(raw.root_directory, raw.relative_path)
+                shutil.copy(
+                    md_restart_path, os.path.join(raw_path, 'mdrestart')
+                )
+            xtb_restart_path = f'{out_dir}/xtbrestart'
+            if os.path.exists(xtb_restart_path):
+                raw = group.require_raw('restart_files')
+                raw_path = os.path.join(raw.root_directory, raw.relative_path)
+                shutil.copy(
+                    xtb_restart_path, os.path.join(raw_path, 'xtbrestart')
+                )
+    
     def create_group(self, group_key):
         """Create group using parsed information.
         
@@ -122,6 +150,9 @@ class creator:
             self.data.add(f'{group_key}/md5_arrays', md5_group)
         except Exception:
             pass
+        
+        if self.parser.package == 'xtb':
+            self._create_extras_xtb(group_key)
 
         return self.data.get(group_key)
 
