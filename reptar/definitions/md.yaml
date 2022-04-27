@@ -1,10 +1,22 @@
 runtime_info:
+  algo_shake:
+    description: >+
+      If the SHAKE algorithm is used to for bond constrains.
+    storage:
+      - attribute
+    type: bool
   md_duration:
     description: >+
       TODO in ps
     storage:
       - attribute
     type: float
+  md_restarted:
+    description: >+
+      Whether this MD simulation was restarted from another.
+    storage:
+      - attribute
+    type: bool
   t_step:
     description: >+
       TODO
@@ -13,10 +25,22 @@ runtime_info:
     type: float
   thermostat_temp:
     description: >+
-      TODO
+      Thermostat temperature set point.
     storage:
       - attribute
     type: float
+  thermostat_type:
+    description: >+
+      Type of thermostat used.
+    storage:
+      - attribute
+    type: string
+  md_steps_dump_traj:
+    description: >+
+      Steps between each trajectory dump in femtoseconds.
+    storage:
+      - attribute
+    type: int
 outputs:
   energy_ke:
     description: >+

@@ -85,21 +85,41 @@ definitions:
       storage:
       - attribute
       type: bool
+    algo_shake:
+      description: "If the SHAKE algorithm is used to for bond constrains.\n"
+      storage:
+      - attribute
+      type: bool
     md_duration:
       description: "TODO in ps\n"
       storage:
       - attribute
       type: float
+    md_restarted:
+      description: "Whether this MD simulation was restarted from another.\n"
+      storage:
+      - attribute
+      type: bool
     t_step:
       description: "TODO\n"
       storage:
       - attribute
       type: float
     thermostat_temp:
-      description: "TODO\n"
+      description: "Thermostat temperature set point.\n"
       storage:
       - attribute
       type: float
+    thermostat_type:
+      description: "Type of thermostat used.\n"
+      storage:
+      - attribute
+      type: string
+    md_steps_dump_traj:
+      description: "Steps between each trajectory dump in femtoseconds.\n"
+      storage:
+      - attribute
+      type: int
     xtb_scc_accuracy:
       description: "SCC accuracy level in MD. Every 10th step the SCC is properly\
         \ converged at sccconv=1.0. sccmd should be < 5 in critical cases, effects\
@@ -108,7 +128,14 @@ definitions:
       - attribute
       type: float
     wall_potential:
-      description: "Confining potential for MD simulations.\n"
+      description: "Confining potential(s) for a MD simulation. Each potential is\
+        \ described with a dictionary (with its own definitions) in a list. ``sphere_radius``\
+        \ is the radius of the confining potential in Angstroms.\n"
+      storage:
+      - attribute
+      type: list
+    mass_h:
+      description: "Mass of Hydrogen atoms in atomic mass units (if specified).\n"
       storage:
       - attribute
       type: float

@@ -36,13 +36,15 @@ class extractorXTB:
         self.triggers = (
             (lambda line: True if ('* xtb version' in line) else False, 'xtb_version'),
             (lambda line: True if ('program call               :' in line.strip()) else False, 'run_type'),
+            (lambda line: True if ('number of electrons        :' in line.strip()) else False, 'n_electrons'),
             (lambda line: True if ('charge                     :' in line.strip()) else False, 'charge'),
             (lambda line: True if ('spin                       :' in line.strip()) else False, 'multiplicity'),
             (lambda line: True if ('> wall' == line.strip()) else False, 'wall_pot'),
-            (lambda line: True if (':  Hamiltonian ' in line.strip()) else False, 'hamiltonian'),
+            (lambda line: True if (':                      SETUP                      :' == line.strip()) else False, 'gfn_setup'),
             (lambda line: True if ('::                     SUMMARY                     ::' in line.strip()) else False, 'summary_energies'),
             (lambda line: True if ('|               Molecular Dynamics                |' in line.strip()) else False, 'md_setup'),
             (lambda line: True if ('A N C O P T' == line.strip('| \n') or 'L-ANC optimizer' == line.strip('| \n')) else False, 'opt_data'),
+            (lambda line: True if ('thermostating problem' == line.strip()) else False, 'thermostat_prob'),
             (lambda line: True if ('normal termination of xtb' == line.strip()) else False, 'success'),
         )
         self.parsed_info = {
@@ -102,6 +104,26 @@ class extractorXTB:
             driver = 'molecular_dynamics'
         self.parsed_info['runtime_info']['calc_driver'] = driver
         line = next(f)
+    
+    def n_electrons(self, f, line):
+        """Total number of electrons.
+
+        Parameters
+        ----------
+        f : :obj:`io.TextIOWrapper`
+            Buffered text stream of the output file.
+        line : :obj:`str`
+            Parsed line from ``f``.
+        
+        Notes
+        -----
+        Example trigger text for this extractor.
+        .. code-block:: text
+
+            number of electrons        :                  1688
+        """
+        n_ele = line.strip(' :').split()[-1]
+        self.parsed_info['system_info']['n_ele'] = int(n_ele)
 
     def charge(self, f, line):
         """Overall system charge.
@@ -169,6 +191,7 @@ class extractorXTB:
             pots = self.parsed_info['runtime_info']['wall_potential']
         else:
             pots = []
+        idx_start = len(pots)
         
         line = next(f)
         pot_type = line.split()[3]
@@ -187,6 +210,8 @@ class extractorXTB:
                     else:
                         atoms_constrained += f'{line_split[-1]},'
                     line = next(f)
+                if atoms_constrained[-1] == ',':
+                    atoms_constrained = atoms_constrained[:-1]
                 sphere_radius = float(line.split()[-2])
                 pots.append(
                     {
@@ -197,13 +222,21 @@ class extractorXTB:
                 )
             elif '-> ellipsoid:' == line[:13]:
                 pass
+
+            if '-> temp =' == line[:9]:
+                temp = float(line.split()[-1])
+                line = next(f)
+                beta = float(line.split()[-1])
+                for i in range(idx_start, len(pots)):
+                    pots[i]['logfermi_temp'] = temp
+                    pots[i]['logfermi_beta'] = beta
                 
             line = next(f)
 
         self.parsed_info['runtime_info']['wall_potential'] = pots
     
-    def hamiltonian(self, f, line):
-        """The xTB hamiltonian used for the calculation.
+    def gfn_setup(self, f, line):
+        """GFN calculation setup.
 
         Parameters
         ----------
@@ -217,11 +250,23 @@ class extractorXTB:
         Example trigger text for this extractor.
         .. code-block:: text
 
-            :  Hamiltonian                  GFN2-xTB          :
+            ...................................................
+            :                      SETUP                      :
+            :.................................................:
         """
-        _, hamiltonian, _ = line.strip(' :').split()
-        self.parsed_info['runtime_info']['hamiltonian'] = hamiltonian
         line = next(f)
+        line = next(f)
+        while '..............................' not in line.strip():
+            
+            # :  # basis functions                1446          :
+            if ' # basis functions' in line:
+                self.parsed_info['runtime_info']['basis_n_func'] = int(line.strip(' :').split()[-2])
+            
+            # :  Hamiltonian                  GFN2-xTB          :
+            if ':  Hamiltonian ' in line:
+                self.parsed_info['runtime_info']['hamiltonian'] = line.strip(' :').split()[1]
+            
+            line = next(f)
     
     def summary_energies(self, f, line):
         """Extracts energies listed in SUMMARY box.
@@ -279,6 +324,7 @@ class extractorXTB:
             self.parsed_info['outputs']['energy_nuc_repul'].append(
                 energy_nuc_repul
             )
+        # For MD simulations.
         else:
             if 'energy_pot' not in self.parsed_info['outputs'].keys():
                 self.parsed_info['outputs']['energy_pot'] = []
@@ -308,9 +354,9 @@ class extractorXTB:
         Example trigger text for this extractor.
         .. code-block:: text
 
-                        ------------------------------------------------- 
+                     ------------------------------------------------- 
                     |               Molecular Dynamics                |
-                        ------------------------------------------------- 
+                     ------------------------------------------------- 
             trajectories on xtb.trj or xtb.trj.<n>
                                 
             MD time /ps        :    5.00
@@ -331,16 +377,39 @@ class extractorXTB:
 
         line = next(f)
         #  SCC accuracy       :    1.00
-        self.parsed_info['runtime_info']['xtb_scc_accuracy'] = int(float(line.split()[3]))
+        self.parsed_info['runtime_info']['xtb_scc_accuracy'] = float(line.split()[3])
 
         line = next(f)
         #  temperature /K     :  500.00
-        self.parsed_info['runtime_info']['temp_thermostat'] = float(line.split()[3])
+        self.parsed_info['runtime_info']['thermostat_temp'] = float(line.split()[3])
 
         while 'dumpstep(trj) /fs' not in line:
             line = next(f)
+        
         #  dumpstep(trj) /fs  :    5.00     5
-        self.parsed_info['runtime_info']['md_steps_dump'] = float(line.split()[4])
+        self.parsed_info['runtime_info']['md_steps_dump_traj'] = float(line.split()[4])
+
+        while 'time (ps)    <Epot>' not in line:
+
+            #  H atoms mass (amu) :     1
+            if 'H atoms mass (amu) :' == line.strip()[:20]:
+                self.parsed_info['runtime_info']['mass_h'] = float(line.split()[-1])
+            
+            # TODO: Parse shake on information.
+            if 'SHAKE off' == line.strip():
+                self.parsed_info['runtime_info']['algo_shake'] = False
+            
+            if 'Berendsen THERMOSTAT on' == line.strip():
+                self.parsed_info['runtime_info']['thermostat_type'] = 'Berendsen'
+            
+            if 'RESTART' == line.strip():
+                self.parsed_info['runtime_info']['md_restarted'] = True
+            
+            line = next(f)
+        
+        if 'md_restarted' not in self.parsed_info['runtime_info'].keys():
+            self.parsed_info['runtime_info']['md_restarted'] = False
+        
     
     def opt_data(self, f, line):
         """All information during optimization routine. Incldues setup, energy.
@@ -383,6 +452,25 @@ class extractorXTB:
                     energy_scf
                 )
             line = next(f)
+        
+    def thermostat_prob(self, f, line):
+        """If there was an issue with the thermostat.
+
+        Parameters
+        ----------
+        f : :obj:`io.TextIOWrapper`
+            Buffered text stream of the output file.
+        line : :obj:`str`
+            Parsed line from ``f``.
+        
+        Notes
+        -----
+        Example trigger text for this extractor.
+        .. code-block:: text
+
+            thermostating problem
+        """
+        self.parsed_info['runtime_info']['success'] = False
     
     def success(self, f, line):
         """If the calculation is successful.
@@ -401,5 +489,6 @@ class extractorXTB:
 
             normal termination of xtb
         """
-        self.parsed_info['runtime_info']['success'] = True
+        if 'success' not in self.parsed_info['runtime_info'].keys():
+            self.parsed_info['runtime_info']['success'] = True
     

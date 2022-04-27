@@ -15,3 +15,9 @@ runtime_info:
     storage:
       - attribute
     type: list
+  mass_h:
+    description: >+
+      Mass of Hydrogen atoms in atomic mass units (if specified).
+    storage:
+      - attribute
+    type: float

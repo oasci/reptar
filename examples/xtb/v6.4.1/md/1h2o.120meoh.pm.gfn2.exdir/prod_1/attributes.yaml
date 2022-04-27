@@ -1,3 +1,4 @@
+n_ele: 1688
 charge: 0
 mult: 1
 prov: xTB
@@ -7,17 +8,26 @@ wall_potential:
 - shape: sphere
   sphere_radius: 12.500003
   atoms_constrained: all
+  logfermi_temp: 300.0
+  logfermi_beta: 6.0
 - shape: sphere
   sphere_radius: 1.5000006
-  atoms_constrained: 1,2,3,
+  atoms_constrained: 1,2,3
+  logfermi_temp: 300.0
+  logfermi_beta: 6.0
+basis_n_func: 1446
 hamiltonian: GFN2-xTB
 md_duration: 5.0
 t_step: 1.0
-xtb_scc_accuracy: 1
-temp_thermostat: 500.0
-md_steps_dump: 5.0
+xtb_scc_accuracy: 1.0
+thermostat_temp: 500.0
+md_steps_dump_traj: 5.0
+mass_h: 1.0
+algo_shake: false
+thermostat_type: Berendsen
+md_restarted: true
 success: true
-md5: 013627e70bc1366a5dc44a2c26c4598b
+md5: 8344d72eb3ceea9cf20b68c4e79c7469
 md5_arrays: 90b09304fcd0d0585a2f7b49627354ff
 comp_ids_num:
   MET: 120
