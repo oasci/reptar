@@ -3,6 +3,15 @@
 <h4 align="center"><b>Rep</b>roducible, <b>t</b>ailorable <b>ar</b>chive</h4>
 
 <p align="center">
+    <a href="https://app.travis-ci.com/github/aalexmmaldonado/reptar" target="_blank">
+        <img src="https://app.travis-ci.com/aalexmmaldonado/reptar.svg?branch=main" alt="License">
+    </a>
+    <a href="https://codecov.io/gh/aalexmmaldonado/reptar">
+        <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD"/>
+    </a>
+    <a href="https://lgtm.com/projects/g/aalexmmaldonado/reptar/context:python">
+        <img src="https://img.shields.io/lgtm/grade/python/g/aalexmmaldonado/reptar.svg?logo=lgtm&logoWidth=18" alt="Language grade: Python">
+    </a>
     <a href="https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/aalexmmaldonado/reptar" alt="License">
     </a>
