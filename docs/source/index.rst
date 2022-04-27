@@ -2,7 +2,7 @@
 Reptar
 ======
 
-**Rep**\ roducible, **t**\ ailorable **ar**\ chives extends and standardizes the functionality of `exdir <https://exdir.readthedocs.io/en/latest/>`_ files for the use in computational modeling.
+**Rep**\ roducible, **t**\ ailorable **ar**\ chive (i.e., reptar) provides an easy way to store (and hopefully release openly) and analyze computational chemistry data.
 
 Installation
 ============
@@ -16,9 +16,8 @@ At the moment, the only way to install reptar is directly from the `GitHub repos
     pip install .
 
 .. toctree::
-   :hidden:
+    :hidden:
 
-   Data <data/data>
-   Tutorials <tutorials/tutorials>
-   API <doc/modules>
-   Contributing <contributing>
+    Tutorials <tutorials/tutorials>
+    API <doc/modules>
+    Contributing <contributing>

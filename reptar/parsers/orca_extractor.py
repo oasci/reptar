@@ -83,13 +83,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ----- AuxJ basis set information -----
@@ -115,13 +116,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             -------------------
@@ -165,13 +167,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             --------------------
@@ -200,13 +203,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ----------------
@@ -255,13 +259,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ----------------------
@@ -308,13 +313,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ----------------------------------------------------------
@@ -355,13 +361,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             Wavefunction type
@@ -399,23 +406,28 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ------------------------------------------------
                               RHF COUPLED CLUSTER ITERATIONS
             ------------------------------------------------
+        
         .. code-block:: text
+
             ------------------------------------------------
                               UHF COUPLED CLUSTER ITERATIONS
             ------------------------------------------------
+
         .. code-block:: text
+        
             ----------------------------------------------------------
                                  OPEN-SHELL COUPLED CLUSTER ITERATIONS
             ----------------------------------------------------------
@@ -485,7 +497,7 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
 
@@ -504,6 +516,7 @@ class extractorORCA(extractor):
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ------------
@@ -552,13 +565,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             -----------------------
@@ -591,13 +605,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ----------------------
@@ -634,13 +649,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             -------------
@@ -685,13 +701,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
                                   .--------------------.
@@ -721,13 +738,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             -----------------------
@@ -763,13 +781,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ------------
@@ -808,13 +827,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             Temperature         ... 298.15 K
@@ -834,13 +854,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             Zero point energy                ...      0.06455884 Eh      40.51 kcal/mol
@@ -860,13 +881,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             Total thermal correction                  0.00868494 Eh       5.45 kcal/mol
@@ -885,13 +907,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             Thermal Enthalpy correction       ...      0.00094421 Eh       0.59 kcal/mol
@@ -910,13 +933,14 @@ class extractorORCA(extractor):
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+        
         .. code-block:: text
 
             Final entropy term                ...      0.04136711
