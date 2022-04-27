@@ -7,7 +7,7 @@ install:
   - pip install pytest-cov codecov
 script:
   - pip install .
-  - pytest --cov=./
+  - pytest --cov=./reptar
 after_success:
   - ./docs/build-docs.sh
   - codecov
