@@ -38,8 +38,7 @@ class manager:
 
     def __init__(self):
         pass
-
-    # TODO: Change this to load any supported file types: JSON, npz, and exdir
+    
     def load(
         self, file_path, mode='r', allow_remove=False, plugins=None
     ):
@@ -63,7 +62,6 @@ class manager:
             file_path, mode=mode, allow_remove=allow_remove, plugins=plugins
         )
     
-    # TODO: Need to change this to handle creating other data types?
     def create_group(
         self, group_key, out_path=None, geom_path=None, traj_path=None,
         extractors=None
