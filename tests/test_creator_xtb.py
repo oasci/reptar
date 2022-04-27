@@ -73,6 +73,11 @@ def test_1h2o_120meoh_md_exdir():
         geom_path=geom_path_prod, traj_path=traj_path_prod
     )
     repman.add_ids('prod_1', entity_ids, comp_ids)
+
+    repman.data.add('readme',
+        '500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n'
+        'Constrains one water molecule to the origin solvated in methanol droplet.'
+    )
     
     repman = manager()
     repman.load(
@@ -132,6 +137,11 @@ def test_1h2o_120meoh_md_json():
     assert repman.data.get('prod_1/energy_pot')[0] == -991.881189902216
     assert repman.data.get('prod_1/energy_pot')[-1] == -991.818996146108
     assert repman.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
+
+    repman.data.add('readme',
+        '500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n'
+        'Constrains one water molecule to the origin solvated in methanol droplet.'
+    )
 
     repman.data.save(json_prettify=True)
 

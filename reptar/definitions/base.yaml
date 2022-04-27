@@ -20,6 +20,12 @@ identification:
     storage:
       - attribute
     type: str
+  readme:
+    description: >+
+      Provides any information about the group.
+    storage:
+      - attribute
+    type: str
 system_info:
   atomic_numbers:
     description: >+

@@ -19,6 +19,11 @@ definitions:
       storage:
       - attribute
       type: str
+    readme:
+      description: "Provides any information about the group.\n"
+      storage:
+      - attribute
+      type: str
   system_info:
     atomic_numbers:
       description: "Number of protons in the nucleus of each atom.\n"
@@ -93,7 +98,7 @@ definitions:
       - attribute
       type: bool
     algo_shake:
-      description: "If the SHAKE algorithm is used to for bond constrains.\n"
+      description: "If the SHAKE algorithm is used for bond constrains.\n"
       storage:
       - attribute
       type: bool
@@ -194,3 +199,5 @@ definitions:
       storage:
       - dataset
       type: float
+readme: "500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n\
+  Constrains one water molecule to the origin solvated in methanol droplet."
