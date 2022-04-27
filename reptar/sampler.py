@@ -37,7 +37,7 @@ def _get_R_prov_id(
     ----------
     dest_R_prov_ids : :obj:`dict`
         The r_prov_ids
-    source_md5 : obj:`str`
+    source_md5 : :obj:`str`
         
     
     Returns
@@ -227,7 +227,7 @@ def sample_structures(
     comp_labels : :obj:`tuple`
         The ``component_id`` labels to include in sample structures. The order
         of each label does matter.
-    R_prov_ids : :obj:`dict`` {:obj:`int`: :obj:`str`}
+    R_prov_ids : :obj:`dict` {:obj:`int`: :obj:`str`}
         Structure prov IDs including any originally defined IDs and new
         ones being added from the source.
     source_R_prov_specs : :obj:`numpy.ndarray` or ``None``
@@ -260,9 +260,7 @@ def sample_structures(
     center_structures : :obj:`bool`, optional
         Move the center of mass of each structure to the origin thereby 
         centering each structure (and losing the actual coordinates of
-        the structure). While not required for correct use of mbGDML this
-        can be useful for other analysis or data set visualization. Defaults
-        to ``False``.
+        the structure). Defaults to ``False``.
     sampling_updates : :obj:`bool`, optional
         Will print something for every 100 successfully sampled structures.
         Defaults to ``False``.
@@ -511,7 +509,7 @@ def add_structures_to_group(
     consistent_entities : :obj:`list` [:obj:`int`], optional
         Molecule indices that will be in every selection. Not implemented
         yet. Defaults to ``None``.
-    criteria : :obj:`mbgdml.criteria`, optional
+    criteria : ``object``, optional
         Structure criteria during the sampling procedure. Defaults to
         ``None`` if no criteria should be used.
     z_slice : :obj:`numpy.ndarray`, optional
@@ -525,9 +523,7 @@ def add_structures_to_group(
     center_structures : :obj:`bool`, optional
         Move the center of mass of each structure to the origin thereby 
         centering each structure (and losing the actual coordinates of
-        the structure). While not required for correct use of mbGDML this
-        can be useful for other analysis or data set visualization. Defaults
-        to ``False``.
+        the structure). Defaults to ``False``.
     sampling_updates : :obj:`bool`, optional
         Will print something for every 100 successfully sampled structures.
         Defaults to ``False``.

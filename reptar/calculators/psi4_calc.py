@@ -27,11 +27,6 @@ import psi4
 import exdir
 
 def psi4_pes(group, e_label, g_label, psi4_options, psi4_method):
-    """
-
-    Energies in Hartrees.
-    Gradients in Hartrees/Angstrom
-    """
     Z = grp['atomic_numbers']
     R = grp['geometry']
     E = np.array([np.nan for _ in range(len(R))])
@@ -49,36 +44,3 @@ def psi4_pes(group, e_label, g_label, psi4_options, psi4_method):
         )
         G[i] = G/psi4.constants.bohr2angstroms
         E[i] = wfn_mp2.energy()
-
-"""
-f = exdir.File('./met_sampling.exdir', 'a')
-grp = f['met-pes']
-
-# Setting up Psi4
-psi4.set_memory('4 GB')
-psi4_options = {
-    'basis': 'cc-pVDZ',
-    'reference': 'rhf',
-    'e_convergence': '1e-10',
-    'd_convergence': '1e-10',
-    'freeze_core': 'false'
-}
-
-psi4_method = 'mp2'
-e_label = 'energy_ele_mp2_ccpvdz'
-g_label = 'grads_mp2_ccpvdz'
-# psi4_pes(grp, e_label, g_label, psi4_options, psi4_method)
-
-psi4_method = 'ccsd'
-e_label = 'energy_ele_ccsd_ccpvdz'
-g_label = 'grads_ccsd_ccpvdz'
-# psi4_pes(grp, e_label, g_label, psi4_options, psi4_method)
-
-g_error = grp['grads_ccsd_ccpvdz'].data - grp['grads_mp2_ccpvdz'].data  # Eh/A
-g_error *= psi4.constants.hartree2kcalmol ## kcal/(mol A)
-
-g_mae = np.mean(np.abs(g_error.flatten()))
-g_rmse = np.sqrt(np.mean((g_error.flatten())**2))
-print(f'MAE:  {g_mae:.5f} kcal/(mol A)')  # 0.83654
-print(f'RMSE: {g_rmse:.5f} kcal/(mol A)')  # 1.01937
-"""
