@@ -60,13 +60,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             * xtb version 6.3.3 (5b13467) compiled by 'ehlert@majestix' on 2020-09-17
@@ -82,13 +83,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             program call               : xtb 5h2o.example.xyz --scc --gfn 2 --charge 0
@@ -112,13 +114,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             number of electrons        :                  1688
@@ -132,13 +135,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             charge                     :                     0
@@ -152,13 +156,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             spin                       :                   0.0
@@ -173,13 +178,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             > wall
@@ -242,13 +248,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             ...................................................
@@ -275,13 +282,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             :::::::::::::::::::::::::::::::::::::::::::::::::::::
@@ -346,13 +354,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
                      ------------------------------------------------- 
@@ -418,26 +427,29 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
-            ----------------------------------------------------------- 
+             ----------------------------------------------------------- 
             |                   =====================                   |
             |                        A N C O P T                        |
             |                   =====================                   |
             |               Approximate Normal Coordinate               |
             |                Rational Function Optimizer                |
-            ----------------------------------------------------------- 
+             ----------------------------------------------------------- 
+        
         .. code-block:: text
-            ----------------------------------------------------------- 
+
+             ----------------------------------------------------------- 
             |                       L-ANC optimizer                     |
-            ----------------------------------------------------------- 
+             ----------------------------------------------------------- 
         """
         
         # The following lines signal the termination of the optimization routine.
@@ -460,13 +472,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             average properties 
@@ -489,13 +502,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             thermostating problem
@@ -508,13 +522,14 @@ class extractorXTB:
         Parameters
         ----------
         f : :obj:`io.TextIOWrapper`
-            Buffered text stream of the output file.
+            Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
         
         Notes
         -----
         Example trigger text for this extractor.
+
         .. code-block:: text
 
             normal termination of xtb

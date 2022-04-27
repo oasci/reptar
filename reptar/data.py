@@ -33,7 +33,7 @@ class data:
 
     Parameters
     ----------
-    file_path : :obj`str`
+    file_path : :obj:`str`
         Path to a file supported by reptar. If it does not exist, then one will
         be created if possible.
     mode : :obj:`str`, optional

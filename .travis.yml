@@ -1,0 +1,23 @@
+language: python
+python:
+  - 3.9
+install:
+  - pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy importlib_resources
+  - pip install Sphinx furo coverage bump2version
+  - pip install pytest-cov codecov
+script:
+  - pip install .
+  - pytest --cov=./
+after_success:
+  - ./docs/build-docs.sh
+  - codecov
+deploy:
+  provider: pages
+  skip-cleanup: true
+  local_dir: docs/html/
+  github-token: $GITHUB_TOKEN
+  keep-history: true
+  target_branch: gh-pages
+  on:
+    branch: main
+    repo: aalexmmaldonado/reptar
