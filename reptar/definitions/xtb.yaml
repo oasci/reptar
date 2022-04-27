@@ -7,3 +7,17 @@ runtime_info:
     storage:
       - attribute
     type: float
+  wall_potential:
+    description: >+
+      Confining potential(s) for a MD simulation.
+      Each potential is described with a dictionary (with its own definitions) in a list.
+      ``sphere_radius`` is the radius of the confining potential in Angstroms.
+    storage:
+      - attribute
+    type: list
+  mass_h:
+    description: >+
+      Mass of Hydrogen atoms in atomic mass units (if specified).
+    storage:
+      - attribute
+    type: float

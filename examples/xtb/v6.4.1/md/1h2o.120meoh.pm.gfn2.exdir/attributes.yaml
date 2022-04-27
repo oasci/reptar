@@ -1,14 +1,21 @@
 definitions:
   identification:
     md5:
-      description: "Unique string determined by all group attributes and datasets.\n"
+      description: "Unique string determined by all group data.\n"
       storage:
       - attribute
       type: str
     md5_arrays:
+      description: "Unique string determined by all group arrays (i.e., data not stored\
+        \ in arrays are not included). This MD5 hash will not change as much when\
+        \ non-array data is added or removed.\n"
+      storage:
+      - attribute
+      type: str
+    md5_structures:
       description: "Unique string determined by all group datasets (no attributes\
-        \ are included). This is a data-focused MD5 that will not be affected by adding\
-        \ or changing less-important attributes. Use this for breadcrumb purposes.\n"
+        \ are included). This MD5 is only dependent on ``atomic_numbers`` and ``geometry``.\
+        \ Use this for breadcrumb purposes.\n"
       storage:
       - attribute
       type: str
@@ -85,21 +92,41 @@ definitions:
       storage:
       - attribute
       type: bool
+    algo_shake:
+      description: "If the SHAKE algorithm is used to for bond constrains.\n"
+      storage:
+      - attribute
+      type: bool
     md_duration:
       description: "TODO in ps\n"
       storage:
       - attribute
       type: float
+    md_restarted:
+      description: "Whether this MD simulation was restarted from another.\n"
+      storage:
+      - attribute
+      type: bool
     t_step:
       description: "TODO\n"
       storage:
       - attribute
       type: float
     thermostat_temp:
-      description: "TODO\n"
+      description: "Thermostat temperature set point.\n"
       storage:
       - attribute
       type: float
+    thermostat_type:
+      description: "Type of thermostat used.\n"
+      storage:
+      - attribute
+      type: string
+    md_steps_dump_traj:
+      description: "Steps between each trajectory dump in femtoseconds.\n"
+      storage:
+      - attribute
+      type: int
     xtb_scc_accuracy:
       description: "SCC accuracy level in MD. Every 10th step the SCC is properly\
         \ converged at sccconv=1.0. sccmd should be < 5 in critical cases, effects\
@@ -107,7 +134,29 @@ definitions:
       storage:
       - attribute
       type: float
+    wall_potential:
+      description: "Confining potential(s) for a MD simulation. Each potential is\
+        \ described with a dictionary (with its own definitions) in a list. ``sphere_radius``\
+        \ is the radius of the confining potential in Angstroms.\n"
+      storage:
+      - attribute
+      type: list
+    mass_h:
+      description: "Mass of Hydrogen atoms in atomic mass units (if specified).\n"
+      storage:
+      - attribute
+      type: float
   outputs:
+    avg_energy_tot:
+      description: "Average total energy during a MD simulation.\n"
+      storage:
+      - attribute
+      type: float
+    avg_temp:
+      description: "Average temperature during a MD simulation.\n"
+      storage:
+      - attribute
+      type: float
     energy_ke:
       description: "TODO\n"
       storage:

@@ -1,17 +1,37 @@
+n_ele: 1688
 charge: 0
 mult: 1
 prov: xTB
 prov_version: 6.4.1
 calc_driver: molecular_dynamics
+wall_potential:
+- shape: sphere
+  sphere_radius: 12.500003
+  atoms_constrained: all
+  logfermi_temp: 300.0
+  logfermi_beta: 6.0
+- shape: sphere
+  sphere_radius: 1.5000006
+  atoms_constrained: 1,2,3
+  logfermi_temp: 300.0
+  logfermi_beta: 6.0
+basis_n_func: 1446
 hamiltonian: GFN2-xTB
 md_duration: 10.0
 t_step: 1.0
-xtb_scc_accuracy: 1
-temp_thermostat: 500.0
-md_steps_dump: 50.0
-success: true
-md5: c0a90109190dda650568bf01a2785812
+xtb_scc_accuracy: 1.0
+thermostat_temp: 500.0
+md_steps_dump_traj: 50.0
+mass_h: 1.0
+algo_shake: false
+thermostat_type: Berendsen
+md_restarted: false
+success: false
+avg_energy_tot: -989.878761268212
+avg_temp: 522.456878068899
+md5: 8703f7180a721034b48c7c731ff9e97a
 md5_arrays: bf256a8b5a6a9cd05a3d0ad0d9cc95e9
+md5_structures: 3a45bba9aa65ac4d6e5d03720b8d7c96
 comp_ids_num:
   MET: 120
   WAT: 1
