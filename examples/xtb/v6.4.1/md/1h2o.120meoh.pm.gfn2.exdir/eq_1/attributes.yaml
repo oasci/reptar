@@ -29,6 +29,7 @@ md_restarted: false
 success: false
 md5: 2495bd650857b838157e664c9e5a5bbf
 md5_arrays: bf256a8b5a6a9cd05a3d0ad0d9cc95e9
+md5_structures: 3a45bba9aa65ac4d6e5d03720b8d7c96
 comp_ids_num:
   MET: 120
   WAT: 1

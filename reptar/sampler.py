@@ -490,7 +490,8 @@ def add_structures_to_group(
     source_data : ``reptar.data``
         A reptar data object to sample structures from. Must contain
         ``atomic_numbers``, ``geometry``, ``entity_ids``, and ``comp_ids``.
-        If it does not contain a ``md5_arrays`` one will be created and saved.
+        If it does not contain a ``md5_structures`` one will be created and
+        saved.
     source_key : :obj:`str`
         Key to the desired source group.
     dest_data : ``reptar.data``
@@ -614,10 +615,10 @@ def add_structures_to_group(
     # Original source (not from sampled)
     if source_R_prov_ids is None:
         try:
-            md5_source = source_data.get(f'{source_key}/md5_arrays')
+            md5_source = source_data.get(f'{source_key}/md5_structures')
         except Exception:
-            md5_source = get_md5(source_data, source_key, only_arrays=True)
-            source_data.add(f'{source_key}/md5_arrays', md5_source)
+            md5_source = get_md5(source_data, source_key, only_structures=True)
+            source_data.add(f'{source_key}/md5_structures', md5_source)
         
         # Create pseudo source_R_prov_ids.
         source_R_prov_ids = {0: md5_source}
@@ -712,7 +713,7 @@ def add_structures_to_group(
             get_md5(dest_data, dest_key)
         )
         dest_data.add(
-            f'{dest_key}/md5_arrays', get_md5(
+            f'{dest_key}/md5_structures', get_md5(
                 dest_data, dest_key, only_arrays=True
             )
         )
