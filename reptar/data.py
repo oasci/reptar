@@ -29,7 +29,7 @@ from collections import defaultdict
 from .utils import combine_dicts
 
 class data:
-    """A reptar data object that creates, stores, retrieves, and manages data.
+    """Create, store, and access data from a variety of formats.
 
     Parameters
     ----------
@@ -77,7 +77,7 @@ class data:
                 with open(file_path, 'r') as f:
                     File = json.load(f)
             else:
-                File = defaultdict(lambda: defaultdict(dict))
+                File = {}
         elif f_ext == '.npz':
             if exists:
                 File = dict(np.load(file_path, allow_pickle=True))
@@ -109,7 +109,7 @@ class data:
         group_dict : :obj:`str`
             Dictionary to populate the data object with.
         """
-        exists = os.path.exists(file_path)
+        assert os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
         
         if f_ext == '.exdir':
