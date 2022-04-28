@@ -48,12 +48,6 @@ Exdir is a simple, yet powerful open file format that mimics the [HDF5](https://
 This provides several advantages such as mixing human-readable YAML and binary NumPy files, being easier for version control, and only loading requested portions of datasets into memory.
 For more detailed information, please read this [*Front. Neuroinform.* article about exdir](https://doi.org/10.3389/fninf.2018.00016).
 
-# TODO
-
-- [ ] Write scripts that create the typical files (i.e., xyz and pdb) from groups.
-- [ ] Documenting default definition YAML files.
-- [ ] Function that skips n lines.
-
 # License
 
 Distributed under the MIT License. See `LICENSE` for more information.
