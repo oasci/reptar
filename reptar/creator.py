@@ -62,7 +62,7 @@ triggers = [
 ]
 
 class creator:
-    """Handles creating reptar data files.
+    """Create groups from computational chemistry data.
 
     Parameters
     ----------
@@ -106,6 +106,13 @@ class creator:
         ----------
         out_path : :obj:`str`
             Path to computational chemistry output file.
+        geom_path : :obj:`str`, optional
+            Path to a file containing a single geometry.
+        traj_path : :obj:`str`, optional
+            Path to a trajectory file from a geometry optimization, MD
+            simulation, etc.
+        extractors : :obj:`list`, optional
+            Additional extractors for the parser to use.
         """
         self.out_path = os.path.abspath(out_path)
         if geom_path is not None:
