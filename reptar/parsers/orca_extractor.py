@@ -579,8 +579,7 @@ class extractorORCA(extractor):
             MULLIKEN ATOMIC CHARGES
             -----------------------
         """
-        line = next(f)
-        line = next(f)
+        line = self.skip_lines(f, 2)
 
         # Creates initial mulliken_charges property.
         if 'mulliken_charges' not in self.parsed_info['outputs'].keys():
@@ -619,8 +618,7 @@ class extractorORCA(extractor):
             LOEWDIN ATOMIC CHARGES
             ----------------------
         """
-        line = next(f)
-        line = next(f)
+        line = self.skip_lines(f, 2)
 
         # Creates initial loewdin_charges property.
         if 'loewdin_charges' not in self.parsed_info['outputs'].keys():
@@ -753,11 +751,12 @@ class extractorORCA(extractor):
             -----------------------
         """
         # Skips the following lines.
-        line = next(f)  # -----------------------
-        line = next(f)  # 
-        line = next(f)  # Scaling factor for frequencies =  1.000000000
-        line = next(f)  # 
-        line = next(f)  #    0:         0.00 cm**-1
+        # -----------------------
+        # 
+        # Scaling factor for frequencies =  1.000000000
+        # 
+        #    0:         0.00 cm**-1
+        line = self.skip_lines(f, 5)
 
         # Sets up data.
         if 'freq_vib' not in self.parsed_info['outputs'].keys():
@@ -795,8 +794,7 @@ class extractorORCA(extractor):
             NORMAL MODES
             ------------
         """
-        for _ in range(0, 8):
-            line = next(f)
+        line = self.skip_lines(f, 8)
 
         # Sets up data.
         if 'q' not in self.parsed_info['outputs'].keys():

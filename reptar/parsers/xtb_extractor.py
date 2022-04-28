@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-class extractorXTB:
+from .extractor import extractor
+
+class extractorXTB(extractor):
     """
 
     Attributes
@@ -33,7 +35,11 @@ class extractorXTB:
         Extracted information from the file from this object.
     """
     def __init__(self):
-        self.triggers = (
+        super().__init__()
+    
+    @property
+    def triggers(self):
+        trig = (
             (lambda line: True if ('* xtb version' in line) else False, 'xtb_version'),
             (lambda line: True if ('program call               :' in line.strip()) else False, 'run_type'),
             (lambda line: True if ('number of electrons        :' in line.strip()) else False, 'n_electrons'),
@@ -48,11 +54,7 @@ class extractorXTB:
             (lambda line: True if ('thermostating problem' == line.strip()) else False, 'thermostat_prob'),
             (lambda line: True if ('normal termination of xtb' == line.strip()) else False, 'success'),
         )
-        self.parsed_info = {
-            'system_info': {},
-            'runtime_info': {},
-            'outputs': {}
-        }
+        return trig
     
     def xtb_version(self, f, line):
         """Version of xtb.
@@ -262,8 +264,7 @@ class extractorXTB:
             :                      SETUP                      :
             :.................................................:
         """
-        line = next(f)
-        line = next(f)
+        line = self.skip_lines(f, 2)
         while '..............................' not in line.strip():
             
             # :  # basis functions                1446          :
