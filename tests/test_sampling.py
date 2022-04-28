@@ -26,7 +26,7 @@ import pytest
 import os
 import shutil
 import numpy as np
-from reptar import manager, add_structures_to_group
+from reptar import creator, add_structures_to_group
 import itertools
 
 import sys
@@ -42,11 +42,11 @@ def test_1h2o_120meoh_prod_sampling():
     source_path = get_1h2o_120meoh_exdir_path()
     dest_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
 
-    source = manager()
+    source = creator()
     source.load(source_path, mode='r')
     source_key = '/prod_1'
 
-    dest = manager()
+    dest = creator()
     dest.load(dest_path, mode='w', allow_remove=True)
     dest_key = '/wat.2met-pes'
     dest.data.init_group(dest_key)
@@ -99,7 +99,7 @@ def test_sampling_from_wat_2met_pes():
     """
     src_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
 
-    source = manager()
+    source = creator()
     source.load(src_path, mode='a')
     source_key = '/wat.2met-pes'
     dest_key = '/wat.met-pes'

@@ -22,7 +22,6 @@
 
 """Groups atoms into fragments."""
 
-import os
 import numpy as np
 from scipy.spatial.distance import cdist
 

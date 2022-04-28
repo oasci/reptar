@@ -205,7 +205,7 @@ def get_md5(data, group_key, only_arrays=False, only_structures=False):
     Returns
     -------
     :obj:`str`
-        MD5 hash of exdir group.
+        MD5 hash of a group.
     """
     md5_hash = hashlib.md5()
     # TODO: Figure out why different formats have different MD5s.
@@ -339,7 +339,17 @@ def center_structures(Z, R):
         return R
 
 def combine_dicts(dict1, dict2):
-    """Combine two dictionaries"""
+    """Combine two dictionaries.
+    
+    Parameters
+    ----------
+    dict1 : :obj:`dict`
+    dict2 : :obj:`dict`
+
+    Returns
+    -------
+    :obj:`dict`
+    """
     for k, v in dict2.items():
         if isinstance(v, collections.abc.Mapping):
             dict1[k] = combine_dicts(dict1.get(k, {}), v)

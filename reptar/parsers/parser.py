@@ -22,14 +22,6 @@
 
 from abc import ABC, abstractmethod
 
-def skip_lines(f, num):
-    """
-    """
-    # TODO: Fix
-    for i in range(num):
-        line = next(f)
-    return line
-
 class parser(ABC):
     """Base class for parsing output files.
 
@@ -152,4 +144,3 @@ class parser(ABC):
 
         self.parsed_info = parsed_info
     
-
