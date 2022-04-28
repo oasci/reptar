@@ -25,11 +25,10 @@ import numpy as np
 import json
 import exdir
 import cclib
-from collections import defaultdict
 from .utils import combine_dicts
 
 class data:
-    """A reptar data object that creates, stores, retrieves, and manages data.
+    """Create, store, and access data from a variety of formats.
 
     Parameters
     ----------
@@ -64,6 +63,20 @@ class data:
         self, file_path, mode, allow_remove, plugins
     ):
         """Populates the data object from a file path.
+
+        Parameters
+        ----------
+        file_path : :obj:`str`
+            Path to a file supported by reptar. If it does not exist, then one will
+            be created if possible.
+        mode : :obj:`str`, optional
+            A file mode string that defines the read/write behavior. Defaults to
+            ``'r'``.
+        allow_remove : :obj:`bool`, optional
+            Allow the removal of exdir groups in ``w`` operation. Defaults to
+            ``False``.
+        plugins : :obj:`list`, optional
+            A list of instantiated exdir plugins. Defaults to ``None``.
         """
         exists = os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
@@ -77,7 +90,7 @@ class data:
                 with open(file_path, 'r') as f:
                     File = json.load(f)
             else:
-                File = defaultdict(lambda: defaultdict(dict))
+                File = {}
         elif f_ext == '.npz':
             if exists:
                 File = dict(np.load(file_path, allow_pickle=True))
@@ -87,7 +100,7 @@ class data:
                         v = self.simplify_iter_data(v)
                         File[k] = v
             else:
-                File = defaultdict(lambda: defaultdict(dict))
+                File = {}
         else:
             raise TypeError(f'{f_ext} is not supported.')
         
@@ -108,8 +121,16 @@ class data:
             will be created if possible.
         group_dict : :obj:`str`
             Dictionary to populate the data object with.
+        mode : :obj:`str`, optional
+            A file mode string that defines the read/write behavior. Defaults to
+            ``'r'``.
+        allow_remove : :obj:`bool`, optional
+            Allow the removal of exdir groups in ``w`` operation. Defaults to
+            ``False``.
+        plugins : :obj:`list`, optional
+            A list of instantiated exdir plugins. Defaults to ``None``.
         """
-        exists = os.path.exists(file_path)
+        assert os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
         
         if f_ext == '.exdir':
@@ -117,7 +138,7 @@ class data:
                 file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json' or f_ext == '.npz':
-            self.File = defaultdict(lambda: defaultdict(dict))
+            self.File = {}
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
@@ -128,7 +149,7 @@ class data:
             self.add(key, data)
     
     def clean_key(self, key):
-        """Clean key and remove any common mistakes in keys.
+        """Clean key and remove any common mistakes.
         
         Parameters
         ----------
@@ -167,7 +188,7 @@ class data:
         return key_split
     
     def _get_from_dict(self, key):
-        """Get data from dictionary-like file.
+        """Get data from dictionary-like file (e.g., json, npz).
         
         Parameters
         ----------
@@ -191,7 +212,7 @@ class data:
         return data
     
     def _get_from_exdir(self, key):
-        """Get data from exdir file source.
+        """Get data from exdir file.
         
         Parameters
         ----------
@@ -215,7 +236,9 @@ class data:
         return data
     
     def get_keys(self, group_key):
-        """A list of keys in a group (not included nested keys).
+        """A list of keys in a group.
+
+        Does not include keys of nested groups.
         
         Parameters
         ----------
@@ -228,9 +251,9 @@ class data:
             A list of all available keys not leading to another group.
         """
         group_key = self.clean_key(group_key)
-        keys = []
         group = self.get(group_key)
-        
+
+        keys = []
         if self.ftype == 'exdir':
             keys.extend(list(sorted(group.attrs.keys())))
             keys.extend(
@@ -244,9 +267,7 @@ class data:
         return keys
 
     def get(self, key):
-        """Retrives data from a loaded file.
-
-        Provides a uniform method of query data from different sources.
+        """Retrieve data.
 
         Parameters
         ----------
@@ -268,6 +289,12 @@ class data:
         return data
     
     def _is_iter(self, data):
+        """If data is iterative (i.e., array, list, or tuple).
+        
+        Returns
+        -------
+        :obj:`bool`
+        """
         if isinstance(data, np.ndarray) or isinstance(data, list) or isinstance(data, tuple):
             return True
         else:
@@ -275,6 +302,16 @@ class data:
     
     def simplify_iter_data(self, data):
         """Simplify iterative data if possible.
+
+        Attempts to simplify iterative objects by the type and/or number of
+        elements. For example, iterative data with only one element will return
+        just that element.
+
+        This is mainly used when adding data to a file. When parsing data we
+        will not know if there will be multiple values of certain data (e.g.,
+        multiple single point energies) until we finish parsing. Thus, we assume
+        there will be multiple values while parsing then simplify any iterative
+        objects at the end.
         
         Parameters
         ----------
@@ -390,7 +427,7 @@ class data:
                 group.create_dataset(data_key, data=data)
 
     def add(self, key, data):
-        """Add information to a loaded file.
+        """Add data to file.
 
         Parameters
         ----------
@@ -428,7 +465,7 @@ class data:
                 yield (k, v)
     
     def init_group(self, key):
-        """Create a new group with the specified key.
+        """Initialize an exdir group with the specified key.
 
         Parameters
         ----------

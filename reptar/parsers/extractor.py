@@ -60,3 +60,22 @@ class extractor(ABC):
     def triggers(self):
         pass
     
+    def skip_lines(self, f, n):
+        """Skip a number of lines.
+
+        Parameters
+        ----------
+        f : :obj:`io.TextIOWrapper`
+            Buffered text stream of the file.
+        n : :obj:`int`
+            Number of lines to skip
+        
+        Returns
+        -------
+        :obj:`str`
+            Line of file.
+        """
+        for i in range(n):
+            line = next(f)
+        return line
+    

@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import manager
+from reptar import creator
 from reptar.writers import pdbWriter
 
 import sys
@@ -41,12 +41,12 @@ def test_pdb_writer_1h2o_120meoh_prod():
     """
     exdir_path = '../examples/xtb/v6.4.1/md/1h2o.120meoh.pm.gfn2.exdir'
 
-    repman = manager()
-    repman.load(exdir_path, mode='r')
+    create = creator()
+    create.load(exdir_path, mode='r')
 
     writer = pdbWriter()
     writer.write(
-        repman.data, '/prod_1', file_name='prod_1',
+        create.data, '/prod_1', file_name='prod_1',
         save_dir='./tmp', R_limits=(None, 5)
     )
 
