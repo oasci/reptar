@@ -429,6 +429,9 @@ class data:
     def add(self, key, data):
         """Add data to file.
 
+        Note that there is some data postprocessing using
+        :meth:`~reptar.data.data.simplify_iter_data`.
+
         Parameters
         ----------
         key : :obj:`str`

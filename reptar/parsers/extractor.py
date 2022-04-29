@@ -24,15 +24,29 @@ from abc import ABC, abstractmethod
 
 class extractor(ABC):
     """Base class for extracting information from files.
+    """
+    def __init__(self):
+        self.parsed_info = {
+            'system_info': {},
+            'runtime_info': {},
+            'outputs': {}
+        }
 
-    Attributes
-    ----------
-    triggers : :obj:`tuple`
-        A collection of triggers that activate the corresponding extractor.
+    @property
+    @abstractmethod
+    def triggers(self):
+        """A collection of triggers that activate the corresponding extractor.
+
         The trigger is a lambda function that returns True or False depending
         on the criteria and the name of the extractor method.
-    parsed_info : :obj:`dict`
-        Information parsed from files. Contains the following keys.
+
+        :type: :obj:`tuple`
+        """
+        pass
+    
+    @property
+    def parsed_info(self):
+        """Information parsed from files. Contains the following keys.
 
         ``system_info``
             Information specifying the system prior to any computation. Such
@@ -47,18 +61,18 @@ class extractor(ABC):
             Results, requested or not, of the job. For example, SCF
             cycle values, optimized coordinates, trajectory, number of
             electrons, generated structures, etc.
-    """
-    def __init__(self):
-        self.parsed_info = {
-            'system_info': {},
-            'runtime_info': {},
-            'outputs': {}
-        }
 
-    @property
-    @abstractmethod
-    def triggers(self):
-        pass
+        :type: :obj:`dict`
+        """
+        return self._parsed_info
+    
+    @parsed_info.setter
+    def parsed_info(self, value):
+        self._parsed_info = value
+
+    @parsed_info.deleter
+    def parsed_info(self, value):
+        del self._parsed_info
     
     def skip_lines(self, f, n):
         """Skip a number of lines.
