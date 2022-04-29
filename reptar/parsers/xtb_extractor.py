@@ -23,17 +23,7 @@
 from .extractor import extractor
 
 class extractorXTB(extractor):
-    """
-
-    Attributes
-    ----------
-    triggers : :obj:`tuple`
-        A collection of triggers that activate the corresponding extractor.
-        The trigger is a lambda function that returns True or False depending
-        on the criteria and the name of the extractor method.
-    parsed_info : :obj:`dict`
-        Extracted information from the file from this object.
-    """
+    """xTB extractor"""
     def __init__(self):
         super().__init__()
     

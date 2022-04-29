@@ -67,7 +67,8 @@ def get_files(path, expression, recursive=True):
     """Returns paths to all files in a given directory that matches a provided
     expression in the file name.
     
-    Commonly used to find all files of a certain type, e.g. output or xyz files.
+    Commonly used to find all files of a certain type, e.g., output or xyz
+    files.
     
     Parameters
     ----------
@@ -75,7 +76,7 @@ def get_files(path, expression, recursive=True):
         Specifies the directory to search.
     expression : :obj:`str`
         Expression to be tested against all file names in ``path``.
-    recursive :obj:`bool`, optional
+    recursive : :obj:`bool`, optional
         Recursively find all files in all subdirectories.
     
     Returns

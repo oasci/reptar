@@ -40,29 +40,6 @@ class parserXTB(parser):
         simulation, etc.
     extractors : :obj:`list`, optional
         Additional extractors for the parser to use.
-    
-    Attributes
-    ----------
-    out_path : :obj:`str`
-        Path to output file.
-    file_name : :obj:`str`
-        The name of the file without extension.
-    parsed_info : :obj:`dict`
-        Information parsed from files. Contains the following keys.
-
-        ``system_info``
-            Information specifying the system prior to any computation. Such
-            as the initial cartesian coordinates, total system charge and
-            multiplicity, etc.
-        
-        ``runtime_info``
-            Contains information about setting up the job/calculation or running
-            the job. Defining convergence criteria, parameters, etc.
-        
-        ``outputs``
-            Results, requested or not, of the job. For example, SCF
-            cycle values, optimized coordinates, trajectory, number of
-            electrons, generated structures, etc.
     """
 
     def __init__(self, out_path, geom_path=None, traj_path=None, extractors=None):
@@ -85,17 +62,7 @@ class parserXTB(parser):
         """Parses trajectory file and extracts information.
         """
         # Extract information.
-        with open(self.out_path, mode='r') as f:
-            for line in f:
-                for extractor in self.extractors:
-                    for i in range(len(extractor.triggers)):
-                        if extractor.triggers[i][0](line):
-                            getattr(extractor, extractor.triggers[i][1])(f, line)
-                            break
-                    else:
-                        continue
-                    break
-        self.combine_extracted()
+        self.extract_data_out()
 
         # Adding any structure information.
         Z = []
