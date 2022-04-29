@@ -33,6 +33,8 @@ At the moment, the only way to install reptar is directly from the `GitHub repos
 .. toctree::
     :hidden:
 
+    Data <data>
+    Definitions <definitions>
     Tutorials <tutorials/tutorials>
     API <doc/modules>
     Contributing <contributing>
