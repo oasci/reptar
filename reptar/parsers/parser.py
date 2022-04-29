@@ -38,22 +38,6 @@ class parser(ABC):
         Path to output file.
     file_name : :obj:`str`
         The name of the file without extension.
-    parsed_info : :obj:`dict`
-        Information parsed from files. Contains the following keys.
-
-        ``system_info``
-            Information specifying the system prior to any computation. Such
-            as the initial cartesian coordinates, total system charge and
-            multiplicity, etc.
-        
-        ``runtime_info``
-            Contains information about setting up the job/calculation or running
-            the job. Defining convergence criteria, parameters, etc.
-        
-        ``outputs``
-            Results, requested or not, of the job. For example, SCF
-            cycle values, optimized coordinates, trajectory, number of
-            electrons, generated structures, etc.
     """
 
     def __init__(self, out_path, extractors):
@@ -68,11 +52,59 @@ class parser(ABC):
     
     @abstractmethod
     def parse(self):
+        """Drive the parsing and postprocessing of parsed data.
+        """
         return NotImplemented
+    
+    @property
+    def parsed_info(self):
+        """Information parsed from files. Contains the following keys.
+
+        .. glossary::
+
+            ``system_info``
+                Information specifying the system prior to any computation. Such
+                as the initial cartesian coordinates, total system charge and
+                multiplicity, etc.
+            
+            ``runtime_info``
+                Contains information about setting up the job/calculation or running
+                the job. Defining convergence criteria, parameters, etc.
+            
+            ``outputs``
+                Results, requested or not, of the job. For example, SCF
+                cycle values, optimized coordinates, trajectory, number of
+                electrons, generated structures, etc.
+
+        :type: :obj:`dict`
+        """
+        return self._parsed_info
+    
+    @parsed_info.setter
+    def parsed_info(self, value):
+        self._parsed_info = value
+
+    @parsed_info.deleter
+    def parsed_info(self, value):
+        del self._parsed_info
     
     def after_parse(self):
         """Replace if desired"""
         pass
+    
+    def extract_data_out(self):
+        """Extract data from ``out_path`` using all extractors"""
+        with open(self.out_path, mode='r') as f:
+            for line in f:
+                for extractor in self.extractors:
+                    for i in range(len(extractor.triggers)):
+                        if extractor.triggers[i][0](line):
+                            getattr(extractor, extractor.triggers[i][1])(f, line)
+                            break
+                    else:
+                        continue
+                    break
+        self.combine_extracted()
     
     def combine_extracted(self):
         """Combines all parsed_info from extractors into the parsed_info in the

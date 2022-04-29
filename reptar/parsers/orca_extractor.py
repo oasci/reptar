@@ -23,31 +23,7 @@
 from .extractor import extractor
 
 class extractorORCA(extractor):
-    """ORCA extractor
-
-    Attributes
-    ----------
-    triggers : :obj:`tuple`
-        A collection of triggers that activate the corresponding extractor.
-        The trigger is a lambda function that returns True or False depending
-        on the criteria and the name of the extractor method.
-    parsed_info : :obj:`dict`
-        Information parsed from files. Contains the following keys.
-
-        ``system_info``
-            Information specifying the system prior to any computation. Such
-            as the initial cartesian coordinates, total system charge and
-            multiplicity, etc.
-        
-        ``runtime_info``
-            Contains information about setting up the job/calculation or running
-            the job. Defining convergence criteria, parameters, etc.
-        
-        ``outputs``
-            Results, requested or not, of the job. For example, SCF
-            cycle values, optimized coordinates, trajectory, number of
-            electrons, generated structures, etc.
-    """
+    """ORCA extractor"""
     def __init__(self):
         super().__init__()
     
