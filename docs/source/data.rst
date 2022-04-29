@@ -2,7 +2,7 @@
 Data
 ====
 
-The heart of reptar is the :class:`~reptar.data.data` class which allows you to interact with your data in a storage-agnostic way.
+The heart of reptar is the :class:`~reptar.data` class which allows you to interact with your data in a storage-agnostic way.
 
 Storage types
 =============
@@ -15,9 +15,9 @@ Reptar currently supports the following file types:
 - JSON,
 - npz.
 
-Any data stored in this format can be interacted with through a :class:`~reptar.data.data` object.
+Any data stored in this format can be interacted with through a :class:`~reptar.data` object.
 
-.. autoclass:: reptar.data.data
+.. autoclass:: reptar.data
     :noindex:
 
 Concepts
@@ -55,12 +55,12 @@ Retrieving data
 Reptar provides a single method, :meth:`~reptar.data.data.get`, to retrieve data from any of the supported file types.
 This can return any nested data stored in a loaded file including other groups.
 
-.. automethod:: reptar.data.data.get
+.. automethod:: reptar.data.get
     :noindex:
 
 You can also get a list of all non-group keys using :meth:`~reptar.data.data.get_keys`.
 
-.. automethod:: reptar.data.data.get_keys
+.. automethod:: reptar.data.get_keys
     :noindex:
 
 Adding data
@@ -68,12 +68,12 @@ Adding data
 
 Reptar provides a single method, :meth:`~reptar.data.data.add`, to store data in any of the supported file types.
 
-.. automethod:: reptar.data.data.add
+.. automethod:: reptar.data.add
     :noindex:
 
 Note that exdir groups must be initialized first with :meth:`~reptar.data.data.init_group` before adding data.
 
-.. automethod:: reptar.data.data.init_group
+.. automethod:: reptar.data.init_group
     :noindex:
 
 Saving
@@ -81,7 +81,7 @@ Saving
 
 Besides exdir, all other file types need to be explicitly saved using the following method.
 
-.. automethod:: reptar.data.data.save
+.. automethod:: reptar.data.save
     :noindex:
 
 File conversion
@@ -89,8 +89,8 @@ File conversion
 
 A group from any file type can be directly converted to a dictionary using :meth:`~reptar.data.data.as_dict`.
 
-.. automethod:: reptar.data.data.as_dict
+.. automethod:: reptar.data.as_dict
     :noindex:
 
-Dictionaries and can also be used to populate a :class:`~reptar.data.data` object with any specified file type.
+Dictionaries and can also be used to populate a :class:`~reptar.data` object with any specified file type.
 

@@ -24,29 +24,6 @@ from abc import ABC, abstractmethod
 
 class extractor(ABC):
     """Base class for extracting information from files.
-
-    Attributes
-    ----------
-    triggers : :obj:`tuple`
-        A collection of triggers that activate the corresponding extractor.
-        The trigger is a lambda function that returns True or False depending
-        on the criteria and the name of the extractor method.
-    parsed_info : :obj:`dict`
-        Information parsed from files. Contains the following keys.
-
-        ``system_info``
-            Information specifying the system prior to any computation. Such
-            as the initial cartesian coordinates, total system charge and
-            multiplicity, etc.
-        
-        ``runtime_info``
-            Contains information about setting up the job/calculation or running
-            the job. Defining convergence criteria, parameters, etc.
-        
-        ``outputs``
-            Results, requested or not, of the job. For example, SCF
-            cycle values, optimized coordinates, trajectory, number of
-            electrons, generated structures, etc.
     """
     def __init__(self):
         self.parsed_info = {
@@ -58,6 +35,38 @@ class extractor(ABC):
     @property
     @abstractmethod
     def triggers(self):
+        """A collection of triggers that activate the corresponding extractor.
+
+        The trigger is a lambda function that returns True or False depending
+        on the criteria and the name of the extractor method.
+
+        :type: :obj:`tuple`
+        """
+        pass
+    
+    @property
+    @abstractmethod
+    def parsed_info(self):
+        """Information parsed from files. Contains the following keys.
+
+        .. glossary::
+
+            ``system_info``
+                Information specifying the system prior to any computation. Such
+                as the initial cartesian coordinates, total system charge and
+                multiplicity, etc.
+            
+            ``runtime_info``
+                Contains information about setting up the job/calculation or running
+                the job. Defining convergence criteria, parameters, etc.
+            
+            ``outputs``
+                Results, requested or not, of the job. For example, SCF
+                cycle values, optimized coordinates, trajectory, number of
+                electrons, generated structures, etc.
+
+        :type: :obj:`dict`
+        """
         pass
     
     def skip_lines(self, f, n):

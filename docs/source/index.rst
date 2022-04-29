@@ -34,7 +34,9 @@ At the moment, the only way to install reptar is directly from the `GitHub repos
     :hidden:
 
     Data <data>
+    Creator <creator>
+    Parsers and extractors <parsers-extractors>
     Definitions <definitions>
-    Tutorials <tutorials/tutorials>
+    Examples <examples/examples>
     API <doc/modules>
     Contributing <contributing>
