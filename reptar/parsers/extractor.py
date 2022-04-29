@@ -45,7 +45,6 @@ class extractor(ABC):
         pass
     
     @property
-    @abstractmethod
     def parsed_info(self):
         """Information parsed from files. Contains the following keys.
 
@@ -67,7 +66,15 @@ class extractor(ABC):
 
         :type: :obj:`dict`
         """
-        pass
+        return self._parsed_info
+    
+    @parsed_info.setter
+    def parsed_info(self, value):
+        self._parsed_info = value
+
+    @parsed_info.deleter
+    def parsed_info(self, value):
+        del self._parsed_info
     
     def skip_lines(self, f, n):
         """Skip a number of lines.
