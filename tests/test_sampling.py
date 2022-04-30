@@ -36,10 +36,14 @@ from .paths import *
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# Writing paths
+xtb_dir = './tmp/xtb/'
+os.makedirs(xtb_dir, exist_ok=True)
+
 def test_1h2o_120meoh_prod_sampling():
     """Sampling from xTB MD reptar file.
     """
-    source_path = get_1h2o_120meoh_exdir_path()
+    source_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
     dest_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
 
     source = creator()

@@ -35,12 +35,16 @@ from .paths import *
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# Writing paths
+orca_dir = './tmp/orca'
+os.makedirs(orca_dir, exist_ok=True)
+
 @pytest.mark.order(0)
 def test_6h2o_temelso_engrad_exdir():
     """
     """
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    exdir_path = dir_path + '.exdir'
+    exdir_path = os.path.join(orca_dir, '6h2o_temelso_pr_engrad.exdir')
 
     create = creator()
     create.load(exdir_path, mode='w', allow_remove=True)
@@ -61,7 +65,7 @@ def test_6h2o_temelso_engrad_json():
     """
     """
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    json_path = dir_path + '.json'
+    json_path = os.path.join(orca_dir, '6h2o_temelso_pr_engrad.json')
 
     # Writing tests.
     create = creator()
@@ -83,7 +87,7 @@ def test_6h2o_temelso_engrad_npz():
     """
     """
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    npz_path = dir_path + '.npz'
+    npz_path = os.path.join(orca_dir, '6h2o_temelso_pr_engrad.npz')
 
     create = creator()
     create.load(npz_path, mode='w')

@@ -35,11 +35,14 @@ from .paths import *
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# Writing paths
+xtb_dir = './tmp/xtb/'
+os.makedirs(xtb_dir, exist_ok=True)
 
 def test_pdb_writer_1h2o_120meoh_prod():
     """Writing short PDB file from exdir file.
     """
-    exdir_path = '../examples/xtb/v6.4.1/md/1h2o.120meoh.pm.gfn2.exdir'
+    exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
 
     create = creator()
     create.load(exdir_path, mode='r')

@@ -130,7 +130,6 @@ class data:
         plugins : :obj:`list`, optional
             A list of instantiated exdir plugins. Defaults to ``None``.
         """
-        assert os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
         
         if f_ext == '.exdir':
