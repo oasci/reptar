@@ -1,0 +1,2 @@
+include versioneer.py
+include reptar/_version.py
