@@ -219,7 +219,7 @@ class creator:
         if self.parser.package == 'xtb':
             self._create_extras_xtb(group_key)
 
-        return self.data.get(group_key)
+        return self.data
     
     def ids(self, group_key, entity_ids, comp_ids):
         """Add ``entity_ids`` and ``comp_ids`` to a group.
