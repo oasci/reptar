@@ -36,7 +36,7 @@ setup(
     package_data={'': ['definitions/*.yaml']},
     keywords='reptar',
     name='reptar',
-    packages=find_packages(include=['reptar', 'reptar.*']),
+    packages=find_packages(include=['reptar']),
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
