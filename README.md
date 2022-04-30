@@ -4,10 +4,13 @@
 
 <p align="center">
     <a href="https://app.travis-ci.com/github/aalexmmaldonado/reptar" target="_blank">
-        <img src="https://app.travis-ci.com/aalexmmaldonado/reptar.svg?branch=main" alt="License">
+        <img src="https://app.travis-ci.com/aalexmmaldonado/reptar.svg?branch=main" alt="Travis Build">
     </a>
     <a href="https://codecov.io/gh/aalexmmaldonado/reptar">
-        <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD"/>
+        <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD" alt="codecov">
+    </a>
+    <a href="https://doi.org/10.5281/zenodo.6508586">
+        <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.6508586.svg" alt="DOI">
     </a>
     <a href="https://lgtm.com/projects/g/aalexmmaldonado/reptar/context:python">
         <img src="https://img.shields.io/lgtm/grade/python/g/aalexmmaldonado/reptar.svg?logo=lgtm&logoWidth=18" alt="Language grade: Python">
