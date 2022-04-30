@@ -3,15 +3,16 @@
 """The setup script."""
 
 from setuptools import setup, find_packages
+import versioneer
 
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
 requirements = [
-    'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy', 'importlib_resources'
+    'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy'
 ]
 
-setup_requirements = [ ]
+setup_requirements = ['versioneer']
 
 test_requirements = requirements.append(['pytest', 'pytest-order'])
 
@@ -39,6 +40,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    version='0.0.1',
     zip_safe=False,
+    version=versioneer.get_version(),
+    cmdclass=versioneer.get_cmdclass(),
 )

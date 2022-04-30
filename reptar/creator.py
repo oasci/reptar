@@ -29,6 +29,9 @@ from .data import data
 from pkg_resources import resource_stream
 import yaml
 
+from . import _version
+__version__ = _version.get_versions()['version']
+
 defs_reserved = [
     'base', 'md', 'molprop', 'pes', 'qc', 'sampl', 'solv', 'xtb'
 ]
@@ -218,6 +221,9 @@ class creator:
         # Extra stuff to do depending on package.
         if self.parser.package == 'xtb':
             self._create_extras_xtb(group_key)
+        
+        # Adding version
+        self.data.add(f'{group_key}/reptar_version', __version__)
 
         return self.data
     

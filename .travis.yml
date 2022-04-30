@@ -2,8 +2,8 @@ language: python
 python:
   - 3.9
 install:
-  - pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy importlib_resources pyyaml
-  - pip install Sphinx furo coverage bump2version
+  - pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy pyyaml
+  - pip install Sphinx furo coverage bump2version versioneer
   - pip install pytest-cov codecov
 script:
   - pip install .

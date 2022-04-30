@@ -21,5 +21,6 @@
     "energy_correl_mp2": -1.558244926,
     "md5": "0470495abad0aa89590709c7137063b7",
     "md5_arrays": "5f1d4f92ef7b4a262b2ce02ad7112d28",
-    "md5_structures": "a8edf75388b959ab13f040f77e7b392a"
+    "md5_structures": "a8edf75388b959ab13f040f77e7b392a",
+    "reptar_version": "0+untagged.15.gc879e40.dirty"
 }
