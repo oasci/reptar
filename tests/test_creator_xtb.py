@@ -35,13 +35,17 @@ from .paths import get_1h2o_120meoh_eq_paths, get_1h2o_120meoh_prod_paths
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# Writing paths
+xtb_dir = './tmp/xtb/'
+os.makedirs(xtb_dir, exist_ok=True)
+
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_exdir():
     """
     """
     dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
     _, _, out_path_prod, geom_path_prod, traj_path_prod = get_1h2o_120meoh_prod_paths()
-    exdir_path = dir_path + '.exdir'
+    exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
 
     num_waters = 1
     atoms_per_water = 3
@@ -98,7 +102,7 @@ def test_1h2o_120meoh_md_json():
     """
     dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
     _, _, out_path_prod, geom_path_prod, traj_path_prod = get_1h2o_120meoh_prod_paths()
-    json_path = dir_path + '.json'
+    json_path = os.path.join(xtb_dir, '1h2o_120meoh_md.json')
 
     num_waters = 1
     atoms_per_water = 3
@@ -161,8 +165,8 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
     """
     """
     dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
-    exdir_path = dir_path + '.exdir'
-    npz_path = dir_path + '-prod.npz'
+    exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
+    npz_path = os.path.join(xtb_dir, '1h2o_120meoh_md-prod.npz')
 
     create_exdir = creator()
     create_exdir.load(exdir_path, mode='r')
