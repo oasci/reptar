@@ -12,6 +12,10 @@ Reptar
     :target: https://codecov.io/gh/aalexmmaldonado/reptar
     :alt: Codecov test coverage
 
+.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6508586.svg
+   :target: https://doi.org/10.5281/zenodo.6508586
+   :alt: Zenodo doi
+
 .. image:: https://img.shields.io/lgtm/grade/python/g/aalexmmaldonado/reptar.svg?logo=lgtm&logoWidth=18
     :target: https://lgtm.com/projects/g/aalexmmaldonado/reptar/context:python
 
