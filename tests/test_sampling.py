@@ -60,7 +60,7 @@ def test_1h2o_120meoh_prod_sampling():
 
     add_structures_to_group(
         source.data, source_key, dest.data, dest_key, quantity,
-        comp_labels, center_structures=False, copy_EF=False, write=True
+        comp_labels, center_structures=False, copy_EG=False, write=True
     )
     assert np.array_equal(
         dest.data.get(f'{dest_key}/atomic_numbers'),
@@ -80,7 +80,7 @@ def test_1h2o_120meoh_prod_sampling():
 
     add_structures_to_group(
         source.data, source_key, dest.data, dest_key,
-        quantity, comp_labels, center_structures=True, copy_EF=False, write=True
+        quantity, comp_labels, center_structures=True, copy_EG=False, write=True
     )
     assert np.array_equal(
         dest.data.get(f'{dest_key}/atomic_numbers'),
@@ -114,7 +114,7 @@ def test_sampling_from_wat_2met_pes():
 
     add_structures_to_group(
         source.data, source_key, source.data, dest_key,
-        quantity, comp_labels, center_structures=True, copy_EF=False
+        quantity, comp_labels, center_structures=True, copy_EG=False
     )
 
     assert np.array_equal(
