@@ -31,7 +31,3 @@ def pytest_sessionstart(session):  # pytest_configure(config)
     else:
         shutil.rmtree(path)           # Removes all the subdirectories!
         os.makedirs(path)
-
-def pytest_sessionfinish(session):  # pytest_unconfigure(config)
-    """Removes tmp directory."""
-    shutil.rmtree('./tests/tmp')
