@@ -25,6 +25,8 @@ import itertools
 import numpy as np
 from .utils import center_structures as get_center_structures
 from .utils import get_md5
+from . import _version
+__version__ = _version.get_versions()['version']
 
 def _get_R_prov_id(
     dest_R_prov_ids, source_md5
@@ -62,8 +64,8 @@ def _get_R_prov_id(
     return R_prov_id
 
 def _initialize_structure_sampling_arrays(
-    Z, R, E, F, R_prov_specs, quantity, comp_labels, R_source, entity_ids_source,
-    entity_ids_samples, copy_EF
+    Z, R, E, G, R_prov_specs, quantity, comp_labels, R_source, entity_ids_source,
+    entity_ids_samples, copy_EG
 ):
     """Creates or extends arrays for sampling structures.
 
@@ -77,7 +79,7 @@ def _initialize_structure_sampling_arrays(
     """
     # Either creates new ones or concatenates to
     # original destination data.
-    # Trial selection to get shapes for R and F
+    # Trial selection to get shapes for R and G
     if quantity == 'all':
         # Determine the maximum amount of structures we can sample from a single
         # source structure.
@@ -110,7 +112,7 @@ def _initialize_structure_sampling_arrays(
         idx_selection = len(R)
         R = np.concatenate((R, sampled_R_empty), axis=0)
     
-    if copy_EF:
+    if copy_EG:
         sampled_E_empty = np.empty(sampled_R_empty.shape[0])
         sampled_E_empty[:] = np.nan
         if E is None:
@@ -118,15 +120,15 @@ def _initialize_structure_sampling_arrays(
         else:
             E = np.concatenate((E, sampled_E_empty))
         
-        sampled_F_empty = np.empty((size_quantity, number_of_atoms, 3))
-        sampled_F_empty[:] = np.nan
-        if F is None:
-            F = sampled_F_empty
+        sampled_G_empty = np.empty((size_quantity, number_of_atoms, 3))
+        sampled_G_empty[:] = np.nan
+        if G is None:
+            G = sampled_G_empty
         else:
-            F = np.concatenate((F, sampled_F_empty), axis=0)
+            G = np.concatenate((G, sampled_G_empty), axis=0)
     else:
         E = None
-        F = None
+        G = None
     
     sampled_R_prov_specs_empty = np.empty((size_quantity, 2+len(comp_labels)))
     sampled_R_prov_specs_empty[:] = np.nan
@@ -137,9 +139,7 @@ def _initialize_structure_sampling_arrays(
             (R_prov_specs, sampled_R_prov_specs_empty), axis=0
         )
     
-    return (Z, R, E, F, R_prov_specs, sampling_all, idx_selection)
-
-
+    return (Z, R, E, G, R_prov_specs, sampling_all, idx_selection)
 
 def _generate_structure_samples(
     quantity, structure_idxs, entity_ids_samples
@@ -204,8 +204,8 @@ def sample_structures(
     source_data, source_key, quantity, comp_labels, R_prov_ids, source_R_prov_specs,
     Z=None, R=None, R_prov_specs=None, structure_idxs=None,
     criteria=None, z_slice=None, cutoff=None, center_structures=False,
-    sampling_updates=False, copy_EF=False, E=None, F=None,
-    energy_label='energy_ele', force_label='forces'
+    sampling_updates=False, copy_EG=False, E=None, G=None,
+    energy_label_source='energy_ele', grad_label_source='grads'
 ):
     """Randomly samples structures from a source.
 
@@ -264,22 +264,22 @@ def sample_structures(
     sampling_updates : :obj:`bool`, optional
         Will print something for every 100 successfully sampled structures.
         Defaults to ``False``.
-    copy_EF : :obj:`bool`, optional
-        Creates datasets for energies and forces (using ``energy_label`` and 
-        ``force_label``) and attempts to copy data from the source if possible.
+    copy_EG : :obj:`bool`, optional
+        Creates datasets for energies and gradients (using ``energy_label`` and 
+        ``grad_label``) and attempts to copy data from the source if possible.
         If no compatible data is available it will just store :obj:`numpy.NaN`.
         Defaults to ``True``.
     E : :obj:`numpy.ndarray`, optional
         Original energies, if any, to append to. Defaults to ``None``.
-    F : :obj:`numpy.ndarray`, optional
-        Original atomic forces, if any, to append to. Defaults to ``None``.
+    G : :obj:`numpy.ndarray`, optional
+        Original atomic gradients, if any, to append to. Defaults to ``None``.
     energy_label_source : :obj:`str`, optional
         Specifies source dataset name containing energies to copy.
-        Defaults to ``'energy_ele'``. If ``copy_EF`` is ``True``, but
+        Defaults to ``'energy_ele'``. If ``copy_EG`` is ``True``, but
         there are no valid energy datasets then we create an empty array.
-    force_label_source : :obj:`str`, optional
-        Specifies source dataset name containing atomic forces to copy.
-        Defaults to ``'forces'``. If ``copy_EF`` is ``True``, but
+    grad_label_source : :obj:`str`, optional
+        Specifies source dataset name containing atomic gradients to copy.
+        Defaults to ``'grads'``. If ``copy_EG`` is ``True``, but
         there are no valid energy datasets then we create an empty array.
     
     Returns
@@ -291,10 +291,10 @@ def sample_structures(
         structures.
     :obj:`numpy.ndarray` or ``None``
         Energies of sampled structures appended to any original structures.
-        ``None`` if ``copy_EF`` is ``False``.
+        ``None`` if ``copy_EG`` is ``False``.
     :obj:`numpy.ndarray` or ``None``
-        Atomic forces of sampled structures appended to any original structures.
-        ``None`` if ``copy_EF`` is ``False``.
+        Atomic gradients of sampled structures appended to any original structures.
+        ``None`` if ``copy_EG`` is ``False``.
     :obj:`numpy.ndarray`
         ``entity_ids`` of the structures.
     :obj:`numpy.ndarray`
@@ -312,16 +312,16 @@ def sample_structures(
         assert len(R_prov_ids) == 1
         source_R_prov_id = tuple(R_prov_ids.keys())[0]
 
-    if copy_EF:
+    if copy_EG:
         try:
             E_source = source_data.get(f'{source_key}/{energy_label_source}')
-            F_source = source_data.get(f'{source_key}/{force_label_source}')
+            G_source = source_data.get(f'{source_key}/{grad_label_source}')
         except Exception:
             E_source = None
-            F_source = None
+            G_source = None
     else:
         E_source = None
-        F_source = None
+        G_source = None
 
 
     ### Setup sampling   ###
@@ -374,10 +374,10 @@ def sample_structures(
 
 
     ###   Initialize all arrays   ###
-    Z, R, E, F, R_prov_specs, sampling_all, idx_selection = \
+    Z, R, E, G, R_prov_specs, sampling_all, idx_selection = \
         _initialize_structure_sampling_arrays(
-        Z, R, E, F, R_prov_specs, quantity, comp_labels, R_source,
-        entity_ids_source, entity_ids_samples, copy_EF
+        Z, R, E, G, R_prov_specs, quantity, comp_labels, R_source,
+        entity_ids_source, entity_ids_samples, copy_EG
     )
 
     ###   Sampling counters   ###
@@ -454,34 +454,35 @@ def sample_structures(
         ###   SUCCESSFUL SAMPLE   ###
         R[idx_selection] = r_selection
         R_prov_specs[idx_selection] = selection
-        if copy_EF:
+        if copy_EG:
             if E_source is not None:
                 E[idx_selection] = E_source[r_index_source]
-            if F_source is not None:
-                F[idx_selection] = F_source[r_index_source][atom_idx_mask]
+            if G_source is not None:
+                G[idx_selection] = G_source[r_index_source][atom_idx_mask]
         
         num_accepted += 1
         idx_selection += 1
     
-    if copy_EF:
+    if copy_EG:
         E = E[:idx_selection]
-        F = F[:idx_selection]
+        G = G[:idx_selection]
 
     # Center structures by moving the center of mass to the origin.
     if center_structures:
         R = get_center_structures(Z, R)
     
     return (
-        Z, R[:idx_selection], E, F, entity_ids, R_prov_specs[:idx_selection]
+        Z, R[:idx_selection], E, G, entity_ids, R_prov_specs[:idx_selection]
     )
 
 def add_structures_to_group(
     source_data, source_key, dest_data, dest_key, quantity,
     comp_labels, structure_idxs=None, consistent_entities=None, criteria=None,
     z_slice=[], cutoff=[], center_structures=False, sampling_updates=False,
-    copy_EF=False, energy_label='energy_ele', force_label='forces', write=True
+    copy_EG=False, energy_labels=('energy_ele',), grad_labels=('grads',),
+    write=True
 ):
-    """Adds randomly sampled structures to a ``exdir.Group``.
+    """Adds randomly sampled structures to a group.
 
     Parameters
     ----------
@@ -527,17 +528,21 @@ def add_structures_to_group(
     sampling_updates : :obj:`bool`, optional
         Will print something for every 100 successfully sampled structures.
         Defaults to ``False``.
-    copy_EF : :obj:`bool`, optional
-        Creates datasets for energies and forces (using ``energy_label`` and 
-        ``force_label``) and attempts to copy data from the source if possible.
+    copy_EG : :obj:`bool`, optional
+        Creates datasets for energies and gradients (using ``energy_label`` and 
+        ``grad_labels``) and attempts to copy data from the source if possible.
         If no compatible data is available it will just store :obj:`numpy.NaN`.
         Defaults to ``True``.
-    energy_label : :obj:`str`, optional
-        Specifies the name of the destination dataset with the desired energies.
-        Defaults to ``'energy_ele'``. This should be the same as the source.
-    force_label : :obj:`str`, optional
-        Specifies the name of the destination dataset with the desired atomic forces.
-        Defaults to ``'forces'``. This should be the same as the source.
+    energy_labels : :obj:`tuple` (:obj:`str`), optional
+        Specifies all energy keys in the destination group to extend with the
+        new sampling. The array from each key will have ``quantity`` amount of 
+        ``np.NaN`` values appended to it. The first value should be the desired
+        key from the source. Defaults to ``('energy_ele',)``.
+    grad_labels : :obj:`str` (:obj:`str`), optional
+        Specifies all gradient keys in the destination group to extend with the
+        new sampling. The array 1from each key will have ``quantity`` amount of 
+        ``np.NaN`` values appended to it. The first value should be the desired
+        key from the source. Defaults to ``('grads',)``.
     write : :obj:`bool`, optional
         Write newly sampled to ``Group``. Defaults to True
     
@@ -557,15 +562,15 @@ def add_structures_to_group(
     except Exception:
         R = None
     
-    # Get energies and forces if available.
-    # TODO: perform check if we should copy energies and forces based on if the
+    # Get energies and gradients if available.
+    # TODO: perform check if we should copy energies and gradients based on if the
     # sampled structure is the entire source structure.
-    if copy_EF:
-        E = dest_data.get(f'{dest_key}/{energy_label}')
-        F = dest_data.get(f'{dest_key}/{force_label}')
+    if copy_EG:
+        E = dest_data.get(f'{dest_key}/{energy_labels[0]}')
+        G = dest_data.get(f'{dest_key}/{grad_labels[0]}')
     else:
         E = None
-        F = None
+        G = None
 
     try:
         R_prov_ids = dest_data.get(f'{dest_key}/r_prov_ids')
@@ -672,14 +677,16 @@ def add_structures_to_group(
         n_R_initial = R.shape[0]
     
     # Begin sampling.
-    Z, R, E, F, entity_ids_sampled, R_prov_specs = sample_structures(
+    Z, R, E, G, entity_ids_sampled, R_prov_specs = sample_structures(
         source_data, source_key, quantity, comp_labels, new_R_prov_ids,
         source_R_prov_specs, Z=Z, R=R, R_prov_specs=R_prov_specs,
         structure_idxs=structure_idxs, criteria=criteria, z_slice=z_slice,
         cutoff=cutoff, center_structures=center_structures,
-        sampling_updates=sampling_updates, copy_EF=copy_EF, E=E, F=F,
-        energy_label=energy_label, force_label=force_label
+        sampling_updates=sampling_updates, copy_EG=copy_EG, E=E, G=G,
+        energy_label_source=energy_labels[0], grad_label_source=grad_labels[0]
     )
+
+    num_sampled = R.shape[0] - n_R_initial
 
     # Check that entity_ids are the same.
     if entity_ids is not None:
@@ -695,9 +702,31 @@ def add_structures_to_group(
     if write:
         dest_data.add(f'{dest_key}/atomic_numbers', Z)
         dest_data.add(f'{dest_key}/geometry', R)
-        if copy_EF:
-            dest_data.add(f'{dest_key}/{energy_label}', E)
-            dest_data.add(f'{dest_key}/{force_label}', F)
+        if copy_EG:
+            dest_data.add(f'{dest_key}/{energy_labels[0]}', E)
+            dest_data.add(f'{dest_key}/{grad_labels[0]}', G)
+            if len(energy_labels) > 1:
+                for i in range(1, len(energy_labels)):
+                    e_label = energy_labels[i]
+                    e_data = dest_data.get(f'{dest_key}/{e_label}')
+                    e_data_shape = e_data.shape
+                    e_shape_new = (e_data_shape[0]+num_sampled,)
+                    e_data_new = np.empty(e_shape_new)
+                    e_data_new[:] = np.nan
+                    e_data_new[:e_data_shape[0]] = e_data
+                    dest_data.add(f'{dest_key}/{e_label}', e_data_new)
+                for i in range(1, len(grad_labels)):
+                    g_label = grad_labels[i]
+                    g_data = dest_data.get(f'{dest_key}/{g_label}')
+                    g_data_shape = g_data.shape
+                    g_shape_new = (
+                        g_data_shape[0]+num_sampled, g_data_shape[1],
+                        g_data_shape[2]
+                    )
+                    g_data_new = np.empty(g_shape_new)
+                    g_data_new[:] = np.nan
+                    g_data_new[:g_data_shape[0]] = g_data
+                    dest_data.add(f'{dest_key}/{g_label}', g_data_new)
         dest_data.add(f'{dest_key}/entity_ids', entity_ids)
         dest_data.add(f'{dest_key}/r_prov_ids', new_R_prov_ids)
         dest_data.add(f'{dest_key}/r_prov_specs', R_prov_specs)
@@ -713,5 +742,6 @@ def add_structures_to_group(
                 dest_data, dest_key, only_arrays=True
             )
         )
+        dest_data.add(f'{dest_key}/reptar_version', __version__)
 
     return dest_data
