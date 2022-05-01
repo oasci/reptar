@@ -12,19 +12,18 @@ after_success:
   - ./docs/build-docs.sh
   - codecov
 deploy:
-  provider: pages
-  skip-cleanup: true
-  local_dir: docs/html/
-  github-token: $GITHUB_TOKEN
-  keep-history: true
-  target_branch: gh-pages
-  on:
-    branch: main
-    repo: aalexmmaldonado/reptar
-deploy:
-  provider: pypi
-  username: "__token__"
-  password:
-    secure: "TpEAFtJOdjXoVMo7ETKrPivTtnuqFbEktAq1ObRvMq6WAO0PCNT409B9pSfLFN5rJdNBr0crZNFEK1j7xvbhlpOQiJTOo+2weCBHJQvmaUQ1vUMxuShtrRYQ7MRnip9wFTxono831jEKK8oI3zkKiKc95lOInGI99IA0Ovbe755GZEqcgzgDy5MD0PdPeHIIQVzBCno6C+XQjk79JhVxnlZjes8RoDpwbgz3tVgiuzp9oVVRkwEA1TEK1GPdn2ucgnWOviXFlaZQ0rpm3jK+lY/s6y77HILbXFV1T/U3q011vBkFWjnTvdko79tjhw/tr0aMNKM7vG3MiLWIZFo/K13ZkWTlncs6PQ007NCF51Mn9RYscbisSAWfszMJ5w8EAdVX3IB7EzchQBh3dA9Bqbbn/VI7wf36OwwiT0BFuVOoF3qnuJEt5R+fDnTssFOM+we2Rm21i/i2FugxveYyFdQbX8zBPA0VkS0OtKmk538M7xU6lKcTwL5LjrN9lPMk9/9l8xaZ+J9wvYkJPAJAGUEuCfoDDR2Hp8e+ia+8zfrZ5D5NlKJg/Om5pjN85VEp7OmscDI6jP8npc+yh9TS1e1SRkE/aVC4r+BEdUFWCcSDabR2pUll3Z/nB4AZAv7KuijfqdGEdqDWI3DiMvhoZubREVH6qNyns8z0CiCnuKI="
-  on:
-    tags: true
+  - provider: pages
+    skip-cleanup: true
+    local_dir: docs/html/
+    github-token: $GITHUB_TOKEN
+    keep-history: true
+    target_branch: gh-pages
+    on:
+      branch: main
+      repo: aalexmmaldonado/reptar
+  - provider: pypi
+    username: "__token__"
+    password:
+      secure: "TpEAFtJOdjXoVMo7ETKrPivTtnuqFbEktAq1ObRvMq6WAO0PCNT409B9pSfLFN5rJdNBr0crZNFEK1j7xvbhlpOQiJTOo+2weCBHJQvmaUQ1vUMxuShtrRYQ7MRnip9wFTxono831jEKK8oI3zkKiKc95lOInGI99IA0Ovbe755GZEqcgzgDy5MD0PdPeHIIQVzBCno6C+XQjk79JhVxnlZjes8RoDpwbgz3tVgiuzp9oVVRkwEA1TEK1GPdn2ucgnWOviXFlaZQ0rpm3jK+lY/s6y77HILbXFV1T/U3q011vBkFWjnTvdko79tjhw/tr0aMNKM7vG3MiLWIZFo/K13ZkWTlncs6PQ007NCF51Mn9RYscbisSAWfszMJ5w8EAdVX3IB7EzchQBh3dA9Bqbbn/VI7wf36OwwiT0BFuVOoF3qnuJEt5R+fDnTssFOM+we2Rm21i/i2FugxveYyFdQbX8zBPA0VkS0OtKmk538M7xU6lKcTwL5LjrN9lPMk9/9l8xaZ+J9wvYkJPAJAGUEuCfoDDR2Hp8e+ia+8zfrZ5D5NlKJg/Om5pjN85VEp7OmscDI6jP8npc+yh9TS1e1SRkE/aVC4r+BEdUFWCcSDabR2pUll3Z/nB4AZAv7KuijfqdGEdqDWI3DiMvhoZubREVH6qNyns8z0CiCnuKI="
+    on:
+      tags: true
