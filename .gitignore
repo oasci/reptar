@@ -107,5 +107,8 @@ docs/source/_build
 docs/html
 docs/source/doc
 
-#psi4 timer
+# psi4 timer
 timer.dat
+
+# Pytest tmp
+tests/tmp/
