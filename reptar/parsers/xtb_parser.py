@@ -23,7 +23,7 @@
 import os
 import numpy as np
 from .parser import parser
-from .xtb_extractor import extractorXTB
+from ..extractors import extractorXTB
 from ..utils import atoms_by_number, parse_stringfile
 
 class parserXTB(parser):

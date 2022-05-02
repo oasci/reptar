@@ -22,24 +22,6 @@ Each package parser class must define its own :meth:`~reptar.parsers.parser.pars
 .. automethod:: reptar.parsers.parser.parse
     :noindex:
 
-In general, there are usually three stages.
-
-:**Preprocessing**:
-    Anything that is done before reptar does its parsing.
-    Reptar does not have extractors for all information, so sometimes `cclib <https://cclib.github.io/>`_ is used to extract additional information.
-
-:**Extracting**:
-    Iterates through all lines in :term:`out_path` using all extractors with :meth:`~reptar.parsers.parser.parser.extract_data_out`.
-    Each extractor has its own ``parsed_info`` that needs to be added to :attr:`~reptar.parsers.parser.parser.parsed_info`.
-
-    .. automethod:: reptar.parsers.parser.extract_data_out
-        :noindex:
-
-:**Postprocessing**:
-    Any additional tasks to complete parsing.
-    There is usually a ``after_parse`` method that adds or changes data based on the final :attr:`~reptar.parsers.parser.parser.parsed_info` attribute.
-    Handling of other files such as :term:`geom_path` and :term:`traj_path`.
-
 ``parsed_info``
 ---------------
 
@@ -53,7 +35,7 @@ Extractors
 ==========
 
 As previously mentioned, the parser drives the extraction of information from files.
-Each extractor is a :class:`~reptar.parsers.extractor.extractor` child class that must have two things.
+Each extractor is a :class:`~reptar.extractors.extractor.extractor` child class that must have two things.
 
 Triggers
 --------
@@ -61,7 +43,7 @@ Triggers
 Reptar has to know when to start extracting information while reading the output files.
 This is accomplished with a tuple of triggers.
 
-.. autoattribute:: reptar.parsers.extractor.triggers
+.. autoattribute:: reptar.extractors.extractor.triggers
     :noindex:
 
 Each element is a tuple of length two with a lambda function and corresponding extractor method name as a string.
@@ -119,7 +101,7 @@ For example, xTB will print energy summaries like the one below.
     :: atomisation energy       153.792759436621 Eh    ::
     :::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-Once reptar encounters the ``SUMMARY`` line, it activates the :meth:`~reptar.parsers.xtb_extractor.extractorXTB.summary_energies` method.
+Once reptar encounters the ``SUMMARY`` line, it activates the :meth:`~reptar.extractors.xtb_extractor.extractorXTB.summary_energies` method.
 Reptar then extracts information such as the total, SCC, and nuclear repulsion energy from this block of text.
 
 Custom extractors
@@ -131,5 +113,5 @@ However, this is not always conducive to a fast-paced research environment.
 We would love for you to add functionality to reptar, but sometimes you just need to get your information and move on.
 
 Reptar was designed to be easily accommodate custom extractors for a supported parser.
-You can write your own :class:`~reptar.parsers.extractor.extractor` child class that implements its own triggers and extractor methods.
+You can write your own :class:`~reptar.extractors.extractor.extractor` child class that implements its own triggers and extractor methods.
 
