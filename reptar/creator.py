@@ -29,7 +29,7 @@ from .data import data
 from pkg_resources import resource_stream
 import yaml
 
-from . import _version
+from reptar import _version
 __version__ = _version.get_versions()['version']
 
 defs_reserved = [

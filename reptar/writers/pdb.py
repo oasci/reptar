@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 from .writer import reptarWriter
-from reptar.utils import z_to_element
+from ..utils import z_to_element
 
 class pdbWriter(reptarWriter):
     """Writes PDB file from reptar group.

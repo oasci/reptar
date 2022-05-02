@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 from .parser import parser
-from .orca_extractor import extractorORCA
+from ..extractors import extractorORCA
 import cclib
 
 class parserORCA(parser):

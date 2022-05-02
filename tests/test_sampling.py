@@ -26,7 +26,8 @@ import pytest
 import os
 import shutil
 import numpy as np
-from reptar import creator, add_structures_to_group
+from reptar import creator
+from reptar.sampler import add_structures_to_group
 import itertools
 
 import sys

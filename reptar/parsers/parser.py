@@ -53,6 +53,24 @@ class parser(ABC):
     @abstractmethod
     def parse(self):
         """Drive the parsing and postprocessing of parsed data.
+
+        In general, there are usually three stages.
+
+        :**Preprocessing**:
+            Anything that is done before reptar does its parsing.
+            Reptar does not have extractors for all information, so sometimes `cclib <https://cclib.github.io/>`_ is used to extract additional information.
+
+        :**Extracting**:
+            Iterates through all lines in :term:`out_path` using all extractors with :meth:`~reptar.parsers.parser.parser.extract_data_out`.
+            Each extractor has its own ``parsed_info`` that needs to be added to :attr:`~reptar.parsers.parser.parser.parsed_info`.
+
+            .. automethod:: reptar.parsers.parser.extract_data_out
+                :noindex:
+
+        :**Postprocessing**:
+            Any additional tasks to complete parsing.
+            There is usually a ``after_parse`` method that adds or changes data based on the final :attr:`~reptar.parsers.parser.parser.parsed_info` attribute.
+            Handling of other files such as :term:`geom_path` and :term:`traj_path`.
         """
         return NotImplemented
     
