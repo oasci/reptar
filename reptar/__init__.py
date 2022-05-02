@@ -1,11 +1,10 @@
 __author__ = """Alex M. Maldonado"""
 
-from . import parsers
-from . import utils
-from . import writers
-from .creator import creator
-from .sampler import *
-from .data import data
+from reptar import utils
+from reptar import writers
+from reptar.creator import creator
+from reptar.sampler import *
+from reptar.data import data
 
-from . import _version
+from reptar import _version
 __version__ = _version.get_versions()['version']
