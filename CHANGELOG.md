@@ -6,10 +6,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Zenodo DOI
+- Parallel implementation of Psi4 and xTB energy and gradient calculations with ray.
+- Updating README and documentation home page.
+- Zenodo DOI.
 
 ### Changed
 
+- Document pip install of reptar.
 - Sampling structures copies gradients instead of forces.
 - Write test files to temporary, untracked directory.
 
