@@ -75,7 +75,8 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
         'freeze_core': 'false'
     }
     psi4_threads = n_cpus_worker
-    psi4_args = (charge, mult, psi4_method, psi4_options, psi4_threads)
+    psi4_mem = '2 GB'
+    psi4_args = (charge, mult, psi4_method, psi4_options, psi4_threads, psi4_mem)
 
     # Creating engrad driver.
     max_calcs = 20  # Manually trims R to the first 20 structures (can remove).

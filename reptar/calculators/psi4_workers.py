@@ -23,8 +23,8 @@
 import numpy as np
 import psi4
 
-def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads):
-    """Ray remote function for computing total electronic energy and atomic
+def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads, mem):
+    """Worker function for computing total electronic energy and atomic
     gradients using Psi4.
 
     Parameters
@@ -53,7 +53,13 @@ def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads):
         and ``reference``.
     threads : :obj:`int`
         Number of threads for Psi4. This is almost always the number of cores
-        being used for the worker.
+        being used for the worker. For more information, see the
+        `documentation <https://psicode.org/psi4manual/master/api\
+        /psi4.core.set_num_threads.html#psi4.core.set_num_threads>`_.
+    mem : :obj:`int`, :obj:`float`, :obj:`str`
+        The amount of memory available. For more information, see the
+        `documentation <https://psicode.org/psi4manual/master/api\
+        /psi4.driver.set_memory.html#psi4.driver.set_memory>`_.
     
     Returns
     -------
@@ -67,6 +73,7 @@ def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads):
         Units of Hartree/Angstrom.
     """
     psi4.core.set_num_threads(threads)
+    psi4.set_memory(mem)
     psi4.set_options(options)
     R = R[R_idxs]
     G = np.zeros(R.shape)
