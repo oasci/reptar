@@ -33,7 +33,8 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
-    'sphinx.ext.autosectionlabel'
+    'sphinx.ext.autosectionlabel',
+    'sphinx_multiversion'
 ]
 
 # List of patterns, relative to source directory, that match files and
@@ -42,7 +43,7 @@ extensions = [
 exclude_patterns = []
 
 # Updating master docs
-master_doc = 'index'
+root_doc = 'index'
 
 # Add mappings
 intersphinx_mapping = {
@@ -62,3 +63,20 @@ html_theme = 'furo'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+# Including sphinx multiversion
+templates_path = [
+    "_templates",
+]
+smv_branch_whitelist = r'main'  # Only include the main branch
+html_sidebars = {
+    '**': [
+        "sidebar/scroll-start.html",
+        "sidebar/brand.html",
+        "sidebar/search.html",
+        "sidebar/navigation.html",
+        "sidebar/ethical-ads.html",
+        "sidebar/scroll-end.html",
+        'versions.html',
+    ],
+}
