@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Rename reptarWriter to textWriter (more specific).
 - Require setting the memory for Psi4 worker.
 
 ## [0.0.2] - 2022-05-03

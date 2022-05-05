@@ -22,21 +22,15 @@
 
 from abc import ABC, abstractmethod
 
-class reptarWriter(ABC):
-    """Base class for parsing output files.
-
-    Parameters
-    ----------
-    out_path : :obj:`str`
-        Path to output file.
-    
-    Attributes
-    ----------
-    group : ``group``
-        Path to output file.
+class writerText(ABC):
+    """Base class for writing text files.
     """
 
     def __init__(self):
         pass
     
-    
+    @abstractmethod
+    def write(self):
+        """Write the text file.
+        """
+        return NotImplemented

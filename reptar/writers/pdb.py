@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .writer import reptarWriter
+from .text_writer import writerText
 from ..utils import z_to_element
 
-class pdbWriter(reptarWriter):
+class pdbWriter(writerText):
     """Writes PDB file from reptar group.
     """
 
