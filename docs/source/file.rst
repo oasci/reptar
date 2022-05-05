@@ -1,8 +1,8 @@
 ====
-Data
+File
 ====
 
-The heart of reptar is the :class:`~reptar.data` class which allows you to interact with your data in a storage-agnostic way.
+The heart of reptar is the :class:`~reptar.File` class which allows you to interact with your data in a storage-agnostic way.
 
 Storage types
 =============
@@ -15,9 +15,9 @@ Reptar currently supports the following file types:
 - JSON,
 - npz.
 
-Any data stored in this format can be interacted with through a :class:`~reptar.data` object.
+Any data stored in this format can be interacted with through a :class:`~reptar.File` object.
 
-.. autoclass:: reptar.data
+.. autoclass:: reptar.File
     :noindex:
 
 Concepts
@@ -52,28 +52,28 @@ Note that the ``/`` prefix is not required (``run/energy_pot`` works as well).
 Retrieving data
 ===============
 
-Reptar provides a single method, :meth:`~reptar.data.data.get`, to retrieve data from any of the supported file types.
+Reptar provides a single method, :meth:`~reptar.reptar_file.File.get`, to retrieve data from any of the supported file types.
 This can return any nested data stored in a loaded file including other groups.
 
-.. automethod:: reptar.data.get
+.. automethod:: reptar.File.get
     :noindex:
 
-You can also get a list of all non-group keys using :meth:`~reptar.data.data.get_keys`.
+You can also get a list of all non-group keys using :meth:`~reptar.reptar_file.File.get_keys`.
 
-.. automethod:: reptar.data.get_keys
+.. automethod:: reptar.File.get_keys
     :noindex:
 
 Adding data
 ===========
 
-Reptar provides a single method, :meth:`~reptar.data.data.add`, to store data in any of the supported file types.
+Reptar provides a single method, :meth:`~reptar.reptar_file.File.add`, to store data in any of the supported file types.
 
-.. automethod:: reptar.data.add
+.. automethod:: reptar.File.add
     :noindex:
 
-Note that exdir groups must be initialized first with :meth:`~reptar.data.data.init_group` before adding data.
+Note that exdir groups must be initialized first with :meth:`~reptar.reptar_file.File.init_group` before adding data.
 
-.. automethod:: reptar.data.init_group
+.. automethod:: reptar.File.init_group
     :noindex:
 
 Saving
@@ -81,16 +81,16 @@ Saving
 
 Besides exdir, all other file types need to be explicitly saved using the following method.
 
-.. automethod:: reptar.data.save
+.. automethod:: reptar.File.save
     :noindex:
 
 File conversion
 ===============
 
-A group from any file type can be directly converted to a dictionary using :meth:`~reptar.data.data.as_dict`.
+A group from any file type can be directly converted to a dictionary using :meth:`~reptar.reptar_file.File.as_dict`.
 
-.. automethod:: reptar.data.as_dict
+.. automethod:: reptar.File.as_dict
     :noindex:
 
-Dictionaries and can also be used to populate a :class:`~reptar.data` object with any specified file type.
+Dictionaries and can also be used to populate a :class:`~reptar.File` object with any specified file type.
 

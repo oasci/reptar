@@ -54,9 +54,9 @@ def test_6h2o_temelso_engrad_exdir():
     # Reading tests.
     create = creator()
     create.load(exdir_path, mode='r')
-    assert create.data.get('/engrad/energy_scf') == -12419.360138637763
+    assert create.rfile.get('/engrad/energy_scf') == -12419.360138637763
     assert np.array_equal(
-        create.data.get('/engrad/dipole_moment'),
+        create.rfile.get('/engrad/dipole_moment'),
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )
 
@@ -71,14 +71,14 @@ def test_6h2o_temelso_engrad_json():
     create = creator()
     create.load(json_path, mode='w')
     create.group('/', out_path=out_path)
-    create.data.save()
+    create.rfile.save()
 
     # Reading tests.
     create = creator()
     create.load(json_path, mode='r')
-    assert create.data.get('energy_scf') == -12419.360138637763
+    assert create.rfile.get('energy_scf') == -12419.360138637763
     assert np.array_equal(
-        create.data.get('dipole_moment'),
+        create.rfile.get('dipole_moment'),
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )
 
@@ -92,13 +92,13 @@ def test_6h2o_temelso_engrad_npz():
     create = creator()
     create.load(npz_path, mode='w')
     create.group('/', out_path=out_path)
-    create.data.save()
+    create.rfile.save()
 
     # Reading tests.
     create = creator()
     create.load(npz_path, mode='r')
-    assert create.data.get('energy_scf') == -12419.360138637763
+    assert create.rfile.get('energy_scf') == -12419.360138637763
     assert np.array_equal(
-        create.data.get('dipole_moment'),
+        create.rfile.get('dipole_moment'),
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )

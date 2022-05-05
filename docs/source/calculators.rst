@@ -42,7 +42,7 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
 
     import numpy as np
     import ray
-    from reptar import data
+    from reptar import File
     from reptar.calculators import driverENGRAD
     from reptar.calculators.psi4_workers import psi4_engrad
 
@@ -53,9 +53,9 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
 
     # Get exdir data.
     exdir_path = '3h2o.exdir'
-    d = data(exdir_path, mode='a')
-    Z = d.get('atomic_numbers')
-    R = d.get('geometry')
+    f = File(exdir_path, mode='a')
+    Z = f.get('atomic_numbers')
+    R = f.get('geometry')
 
     # Create energy and gradient arrays.
     E = np.empty(R.shape[0])
@@ -89,6 +89,6 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
     E, G = engrads.run()
 
     # Add data to exdir file.
-    d.add('energy_ele_mp2.ccpvtz_psi4', E)
-    d.add('grads_mp2.ccpvtz_psi4', G)
+    f.add('energy_ele_mp2.ccpvtz_psi4', E)
+    f.add('grads_mp2.ccpvtz_psi4', G)
 

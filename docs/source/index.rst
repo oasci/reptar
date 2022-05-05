@@ -69,7 +69,7 @@ You can install reptar using ``pip install reptar`` or install the latest versio
 .. toctree::
     :hidden:
 
-    Data <data>
+    File <file>
     Creator <creator>
     Parsers and extractors <parsers-extractors>
     Definitions <definitions>

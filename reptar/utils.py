@@ -187,13 +187,15 @@ def parse_stringfile(stringfile_path):
                     data[-1].append([float(i) for i in line_split[1:]])
     return Z, comments, data
 
-def get_md5(data, group_key, only_arrays=False, only_structures=False):
+def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
     """Creates MD5 hash for a group.
 
     Parameters
     ----------
-    group : ``exdir.Object``
-        An exdir object (``File`` or ``Group``)
+    rfile : :obj:`reptar.File`
+        A reptar file.
+    group_key : :obj:`str`
+        Key to the desired group.
     only_arrays : :obj:`bool`, optional
         Generate the MD5 hash using only arrays. This creates a data-centered
         MD5 that is not affected by data that are commonly added or
@@ -213,23 +215,23 @@ def get_md5(data, group_key, only_arrays=False, only_structures=False):
 
     if only_structures:
         try:
-            Z = data.get(f'{group_key}/atomic_numbers')
+            Z = rfile.get(f'{group_key}/atomic_numbers')
             Z = Z.ravel()
             md5_hash.update(hashlib.md5(Z).digest())
         except Exception:
             pass
         try:
-            R = data.get(f'{group_key}/geometry')
+            R = rfile.get(f'{group_key}/geometry')
             R = R.ravel()
             md5_hash.update(hashlib.md5(R).digest())
         except Exception:
             pass
     else:
-        keys = data.get_keys(group_key)
+        keys = rfile.get_keys(group_key)
         for key in keys:
             if 'md5' in key:
                 continue
-            d = data.get(f'{group_key}/{key}')
+            d = rfile.get(f'{group_key}/{key}')
             if isinstance(d, np.ndarray):
                 d = d.ravel()
                 md5_hash.update(hashlib.md5(d).digest())

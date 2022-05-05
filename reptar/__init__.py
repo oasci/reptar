@@ -7,12 +7,12 @@ from . import utils
 from . import extractors
 from . import parsers
 from .creator import creator
-from .data import data
+from .reptar_file import File
 from . import sampler
 from . import writers
 from . import fragment
 
 __all__ = [
-    'utils', 'extractors', 'parsers', 'creator', 'data', 'sampler', 'writers',
+    'utils', 'extractors', 'parsers', 'creator', 'File', 'sampler', 'writers',
     'fragment'
 ]

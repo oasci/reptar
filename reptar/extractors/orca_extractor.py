@@ -310,8 +310,8 @@ class extractorORCA(extractor):
         while '-     ORCA property calculations      *' != line.strip():
             # Freezing NCore=10 chemical core electrons
             if 'Freezing NCore=' == line.strip()[:15]:
-                # if 'ele_frozen' not in self.data['keywords'].keys():
-                #     self.data['outputs']['ele_frozen'] = []
+                # if 'ele_frozen' not in self.rfile['keywords'].keys():
+                #     self.rfile['outputs']['ele_frozen'] = []
                 ele_frozen = int(line.split()[1][6:])
                 self.parsed_info['outputs']['ele_frozen'] = ele_frozen
 

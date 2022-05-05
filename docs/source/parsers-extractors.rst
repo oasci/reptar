@@ -25,7 +25,7 @@ Each package parser class must define its own :meth:`~reptar.parsers.parser.pars
 ``parsed_info``
 ---------------
 
-Used to store any and all information that can be added to a :ref:`data <data>` object.
+Used to store any and all information that can be added to a :ref:`File <file>` object.
 
 .. autoattribute:: reptar.parsers.parser.parsed_info
     :noindex:

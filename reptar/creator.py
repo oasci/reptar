@@ -25,7 +25,7 @@ import shutil
 import numpy as np
 from .parsers import parserORCA, parserXTB
 from .utils import get_md5
-from .data import data
+from .reptar_file import File
 from pkg_resources import resource_stream
 import yaml
 
@@ -69,18 +69,18 @@ class creator:
 
     Parameters
     ----------
-    data : ``reptar.data``, optional
-        An initialized data object.
+    rfile : :obj:`reptar.File`, optional
+        An initialized reptar File.
     """
 
-    def __init__(self, data=None):
-        if data is not None:
-            self.data = data
+    def __init__(self, rfile=None):
+        if rfile is not None:
+            self.rfile = rfile
     
     def load(
         self, file_path, mode='r', allow_remove=False, plugins=None
     ):
-        """Load a data file for creating/adding information.
+        """Load a reptar file for creating/adding information.
 
         Parameters
         ----------
@@ -96,9 +96,25 @@ class creator:
         plugins : :obj:`list`, optional
             A list of instantiated exdir plugins. Defaults to ``None``.
         """
-        self.data = data(
+        self.rfile = File(
             file_path, mode=mode, allow_remove=allow_remove, plugins=plugins
         )
+    
+    @property
+    def rfile(self):
+        """The reptar file to manage.
+
+        :obj:`reptar.File`
+        """
+        return self._rfile
+    
+    @rfile.setter
+    def rfile(self, value):
+        self._rfile = value
+
+    @rfile.deleter
+    def rfile(self, value):
+        del self._rfile
 
     def parse_output(
         self, out_path, geom_path=None, traj_path=None, extractors=None
@@ -142,9 +158,9 @@ class creator:
             Key to the desired new group (including parent).
         """
         out_dir = os.path.dirname(self.out_path)
-        group = self.data.get(group_key)
+        group = self.rfile.get(group_key)
         
-        if self.data.ftype == 'exdir':
+        if self.rfile.ftype == 'exdir':
             md_restart_path = f'{out_dir}/mdrestart'
             if os.path.exists(md_restart_path):
                 raw = group.require_raw('restart_files')
@@ -186,35 +202,35 @@ class creator:
         ``geom_path`` provides an initial geometry not included in
         ``traj_path``.
         """
-        assert hasattr(self, 'data')
+        assert hasattr(self, 'rfile')
         self.parse_output(
             out_path, geom_path=geom_path, traj_path=traj_path,
             extractors=extractors
         )
         parsed_info = self.parsed_info
 
-        if self.data.ftype == 'exdir':
-            self.data.init_group(group_key)
+        if self.rfile.ftype == 'exdir':
+            self.rfile.init_group(group_key)
         
         # Loop through each category of data.
         for cat_key in parsed_info.keys():
             for data_key in parsed_info[cat_key].keys():
                 data = parsed_info[cat_key][data_key]
-                self.data.add(f'{group_key}/{data_key}', data)
+                self.rfile.add(f'{group_key}/{data_key}', data)
         
         # MD5 stuff
-        md5 = get_md5(self.data, group_key)
-        self.data.add(f'{group_key}/md5', md5)
+        md5 = get_md5(self.rfile, group_key)
+        self.rfile.add(f'{group_key}/md5', md5)
         
         try:
-            md5_arrays = get_md5(self.data, group_key, only_arrays=True)
-            self.data.add(f'{group_key}/md5_arrays', md5_arrays)
+            md5_arrays = get_md5(self.rfile, group_key, only_arrays=True)
+            self.rfile.add(f'{group_key}/md5_arrays', md5_arrays)
         except Exception:
             pass
 
         try:
-            md5_structures = get_md5(self.data, group_key, only_structures=True)
-            self.data.add(f'{group_key}/md5_structures', md5_structures)
+            md5_structures = get_md5(self.rfile, group_key, only_structures=True)
+            self.rfile.add(f'{group_key}/md5_structures', md5_structures)
         except Exception:
             pass
 
@@ -223,9 +239,9 @@ class creator:
             self._create_extras_xtb(group_key)
         
         # Adding version
-        self.data.add(f'{group_key}/reptar_version', __version__)
+        self.rfile.add(f'{group_key}/reptar_version', __version__)
 
-        return self.data
+        return self.rfile
     
     def ids(self, group_key, entity_ids, comp_ids):
         """Add ``entity_ids`` and ``comp_ids`` to a group.
@@ -248,16 +264,16 @@ class creator:
         if isinstance(comp_ids, list):
             comp_ids = np.array(comp_ids)
         
-        self.data.add(f'{group_key}/entity_ids', entity_ids)
-        self.data.add(f'{group_key}/comp_ids', comp_ids)
+        self.rfile.add(f'{group_key}/entity_ids', entity_ids)
+        self.rfile.add(f'{group_key}/comp_ids', comp_ids)
 
         comp_ids_num = {}
         unique_comp_ids, comp_ids_freq = np.unique(comp_ids, return_counts=True)
         for comp_id, num in zip(unique_comp_ids, comp_ids_freq):
             comp_ids_num[str(comp_id)] = int(num)
         
-        self.data.add(f'{group_key}/comp_ids_num', comp_ids_num)
-        return self.data.get(group_key)
+        self.rfile.add(f'{group_key}/comp_ids_num', comp_ids_num)
+        return self.rfile.get(group_key)
     
     # TODO: Update ways we get data here.
     def definitions(self, definitions=None):
@@ -304,4 +320,4 @@ class creator:
                     else:
                         pass
         
-        self.data.add('definitions', defs)
+        self.rfile.add('definitions', defs)

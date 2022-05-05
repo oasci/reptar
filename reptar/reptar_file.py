@@ -27,7 +27,7 @@ import exdir
 import cclib
 from .utils import combine_dicts
 
-class data:
+class File:
     """Create, store, and access data from a variety of formats.
 
     Parameters
@@ -62,7 +62,7 @@ class data:
     def _from_path(
         self, file_path, mode, allow_remove, plugins
     ):
-        """Populates the data object from a file path.
+        """Populates the File object from a file path.
 
         Parameters
         ----------
@@ -82,37 +82,37 @@ class data:
         _, f_ext = os.path.splitext(file_path)
 
         if f_ext == '.exdir':
-            File = exdir.File(
+            File_ = exdir.File(
                 file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json':
             if exists:
                 with open(file_path, 'r') as f:
-                    File = json.load(f)
+                    File_ = json.load(f)
             else:
-                File = {}
+                File_ = {}
         elif f_ext == '.npz':
             if exists:
-                File = dict(np.load(file_path, allow_pickle=True))
+                File_ = dict(np.load(file_path, allow_pickle=True))
                 # Since everything is stored in arrays, we clean up array data.
-                for k,v in File.items():
+                for k,v in File_.items():
                     if self._is_iter(v):
                         v = self.simplify_iter_data(v)
-                        File[k] = v
+                        File_[k] = v
             else:
-                File = {}
+                File_ = {}
         else:
             raise TypeError(f'{f_ext} is not supported.')
         
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
-        self.File = File
+        self.File_ = File_
     
     def _from_dict(
         self, file_path, group_dict, mode, allow_remove, plugins
     ):
-        """Populates the data object from a dictionary.
+        """Populates the File object from a dictionary.
 
         Parameters
         ----------
@@ -120,7 +120,7 @@ class data:
             Path to a file supported by reptar. If it does not exist, then one
             will be created if possible.
         group_dict : :obj:`str`
-            Dictionary to populate the data object with.
+            Dictionary to populate the File object with.
         mode : :obj:`str`, optional
             A file mode string that defines the read/write behavior. Defaults to
             ``'r'``.
@@ -133,11 +133,11 @@ class data:
         _, f_ext = os.path.splitext(file_path)
         
         if f_ext == '.exdir':
-            self.File = exdir.File(
+            self.File_ = exdir.File(
                 file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json' or f_ext == '.npz':
-            self.File = {}
+            self.File_ = {}
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
@@ -195,13 +195,13 @@ class data:
             Key of the desired data. Nested keys should be separated by ``/``.
         """
         if key == '/':
-            return self.File
+            return self.File_
         
         keys = key.split('/')
         if keys[0] == '':
             del keys[0]
         
-        data = self.File[keys[0]]
+        data = self.File_[keys[0]]
         for k in keys[1:]:
             data = data[k]
         if isinstance(data, list):
@@ -219,10 +219,10 @@ class data:
             Key of the desired data. Nested keys should be separated by ``/``.
         """
         if key == '/':
-            return self.File
+            return self.File_
         
         key_parent, key_data = self.split_key(key)
-        parent = self.File[key_parent]
+        parent = self.File_[key_parent]
         if key_data in list(parent):
             data = parent[key_data]
             if isinstance(data, exdir.core.dataset.Dataset):
@@ -275,9 +275,9 @@ class data:
         
         Examples
         --------
-        >>> data.get('/prod_1/charge')
+        >>> rfile.get('/prod_1/charge')
         0
-        >>> data.get('energy_scf')
+        >>> rfile.get('energy_scf')
         -12419.360138637763
         """
         key = self.clean_key(key)
@@ -373,7 +373,7 @@ class data:
         for key in reversed(keys[:-1]):
             add_dic = {key: add_dic}
 
-        self.File = combine_dicts(self.File, add_dic)
+        self.File_ = combine_dicts(self.File_, add_dic)
     
     def _add_to_exdir(self, key, data):
         """Add data to an exdir group.
@@ -429,7 +429,7 @@ class data:
         """Add data to file.
 
         Note that there is some data postprocessing using
-        :meth:`~reptar.data.data.simplify_iter_data`.
+        :meth:`~reptar.reptar_file.File.simplify_iter_data`.
 
         Parameters
         ----------
@@ -516,7 +516,7 @@ class data:
         """
         assert self.fmode == 'w'
         if self.ftype == 'json':
-            json_dict = self.File
+            json_dict = self.File_
 
             if json_prettify:
                 json_string = json.dumps(
@@ -531,5 +531,5 @@ class data:
             with open(self.fpath, 'w') as f:
                 f.write(json_string)
         elif self.ftype == 'npz':
-            npz_dict = self.File
+            npz_dict = self.File_
             np.savez_compressed(self.fpath, **npz_dict)

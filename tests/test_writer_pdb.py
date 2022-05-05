@@ -49,7 +49,7 @@ def test_pdb_writer_1h2o_120meoh_prod():
 
     writer = pdbWriter()
     writer.write(
-        create.data, '/prod_1', file_name='prod_1',
+        create.rfile, '/prod_1', file_name='prod_1',
         save_dir='./tmp', R_limits=(None, 5)
     )
 

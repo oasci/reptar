@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Rename `data` class to `File`.
+This clears up previous ambiguous usage of "data" to refer to both a file and value of a key.
 - Rename reptarWriter to textWriter (more specific).
 - Require setting the memory for Psi4 worker.
 

@@ -201,7 +201,7 @@ def _generate_structure_samples(
                 yield selection
 
 def sample_structures(
-    source_data, source_key, quantity, comp_labels, R_prov_ids, source_R_prov_specs,
+    source_file, source_key, quantity, comp_labels, R_prov_ids, source_R_prov_specs,
     Z=None, R=None, R_prov_specs=None, structure_idxs=None,
     criteria=None, z_slice=None, cutoff=None, center_structures=False,
     sampling_updates=False, copy_EG=False, E=None, G=None,
@@ -215,8 +215,8 @@ def sample_structures(
 
     Parameters
     ----------
-    source_data : ``exdir.Group``
-        A loaded ``exdir.Group`` to sample structures from. Must contain
+    source_file : :obj:`reptar.File`
+        A loaded reptar File to sample structures from. Must contain
         ``z``, ``r``, ``entity_ids``, and
         ``comp_ids``.
     source_key : :obj:`str`
@@ -301,10 +301,10 @@ def sample_structures(
         ``R_prov_specs`` of the structures.
     """
     # Get data from structure source.
-    Z_source = source_data.get(f'{source_key}/atomic_numbers')
-    R_source = source_data.get(f'{source_key}/geometry')
-    entity_ids_source = source_data.get(f'{source_key}/entity_ids')
-    comp_ids_source = source_data.get(f'{source_key}/comp_ids')
+    Z_source = source_file.get(f'{source_key}/atomic_numbers')
+    R_source = source_file.get(f'{source_key}/geometry')
+    entity_ids_source = source_file.get(f'{source_key}/entity_ids')
+    comp_ids_source = source_file.get(f'{source_key}/comp_ids')
 
     # If source_R_prov_specs is None, then this is an original source.
     # Which means there should only be one R_prov_id (we store this for later).
@@ -314,8 +314,8 @@ def sample_structures(
 
     if copy_EG:
         try:
-            E_source = source_data.get(f'{source_key}/{energy_label_source}')
-            G_source = source_data.get(f'{source_key}/{grad_label_source}')
+            E_source = source_file.get(f'{source_key}/{energy_label_source}')
+            G_source = source_file.get(f'{source_key}/{grad_label_source}')
         except Exception:
             E_source = None
             G_source = None
@@ -476,7 +476,7 @@ def sample_structures(
     )
 
 def add_structures_to_group(
-    source_data, source_key, dest_data, dest_key, quantity,
+    source_file, source_key, dest_file, dest_key, quantity,
     comp_labels, structure_idxs=None, consistent_entities=None, criteria=None,
     z_slice=[], cutoff=[], center_structures=False, sampling_updates=False,
     copy_EG=False, energy_labels=('energy_ele',), grad_labels=('grads',),
@@ -486,15 +486,15 @@ def add_structures_to_group(
 
     Parameters
     ----------
-    source_data : ``reptar.data``
-        A reptar data object to sample structures from. Must contain
+    source_file : :obj:`reptar.File`
+        A reptar File to sample structures from. Must contain
         ``atomic_numbers``, ``geometry``, ``entity_ids``, and ``comp_ids``.
         If it does not contain a ``md5_structures`` one will be created and
         saved.
     source_key : :obj:`str`
         Key to the desired source group.
-    dest_data : ``reptar.data``
-        A reptar data object to add sampled structures to.
+    dest_file : :obj:`reptar.File`
+        A reptar File to add sampled structures to.
     dest_key : :obj:`str`
         Key to the desired destination group. If it does not
         exist then it will be created.
@@ -553,12 +553,12 @@ def add_structures_to_group(
     """
     # Grabs data from destination if exists.
     try:
-        Z = dest_data.get(f'{dest_key}/atomic_numbers')
+        Z = dest_file.get(f'{dest_key}/atomic_numbers')
     except Exception:
         Z = None
     
     try:
-        R = dest_data.get(f'{dest_key}/geometry')
+        R = dest_file.get(f'{dest_key}/geometry')
     except Exception:
         R = None
     
@@ -566,30 +566,30 @@ def add_structures_to_group(
     # TODO: perform check if we should copy energies and gradients based on if the
     # sampled structure is the entire source structure.
     if copy_EG:
-        E = dest_data.get(f'{dest_key}/{energy_labels[0]}')
-        G = dest_data.get(f'{dest_key}/{grad_labels[0]}')
+        E = dest_file.get(f'{dest_key}/{energy_labels[0]}')
+        G = dest_file.get(f'{dest_key}/{grad_labels[0]}')
     else:
         E = None
         G = None
 
     try:
-        R_prov_ids = dest_data.get(f'{dest_key}/r_prov_ids')
-        R_prov_specs = dest_data.get(f'{dest_key}/r_prov_specs')
+        R_prov_ids = dest_file.get(f'{dest_key}/r_prov_ids')
+        R_prov_specs = dest_file.get(f'{dest_key}/r_prov_specs')
     except Exception as e:
         R_prov_ids = None
         R_prov_specs = None
     
     try:
-        entity_ids = dest_data.get(f'{dest_key}/entity_ids')
-        comp_ids = dest_data.get(f'{dest_key}/comp_ids')
+        entity_ids = dest_file.get(f'{dest_key}/entity_ids')
+        comp_ids = dest_file.get(f'{dest_key}/comp_ids')
     except Exception:
         entity_ids = None
         comp_ids = None
     
     # Handle if source already has r_prov_ids
     try:
-        source_R_prov_ids = source_data.get(f'{source_key}/r_prov_ids')
-        source_R_prov_specs = source_data.get(f'{source_key}/r_prov_specs')
+        source_R_prov_ids = source_file.get(f'{source_key}/r_prov_ids')
+        source_R_prov_specs = source_file.get(f'{source_key}/r_prov_specs')
     except Exception as e:
         # This source is an original (was not created from sampling).
         source_R_prov_ids = None
@@ -616,10 +616,10 @@ def add_structures_to_group(
     # Original source (not from sampled)
     if source_R_prov_ids is None:
         try:
-            md5_source = source_data.get(f'{source_key}/md5_structures')
+            md5_source = source_file.get(f'{source_key}/md5_structures')
         except Exception:
-            md5_source = get_md5(source_data, source_key, only_structures=True)
-            source_data.add(f'{source_key}/md5_structures', md5_source)
+            md5_source = get_md5(source_file, source_key, only_structures=True)
+            source_file.add(f'{source_key}/md5_structures', md5_source)
         
         # Create pseudo source_R_prov_ids.
         source_R_prov_ids = {0: md5_source}
@@ -678,7 +678,7 @@ def add_structures_to_group(
     
     # Begin sampling.
     Z, R, E, G, entity_ids_sampled, R_prov_specs = sample_structures(
-        source_data, source_key, quantity, comp_labels, new_R_prov_ids,
+        source_file, source_key, quantity, comp_labels, new_R_prov_ids,
         source_R_prov_specs, Z=Z, R=R, R_prov_specs=R_prov_specs,
         structure_idxs=structure_idxs, criteria=criteria, z_slice=z_slice,
         cutoff=cutoff, center_structures=center_structures,
@@ -700,24 +700,24 @@ def add_structures_to_group(
         entity_ids = entity_ids_sampled
     
     if write:
-        dest_data.add(f'{dest_key}/atomic_numbers', Z)
-        dest_data.add(f'{dest_key}/geometry', R)
+        dest_file.add(f'{dest_key}/atomic_numbers', Z)
+        dest_file.add(f'{dest_key}/geometry', R)
         if copy_EG:
-            dest_data.add(f'{dest_key}/{energy_labels[0]}', E)
-            dest_data.add(f'{dest_key}/{grad_labels[0]}', G)
+            dest_file.add(f'{dest_key}/{energy_labels[0]}', E)
+            dest_file.add(f'{dest_key}/{grad_labels[0]}', G)
             if len(energy_labels) > 1:
                 for i in range(1, len(energy_labels)):
                     e_label = energy_labels[i]
-                    e_data = dest_data.get(f'{dest_key}/{e_label}')
+                    e_data = dest_file.get(f'{dest_key}/{e_label}')
                     e_data_shape = e_data.shape
                     e_shape_new = (e_data_shape[0]+num_sampled,)
                     e_data_new = np.empty(e_shape_new)
                     e_data_new[:] = np.nan
                     e_data_new[:e_data_shape[0]] = e_data
-                    dest_data.add(f'{dest_key}/{e_label}', e_data_new)
+                    dest_file.add(f'{dest_key}/{e_label}', e_data_new)
                 for i in range(1, len(grad_labels)):
                     g_label = grad_labels[i]
-                    g_data = dest_data.get(f'{dest_key}/{g_label}')
+                    g_data = dest_file.get(f'{dest_key}/{g_label}')
                     g_data_shape = g_data.shape
                     g_shape_new = (
                         g_data_shape[0]+num_sampled, g_data_shape[1],
@@ -726,22 +726,22 @@ def add_structures_to_group(
                     g_data_new = np.empty(g_shape_new)
                     g_data_new[:] = np.nan
                     g_data_new[:g_data_shape[0]] = g_data
-                    dest_data.add(f'{dest_key}/{g_label}', g_data_new)
-        dest_data.add(f'{dest_key}/entity_ids', entity_ids)
-        dest_data.add(f'{dest_key}/r_prov_ids', new_R_prov_ids)
-        dest_data.add(f'{dest_key}/r_prov_specs', R_prov_specs)
-        dest_data.add(f'{dest_key}/r_centered', center_structures)
-        dest_data.add(f'{dest_key}/comp_ids', comp_ids)
+                    dest_file.add(f'{dest_key}/{g_label}', g_data_new)
+        dest_file.add(f'{dest_key}/entity_ids', entity_ids)
+        dest_file.add(f'{dest_key}/r_prov_ids', new_R_prov_ids)
+        dest_file.add(f'{dest_key}/r_prov_specs', R_prov_specs)
+        dest_file.add(f'{dest_key}/r_centered', center_structures)
+        dest_file.add(f'{dest_key}/comp_ids', comp_ids)
 
-        dest_data.add(
+        dest_file.add(
             f'{dest_key}/md5',
-            get_md5(dest_data, dest_key)
+            get_md5(dest_file, dest_key)
         )
-        dest_data.add(
+        dest_file.add(
             f'{dest_key}/md5_structures', get_md5(
-                dest_data, dest_key, only_arrays=True
+                dest_file, dest_key, only_arrays=True
             )
         )
-        dest_data.add(f'{dest_key}/reptar_version', __version__)
+        dest_file.add(f'{dest_key}/reptar_version', __version__)
 
-    return dest_data
+    return dest_file

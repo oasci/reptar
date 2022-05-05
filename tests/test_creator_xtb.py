@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import creator, data
+from reptar import creator, File
 from reptar.utils import get_md5, gen_entity_ids, gen_comp_ids
 
 import sys
@@ -78,7 +78,7 @@ def test_1h2o_120meoh_md_exdir():
     )
     create.ids('prod_1', entity_ids, comp_ids)
 
-    create.data.add('readme',
+    create.rfile.add('readme',
         '500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n'
         'Constrains one water molecule to the origin solvated in methanol droplet.'
     )
@@ -88,13 +88,13 @@ def test_1h2o_120meoh_md_exdir():
         exdir_path, mode='r'
     )
 
-    assert create.data.get('prod_1/geometry').shape == (1001, 723, 3)
-    assert create.data.get('prod_1/geometry')[0][3][1] == -2.64576119977354
-    assert create.data.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
-    assert create.data.get('prod_1/energy_pot').shape == (1001,)
-    assert create.data.get('prod_1/energy_pot')[0] == -991.881189902216
-    assert create.data.get('prod_1/energy_pot')[-1] == -991.818996146108
-    assert create.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
+    assert create.rfile.get('prod_1/geometry').shape == (1001, 723, 3)
+    assert create.rfile.get('prod_1/geometry')[0][3][1] == -2.64576119977354
+    assert create.rfile.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
+    assert create.rfile.get('prod_1/energy_pot').shape == (1001,)
+    assert create.rfile.get('prod_1/energy_pot')[0] == -991.881189902216
+    assert create.rfile.get('prod_1/energy_pot')[-1] == -991.818996146108
+    assert create.rfile.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_json():
@@ -134,31 +134,31 @@ def test_1h2o_120meoh_md_json():
     )
     create.ids('prod_1', entity_ids, comp_ids)
 
-    assert create.data.get('prod_1/geometry').shape == (1001, 723, 3)
-    assert create.data.get('prod_1/geometry')[0][3][1] == -2.64576119977354
-    assert create.data.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
-    assert create.data.get('prod_1/energy_pot').shape == (1001,)
-    assert create.data.get('prod_1/energy_pot')[0] == -991.881189902216
-    assert create.data.get('prod_1/energy_pot')[-1] == -991.818996146108
-    assert create.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
+    assert create.rfile.get('prod_1/geometry').shape == (1001, 723, 3)
+    assert create.rfile.get('prod_1/geometry')[0][3][1] == -2.64576119977354
+    assert create.rfile.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
+    assert create.rfile.get('prod_1/energy_pot').shape == (1001,)
+    assert create.rfile.get('prod_1/energy_pot')[0] == -991.881189902216
+    assert create.rfile.get('prod_1/energy_pot')[-1] == -991.818996146108
+    assert create.rfile.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
-    create.data.add('readme',
+    create.rfile.add('readme',
         '500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n'
         'Constrains one water molecule to the origin solvated in methanol droplet.'
     )
 
-    create.data.save(json_prettify=True)
+    create.rfile.save(json_prettify=True)
 
     create = creator()
     create.load(json_path, mode='r')
 
-    assert create.data.get('prod_1/geometry').shape == (1001, 723, 3)
-    assert create.data.get('prod_1/geometry')[0][3][1] == -2.64576119977354
-    assert create.data.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
-    assert create.data.get('prod_1/energy_pot').shape == (1001,)
-    assert create.data.get('prod_1/energy_pot')[0] == -991.881189902216
-    assert create.data.get('prod_1/energy_pot')[-1] == -991.818996146108
-    assert create.data.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
+    assert create.rfile.get('prod_1/geometry').shape == (1001, 723, 3)
+    assert create.rfile.get('prod_1/geometry')[0][3][1] == -2.64576119977354
+    assert create.rfile.get('prod_1/geometry')[-1][-1][0] == -1.62420092727186
+    assert create.rfile.get('prod_1/energy_pot').shape == (1001,)
+    assert create.rfile.get('prod_1/energy_pot')[0] == -991.881189902216
+    assert create.rfile.get('prod_1/energy_pot')[-1] == -991.818996146108
+    assert create.rfile.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_prod_exdir_to_npz():
@@ -170,15 +170,15 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
 
     create_exdir = creator()
     create_exdir.load(exdir_path, mode='r')
-    prod_dict = create_exdir.data.as_dict('prod_1')
+    prod_dict = create_exdir.rfile.as_dict('prod_1')
     
-    data_npz = data(npz_path, mode='w', from_dict=prod_dict)
-    data_npz.save()
+    npz_file = File(npz_path, mode='w', from_dict=prod_dict)
+    npz_file.save()
 
-    assert data_npz.get('geometry').shape == (1001, 723, 3)
-    assert data_npz.get('geometry')[0][3][1] == -2.64576119977354
-    assert data_npz.get('geometry')[-1][-1][0] == -1.62420092727186
-    assert data_npz.get('energy_pot').shape == (1001,)
-    assert data_npz.get('energy_pot')[0] == -991.881189902216
-    assert data_npz.get('energy_pot')[-1] == -991.818996146108
-    assert data_npz.get('wall_potential')[0]['sphere_radius'] == 12.500003
+    assert npz_file.get('geometry').shape == (1001, 723, 3)
+    assert npz_file.get('geometry')[0][3][1] == -2.64576119977354
+    assert npz_file.get('geometry')[-1][-1][0] == -1.62420092727186
+    assert npz_file.get('energy_pot').shape == (1001,)
+    assert npz_file.get('energy_pot')[0] == -991.881189902216
+    assert npz_file.get('energy_pot')[-1] == -991.818996146108
+    assert npz_file.get('wall_potential')[0]['sphere_radius'] == 12.500003

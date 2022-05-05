@@ -54,49 +54,49 @@ def test_1h2o_120meoh_prod_sampling():
     dest = creator()
     dest.load(dest_path, mode='w', allow_remove=True)
     dest_key = '/wat.2met-pes'
-    dest.data.init_group(dest_key)
+    dest.rfile.init_group(dest_key)
 
     quantity = 100
     comp_labels = ('WAT', 'MET', 'MET')
 
     add_structures_to_group(
-        source.data, source_key, dest.data, dest_key, quantity,
+        source.rfile, source_key, dest.rfile, dest_key, quantity,
         comp_labels, center_structures=False, copy_EG=False, write=True
     )
     assert np.array_equal(
-        dest.data.get(f'{dest_key}/atomic_numbers'),
+        dest.rfile.get(f'{dest_key}/atomic_numbers'),
         np.array([8, 1, 1, 8, 1, 6, 1, 1, 1, 8, 1, 6, 1, 1, 1])
     )
     assert np.array_equal(
-        dest.data.get(f'{dest_key}/entity_ids'),
+        dest.rfile.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     )
-    assert dest.data.get(f'{dest_key}/geometry').shape == (100, 15, 3)
-    assert dest.data.get(f'{dest_key}/r_prov_specs').shape == (100, 5)
-    assert len(dest.data.get(f'{dest_key}/r_prov_ids')) == 1
-    assert dest.data.get(f'{dest_key}/r_centered') == False
+    assert dest.rfile.get(f'{dest_key}/geometry').shape == (100, 15, 3)
+    assert dest.rfile.get(f'{dest_key}/r_prov_specs').shape == (100, 5)
+    assert len(dest.rfile.get(f'{dest_key}/r_prov_ids')) == 1
+    assert dest.rfile.get(f'{dest_key}/r_centered') == False
     assert np.array_equal(
-        dest.data.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
+        dest.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
 
     add_structures_to_group(
-        source.data, source_key, dest.data, dest_key,
+        source.rfile, source_key, dest.rfile, dest_key,
         quantity, comp_labels, center_structures=True, copy_EG=False, write=True
     )
     assert np.array_equal(
-        dest.data.get(f'{dest_key}/atomic_numbers'),
+        dest.rfile.get(f'{dest_key}/atomic_numbers'),
         np.array([8, 1, 1, 8, 1, 6, 1, 1, 1, 8, 1, 6, 1, 1, 1])
     )
     assert np.array_equal(
-        dest.data.get(f'{dest_key}/entity_ids'),
+        dest.rfile.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     )
-    assert dest.data.get(f'{dest_key}/geometry').shape == (200, 15, 3)
-    assert dest.data.get(f'{dest_key}/r_prov_specs').shape == (200, 5)
-    assert len(dest.data.get(f'{dest_key}/r_prov_ids')) == 1
-    assert dest.data.get(f'{dest_key}/r_centered') == True
+    assert dest.rfile.get(f'{dest_key}/geometry').shape == (200, 15, 3)
+    assert dest.rfile.get(f'{dest_key}/r_prov_specs').shape == (200, 5)
+    assert len(dest.rfile.get(f'{dest_key}/r_prov_ids')) == 1
+    assert dest.rfile.get(f'{dest_key}/r_centered') == True
     assert np.array_equal(
-        dest.data.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
+        dest.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
 
 def test_sampling_from_wat_2met_pes():
@@ -108,22 +108,22 @@ def test_sampling_from_wat_2met_pes():
     source.load(src_path, mode='a')
     source_key = '/wat.2met-pes'
     dest_key = '/wat.met-pes'
-    source.data.init_group(dest_key)
+    source.rfile.init_group(dest_key)
 
     quantity = 100
     comp_labels = ('WAT', 'MET')
 
     add_structures_to_group(
-        source.data, source_key, source.data, dest_key,
+        source.rfile, source_key, source.rfile, dest_key,
         quantity, comp_labels, center_structures=True, copy_EG=False
     )
 
     assert np.array_equal(
-        source.data.get(f'{dest_key}/entity_ids'),
+        source.rfile.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1])
     )
-    assert len(source.data.get(f'{dest_key}/r_prov_ids')) == 1
-    assert source.data.get(f'{dest_key}/r_centered') == True
+    assert len(source.rfile.get(f'{dest_key}/r_prov_ids')) == 1
+    assert source.rfile.get(f'{dest_key}/r_centered') == True
     assert np.array_equal(
-        source.data.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
+        source.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
