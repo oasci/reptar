@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Documentation for writers.
 - Method to store arrays in ASE and schnetpack databases.
 
 ### Changed

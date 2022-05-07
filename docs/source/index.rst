@@ -72,6 +72,7 @@ You can install reptar using ``pip install reptar`` or install the latest versio
     File <file>
     Creator <creator>
     Parsers and extractors <parsers-extractors>
+    Writers <writers>
     Definitions <definitions>
     Calculators <calculators>
     Examples <examples/examples>
