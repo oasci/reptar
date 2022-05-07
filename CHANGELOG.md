@@ -4,8 +4,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Method to store arrays in ASE and schnetpack databases.
+
 ### Changed
 
+- PDB writer requires arrays instead of reptar files and group keys.
 - Rename `data` class to `File`.
 This clears up previous ambiguous usage of "data" to refer to both a file and value of a key.
 - Rename reptarWriter to textWriter (more specific).
