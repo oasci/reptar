@@ -37,15 +37,18 @@ from .paths import *
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# Source paths
+xtb_dir = './tmp/xtb'
+
 # Writing paths
-xtb_dir = './tmp/xtb/'
-os.makedirs(xtb_dir, exist_ok=True)
+sampling_dir = './tmp/sampling/'
+os.makedirs(sampling_dir, exist_ok=True)
 
 def test_1h2o_120meoh_prod_sampling():
     """Sampling from xTB MD reptar file.
     """
     source_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
-    dest_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
+    dest_path = f'{sampling_dir}/test_1h2o_120meoh_prod_sampling.exdir'
 
     source = creator()
     source.load(source_path, mode='r')
@@ -102,7 +105,7 @@ def test_1h2o_120meoh_prod_sampling():
 def test_sampling_from_wat_2met_pes():
     """Sampling from a sampled exdir group.
     """
-    src_path = './tmp/test_1h2o_120meoh_prod_sampling.exdir'
+    src_path = f'{sampling_dir}/test_1h2o_120meoh_prod_sampling.exdir'
 
     source = creator()
     source.load(src_path, mode='a')
