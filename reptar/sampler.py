@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from random import randrange, sample, choice
+from random import randrange, choice
 import itertools
 import numpy as np
 from .utils import center_structures as get_center_structures
@@ -68,14 +68,6 @@ def _initialize_structure_sampling_arrays(
     entity_ids_samples, copy_EG
 ):
     """Creates or extends arrays for sampling structures.
-
-    Parameters
-    ----------
-        
-    
-    Returns
-    -------
-
     """
     # Either creates new ones or concatenates to
     # original destination data.

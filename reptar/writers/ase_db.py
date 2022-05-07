@@ -23,7 +23,6 @@
 from ase import Atoms
 from ase.db import connect
 from ase.calculators.singlepoint import SinglePointCalculator
-import numpy as np
 
 def write_ase_db(db_path, Z, R, energy=None, forces=None):
     """Create an atomic simulation environment database.

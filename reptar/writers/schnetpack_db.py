@@ -21,7 +21,6 @@
 # SOFTWARE.
 
 from ase import Atoms
-from ase.units import eV, Angstrom
 import numpy as np
 from schnetpack import AtomsData
 from schnetpack.data.atoms import get_center_of_mass
