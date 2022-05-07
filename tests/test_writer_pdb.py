@@ -26,7 +26,7 @@ import pytest
 import os
 import numpy as np
 from reptar import File
-from reptar.writers import pdbWriter
+from reptar.writers import write_pdb
 
 import sys
 sys.path.append("..")
@@ -52,8 +52,7 @@ def test_pdb_writer_1h2o_120meoh_prod():
     R = rfile.get('prod_1/geometry')[:5]
     entity_ids = rfile.get('prod_1/entity_ids')
     comp_ids = rfile.get('prod_1/comp_ids')
-    writer = pdbWriter()
-    writer.write(
+    write_pdb(
         Z, R, entity_ids, comp_ids, file_name='prod_1',
         save_dir=writing_dir
     )
