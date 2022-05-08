@@ -31,6 +31,8 @@ def write_pdb(
 
     Parameters
     ----------
+    pdb_path : :obj:`str`
+        Path to PDB file to write.
     Z : :obj:`numpy.ndarray`
         Atomic numbers used to populate ``numbers`` in the ASE db.
     R : :obj:`numpy.ndarray`
@@ -49,10 +51,6 @@ def write_pdb(
         be ``['h2o', 'meoh']``.
     atom_type : :obj:`str`, optional
         The PDB atom type to be used. Should almost always be ``HETATM``.
-    file_name : :obj:`str`, optional
-        Name of the PDB file. Defaults to ``'structure'``.
-    save_dir : :obj:`str`, optional
-        Directory to save the PDB file. Defaults to the current directory.
     """ 
     atom_labels = [z_to_element[z] for z in Z]
 

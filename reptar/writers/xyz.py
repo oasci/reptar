@@ -23,61 +23,34 @@
 import numpy as np
 from .writing_utils import string_xyz_arrays
     
-def write_xyz_gap(
-    xyz_path, lattice, Z, R, E, F=None, lattice_precision=3, data_precision=10
+def write_xyz(
+    xyz_path, Z, R, comments=None, data_precision=10
 ):
-    """Write an extended XYZ file in the GAP format.
+    """Write standard XYZ file.
     
     Parameters
     ----------
     xyz_path : :obj:`str`
-        Path to the XYZ file to write.
-    lattice : :obj:`numpy.ndarray`
-        The three cartesian lattice vectors describing the periodic cell (in
-        Angstroms).
-        
-        All structures need a this lattice even structures are not supposed to
-        be periodic. Just use a lattice vector that is larger than twice the
-        cutoff of any potential you plan to create or use.
+        Path to XYZ file to write.
     Z : :obj:`numpy.ndarray`
         Atomic numbers of all atoms in the system.
     R : :obj:`numpy.ndarray`
         Cartesian coordinates of all structures in the same order as ``Z``.
-    E : :obj:`numpy.ndarray`
-        Energy of all structures in ``R`` in units of eV.
-    F : :obj:`numpy.ndarray`, optional
-        Atomic forces of all structures in ``R`` in units of eV/A. Defaults to
-        ``None``.
-    lattice_precision : :obj:`int`, optional
-        Number of decimal points to print for lattice dimensions. Default is
-        ``3``.
+    comments : :obj:`list`, optional
+        Comment lines for each XYZ structure.
     data_precision : :obj:`int`, optional
         Number of decimal points for printing array data. Default is ``13``.
 
     """
-    lat_str = np.array2string(
-        lattice.flatten(),
-        formatter={'float_kind':lambda x: f'%.{lattice_precision}f' % x}
-    )
-    # TODO: is pbc always T T T?
-    lat_str = 'pbc="T T T" Lattice="' + lat_str[1:-1] + '"'
-
-    prop_line = 'Properties=species:S:1:pos:R:3'
-    if F is not None:
-        prop_line += 'forces:R:3'
-    
-    e_formatter = lambda x: f'%.{data_precision}f' % x
-    
     n_atoms = len(Z)
-    F_arr = None
     with open(xyz_path, 'w') as f:
         for i in range(len(R)):
             f.write(f'{n_atoms}\n')
-            f.write(
-                ' '.join([f'energy={e_formatter(E[i])}', prop_line, lat_str]) + '\n'
-            )
-            if F is not None:
-                F_arr = F[i]
-            f.write(
-                string_xyz_arrays(Z, R[i], F_arr, precision=data_precision)
-            )
+            if comments is not None:
+                comment = comments[i]
+                if comment[-2:] != '\n':
+                    comment += '\n'
+            else:
+                comment = '\n'
+            f.write(comment)
+            f.write(string_xyz_arrays(Z, R[i], precision=data_precision))

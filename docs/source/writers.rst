@@ -33,7 +33,7 @@ GAP
 ===
 
 The Gaussian approximation potentials (GAP) code requires data in a specific extended XYZ format.
-You can use :func:`~reptar.writers.write_xyz_gap` to write these databases as shown in the example below.
+You can use :func:`~reptar.writers.write_xyz_gap` to write these files as shown in the example below.
 
 .. code-block:: python
 
@@ -63,6 +63,7 @@ You can use :func:`~reptar.writers.write_pdb` to write these files as shown in t
     from reptar.writers import write_pdb
 
     rfile_path = '1h2o_120meoh_md.exdir'
+    pdb_path = '1h2o_120meoh_md.pdb'
 
     rfile = File(rfile_path, mode='r')
     Z = rfile.get('prod_1/atomic_numbers')
@@ -70,7 +71,7 @@ You can use :func:`~reptar.writers.write_pdb` to write these files as shown in t
     entity_ids = rfile.get('prod_1/entity_ids')
     comp_ids = rfile.get('prod_1/comp_ids')
 
-    write_pdb(Z, R, entity_ids, comp_ids, file_name='prod_1')
+    write_pdb(pdb_path, Z, R, entity_ids, comp_ids)
 
 Schnetpack
 ==========
@@ -94,3 +95,22 @@ You can use :func:`~reptar.writers.write_schnetpack_db` to write these databases
     E *= 27.21138602  # eV
     
     db = write_schnetpack_db(db_path, Z, R, energy=E, centering_function=None)
+
+XYZ
+===
+
+Standard XYZ files can be written with :func:`~reptar.writers.write_xyz` as shown in the example below.
+
+.. code-block:: python
+
+    from reptar import File
+    from reptar.writers import write_xyz
+
+    rfile_path = '1h2o_120meoh_md.exdir'
+    xyz_path = '1h2o_120meoh_md.xyz'
+
+    rfile = File(rfile_path, mode='r')
+    Z = rfile.get('prod_1/atomic_numbers')
+    R = rfile.get('prod_1/geometry')
+    
+    write_xyz(xyz_path, Z, R)
