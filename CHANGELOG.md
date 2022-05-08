@@ -14,6 +14,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Upgrades to README.
 - PDB writer is now a function instead of class.
 - PDB writer requires arrays instead of reptar files and group keys.
 - Rename `data` class to `File`.

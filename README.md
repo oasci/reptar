@@ -1,6 +1,8 @@
 <h1 align="center">Reptar</h1>
 
-<h4 align="center">A tool for storing and analyzing computational chemistry data in a file-agnostic way</h4>
+<h4 align="center">A tool for storing and analyzing manuscript-scale computational chemistry data</h4>
+
+<h4 align="center" style="padding-bottom: 0.5em;"><a href="https://www.aalexmmaldonado.com/reptar/">Documentation</a></h4>
 
 <p align="center">
     <a href="https://app.travis-ci.com/github/aalexmmaldonado/reptar" target="_blank">
@@ -28,26 +30,40 @@
 
 <p align="center">
     <a href="#motivation">Motivation</a> •
-    <a href="#about">About</a> •
+    <a href="#installation">Installation</a> •
+    <a href="#file-types">File Types</a> •
+    <a href="#key-value-pairs">Key-value pairs</a> •
+    <a href="#workflow">Workflow</a> •
     <a href="#license">License</a>
 </p>
 
+<h4 align="center"><b>Disclaimer:</b> Reptar is under active development and not ready for use.</h4>
+
 # Motivation
 
-Computational chemistry is falling behind in providing open raw and processed data used to draw scientific conclusions.
-Often it is the lack of time, expertise, and options that push researchers to overlook the importance of reproducible findings.
-Projects such as [QCArchive](https://qcarchive.molssi.org/), [Materials Project](https://materialsproject.org/), [Pitt Quantum Repository](https://pqr.pitt.edu/), [ioChem-BD](https://www.iochem-bd.org/) and many others provide a rigid data framework for a specific purpose (e.g., quantum chemistry and material properties).
-In other words, data that does not directly fit into their paradigm are incompatible (for good reason).
+The computational chemistry community often fails to openly provide raw and/or processed data used to draw their scientific conclusions.
 
-Alternatively, you could use file formats such as JSON, XML, YAML, npz, etc. for a specific project.
+For large projects, frameworks such as [QCArchive](https://qcarchive.molssi.org/), [Materials Project](https://materialsproject.org/), [Pitt Quantum Repository](https://pqr.pitt.edu/), [ioChem-BD](https://www.iochem-bd.org/) and many others provide great storage solutions.
+This approach would not be practical for fluid data pipelines and small-scale projects such as a single manuscript.
+
+Alternatively, you could use individual files in formats such as JSON, XML, YAML, npz, etc.
 These are great options for customizable data storage with their own advantages and disadvantages.
 However, you often must choose between (1) a standardized parser that might not support your workflow or (2) writing your own.
 
-Reptar provides customizable parsers and data storage frameworks for whatever an individual project demands.
-Data is stored in one of the supported file types and generalized routines are used to access and store data.
-All data is stored in a key-value pair format where users can use predetermined definitions or include their own.
-Regardless if you are running nudged elastic band calculations in VASP, free energy perturbation simulations in GROMACS, or gradient calculations in Psi4, you can store data easily with reptar by selecting a parser a specifying the desired file type.
-The result is a user-specified data file streamlined for analysis in Python and optimized for archival on places such as [GitHub](https://github.com/) and [Zenodo](https://zenodo.org/).
+Reptar is designed for easy data storage and analysis for individual projects.
+Customizable parsers provide a simple way to extract new data without submitting issues and pull requests (although this is highly encouraged).
+While files are the heart of reptar, it strives to be file-type agnostic by providing the same interface for all supported file types.
+The result is a user-specified file streamlined for analysis in Python and archival on places such as [GitHub](https://github.com/) and [Zenodo](https://zenodo.org/).
+
+# Installation
+
+You can install reptar using ``pip install reptar`` or install the latest version directly from the [GitHub repository](https://github.com/aalexmmaldonado/reptar).
+
+```bash
+git clone https://github.com/aalexmmaldonado/reptar
+cd reptar
+pip install .
+```
 
 # File types
 
@@ -59,13 +75,42 @@ Exdir is a simple, yet powerful open file format that mimics the [HDF5](https://
 This provides several advantages such as mixing human-readable YAML and binary NumPy files, being easier for version control, and only loading requested portions of datasets into memory.
 For more detailed information, please read this [*Front. Neuroinform.* article about exdir](https://doi.org/10.3389/fninf.2018.00016).
 
-# Installation
+# Key-value pairs
 
-You can install reptar using ``pip install reptar`` or install the latest version directly from the [GitHub repository](https://github.com/aalexmmaldonado/reptar).
+All data is stored under a ``key``-``value`` pair within the reptar framework.
+The ``key`` tells reptar where the data is stored and is conceptually related to standard file paths (without file extensions).
+Nested data is specified by separating the nested keys with a ``/``.
+For example, ``energy_pot``, ``md_run/geometry``, and ``entity_ids`` are all valid keys.
+Note that ``gradients`` and ``/gradients`` would translate to the same value (``/`` species the "root" of the file).
 
-    git clone https://github.com/aalexmmaldonado/reptar
-    cd reptar
-    pip install .
+# Workflow
+
+## Calculation to reptar file
+
+We refer to a "reptar file" as any file that can be used with the ``reptar.File`` class.
+Creating a reptar file starts by having a set of data files generated from some calculation.
+Paths to these data files are passed into ``reptar.creator.group`` that extracts information using a ``reptar.parser`` class.
+Information parsed from these files, ``parsed_info``, is then used to populate a ``reptar.File`` object.
+
+## Reptar file data
+
+Data can be added or retrieved using the same interface regardless of the underlying file format (e.g., exdir, JSON, and npz).
+The only thing required is the respective ``key`` specifying where its stored.
+Then, ``File.add(key)`` can be used to add data to the reptar file and ``File.get(key)`` can retrieve it.
+
+When working with JSON and npz files, ``File.save()`` must be explicitly called after any modification.
+
+## Reptar file to other format
+
+Other packages often require data to be formatted in their own specific way.
+Reptar provides ways to extract data from reptar files using ``File.get(key)`` and passing it into the desired ``reptar.writer`` function.
+Reptar currently automates the creation of:
+
+- [Atomic simulation environment (ASE) databases](https://wiki.fysik.dtu.dk/ase/tutorials/tut06_database/database.html),
+- [Gaussian approximate potentials (GAP) extended XYZ files](https://libatoms.github.io/GAP/gap_fit.html#data),
+- Protein data bank (PDB) files,
+- [Schnetpack databases](https://schnetpack.readthedocs.io/en/stable/tutorials/tutorial_01_preparing_data.html),
+- XYZ files.
 
 # License
 
