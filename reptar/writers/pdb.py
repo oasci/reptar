@@ -21,11 +21,11 @@
 # SOFTWARE.
 
 import numpy as np
+import os
 from ..utils import z_to_element
     
 def write_pdb(
-    Z, R, entity_ids, comp_ids, atom_type='HETATM', file_name=None,
-    save_dir=None,
+    pdb_path, Z, R, entity_ids, comp_ids, atom_type='HETATM'
 ):
     """Write PDB file.
 
@@ -53,29 +53,16 @@ def write_pdb(
         Name of the PDB file. Defaults to ``'structure'``.
     save_dir : :obj:`str`, optional
         Directory to save the PDB file. Defaults to the current directory.
-    
-    Returns
-    -------
-    :obj:`str`
-        Path to PDB file.
     """ 
     atom_labels = [z_to_element[z] for z in Z]
-    
-    if file_name is None:
-        file_name = 'structure'
-    if save_dir is None:
-        save_dir = '.'
-    else:
-        if save_dir[-1] == '/':
-            save_dir = save_dir[:-1]
 
     num_structures = len(R)
     num_atoms = len(Z)
 
+    file_name = os.path.splitext(os.path.basename(pdb_path))[0]
     # Trims component ids to the first three letters
     comp_ids = np.array([comp_id[:3] for comp_id in comp_ids])
-    file_path = f'{save_dir}/{file_name}.pdb'
-    with open(file_path, 'w') as f:
+    with open(pdb_path, 'w') as f:
         f.write(file_name+'\n')
         f.write(f'{num_atoms}\n')  
         for i_structure in range(num_structures):
@@ -97,7 +84,3 @@ def write_pdb(
                 )
             if num_structures > 1:
                 f.write('ENDMDL\n')
-    return file_path
-            
-    
-    

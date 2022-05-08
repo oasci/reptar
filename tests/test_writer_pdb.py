@@ -45,6 +45,7 @@ os.makedirs(writing_dir, exist_ok=True)
 def test_pdb_writer_1h2o_120meoh_prod():
     """Writing short PDB file from exdir file"""
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
+    pdb_path = os.path.join(writing_dir, '1h2o_120meoh_md_prod_1.pdb')
 
     rfile = File(exdir_path, mode='r')
 
@@ -53,9 +54,7 @@ def test_pdb_writer_1h2o_120meoh_prod():
     entity_ids = rfile.get('prod_1/entity_ids')
     comp_ids = rfile.get('prod_1/comp_ids')
     write_pdb(
-        Z, R, entity_ids, comp_ids, file_name='prod_1',
-        save_dir=writing_dir
+        pdb_path, Z, R, entity_ids, comp_ids
     )
 
     # TODO: Write tests
-
