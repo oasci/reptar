@@ -24,7 +24,6 @@ import os
 import shutil
 import numpy as np
 from .parsers import parserORCA, parserXTB
-from .utils import get_md5
 from .reptar_file import File
 from pkg_resources import resource_stream
 import yaml
@@ -219,20 +218,7 @@ class creator:
                 self.rfile.add(f'{group_key}/{data_key}', data)
         
         # MD5 stuff
-        md5 = get_md5(self.rfile, group_key)
-        self.rfile.add(f'{group_key}/md5', md5)
-        
-        try:
-            md5_arrays = get_md5(self.rfile, group_key, only_arrays=True)
-            self.rfile.add(f'{group_key}/md5_arrays', md5_arrays)
-        except Exception:
-            pass
-
-        try:
-            md5_structures = get_md5(self.rfile, group_key, only_structures=True)
-            self.rfile.add(f'{group_key}/md5_structures', md5_structures)
-        except Exception:
-            pass
+        self.rfile.update_md5(group_key)
 
         # Extra stuff to do depending on package.
         if self.parser.package == 'xtb':

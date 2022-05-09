@@ -26,7 +26,7 @@ import pytest
 import os
 import numpy as np
 from reptar import creator, File
-from reptar.utils import get_md5, gen_entity_ids, gen_comp_ids
+from reptar.utils import gen_entity_ids, gen_comp_ids
 
 import sys
 sys.path.append("..")
