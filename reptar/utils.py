@@ -22,6 +22,7 @@
 
 import hashlib
 import numpy as np
+import os
 import collections.abc
 
 element_to_z = {
