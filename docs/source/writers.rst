@@ -51,6 +51,78 @@ You can use :func:`~reptar.writers.write_xyz_gap` to write these files as shown 
     
     write_xyz_gap(xyz_path, lattice, Z, R, E)
 
+GDML
+====
+
+The gradient-domain machine learning (GDML) packages (`sGDML <http://quantum-machine.org/gdml/>`_ and `mbGDML <https://keithgroup.github.io/mbGDML/>`_) require datasets to be in a npz format.
+Since reptar innately supports npz files, you just need to use the ``from_dict`` option in :class:`~reptar.File`.
+An example script is shown below.
+
+.. note::
+
+    When retrieving data from reptar files it is important to explicitly open in them ``r`` mode (to avoid accidentally overwriting data).
+    However, if unit conversions are needed from exdir files you must create an array copy: ``np.array(rfile.get(key))``.
+    Exdir uses `memory maps <https://numpy.org/doc/stable/reference/generated/numpy.memmap.html>`_ to avoid automatically loading full arrays into memory.
+    Creating an array allows you make any runtime changes (e.g., unit conversions).
+
+.. code-block:: python
+
+    import numpy as np
+    from reptar import File
+
+    hartree2kcalmol = 627.5094737775374055927342256  # Psi4 v1.5
+
+    # Loading Exdir file.
+    exdir_path = '140h2o-xtb.md-samples.exdir'
+    rfile = File(exdir_path, mode='r')
+    group_key = '3h2o'
+
+    # Getting GDML-relevant data.
+    Z = rfile.get(f'{group_key}/atomic_numbers')
+    R = rfile.get(f'{group_key}/geometry')
+    E = np.array(rfile.get(f'{group_key}/energy_ele_mp2.def2tzvp_orca'))   # Hartree
+    G = np.array(rfile.get(f'{group_key}/grads_mp2.def2tzvp_orca'))  # Hartree/A
+    entity_ids = rfile.get(f'{group_key}/entity_ids')
+    comp_ids = rfile.get(f'{group_key}/comp_ids')
+    r_prov_ids = rfile.get(f'{group_key}/r_prov_ids')
+    r_prov_specs = rfile.get(f'{group_key}/r_prov_specs')
+
+    # Unit conversions.
+    E *= hartree2kcalmol  # kcal/mol
+    G *= hartree2kcalmol  # kcal/(mol A)
+    F = -G
+
+    # Manual data.
+    r_unit = 'Angstrom'
+    e_unit = 'kcal/mol'
+    theory = 'mp2/def2tzvp'
+
+    # Specifying npz path and name.
+    npz_path = '140h2o-3h2o.sampled-mp2.def2tzvp.npz'
+    npz_name = npz_path[:-4]
+
+    # Creating the soon-to-be npz file as dictionary.
+    npz_dict = {
+        'type': 'd', 'name': npz_name, 'z': Z, 'R': R, 'r_unit': r_unit,
+        'E': E, 'e_unit': e_unit, 'F': F, 'entity_ids': entity_ids,
+        'comp_ids': comp_ids, 'theory': theory, 'r_prov_ids': r_prov_ids,
+        'r_prov_specs': r_prov_specs
+    }
+    for label,arr in zip(('E', 'F'), (E, F)):
+        npz_dict[f'{label}_min'] = np.min(arr.flatten())
+        npz_dict[f'{label}_mean'] = np.mean(arr.flatten())
+        npz_dict[f'{label}_var'] = np.var(arr.flatten())
+        npz_dict[f'{label}_max'] = np.max(arr.flatten())
+
+    # We explicitly turn everything into arrays (as specified by the npz format).
+    # This is import to avoid having reptar make r_prov_ids into a nested group.
+    for k,v in npz_dict.items():
+        npz_dict[k] = np.array(v)
+
+    # Save the npz file.
+    npz_file = File(npz_path, mode='w', from_dict=npz_dict)
+    npz_file.save()
+
 PDB
 ===
 
