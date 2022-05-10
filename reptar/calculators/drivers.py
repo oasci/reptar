@@ -28,46 +28,47 @@ class driverENGRAD:
     """Supervisor of energy+gradient workers.
 
     Creates and manages ray tasks using specified worker.
-
-    Parameters
-    ----------
-    Z : :obj:`numpy.ndarray`
-        Atomic numbers of the atoms with repsect to ``R``. Should have shape
-        ``(i,)`` where ``i`` is the number of atoms in the system.
-    R : :obj:`numpy.ndarray`
-        Cartesian coordinates of all structures in group. Should have shape
-        ``(j, i, 3)`` where ``j`` is the number of structures. Units are in
-        Angstroms.
-    E : :obj:`numpy.ndarray`
-        Total electronic energies of all structures in ``R``. Energies that need
-        to be calculated should have ``NaN`` in the element corresponding
-        to the same index in ``R``. Should have shape ``(j,)``. Units are in
-        Hartrees.
-    G : :obj:`numpy.ndarray`
-        Atomic gradients of all structures in ``R``. Gradients that need to be
-        calculated should have ``NaN`` in the corresponding elements. Should
-        have the same shape as ``R``. Units are in Hartrees/Angstroms
-    worker : ``function``
-        The desired worker function to compute energy and gradients. It should
-        be the same as any previous calculations. The ``ray.remote`` decorator
-        will be applied automatically.
-    worker_args : :obj:`tuple`
-        The other required arguments for the worker function after ``Z``,
-        ``R``, and ``R_idxs``.
-    n_cpus : :obj:`int`
-        Total number of CPUs to use for all workers (same as ``num_cpus``
-        when initalizing ray).
-    n_cpus_worker : :obj:`int`, optional
-        Number of CPUs to dedicate to each worker. Defaults to ``4``.
-    start_slice : :obj:`int`, optional
-        Trims ``R`` to start at this index.
-    end_slice : :obj:`int`, optional
-        Trims ``R`` to end at this index.
     """
     def __init__(
         self, Z, R, E, G, worker, worker_args, n_cpus, n_cpus_worker=4,
         start_slice=None, end_slice=None
     ):
+        """
+        Parameters
+        ----------
+        Z : :obj:`numpy.ndarray`, ndim: ``1``
+            Atomic numbers of the atoms with repsect to ``R``. Should have shape
+            ``(i,)`` where ``i`` is the number of atoms in the system.
+        R : :obj:`numpy.ndarray`, ndim: ``3``
+            Cartesian coordinates of all structures in group. Should have shape
+            ``(j, i, 3)`` where ``j`` is the number of structures. Units are in
+            Angstroms.
+        E : :obj:`numpy.ndarray`, ndim: ``1``
+            Total electronic energies of all structures in ``R``. Energies that need
+            to be calculated should have ``NaN`` in the element corresponding
+            to the same index in ``R``. Should have shape ``(j,)``. Units are in
+            Hartrees.
+        G : :obj:`numpy.ndarray`, ndim: ``3``
+            Atomic gradients of all structures in ``R``. Gradients that need to be
+            calculated should have ``NaN`` in the corresponding elements. Should
+            have the same shape as ``R``. Units are in Hartrees/Angstroms
+        worker : ``callable``
+            The desired worker function to compute energy and gradients. It should
+            be the same as any previous calculations. The ``ray.remote`` decorator
+            will be applied automatically.
+        worker_args : :obj:`tuple`, ndim: ``1``
+            The other required arguments for the worker function after ``Z``,
+            ``R``, and ``R_idxs``.
+        n_cpus : :obj:`int`
+            Total number of CPUs to use for all workers (same as ``num_cpus``
+            when initalizing ray).
+        n_cpus_worker : :obj:`int`, default: ``4``
+            Number of CPUs to dedicate to each worker.
+        start_slice : :obj:`int`, default: ``None``
+            Trims ``R`` to start at this index.
+        end_slice : :obj:`int`, default: ``None``
+            Trims ``R`` to end at this index.
+        """
         assert ray.is_initialized() == True
         # Check arrays (obsessively)
         assert R.ndim == 3

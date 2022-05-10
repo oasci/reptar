@@ -20,17 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Tests writing PDB files from group"""
+"""Tests writing atomic simulation environment (ASE) databases"""
 
 import pytest
 import os
 import numpy as np
 from reptar import File
-from reptar.writers import write_pdb
+from reptar.writers import write_ase_db
 
 import sys
 sys.path.append("..")
 from .paths import *
+
+hartree2ev = 27.21138602  # Psi4 v1.5
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -42,19 +44,26 @@ xtb_dir = './tmp/xtb'
 writing_dir = './tmp/writing/'
 os.makedirs(writing_dir, exist_ok=True)
 
-def test_pdb_writer_1h2o_120meoh_prod():
-    """Writing short PDB file from exdir file"""
+def test_ase_db_writer_1h2o_120meoh_prod():
+    """Writing small ASE database"""
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
-    pdb_path = os.path.join(writing_dir, '1h2o_120meoh_md_prod_1.pdb')
+    db_path = os.path.join(writing_dir, '1h2o_120meoh_md_ase.db')
+
+    if os.path.exists(db_path):
+        os.remove(db_path)
+
+    i_test = 3
 
     rfile = File(exdir_path, mode='r')
+    Z = np.array(rfile.get('prod_1/atomic_numbers'))
+    R = np.array(rfile.get('prod_1/geometry')[:10])
+    E = np.array(rfile.get('prod_1/energy_pot')[:10])  # Hartree
+    E *= hartree2ev  # eV
 
-    Z = rfile.get('prod_1/atomic_numbers')
-    R = rfile.get('prod_1/geometry')[:5]
-    entity_ids = rfile.get('prod_1/entity_ids')
-    comp_ids = rfile.get('prod_1/comp_ids')
-    write_pdb(
-        pdb_path, Z, R, entity_ids, comp_ids
-    )
+    db = write_ase_db(db_path, Z, R, energy=E)
+    row = db.get(i_test+1)
 
-    # TODO: Write tests
+    assert np.array_equal(Z, row['numbers'])
+    assert np.array_equal(R[i_test], row['positions'])
+    assert E[i_test] == row['energy']
+    assert np.array_equal(np.array([False, False, False]), row['pbc'])

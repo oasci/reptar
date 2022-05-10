@@ -20,17 +20,19 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Tests writing PDB files from group"""
+"""Tests writing schnetpack databases"""
 
 import pytest
 import os
 import numpy as np
 from reptar import File
-from reptar.writers import write_pdb
+from reptar.writers import write_schnetpack_db
 
 import sys
 sys.path.append("..")
 from .paths import *
+
+hartree2ev = 27.21138602  # Psi4 v1.5
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -42,19 +44,29 @@ xtb_dir = './tmp/xtb'
 writing_dir = './tmp/writing/'
 os.makedirs(writing_dir, exist_ok=True)
 
-def test_pdb_writer_1h2o_120meoh_prod():
-    """Writing short PDB file from exdir file"""
+def test_schnetpack_db_writer_1h2o_120meoh_prod():
+    """Writing small schnetpack database"""
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
-    pdb_path = os.path.join(writing_dir, '1h2o_120meoh_md_prod_1.pdb')
+    db_path = os.path.join(writing_dir, '1h2o_120meoh_md_schnetpack.db')
+
+    if os.path.exists(db_path):
+        os.remove(db_path)
+
+    i_test = 3
 
     rfile = File(exdir_path, mode='r')
+    # Note that we need to convert these to arrays to slice them because
+    # we open the file as readonly.
+    Z = np.array(rfile.get('prod_1/atomic_numbers'))
+    R = np.array(rfile.get('prod_1/geometry')[:10])
+    E = np.array(rfile.get('prod_1/energy_pot')[:10])  # Hartree
+    E *= hartree2ev  # eV
+    
+    db = write_schnetpack_db(db_path, Z, R, energy=E, centering_function=None)
+    row_atoms, row_props = db.get_properties(i_test)
 
-    Z = rfile.get('prod_1/atomic_numbers')
-    R = rfile.get('prod_1/geometry')[:5]
-    entity_ids = rfile.get('prod_1/entity_ids')
-    comp_ids = rfile.get('prod_1/comp_ids')
-    write_pdb(
-        pdb_path, Z, R, entity_ids, comp_ids
-    )
+    assert np.array_equal(Z, row_props['_atomic_numbers'])
+    assert E[i_test] == row_props['energy'][0]
+    assert np.array_equal(R[i_test], row_atoms.positions)
+    assert np.allclose(R[i_test], row_props['_positions'])
 
-    # TODO: Write tests

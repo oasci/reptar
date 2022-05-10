@@ -16,7 +16,7 @@ Energy and gradients
 
 Reptar provides a framework with a ray driver and premade ray task/worker functions.
 
-.. autoclass:: reptar.calculators.driverENGRAD
+.. autoclass:: reptar.calculators.drivers.driverENGRAD
     :noindex:
 
 ``worker_func`` calls the desired program and computes energies and gradients.
@@ -24,7 +24,7 @@ Reptar provides a framework with a ray driver and premade ray task/worker functi
 .. note::
 
     ``worker_func`` should not already have the ``ray.remote`` decorator.
-    This is automatically included when :class:`~reptar.calculators.engrads.driverENGRAD` is initialized.
+    This is automatically included when :class:`~reptar.calculators.drivers.driverENGRAD` is initialized.
 
 Reptar currently has a worker for `Psi4 <https://psicode.org/psi4manual/master/index.html>`_, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, and `xTB <https://xtb-docs.readthedocs.io/en/latest/contents.html>`_, :func:`~reptar.calculators.xtb_workers.xtb_engrad`. 
 
@@ -42,8 +42,8 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
 
     import numpy as np
     import ray
-    from reptar import data
-    from reptar.calculators import driverENGRAD
+    from reptar import File
+    from reptar.calculators.drivers import driverENGRAD
     from reptar.calculators.psi4_workers import psi4_engrad
 
     # Initialize ray and worker CPUs.
@@ -53,9 +53,9 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
 
     # Get exdir data.
     exdir_path = '3h2o.exdir'
-    d = data(exdir_path, mode='a')
-    Z = d.get('atomic_numbers')
-    R = d.get('geometry')
+    f = File(exdir_path, mode='a')
+    Z = f.get('atomic_numbers')
+    R = f.get('geometry')
 
     # Create energy and gradient arrays.
     E = np.empty(R.shape[0])
@@ -89,6 +89,6 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
     E, G = engrads.run()
 
     # Add data to exdir file.
-    d.add('energy_ele_mp2.ccpvtz_psi4', E)
-    d.add('grads_mp2.ccpvtz_psi4', G)
+    f.add('energy_ele_mp2.ccpvtz_psi4', E)
+    f.add('grads_mp2.ccpvtz_psi4', G)
 
