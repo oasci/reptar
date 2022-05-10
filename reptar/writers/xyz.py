@@ -32,14 +32,14 @@ def write_xyz(
     ----------
     xyz_path : :obj:`str`
         Path to XYZ file to write.
-    Z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of all atoms in the system.
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in the same order as ``Z``.
-    comments : :obj:`list`, optional
+    comments : :obj:`list`, default: ``None``
         Comment lines for each XYZ structure.
-    data_precision : :obj:`int`, optional
-        Number of decimal points for printing array data. Default is ``13``.
+    data_precision : :obj:`int`, default: ``10``
+        Number of decimal points for printing array data.
 
     """
     n_atoms = len(Z)

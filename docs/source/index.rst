@@ -121,8 +121,9 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Creator <creator>
     Parsers and extractors <parsers-extractors>
     Writers <writers>
-    Definitions <definitions>
+    Sampling <sampling>
     Calculators <calculators>
+    Definitions <definitions>
     Examples <examples/examples>
     API <doc/modules>
     Contributing <contributing>

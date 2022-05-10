@@ -51,6 +51,9 @@ intersphinx_mapping = {
     'numpy': ('https://numpy.org/doc/stable/', None)
 }
 
+# Include __init__ docstring for classes
+autoclass_content = 'both'
+
 # -- Options for HTML output -------------------------------------------------
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for

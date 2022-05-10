@@ -149,7 +149,7 @@ def _generate_structure_samples(
     quantity : :obj:`int` or :obj:`float`
         Number of structures to sample from the structure set. For example,
         ``'100'``, ``452``, or even ``'all'``.
-    structure_idxs : :obj:`numpy.ndarray`
+    structure_idxs : :obj:`numpy.ndarray`, ndim: ``1``
         Indices of source structures we can sample from.
     entity_ids_samples : :obj:`tuple` (:obj:`tuple`)
         A nested tuple containing all possible entity selections for all desired

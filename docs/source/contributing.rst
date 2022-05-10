@@ -77,13 +77,15 @@ Ready to contribute? Here's how to set up ``reptar`` for local development.
 
     $ pytest
 
-6. Commit your changes and push your branch to GitHub::
+6. Add a description of the changes in the ``CHANGELOG.md``.
+
+7. Commit your changes and push your branch to GitHub::
 
     $ git add .
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-bugfix-or-feature
 
-7. Submit a pull request through the GitHub website.
+8. Submit a pull request through the GitHub website.
 
 Pull Request Guidelines
 =======================
@@ -95,16 +97,3 @@ Before you submit a pull request, check that it meets these guidelines:
    Put your new functionality into a function with a docstring, and add the feature to the list in ``CHANGELOG.md``.
 3. The pull request should work for Python 3.9.
    Check app.travis-ci.com/github/aalexmmaldonado/reptar/pull_requests and make sure that the tests pass for all supported Python versions.
-
-Deploying
-=========
-
-A reminder for the maintainers on how to deploy.
-Make sure all your changes are committed (including an entry in HISTORY.rst).
-Then run::
-
-$ bump2version patch # possible: major / minor / patch
-$ git push
-$ git push --tags
-
-Travis will then deploy to PyPI if tests pass.

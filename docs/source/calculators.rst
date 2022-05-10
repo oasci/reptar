@@ -16,7 +16,7 @@ Energy and gradients
 
 Reptar provides a framework with a ray driver and premade ray task/worker functions.
 
-.. autoclass:: reptar.calculators.driverENGRAD
+.. autoclass:: reptar.calculators.drivers.driverENGRAD
     :noindex:
 
 ``worker_func`` calls the desired program and computes energies and gradients.
@@ -24,7 +24,7 @@ Reptar provides a framework with a ray driver and premade ray task/worker functi
 .. note::
 
     ``worker_func`` should not already have the ``ray.remote`` decorator.
-    This is automatically included when :class:`~reptar.calculators.engrads.driverENGRAD` is initialized.
+    This is automatically included when :class:`~reptar.calculators.drivers.driverENGRAD` is initialized.
 
 Reptar currently has a worker for `Psi4 <https://psicode.org/psi4manual/master/index.html>`_, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, and `xTB <https://xtb-docs.readthedocs.io/en/latest/contents.html>`_, :func:`~reptar.calculators.xtb_workers.xtb_engrad`. 
 
@@ -43,7 +43,7 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
     import numpy as np
     import ray
     from reptar import File
-    from reptar.calculators import driverENGRAD
+    from reptar.calculators.drivers import driverENGRAD
     from reptar.calculators.psi4_workers import psi4_engrad
 
     # Initialize ray and worker CPUs.

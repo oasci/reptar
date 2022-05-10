@@ -33,23 +33,23 @@ def write_pdb(
     ----------
     pdb_path : :obj:`str`
         Path to PDB file to write.
-    Z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers used to populate ``numbers`` in the ASE db.
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates used to populate ``positions`` in the ASE db.
-    entity_ids : :obj:`numpy.ndarray`
+    entity_ids : :obj:`numpy.ndarray`, ndim: ``1``
         A uniquely identifying integer specifying what atoms belong to
         which entities. Entities can be a related set of atoms, molecules,
         or functional group. For example, a water and methanol molecule
         could be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
-    comp_ids : :obj:`numpy.ndarray`
+    comp_ids : :obj:`numpy.ndarray`, ndim: ``1``
         Relates ``entity_id`` to a fragment label for chemical components
         or species. Labels could be ``WAT`` or ``h2o`` for water, ``MeOH``
         for methanol, ``bz`` for benzene, etc. There are no standardized
         labels for species. The index of the label is the respective
         ``entity_id``. For example, a water and methanol molecule could
         be ``['h2o', 'meoh']``.
-    atom_type : :obj:`str`, optional
+    atom_type : :obj:`str`, default: ``'HETATM'``
         The PDB atom type to be used. Should almost always be ``HETATM``.
     """ 
     atom_labels = [z_to_element[z] for z in Z]

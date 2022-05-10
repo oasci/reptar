@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Quick documentation for sampler.
 - Example script for GDML npz files.
 - Writer for standard XYZ files with optional comments.
 - Writer for extended XYZ files used in the Gaussian approximation potentials
@@ -15,6 +16,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Specify array dimensions in docstrings.
+- Do not import every submodule in reptar.
+That way, optional calculation dependencies are not required when importing reptar.
 - Upgrades to README.
 - PDB writer is now a function instead of class.
 - PDB writer requires arrays instead of reptar files and group keys.

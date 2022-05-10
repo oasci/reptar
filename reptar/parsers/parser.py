@@ -24,13 +24,6 @@ from abc import ABC, abstractmethod
 
 class parser(ABC):
     """Base class for parsing output files.
-
-    Parameters
-    ----------
-    out_path : :obj:`str`
-        Path to output file.
-    extractors : :obj:`list`
-        Additional extractors for the parser to use.
     
     Attributes
     ----------
@@ -41,6 +34,14 @@ class parser(ABC):
     """
 
     def __init__(self, out_path, extractors):
+        """
+        Parameters
+        ----------
+        out_path : :obj:`str`
+            Path to output file.
+        extractors : :obj:`list`, ndim: ``1``
+            Additional extractors for the parser to use.
+        """
         self.out_path = out_path
         self.file_name = '.'.join(self.out_path.split('/')[-1].split('.')[:-1])
         self.parsed_info = {
@@ -138,7 +139,7 @@ class parser(ABC):
                         pass
     
     def map_cclib_data(self):
-        """
+        """Assign cclib-parsed data to our ``parsed_info`` dictionary.
         """
         parsed_info = self.parsed_info
         cclib_data = self.cclib_data

@@ -446,7 +446,7 @@ class File:
         key : :obj:`str`
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
-        data
+        data : ``obj``
             Data to add to file.
         """
         key = self.clean_key(key)

@@ -20,10 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import collections.abc
 import hashlib
 import numpy as np
 import os
-import collections.abc
 
 element_to_z = {
     'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9,
@@ -77,7 +77,7 @@ def get_files(path, expression, recursive=True):
         Specifies the directory to search.
     expression : :obj:`str`
         Expression to be tested against all file names in ``path``.
-    recursive : :obj:`bool`, optional
+    recursive : :obj:`bool`, default: ``True``
         Recursively find all files in all subdirectories.
     
     Returns
@@ -197,11 +197,11 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
         A reptar file.
     group_key : :obj:`str`
         Key to the desired group.
-    only_arrays : :obj:`bool`, optional
+    only_arrays : :obj:`bool`, default: ``False``
         Generate the MD5 hash using only arrays. This creates a data-centered
         MD5 that is not affected by data that are commonly added or
         changed. Defaults to ``False``.
-    only_structures : :obj:`bool`, optional
+    only_structures : :obj:`bool`, default: ``False``
         Generate the MD5 has with only ``atomic_numbers`` and ``geometry``
         if possible). This is more static than ``only_arrays`` and should be
         used to track sampling (i.e., ``r_prov_ids``).
@@ -313,9 +313,9 @@ def center_structures(Z, R):
 
     Parameters
     ----------
-    Z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of the atoms in every structure.
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian atomic coordinates of data set structures.
     
     Returns

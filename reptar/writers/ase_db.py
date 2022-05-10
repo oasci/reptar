@@ -33,15 +33,14 @@ def write_ase_db(db_path, Z, R, energy=None, forces=None):
     ----------
     db_path : :obj:`str`
         Path to atomic simulation environment database.
-    Z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers used to populate ``numbers`` in the ASE db.
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates used to populate ``positions`` in the ASE db.
-    energy : :obj:`numpy.ndarray`, optional
-        Energies to population ``energy`` in the ASE db. Defaults to ``None``.
-    forces : :obj:`numpy.ndarray`, optional
-        Atomic forces to populate ``forces`` in the ASE db. Defaults to
-        ``None``.
+    energy : :obj:`numpy.ndarray`, ndim: ``1``, default: ``None``
+        Energies to population ``energy`` in the ASE db.
+    forces : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
+        Atomic forces to populate ``forces`` in the ASE db.
     
     Returns
     -------

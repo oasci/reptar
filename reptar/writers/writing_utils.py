@@ -28,17 +28,17 @@ def string_xyz_arrays(Z, R, *args, precision=10):
 
     Parameters
     ----------
-    Z : :obj:`numpy.ndarray`, int, ndim=1
+    Z : :obj:`numpy.ndarray`, ndim=1
         Atomic numbers of all atoms in the system.
-    R : :obj:`numpy.ndarray`, float, ndim=2
+    R : :obj:`numpy.ndarray`, ndim=2
         Cartesian coordinates of all atoms in the same order as ``Z``.
     args
         Other :obj:`numpy.ndarray` (ndim>=1) to add where it's assumed the
         zero axis is with respect to ``R``. For example, if we have atomic
         forces the array shape would be ``(n, 3)`` where ``n`` is the number of
         atoms in the structure.
-    precision : :obj:`int`, optional
-        Number of decimal points for printing array data. Defaults to ``13``.
+    precision : :obj:`int`, default: ``10``
+        Number of decimal points for printing array data.
     
     Returns
     -------

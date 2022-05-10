@@ -37,19 +37,21 @@ def write_schnetpack_db(
     ----------
     db_path : :obj:`str`
         Path to schnetpack database.
-    Z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers used to populate ``numbers`` in the ASE db.
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates used to populate ``positions`` in the ASE db.
-    energy : :obj:`numpy.ndarray`, optional
+    energy : :obj:`numpy.ndarray`, ndim: ``1``, default: ``None``
         Energies to add to database in eV.
-    forces : :obj:`numpy.ndarray`, optional
+    forces : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
         Atomic forces to add to database in eV/A.
-    e_units : :obj:`float`, optional
-        Units of energy using ``ase.units``. Defaults to eV (``1.0``).
-    f_units : :obj:`float`, optional
-        Units of forces using ``ase.units``. Defaults to eV/Ang (``1.0``).
-    centering_function : ``callable``, optional
+    e_units : :obj:`float`, default: ``1.0``
+        Units of energy using ``ase.units``. Essentially the conversion factor
+        to eV.
+    f_units : :obj:`float`, default: ``1.0``
+        Units of forces using ``ase.units``. Essentially the conversion factor
+        to eV/A.
+    centering_function : ``callable``, default: schnetpack.data.atoms.get_center_of_mass``
         A function for centering the ``positions`` when querying the database.
         Defaults to centering the structure according to the center of mass.
         Set to ``None`` for no centering.

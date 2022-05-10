@@ -31,25 +31,24 @@ def xtb_engrad(
 
     Parameters
     ----------
-    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`
+    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of the atoms with repsect to ``R``.
-    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`
+    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
-    R_idxs : :obj:`numpy.ndarray`
+    R_idxs : :obj:`numpy.ndarray`, ndim: ``1``
         Indices of the structures from ``R`` to compute energies and gradients
         for.
     charge : :obj:`int`
         Total molecular charge.
     mult : :obj:`int`
         Total multiplicity.
-    calc_acc : :obj:`str`, optional
+    calc_acc : :obj:`int`, default: ``0.1``
         Numerical accuracy for calculation. For more information, visit the
         `documentation <https://xtb-python.readthedocs.io/en/latest\
         /general-api.html#xtb.interface.Calculator.set_accuracy>`_.
-        Defaults to ``0.1``.
-    params, optional
-        xTB parameters. Defaults to ``Param.GFN2xTB``.
+    params : default: ``xtb.interface.Param.GFN2xTB
+        xTB parameters.
     
     Returns
     -------
