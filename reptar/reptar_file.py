@@ -20,36 +20,34 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-import numpy as np
-import json
 import exdir
-import cclib
-from .utils import combine_dicts
+import json
+import numpy as np
+import os
+from .utils import combine_dicts, get_md5
 
-class data:
+class File:
     """Create, store, and access data from a variety of formats.
-
-    Parameters
-    ----------
-    file_path : :obj:`str`
-        Path to a file supported by reptar. If it does not exist, then one will
-        be created if possible.
-    mode : :obj:`str`, optional
-        A file mode string that defines the read/write behavior. Defaults to
-        ``'r'``.
-    allow_remove : :obj:`bool`, optional
-        Allow the removal of exdir groups in ``w`` operation. Defaults to
-        ``False``.
-    plugins : :obj:`list`, optional
-        A list of instantiated exdir plugins. Defaults to ``None``.
-    from_dict : :obj:`dict`, optional
-        Load data from a dictionary.
     """
 
     def __init__(self, file_path, mode='r', allow_remove=False,
         plugins=None, from_dict=None
     ):
+        """
+        Parameters
+        ----------
+        file_path : :obj:`str`
+            Path to a file supported by reptar. If it does not exist, then one will
+            be created if possible.
+        mode : :obj:`str`, default: ``'r'``
+            A file mode string that defines the read/write behavior.
+        allow_remove : :obj:`bool`, default: ``False``
+            Allow the removal of exdir groups in ``'w'`` operation.
+        plugins : :obj:`list`, default: ``None``
+            A list of instantiated exdir plugins.
+        from_dict : :obj:`dict`, default: ``None``
+            Load data from a dictionary.
+        """
         if from_dict is None:
             self._from_path(
                 file_path, mode, allow_remove, plugins
@@ -62,82 +60,78 @@ class data:
     def _from_path(
         self, file_path, mode, allow_remove, plugins
     ):
-        """Populates the data object from a file path.
+        """Populates the File object from a file path.
 
         Parameters
         ----------
         file_path : :obj:`str`
             Path to a file supported by reptar. If it does not exist, then one will
             be created if possible.
-        mode : :obj:`str`, optional
-            A file mode string that defines the read/write behavior. Defaults to
-            ``'r'``.
-        allow_remove : :obj:`bool`, optional
-            Allow the removal of exdir groups in ``w`` operation. Defaults to
-            ``False``.
-        plugins : :obj:`list`, optional
-            A list of instantiated exdir plugins. Defaults to ``None``.
+        mode : :obj:`str`, default: ``'r'``
+            A file mode string that defines the read/write behavior.
+        allow_remove : :obj:`bool`, default: ``False``
+            Allow the removal of exdir groups in ``'w'`` operation.
+        plugins : :obj:`list`, default: ``None``
+            A list of instantiated exdir plugins.
         """
         exists = os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
 
         if f_ext == '.exdir':
-            File = exdir.File(
+            File_ = exdir.File(
                 file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json':
             if exists:
                 with open(file_path, 'r') as f:
-                    File = json.load(f)
+                    File_ = json.load(f)
             else:
-                File = {}
+                File_ = {}
         elif f_ext == '.npz':
             if exists:
-                File = dict(np.load(file_path, allow_pickle=True))
+                File_ = dict(np.load(file_path, allow_pickle=True))
                 # Since everything is stored in arrays, we clean up array data.
-                for k,v in File.items():
+                for k,v in File_.items():
                     if self._is_iter(v):
                         v = self.simplify_iter_data(v)
-                        File[k] = v
+                        File_[k] = v
             else:
-                File = {}
+                File_ = {}
         else:
             raise TypeError(f'{f_ext} is not supported.')
         
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
-        self.File = File
+        self.File_ = File_
     
     def _from_dict(
         self, file_path, group_dict, mode, allow_remove, plugins
     ):
-        """Populates the data object from a dictionary.
+        """Populates the File object from a dictionary.
 
         Parameters
         ----------
-        file_path : :obj`str`
+        file_path : :obj:`str`
             Path to a file supported by reptar. If it does not exist, then one
             will be created if possible.
-        group_dict : :obj:`str`
-            Dictionary to populate the data object with.
-        mode : :obj:`str`, optional
-            A file mode string that defines the read/write behavior. Defaults to
-            ``'r'``.
-        allow_remove : :obj:`bool`, optional
-            Allow the removal of exdir groups in ``w`` operation. Defaults to
-            ``False``.
-        plugins : :obj:`list`, optional
-            A list of instantiated exdir plugins. Defaults to ``None``.
+        group_dict : :obj:`dict`
+            Dictionary to populate the File object with.
+        mode : :obj:`str`, default: ``'r'``
+            A file mode string that defines the read/write behavior.
+        allow_remove : :obj:`bool`, default: ``False``
+            Allow the removal of exdir groups in ``'w'`` operation.
+        plugins : :obj:`list`, default: ``None``
+            A list of instantiated exdir plugins.
         """
         _, f_ext = os.path.splitext(file_path)
         
         if f_ext == '.exdir':
-            self.File = exdir.File(
+            self.File_ = exdir.File(
                 file_path, mode, allow_remove, plugins
             )
         elif f_ext == '.json' or f_ext == '.npz':
-            self.File = {}
+            self.File_ = {}
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
@@ -149,6 +143,8 @@ class data:
     
     def clean_key(self, key):
         """Clean key and remove any common mistakes.
+
+        Currently this only corrects instances of ``//``.
         
         Parameters
         ----------
@@ -193,15 +189,19 @@ class data:
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
+        
+        Returns
+        -------
+        Requested data from a dictionary source.
         """
         if key == '/':
-            return self.File
+            return self.File_
         
         keys = key.split('/')
         if keys[0] == '':
             del keys[0]
         
-        data = self.File[keys[0]]
+        data = self.File_[keys[0]]
         for k in keys[1:]:
             data = data[k]
         if isinstance(data, list):
@@ -217,12 +217,16 @@ class data:
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
+        
+        Returns
+        -------
+        Requested data from a exdir source.
         """
         if key == '/':
-            return self.File
+            return self.File_
         
         key_parent, key_data = self.split_key(key)
-        parent = self.File[key_parent]
+        parent = self.File_[key_parent]
         if key_data in list(parent):
             data = parent[key_data]
             if isinstance(data, exdir.core.dataset.Dataset):
@@ -275,9 +279,9 @@ class data:
         
         Examples
         --------
-        >>> data.get('/prod_1/charge')
+        >>> rfile.get('/prod_1/charge')
         0
-        >>> data.get('energy_scf')
+        >>> rfile.get('energy_scf')
         -12419.360138637763
         """
         key = self.clean_key(key)
@@ -293,6 +297,7 @@ class data:
         Returns
         -------
         :obj:`bool`
+            If the data is iterative.
         """
         if isinstance(data, np.ndarray) or isinstance(data, list) or isinstance(data, tuple):
             return True
@@ -316,6 +321,11 @@ class data:
         ----------
         data : :obj:`numpy.ndarray`, :obj:`list`, :obj:`tuple`
             An iterative data object.
+        
+        Returns
+        -------
+        ``obj``
+            Simplified data (if possible).
         """
         # If data is a list we check the types of data it contains.
         # If all of them are strings, we do not convert to array.
@@ -373,7 +383,7 @@ class data:
         for key in reversed(keys[:-1]):
             add_dic = {key: add_dic}
 
-        self.File = combine_dicts(self.File, add_dic)
+        self.File_ = combine_dicts(self.File_, add_dic)
     
     def _add_to_exdir(self, key, data):
         """Add data to an exdir group.
@@ -429,14 +439,14 @@ class data:
         """Add data to file.
 
         Note that there is some data postprocessing using
-        :meth:`~reptar.data.data.simplify_iter_data`.
+        :meth:`~reptar.reptar_file.File.simplify_iter_data`.
 
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
-        data
+        data : ``obj``
             Data to add to file.
         """
         key = self.clean_key(key)
@@ -505,6 +515,29 @@ class data:
                 group_dict[d_key] = self.get(g_key)
             return group_dict
     
+    def update_md5(self, group_key):
+        """Update all possible MD5 hashes of a specific group.
+
+        Parameters
+        ----------
+        group_key : :obj:`str`
+            Desired group.
+        """
+        md5 = get_md5(self, group_key)
+        self.add(f'{group_key}/md5', md5)
+        
+        try:
+            md5_arrays = get_md5(self, group_key, only_arrays=True)
+            self.add(f'{group_key}/md5_arrays', md5_arrays)
+        except Exception:
+            pass
+
+        try:
+            md5_structures = get_md5(self, group_key, only_structures=True)
+            self.add(f'{group_key}/md5_structures', md5_structures)
+        except Exception:
+            pass
+    
     def save(self, json_prettify=True):
         """Saves non-exdir files.
 
@@ -515,21 +548,22 @@ class data:
             line.
         """
         assert self.fmode == 'w'
+        from cclib.io.cjsonwriter import JSONIndentEncoder, NumpyAwareJSONEncoder
         if self.ftype == 'json':
-            json_dict = self.File
+            json_dict = self.File_
 
             if json_prettify:
                 json_string = json.dumps(
-                    json_dict, cls=cclib.io.cjsonwriter.JSONIndentEncoder,
+                    json_dict, cls=JSONIndentEncoder,
                     sort_keys=True, indent=4
                 )
             else:
                 json_string = json.dumps(
-                    json_dict, cls=cclib.io.cjsonwriter.NumpyAwareJSONEncoder,
+                    json_dict, cls=NumpyAwareJSONEncoder,
                     sort_keys=True
                 )
             with open(self.fpath, 'w') as f:
                 f.write(json_string)
         elif self.ftype == 'npz':
-            npz_dict = self.File
+            npz_dict = self.File_
             np.savez_compressed(self.fpath, **npz_dict)

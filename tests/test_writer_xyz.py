@@ -20,11 +20,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import os
-import shutil
+"""Tests writing XYZ files"""
 
-def pytest_sessionstart(session):  # pytest_configure(config)
-    """Creates a tmp directory for writing files."""
-    path = './tests/tmp'
-    if not os.path.exists(path):
-        os.makedirs(path)
+import pytest
+import os
+import numpy as np
+from reptar import File
+from reptar.writers import write_xyz
+
+import sys
+sys.path.append("..")
+from .paths import *
+
+# Ensures we execute from file directory (for relative paths).
+os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
+# Source paths
+xtb_dir = './tmp/xtb'
+
+# Writing paths
+writing_dir = './tmp/writing/'
+os.makedirs(writing_dir, exist_ok=True)
+
+def test_xyz_gap_writer_1h2o_120meoh_prod():
+    """Writing short XYZ file from exdir file"""
+    exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
+    xyz_path = os.path.join(writing_dir, '1h2o_120meoh_md.xyz')
+
+    rfile = File(exdir_path, mode='r')
+
+    Z = rfile.get('prod_1/atomic_numbers')
+    R = rfile.get('prod_1/geometry')[:5]
+    write_xyz(xyz_path, Z, R)
+
+    # TODO: Write tests

@@ -310,8 +310,8 @@ class extractorORCA(extractor):
         while '-     ORCA property calculations      *' != line.strip():
             # Freezing NCore=10 chemical core electrons
             if 'Freezing NCore=' == line.strip()[:15]:
-                # if 'ele_frozen' not in self.data['keywords'].keys():
-                #     self.data['outputs']['ele_frozen'] = []
+                # if 'ele_frozen' not in self.rfile['keywords'].keys():
+                #     self.rfile['outputs']['ele_frozen'] = []
                 ele_frozen = int(line.split()[1][6:])
                 self.parsed_info['outputs']['ele_frozen'] = ele_frozen
 
@@ -565,8 +565,8 @@ class extractorORCA(extractor):
         # Appends Mulliken charges to a new item for every structure.
         # self.parsed_info['outputs']['mulliken_charges'].append([])
         while 'Sum of atomic charges' not in line:
-            line_split = line.split(':')
             """
+            line_split = line.split(':')
             self.parsed_info['outputs']['mulliken_charges'][-1].append(
                 float(line_split[-1])
             )
@@ -604,8 +604,8 @@ class extractorORCA(extractor):
         # Appends Loewdin charges to a new item for every structure.
         # self.parsed_info['outputs']['loewdin_charges'].append([])
         while '' != line.strip():
-            line_split = line.split(':')
             """
+            line_split = line.split(':')
             self.parsed_info['outputs']['loewdin_charges'][-1].append(
                 float(line_split[-1])
             )
@@ -644,8 +644,8 @@ class extractorORCA(extractor):
         while 'Total Dipole Moment    :' not in line:
             line = next(f)
         line_split = line.split()
-        dipole = [float(line_split[4]), float(line_split[5]), float(line_split[6])]
-        #self.parsed_info['outputs']['dipole_moment'].append(dipole)
+        # dipole = [float(line_split[4]), float(line_split[5]), float(line_split[6])]
+        # self.parsed_info['outputs']['dipole_moment'].append(dipole)
 
     
     def _add_geo_conv(self, info_label, line):
@@ -818,9 +818,8 @@ class extractorORCA(extractor):
             self.parsed_info['outputs']['temp_thermochem'] = []
         temp = float(line.split()[2])
         self.parsed_info['outputs']['temp_thermochem'].append(temp)
-        # Needs to move off this line so extract can continue.
-        line = next(f)
-
+        next(f)
+    
     
     def zpve(self, f, line):
         """Extract zero-point vibrational energy correction.
@@ -871,7 +870,7 @@ class extractorORCA(extractor):
             self.parsed_info['outputs']['correc_thermal'] = []
         thermal = float(line.split()[3])
         self.parsed_info['outputs']['correc_thermal'].append(thermal)
-        line = next(f)  # Needs to move off this line so extract can continue.
+        next(f)
 
     
     def enthalpic_corr(self, f, line):
@@ -897,7 +896,7 @@ class extractorORCA(extractor):
             self.parsed_info['outputs']['correc_enthalpy'] = []
         enthalpy = float(line.split()[4])
         self.parsed_info['outputs']['correc_enthalpy'].append(enthalpy)
-        line = next(f)  # Needs to move off this line so extract can continue.
+        next(f)
 
     
     def entropic_corr(self, f, line):
@@ -923,6 +922,5 @@ class extractorORCA(extractor):
             self.parsed_info['outputs']['correc_entropy'] = []
         entropy = float(line.split()[4])
         self.parsed_info['outputs']['correc_entropy'].append(entropy)
-        # Needs to move off this line so extract can continue.
-        line = next(f)
+        next(f)
 

@@ -67,7 +67,7 @@ class extractorXTB(extractor):
         line_split = line.split()
         version = line_split[3]
         self.parsed_info['runtime_info']['prov_version'] = version
-        line = next(f)
+        next(f)
     
     def run_type(self, f, line):
         """Calculation type (e.g., opt, sp, grad).
@@ -98,7 +98,7 @@ class extractorXTB(extractor):
         elif '--omd' in line or '--md' in line:
             driver = 'molecular_dynamics'
         self.parsed_info['runtime_info']['calc_driver'] = driver
-        line = next(f)
+        next(f)
     
     def n_electrons(self, f, line):
         """Total number of electrons.
@@ -199,8 +199,7 @@ class extractorXTB(extractor):
         while '$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$' not in line:
             if '-> sphere:' == line[:10]:
                 shape_type = line.split(':')[0].split(' ')[1]
-                line = next(f)
-                line = next(f)
+                line = self.skip_lines(f, 2)
                 atoms_constrained = ''
                 while 'spherical wallpotenial' != line[:22]:
                     line_split = line.strip().split()
@@ -214,6 +213,7 @@ class extractorXTB(extractor):
                 sphere_radius = float(line.split()[-2])
                 pots.append(
                     {
+                        'pot_type': pot_type,
                         'shape': shape_type,
                         'sphere_radius': sphere_radius,
                         'atoms_constrained': atoms_constrained,

@@ -20,23 +20,37 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from abc import ABC, abstractmethod
-
-class reptarWriter(ABC):
-    """Base class for parsing output files.
-
+import numpy as np
+from .writing_utils import string_xyz_arrays
+    
+def write_xyz(
+    xyz_path, Z, R, comments=None, data_precision=10
+):
+    """Write standard XYZ file.
+    
     Parameters
     ----------
-    out_path : :obj:`str`
-        Path to output file.
-    
-    Attributes
-    ----------
-    group : ``group``
-        Path to output file.
-    """
+    xyz_path : :obj:`str`
+        Path to XYZ file to write.
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
+        Atomic numbers of all atoms in the system.
+    R : :obj:`numpy.ndarray`, ndim: ``3``
+        Cartesian coordinates of all structures in the same order as ``Z``.
+    comments : :obj:`list`, default: ``None``
+        Comment lines for each XYZ structure.
+    data_precision : :obj:`int`, default: ``10``
+        Number of decimal points for printing array data.
 
-    def __init__(self):
-        pass
-    
-    
+    """
+    n_atoms = len(Z)
+    with open(xyz_path, 'w') as f:
+        for i in range(len(R)):
+            f.write(f'{n_atoms}\n')
+            if comments is not None:
+                comment = comments[i]
+                if comment[-2:] != '\n':
+                    comment += '\n'
+            else:
+                comment = '\n'
+            f.write(comment)
+            f.write(string_xyz_arrays(Z, R[i], precision=data_precision))

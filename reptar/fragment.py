@@ -32,11 +32,11 @@ def pairwise_distance(R, cutoff=1.5, num_frags=None):
 
     Parameters
     ---------
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``2``
         Cartesian coordinates of all atoms in the system in Angstroms.
-    cutoff : :obj:`float`
+    cutoff : :obj:`float`, default: ``1.5``
         Atoms within this distance is group together in a fragment.
-    num_frags : :obj:`int`, optional
+    num_frags : :obj:`int`, default: ``None``
         Known number of fragments in structure.
     
     Returns
