@@ -123,6 +123,7 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Writers <writers>
     Sampling <sampling>
     Calculators <calculators>
+    Many-body expansion <many-body-expansion>
     Definitions <definitions>
     Examples <examples/examples>
     API <doc/modules>
