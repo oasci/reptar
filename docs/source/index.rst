@@ -124,6 +124,7 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Sampling <sampling>
     Calculators <calculators>
     Many-body expansion <many-body-expansion>
+    Descriptors <descriptors>
     Definitions <definitions>
     Examples <examples/examples>
     API <doc/modules>

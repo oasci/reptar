@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Simple structural descriptors.
 - Add or remove many-body contributions based on sampled structures.
 - Quick documentation for sampler.
 - Example script for GDML npz files.
