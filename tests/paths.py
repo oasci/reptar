@@ -73,3 +73,13 @@ def get_1h2o_120meoh_prod_paths():
 def get_1h2o_120meoh_exdir_path():
     dir_path = path_xtb_641_md + '/1h2o.120meoh.pm.gfn2.exdir'
     return dir_path
+
+################
+###   Data   ###
+################
+
+path_data = './data'
+
+def get_140h2o_samples_path():
+    exdir_path = os.path.join(path_data, '140h2o-xtb.md-samples.exdir')
+    return exdir_path
