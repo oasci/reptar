@@ -145,7 +145,7 @@ def mb_worker(
             # Adding or removing energy contributions.
             E[i] += E_lower[i_r_lower]
             
-            # Adding or removing gradient contributions.
+            # Adding or removing derivative contributions.
             # We have to determine the corresponding atom indices of both the
             # reference and lower-order structure.
             # This is done by matching the entity_id_prov between the two r_prov_specs.
@@ -212,10 +212,11 @@ def mb_contributions(
     entity_ids_lower, r_prov_ids_lower, r_prov_specs_lower, operation='remove',
     n_workers=1
 ):
-    """Adds or removes energy and gradient contributions from a reference.
+    """Adds or removes energy and derivative (i.e., gradients or forces)
+    contributions from a reference.
 
     We use the term "lower" to refer to the lower-order (i.e., smaller) systems.
-    These are the energy and gradient contributions to remove or add to a
+    These are the energy and derivative contributions to remove or add to a
     reference.
 
     Parameters
@@ -269,7 +270,7 @@ def mb_contributions(
     :obj:`numpy.ndarray`
         Energies with lower-order contributions added or removed.
     :obj:`numpy.ndarray`
-        Gradients with lower-order contributions added or removed.
+        Derivatives with lower-order contributions added or removed.
     """
     if operation != 'add' and operation != 'remove':
         raise ValueError(f'{operation} is not "add" or "remove".')
