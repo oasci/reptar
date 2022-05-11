@@ -34,9 +34,9 @@ def write_pdb(
     pdb_path : :obj:`str`
         Path to PDB file to write.
     Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers used to populate ``numbers`` in the ASE db.
+        Atomic numbers.
     R : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian coordinates used to populate ``positions`` in the ASE db.
+        Cartesian coordinates.
     entity_ids : :obj:`numpy.ndarray`, ndim: ``1``
         A uniquely identifying integer specifying what atoms belong to
         which entities. Entities can be a related set of atoms, molecules,
