@@ -271,7 +271,7 @@ def mb_contributions(
     :obj:`numpy.ndarray`
         Gradients with lower-order contributions added or removed.
     """
-    if operation != 'add' or operation != 'remove':
+    if operation != 'add' and operation != 'remove':
         raise ValueError(f'{operation} is not "add" or "remove".')
     
     # Checks that the r_prov_md5 hashes match the same r_prov_id
