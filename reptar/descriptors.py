@@ -85,7 +85,7 @@ def max_atom_pair_dist(Z, R):
 
     Returns
     -------
-    :obj:`float`
+    :obj:`numpy.ndarray`, ndim: ``1``
         The largest pairwise distance.
     """
     if R.ndim == 2:
@@ -118,7 +118,7 @@ def com_distance_sum(Z, R, entity_ids):
 
     Returns
     -------
-    :obj:`float`
+    :obj:`numpy.ndarray`, ndim: ``1``
         Calculated distance metric.
     """
     if R.ndim == 2:
