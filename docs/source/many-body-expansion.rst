@@ -20,5 +20,5 @@ Reptar provides useful routines for computing :math:`n`-body properties.
 *n*-body contributions
 ======================
 
-.. autoclass:: reptar.mb.mb_contributions
+.. autofunction:: reptar.mb.mb_contributions
     :noindex:
