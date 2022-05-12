@@ -48,6 +48,11 @@ You can use :func:`~reptar.writers.write_xyz_gap` to write these files as shown 
     R = rfile.get('prod_1/geometry')
     E = rfile.get('prod_1/energy_pot')  # Hartree
     E *= 27.21138602  # eV
+    lattice = np.array(
+        [[200.0, 0.0, 0.0],
+         [0.0, 200.0, 0.0],
+         [0.0, 0.0, 200.0]]
+    )
     
     write_xyz_gap(xyz_path, lattice, Z, R, E)
 
