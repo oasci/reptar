@@ -50,9 +50,9 @@ def test_xyz_gap_writer_1h2o_120meoh_prod():
     rfile = File(exdir_path, mode='r')
 
     lattice = np.array(
-        [[50.0, 0.0, 0.0],
-         [0.0, 50.0, 0.0],
-         [0.0, 0.0, 50.0]]
+        [[200.0, 0.0, 0.0],
+         [0.0, 200.0, 0.0],
+         [0.0, 0.0, 200.0]]
     )
     Z = rfile.get('prod_1/atomic_numbers')
     R = rfile.get('prod_1/geometry')[:5]
