@@ -360,3 +360,41 @@ def combine_dicts(dict1, dict2):
         else:
             dict1[k] = v
     return dict1
+
+def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
+    """Find the structure indices of a parent r_prov_specs using a subset of
+    the specifications.
+
+    Useful for identifying structure indices when ``r_prov_specs_subset`` is in
+    a different order.
+    
+    Parameters
+    ----------
+    r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2``
+        Structure provenance specifications.
+    r_prov_specs_subset : :obj:`numpy.ndarray`, ndim: ``2``
+        Specifications in no particular order.
+    
+    Returns
+    -------
+    :obj:`numpy.ndarray`, ndim: ``1``
+        Structure indices of ``r_prov_specs_subset`` with respect to
+        ``r_prov_specs``. Specifications that cannot be found will have
+        ``NaN`` as their element.
+    
+    Example
+    -------
+    >>> r_prov_specs = np.array([[0, 0, 1], [0, 0, 2], [1, 1, 1]])
+    >>> r_prov_specs_subset = np.array([[0, 0, 1], [1, 1, 1]])
+    >>> find_parent_r_idxs(r_prov_specs, r_prov_specs_subset)
+    [0, 2]
+    
+    """
+    r_idxs = np.empty(r_prov_specs_subset.shape[0])
+    r_idxs[:] = np.NaN
+    for i in range(len(r_idxs)):
+        r_prov_spec = r_prov_specs_subset[i]
+        r_idx = np.where((r_prov_spec == r_prov_specs).all(1))[0]
+        if len(r_idx) == 1:
+            r_idxs[i] = r_idx[0]
+    return r_idxs.astype('int')
