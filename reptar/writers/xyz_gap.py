@@ -62,7 +62,7 @@ def write_xyz_gap(
 
     prop_line = 'Properties=species:S:1:pos:R:3'
     if F is not None:
-        prop_line += 'forces:R:3'
+        prop_line += ':forces:R:3'
     
     e_formatter = lambda x: f'%.{data_precision}f' % x
     
