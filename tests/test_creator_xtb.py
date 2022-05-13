@@ -67,12 +67,12 @@ def test_1h2o_120meoh_md_exdir():
     create = creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     create.definitions(definitions=['md', 'xtb', 'pes'])
-    create.group(
+    create.from_calc(
         '/eq_1', out_path=out_path_eq,
         geom_path=geom_path_eq, traj_path=traj_path_eq
     )
     create.ids('/eq_1', entity_ids, comp_ids)
-    create.group(
+    create.from_calc(
         'prod_1', out_path=out_path_prod,
         geom_path=geom_path_prod, traj_path=traj_path_prod
     )
@@ -123,12 +123,12 @@ def test_1h2o_120meoh_md_json():
 
     create = creator()
     create.load(json_path, mode='w')
-    create.group(
+    create.from_calc(
         '/eq_1', out_path=out_path_eq,
         geom_path=geom_path_eq, traj_path=traj_path_eq
     )
     create.ids('/eq_1', entity_ids, comp_ids)
-    create.group(
+    create.from_calc(
         'prod_1', out_path=out_path_prod,
         geom_path=geom_path_prod, traj_path=traj_path_prod
     )

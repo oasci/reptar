@@ -49,7 +49,7 @@ def test_6h2o_temelso_engrad_exdir():
     create = creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     create.definitions(definitions=['qc', 'pes', 'molprop'])
-    create.group('/engrad', out_path=out_path)
+    create.from_calc('/engrad', out_path=out_path)
 
     # Reading tests.
     create = creator()
@@ -70,7 +70,7 @@ def test_6h2o_temelso_engrad_json():
     # Writing tests.
     create = creator()
     create.load(json_path, mode='w')
-    create.group('/', out_path=out_path)
+    create.from_calc('/', out_path=out_path)
     create.rfile.save()
 
     # Reading tests.
@@ -91,7 +91,7 @@ def test_6h2o_temelso_engrad_npz():
 
     create = creator()
     create.load(npz_path, mode='w')
-    create.group('/', out_path=out_path)
+    create.from_calc('/', out_path=out_path)
     create.rfile.save()
 
     # Reading tests.
