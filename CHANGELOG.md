@@ -19,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- `creator.group` is now `creator.from_calc`.
 - Specify array dimensions in docstrings.
 - Do not import every submodule in reptar.
 That way, optional calculation dependencies are not required when importing reptar.

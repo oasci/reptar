@@ -174,11 +174,11 @@ class creator:
                     xtb_restart_path, os.path.join(raw_path, 'xtbrestart')
                 )
     
-    def group(
+    def from_calc(
         self, group_key, out_path=None, geom_path=None, traj_path=None,
         extractors=None
     ):
-        """Create a group using any data reptar can find from provided paths.
+        """Create a group from a supported calculation.
         
         Parameters
         ----------
