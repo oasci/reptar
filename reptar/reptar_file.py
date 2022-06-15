@@ -210,13 +210,15 @@ class File:
                 data = data_array
         return data
     
-    def _get_from_exdir(self, key):
+    def _get_from_exdir(self, key, as_memmap=False):
         """Get data from exdir file.
         
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
+        as_memmap : :obj:`bool`, default: ``False``
+            Keep NumPy memmap instead of converting to arrays.
         
         Returns
         -------
@@ -230,7 +232,10 @@ class File:
         if key_data in list(parent):
             data = parent[key_data]
             if isinstance(data, exdir.core.dataset.Dataset):
-                data = data.data
+                if as_memmap:
+                    data = data.data
+                else:
+                    data = np.array(data.data)
         elif key_data in list(parent.attrs):
             data = parent.attrs[key_data]
             if isinstance(data, exdir.core.attribute.Attribute):
@@ -269,13 +274,15 @@ class File:
             keys.extend(list(group.keys()))
         return keys
 
-    def get(self, key):
+    def get(self, key, as_memmap=False):
         """Retrieve data.
 
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
+        as_memmap : :obj:`bool`, default: ``False``
+            Keep NumPy memmap (from exdir files) instead of converting to arrays.
         
         Examples
         --------
@@ -286,7 +293,7 @@ class File:
         """
         key = self.clean_key(key)
         if self.ftype == 'exdir':
-            data = self._get_from_exdir(key)
+            data = self._get_from_exdir(key, as_memmap=as_memmap)
         elif self.ftype == 'json' or self.ftype == 'npz':
             data = self._get_from_dict(key)
         return data

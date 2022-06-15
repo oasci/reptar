@@ -66,9 +66,10 @@ An example script is shown below.
 .. note::
 
     When retrieving data from reptar files it is important to explicitly open in them ``r`` mode (to avoid accidentally overwriting data).
-    However, if unit conversions are needed from exdir files you must create an array copy: ``np.array(rfile.get(key))``.
     Exdir uses `memory maps <https://numpy.org/doc/stable/reference/generated/numpy.memmap.html>`_ to avoid automatically loading full arrays into memory.
-    Creating an array allows you make any runtime changes (e.g., unit conversions).
+    You cannot make any changes to these data in `r` mode.
+    Thus, we automatically convert all memmaps to arrays by default to avoid having to create array copies every time.
+    You can request memmaps by using ``rfile.get(key, as_memmap=True)``.
 
 .. code-block:: python
 
