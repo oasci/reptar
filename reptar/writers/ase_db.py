@@ -20,10 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ase import Atoms
-from ase.db import connect
-from ase.calculators.singlepoint import SinglePointCalculator
-
 def write_ase_db(db_path, Z, R, energy=None, forces=None):
     """Create an atomic simulation environment database.
 
@@ -47,6 +43,10 @@ def write_ase_db(db_path, Z, R, energy=None, forces=None):
     ``ase.db.sqlite.SQLite3Database``
         Atomic simulation environment database.
     """
+    from ase import Atoms
+    from ase.db import connect
+    from ase.calculators.singlepoint import SinglePointCalculator
+
     db = connect(db_path)
     for i in range(len(R)):
         if energy is not None:

@@ -46,6 +46,11 @@ os.makedirs(writing_dir, exist_ok=True)
 
 def test_ase_db_writer_1h2o_120meoh_prod():
     """Writing small ASE database"""
+    try:
+        import ase
+    except ImportError:
+        pytest.skip("ase package not installed")
+    
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
     db_path = os.path.join(writing_dir, '1h2o_120meoh_md_ase.db')
 

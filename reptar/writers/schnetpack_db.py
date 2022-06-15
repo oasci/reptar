@@ -20,14 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ase import Atoms
 import numpy as np
-from schnetpack import AtomsData
-from schnetpack.data.atoms import get_center_of_mass
 
 def write_schnetpack_db(
     db_path, Z, R, energy=None, forces=None, e_units=1.0, f_units=1.0,
-    centering_function=get_center_of_mass
+    centering_function=None
 ):
     """Create a schnetpack database.
 
@@ -75,6 +72,12 @@ def write_schnetpack_db(
     However, ``row_prop["_positions"][0][0]`` could be something like
     ``-0.93996471166611``.
     """
+    from ase import Atoms
+    from schnetpack import AtomsData
+    from schnetpack.data.atoms import get_center_of_mass
+    if centering_function is None:
+        centering_function = get_center_of_mass
+
     avail_props = []
     unit_list = []
     if energy is not None:

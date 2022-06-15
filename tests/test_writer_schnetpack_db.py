@@ -46,6 +46,11 @@ os.makedirs(writing_dir, exist_ok=True)
 
 def test_schnetpack_db_writer_1h2o_120meoh_prod():
     """Writing small schnetpack database"""
+    try:
+        import schnetpack
+    except ImportError:
+        pytest.skip("schnetpack package not installed")
+    
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
     db_path = os.path.join(writing_dir, '1h2o_120meoh_md_schnetpack.db')
 
