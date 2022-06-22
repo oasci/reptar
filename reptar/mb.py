@@ -219,6 +219,11 @@ def mb_contributions(
     These are the energy and derivative contributions to remove or add to a
     reference.
 
+    Making :math:`n`-body predictions (i.e., ``operation = 'add'``) will often
+    not have ``r_prov_ids`` or ``r_prov_specs``as all lower contributions are
+    derived exclusively from these structures. Use ``None`` for both of these
+    and this function will assume that all ``_lower`` properties apply.
+
     Parameters
     ----------
     E : :obj:`numpy.ndarray`, ndim: ``1``
@@ -231,12 +236,12 @@ def mb_contributions(
         which entities for reference structures. Entities can be a related
         set of atoms, molecules, or functional group. For example, a water and
         methanol molecule could be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
-    r_prov_ids : :obj:`dict` {:obj:`int`: :obj:`str`}
+    r_prov_ids : :obj:`dict` {:obj:`int`: :obj:`str`} or ``None``
         Species an ID (:obj:`int`) to uniquely identifying labels for each
         structure if it originated from another reptar file. Labels should
         always be ``md5_structures``. For example,
         ``{0: '6038e101da7fc0085978741832ebc7ad', 1: 'eeaf93dec698de3ecb55e9292bd9dfcb'}``.
-    r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2``
+    r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2`` or ``None``
         Structure provenance IDs. This specifies the ``r_prov_id``, structure
         index from the ``r_prov_id`` source, and ``entity_ids`` making up
         the structure.
@@ -276,8 +281,20 @@ def mb_contributions(
         raise ValueError(f'{operation} is not "add" or "remove".')
     
     # Checks that the r_prov_md5 hashes match the same r_prov_id
-    for r_prov_id_lower, r_prov_md5_lower in r_prov_ids_lower.items():
-        assert r_prov_md5_lower == r_prov_ids[r_prov_id_lower]
+    if (r_prov_ids is not None) and (r_prov_ids != {}):
+        for r_prov_id_lower, r_prov_md5_lower in r_prov_ids_lower.items():
+            assert r_prov_md5_lower == r_prov_ids[r_prov_id_lower]
+    # Assume that all lower models apply.
+    else:
+        assert r_prov_specs is None or r_prov_specs.shape == (1, 0)
+        assert len(set(r_prov_specs_lower[:,0])) == 1
+        n_r = len(E)
+        n_entities = len(set(entity_ids))
+        r_prov_specs = np.empty((n_r, 2 + n_entities), dtype=int)
+        r_prov_specs[:,0] = r_prov_specs_lower[0][0]
+        r_prov_specs[:,1] = np.array([i for i in range(n_r)])
+        for entity_id in range(n_entities):
+            r_prov_specs[:,entity_id+2] = entity_id
 
     r_shape = Deriv.shape[1:]
 
