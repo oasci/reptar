@@ -83,3 +83,7 @@ path_data = './data'
 def get_140h2o_samples_path():
     exdir_path = os.path.join(path_data, '140h2o-xtb.md-samples.exdir')
     return exdir_path
+
+def get_temelso_path():
+    exdir_path = os.path.join(path_data, 'h2o-temelso.etal.exdir')
+    return exdir_path
