@@ -20,46 +20,38 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Tests writing XYZ files for GAP code"""
+"""Utilities for tests."""
 
-import pytest
-import os
 import numpy as np
-from reptar import File
-from reptar.writers import write_xyz_gap
+import scipy as sp
 
-import sys
-sys.path.append("..")
-from .paths import *
+def _pdist(r, lat_and_inv=None):
+    """
+    Compute pairwise Euclidean distance matrix between all atoms.
 
-# Ensures we execute from file directory (for relative paths).
-os.chdir(os.path.dirname(os.path.realpath(__file__)))
+    Parameters
+    ----------
+    r : :obj:`numpy.ndarray`
+        Array of size 3N containing the Cartesian coordinates of
+        each atom.
+    lat_and_inv : :obj:`tuple` of :obj:`numpy.ndarray`, optional
+        Tuple of 3x3 matrix containing lattice vectors as columns and its inverse.
 
-# Source paths
-xtb_dir = './tmp/xtb'
+    Returns
+    -------
+    :obj:`numpy.ndarray`
+        Array of size N x N containing all pairwise distances between atoms.
+    """
 
-# Writing paths
-writing_dir = './tmp/writing/'
-os.makedirs(writing_dir, exist_ok=True)
+    r = r.reshape(-1, 3)
+    n_atoms = r.shape[0]
 
-def test_xyz_gap_writer_1h2o_120meoh_prod():
-    """Writing short XYZ file from exdir file"""
-    exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
-    xyz_path = os.path.join(writing_dir, '1h2o_120meoh_md_gap.xyz')
+    if lat_and_inv is None:
+        pdist = sp.spatial.distance.pdist(r, 'euclidean')
+    else:
+        pdist = sp.spatial.distance.pdist(
+            r, lambda u, v: np.linalg.norm(_pbc_diff(u - v, lat_and_inv))
+        )
 
-    rfile = File(exdir_path, mode='r')
-
-    lattice = np.array(
-        [[200.0, 0.0, 0.0],
-         [0.0, 200.0, 0.0],
-         [0.0, 0.0, 200.0]]
-    )
-    Z = rfile.get('prod_1/atomic_numbers')
-    R = rfile.get('prod_1/geometry')[:5]
-    E = rfile.get('prod_1/energy_pot')[:5]  # Hartree
-    E *= 27.21138602  # eV
-    write_xyz_gap(
-        xyz_path, lattice, Z, R, E
-    )
-
-    # TODO: Write tests
+    tril_idxs = np.tril_indices(n_atoms, k=-1)
+    return sp.spatial.distance.squareform(pdist, checks=False)[tril_idxs]
