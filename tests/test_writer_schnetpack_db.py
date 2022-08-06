@@ -31,6 +31,7 @@ from reptar.writers import write_schnetpack_db
 import sys
 sys.path.append("..")
 from .paths import *
+from .utils import _pdist
 
 hartree2ev = 27.21138602  # Psi4 v1.5
 
@@ -60,11 +61,10 @@ def test_schnetpack_db_writer_1h2o_120meoh_prod():
     i_test = 3
 
     rfile = File(exdir_path, mode='r')
-    # Note that we need to convert these to arrays to slice them because
-    # we open the file as readonly.
-    Z = np.array(rfile.get('prod_1/atomic_numbers'))
-    R = np.array(rfile.get('prod_1/geometry')[:10])
-    E = np.array(rfile.get('prod_1/energy_pot')[:10])  # Hartree
+    
+    Z = rfile.get('prod_1/atomic_numbers')
+    R = rfile.get('prod_1/geometry')[:10]
+    E = rfile.get('prod_1/energy_pot')[:10]  # Hartree
     E *= hartree2ev  # eV
     
     db = write_schnetpack_db(db_path, Z, R, energy=E, centering_function=None)
@@ -72,6 +72,10 @@ def test_schnetpack_db_writer_1h2o_120meoh_prod():
 
     assert np.array_equal(Z, row_props['_atomic_numbers'])
     assert E[i_test] == row_props['energy'][0]
-    assert np.array_equal(R[i_test], row_atoms.positions)
-    assert np.allclose(R[i_test], row_props['_positions'])
+    assert np.array_equal(R[i_test], row_atoms.positions)  # Exact
+    
+    # Note that row_props['_positions'] is slightly different.
+    # I think they are still centering the structure, so we check
+    # pairwise distances.
+    assert np.allclose(_pdist(R[i_test]), _pdist(row_props['_positions']))
 

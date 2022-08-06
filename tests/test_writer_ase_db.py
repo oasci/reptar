@@ -60,9 +60,9 @@ def test_ase_db_writer_1h2o_120meoh_prod():
     i_test = 3
 
     rfile = File(exdir_path, mode='r')
-    Z = np.array(rfile.get('prod_1/atomic_numbers'))
-    R = np.array(rfile.get('prod_1/geometry')[:10])
-    E = np.array(rfile.get('prod_1/energy_pot')[:10])  # Hartree
+    Z = rfile.get('prod_1/atomic_numbers')
+    R = rfile.get('prod_1/geometry')[:10]
+    E = rfile.get('prod_1/energy_pot')[:10]  # Hartree
     E *= hartree2ev  # eV
 
     db = write_ase_db(db_path, Z, R, energy=E)
