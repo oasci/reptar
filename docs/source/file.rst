@@ -66,9 +66,9 @@ You can also get a list of all non-group keys using :meth:`~reptar.reptar_file.F
 Adding data
 ===========
 
-Reptar provides a single method, :meth:`~reptar.reptar_file.File.add`, to store data in any of the supported file types.
+Reptar provides a single method, :meth:`~reptar.reptar_file.File.put`, to store data in any of the supported file types.
 
-.. automethod:: reptar.File.add
+.. automethod:: reptar.File.put
     :noindex:
 
 Note that exdir groups must be initialized first with :meth:`~reptar.reptar_file.File.init_group` before adding data.
