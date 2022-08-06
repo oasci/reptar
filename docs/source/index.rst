@@ -92,7 +92,7 @@ Reptar file data
 
 Data can be added or retrieved using the same interface regardless of the underlying file format (e.g., exdir, JSON, and npz).
 The only thing required is the respective ``key`` specifying where its stored.
-Then, ``File.add(key)`` can be used to add data to the reptar file and ``File.get(key)`` can retrieve it.
+Then, ``File.put(key, data)`` can be used to add ``data`` to the reptar file and ``File.get(key)`` can retrieve it.
 
 When working with JSON and npz files, ``File.save()`` must be explicitly called after any modification.
 

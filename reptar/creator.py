@@ -214,7 +214,7 @@ class creator:
         for cat_key in parsed_info.keys():
             for data_key in parsed_info[cat_key].keys():
                 data = parsed_info[cat_key][data_key]
-                self.rfile.add(f'{group_key}/{data_key}', data)
+                self.rfile.put(f'{group_key}/{data_key}', data)
         
         # MD5 stuff
         self.rfile.update_md5(group_key)
@@ -224,7 +224,7 @@ class creator:
             self._create_extras_xtb(group_key)
         
         # Adding version
-        self.rfile.add(f'{group_key}/reptar_version', __version__)
+        self.rfile.put(f'{group_key}/reptar_version', __version__)
 
         return self.rfile
     
@@ -254,15 +254,15 @@ class creator:
         if isinstance(comp_ids, list):
             comp_ids = np.array(comp_ids)
         
-        self.rfile.add(f'{group_key}/entity_ids', entity_ids)
-        self.rfile.add(f'{group_key}/comp_ids', comp_ids)
+        self.rfile.put(f'{group_key}/entity_ids', entity_ids)
+        self.rfile.put(f'{group_key}/comp_ids', comp_ids)
 
         comp_ids_num = {}
         unique_comp_ids, comp_ids_freq = np.unique(comp_ids, return_counts=True)
         for comp_id, num in zip(unique_comp_ids, comp_ids_freq):
             comp_ids_num[str(comp_id)] = int(num)
         
-        self.rfile.add(f'{group_key}/comp_ids_num', comp_ids_num)
+        self.rfile.put(f'{group_key}/comp_ids_num', comp_ids_num)
         return self.rfile.get(group_key)
     
     # TODO: Update ways we get data here.
@@ -310,4 +310,4 @@ class creator:
                     else:
                         pass
         
-        self.rfile.add('definitions', defs)
+        self.rfile.put('definitions', defs)

@@ -139,7 +139,7 @@ class File:
         for pair in self._iter_dict(group_dict):
             key = '/'.join(pair[:-1])
             data = pair[-1]
-            self.add(key, data)
+            self.put(key, data)
     
     def clean_key(self, key):
         """Clean key and remove any common mistakes.
@@ -364,13 +364,13 @@ class File:
         
         return data
     
-    def _add_to_dict(self, key, data):
+    def _put_to_dict(self, key, data):
         """Add data to dictionary-like file.
 
         Parameters
         ----------
         key : :obj:`str`
-            Where to add the data. Can be a nested key.
+            Where to put the data. Can be a nested key.
         data : various
             Data to add to file.
         """
@@ -392,13 +392,13 @@ class File:
 
         self.File_ = combine_dicts(self.File_, add_dic)
     
-    def _add_to_exdir(self, key, data):
+    def _put_to_exdir(self, key, data):
         """Add data to an exdir group.
 
         Parameters
         ----------
         key : :obj:`str`
-            Where to add the data. Can be a nested key.
+            Where to put the data. Can be a nested key.
         data : various
             Data to add to exdir file.
         """
@@ -442,8 +442,8 @@ class File:
                 group.__delitem__(data_key)
                 group.create_dataset(data_key, data=data)
 
-    def add(self, key, data):
-        """Add data to file.
+    def put(self, key, data):
+        """Put data to file in a specific location.
 
         Note that there is some data postprocessing using
         :meth:`~reptar.reptar_file.File.simplify_iter_data`.
@@ -458,9 +458,9 @@ class File:
         """
         key = self.clean_key(key)
         if self.ftype == 'exdir':
-            self._add_to_exdir(key, data)
+            self._put_to_exdir(key, data)
         elif self.ftype == 'json' or self.ftype == 'npz':
-            self._add_to_dict(key, data)
+            self._put_to_dict(key, data)
     
     def _iter_dict(self, dic):
         """Iterate over nested dictionary.
@@ -531,17 +531,17 @@ class File:
             Desired group.
         """
         md5 = get_md5(self, group_key)
-        self.add(f'{group_key}/md5', md5)
+        self.put(f'{group_key}/md5', md5)
         
         try:
             md5_arrays = get_md5(self, group_key, only_arrays=True)
-            self.add(f'{group_key}/md5_arrays', md5_arrays)
+            self.put(f'{group_key}/md5_arrays', md5_arrays)
         except Exception:
             pass
 
         try:
             md5_structures = get_md5(self, group_key, only_structures=True)
-            self.add(f'{group_key}/md5_structures', md5_structures)
+            self.put(f'{group_key}/md5_structures', md5_structures)
         except Exception:
             pass
     

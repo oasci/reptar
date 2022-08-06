@@ -89,6 +89,6 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
     E, G = engrads.run()
 
     # Add data to exdir file.
-    f.add('energy_ele_mp2.ccpvtz_psi4', E)
-    f.add('grads_mp2.ccpvtz_psi4', G)
+    f.put('energy_ele_mp2.ccpvtz_psi4', E)
+    f.put('grads_mp2.ccpvtz_psi4', G)
 

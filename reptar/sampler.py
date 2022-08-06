@@ -604,7 +604,7 @@ def add_structures_to_group(
             md5_source = source_file.get(f'{source_key}/md5_structures')
         except Exception:
             md5_source = get_md5(source_file, source_key, only_structures=True)
-            source_file.add(f'{source_key}/md5_structures', md5_source)
+            source_file.put(f'{source_key}/md5_structures', md5_source)
         
         # Create pseudo source_r_prov_ids.
         source_r_prov_ids = {0: md5_source}
@@ -685,11 +685,11 @@ def add_structures_to_group(
         entity_ids = entity_ids_sampled
     
     if write:
-        dest_file.add(f'{dest_key}/atomic_numbers', Z)
-        dest_file.add(f'{dest_key}/geometry', R)
+        dest_file.put(f'{dest_key}/atomic_numbers', Z)
+        dest_file.put(f'{dest_key}/geometry', R)
         if copy_EG:
-            dest_file.add(f'{dest_key}/{energy_labels[0]}', E)
-            dest_file.add(f'{dest_key}/{grad_labels[0]}', G)
+            dest_file.put(f'{dest_key}/{energy_labels[0]}', E)
+            dest_file.put(f'{dest_key}/{grad_labels[0]}', G)
             if len(energy_labels) > 1:
                 for i in range(1, len(energy_labels)):
                     e_label = energy_labels[i]
@@ -699,7 +699,7 @@ def add_structures_to_group(
                     e_data_new = np.empty(e_shape_new)
                     e_data_new[:] = np.nan
                     e_data_new[:e_data_shape[0]] = e_data
-                    dest_file.add(f'{dest_key}/{e_label}', e_data_new)
+                    dest_file.put(f'{dest_key}/{e_label}', e_data_new)
                 for i in range(1, len(grad_labels)):
                     g_label = grad_labels[i]
                     g_data = dest_file.get(f'{dest_key}/{g_label}')
@@ -711,14 +711,14 @@ def add_structures_to_group(
                     g_data_new = np.empty(g_shape_new)
                     g_data_new[:] = np.nan
                     g_data_new[:g_data_shape[0]] = g_data
-                    dest_file.add(f'{dest_key}/{g_label}', g_data_new)
-        dest_file.add(f'{dest_key}/entity_ids', entity_ids)
-        dest_file.add(f'{dest_key}/r_prov_ids', new_r_prov_ids)
-        dest_file.add(f'{dest_key}/r_prov_specs', r_prov_specs)
-        dest_file.add(f'{dest_key}/r_centered', center_structures)
-        dest_file.add(f'{dest_key}/comp_ids', comp_ids)
+                    dest_file.put(f'{dest_key}/{g_label}', g_data_new)
+        dest_file.put(f'{dest_key}/entity_ids', entity_ids)
+        dest_file.put(f'{dest_key}/r_prov_ids', new_r_prov_ids)
+        dest_file.put(f'{dest_key}/r_prov_specs', r_prov_specs)
+        dest_file.put(f'{dest_key}/r_centered', center_structures)
+        dest_file.put(f'{dest_key}/comp_ids', comp_ids)
 
         dest_file.update_md5(dest_key)
-        dest_file.add(f'{dest_key}/reptar_version', __version__)
+        dest_file.put(f'{dest_key}/reptar_version', __version__)
 
     return dest_file
