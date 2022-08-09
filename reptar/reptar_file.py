@@ -408,7 +408,10 @@ class File:
             or isinstance(group, exdir.core.group.Group)
         
         # Custom handling of parsed data to ensure logical behavior.
-        if data_key == 'dipole_moment':
+        ndarray_to_list_keys = [
+            'dipole_moment', 'periodic', 'periodic_cell'
+        ]
+        if data_key in ndarray_to_list_keys:
             if isinstance(data, np.ndarray):
                 data = data.tolist()
             group.attrs[data_key] = data

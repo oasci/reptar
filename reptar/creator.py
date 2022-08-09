@@ -23,7 +23,7 @@
 import os
 import shutil
 import numpy as np
-from .parsers import parserORCA, parserXTB
+from .parsers import parserORCA, parserXTB, parserASE
 from .reptar_file import File
 from pkg_resources import resource_stream
 import yaml
@@ -62,6 +62,23 @@ triggers = [
     (parserORCA, ["O   R   C   A"], True),
     (parserXTB, ["x T B"], True)
 ]
+
+def identify_trajectory(traj_path):
+    """Identifies the type of trajectory depending on a series of tests.
+    """
+    # ASE trajectory
+    try:
+        import ase
+        from ase.io.ulm import InvalidULMFileError
+        try:
+            traj = ase.io.trajectory.Trajectory(traj_path)
+            return parserASE
+        except InvalidULMFileError:
+            # Does have ase installed but is not a trajectory file.
+            pass
+    except ImportError:
+        # Do not have ase installed.
+        pass
 
 class creator:
     """Create groups from computational chemistry data.
@@ -146,6 +163,25 @@ class creator:
         )
         self.parsed_info = self.parser.parse()
     
+    def parse_traj(self, traj_path, extractors=None):
+        """Parse a trajectory file.
+
+        Parameters
+        ----------
+        traj_path : :obj:`str`
+            Path to a trajectory file from a geometry optimization, MD
+            simulation, etc.
+        extractors : :obj:`list`, default: ``None``
+            Additional extractors for the parser to use.
+        """
+        self.traj_path = os.path.abspath(traj_path)
+        packageParser = identify_trajectory(self.traj_path)
+        self.parser = packageParser(
+            out_path=None, geom_path=None, traj_path=traj_path,
+            extractors=extractors
+        )
+        self.parsed_info = self.parser.parse()
+    
     def _create_extras_xtb(self, group_key):
         """Extra actions for groups created from xtb calculations.
 
@@ -201,14 +237,30 @@ class creator:
         ``traj_path``.
         """
         assert hasattr(self, 'rfile')
-        self.parse_output(
-            out_path, geom_path=geom_path, traj_path=traj_path,
-            extractors=extractors
-        )
-        parsed_info = self.parsed_info
 
         if self.rfile.ftype == 'exdir':
             self.rfile.init_group(group_key)
+        
+        # Parsable calculations using an output file.
+        if out_path is not None:
+            self.parse_output(
+                out_path, geom_path=geom_path, traj_path=traj_path,
+                extractors=extractors
+            )
+            parsed_info = self.parsed_info
+
+            # Extra stuff to do depending on package.
+            if self.parser.package == 'xtb':
+                self._create_extras_xtb(group_key)
+        # Only a trajectory is provided. Likely coordinates or package-specific
+        # trajectory file like ASE.
+        elif out_path is None and traj_path is not None:
+            self.parse_traj(
+                traj_path, extractors=extractors
+            )
+            parsed_info = self.parsed_info
+        else:
+            return None
         
         # Loop through each category of data.
         for cat_key in parsed_info.keys():
@@ -218,10 +270,6 @@ class creator:
         
         # MD5 stuff
         self.rfile.update_md5(group_key)
-
-        # Extra stuff to do depending on package.
-        if self.parser.package == 'xtb':
-            self._create_extras_xtb(group_key)
         
         # Adding version
         self.rfile.put(f'{group_key}/reptar_version', __version__)
