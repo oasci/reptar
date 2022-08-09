@@ -29,7 +29,9 @@ class parserXTB(parser):
     """Custom parser for xtb output files.
     """
 
-    def __init__(self, out_path, geom_path=None, traj_path=None, extractors=None):
+    def __init__(
+        self, out_path=None, geom_path=None, traj_path=None, extractors=None
+    ):
         """
         Parameters
         ----------

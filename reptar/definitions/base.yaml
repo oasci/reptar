@@ -88,6 +88,18 @@ system_info:
     storage:
       - attribute
     type: int
+  periodic:
+    description: >+
+      If periodic boundary conditions are enforced in the x, y, or z direction, respectively.
+    storage:
+      - attribute
+    type: bool
+  periodic_cell:
+    description: >+
+      The three cell vectors defining the periodic cell.
+    storage:
+      - dataset
+    type: float
 runtime_info:
   calc_driver:
     description: >+
