@@ -21,7 +21,10 @@
 # SOFTWARE.
 
 import numpy as np
-import psi4
+try:
+    import psi4
+except ImportError:
+    pass
 
 def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads, mem):
     """Worker function for computing total electronic energy and atomic

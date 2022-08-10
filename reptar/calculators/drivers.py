@@ -22,7 +22,10 @@
 
 import math
 import numpy as np
-import ray
+try:
+    import ray
+except ImportError:
+    pass
 
 class driverENGRAD:
     """Supervisor of energy+gradient workers.
@@ -69,7 +72,7 @@ class driverENGRAD:
         end_slice : :obj:`int`, default: ``None``
             Trims ``R`` to end at this index.
         """
-        assert ray.is_initialized() == True
+        assert ray.is_initialized()
         # Check arrays (obsessively)
         assert R.ndim == 3
         assert Z.shape[0] == R.shape[1]
