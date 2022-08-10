@@ -65,12 +65,12 @@ def test_1h2o_57h2o_ase_exdir():
     )
 
     assert create.rfile.get(f'{group_key}/geometry').shape == (201, 174, 3)
-    assert create.rfile.get(f'{group_key}/geometry')[0][3][1] == 1.5628686905646898
-    assert create.rfile.get(f'{group_key}/geometry')[-1][-1][0] == 6.727016221639617
+    assert create.rfile.get(f'{group_key}/geometry')[0][3][1] == pytest.approx(1.5628686905646898, abs=1e-10)
+    assert create.rfile.get(f'{group_key}/geometry')[-1][-1][0] == pytest.approx(6.727016221639617, abs=1e-10)
     assert create.rfile.get(f'{group_key}/energy_pot').shape == (201,)
-    assert create.rfile.get(f'{group_key}/energy_pot')[0] == -4427.15748237676
-    assert create.rfile.get(f'{group_key}/energy_pot')[-1] == -4427.009820153819
-    assert create.rfile.get(f'{group_key}/temp')[24] == 289.7385847153916
-    assert create.rfile.get(f'{group_key}/velcs')[24][12][1] == -0.003541032926883468
+    assert create.rfile.get(f'{group_key}/energy_pot')[0] == pytest.approx(-4427.15748237676, abs=1e-10)
+    assert create.rfile.get(f'{group_key}/energy_pot')[-1] == pytest.approx(-4427.009820153819, abs=1e-10)
+    assert create.rfile.get(f'{group_key}/temp')[24] == pytest.approx(289.7385847153916, abs=1e-10)
+    assert create.rfile.get(f'{group_key}/velcs')[24][12][1] == pytest.approx(-0.003541032926883468, abs=1e-10)
     
 
