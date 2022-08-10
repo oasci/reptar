@@ -249,9 +249,6 @@ class creator:
             )
             parsed_info = self.parsed_info
 
-            # Extra stuff to do depending on package.
-            if self.parser.package == 'xtb':
-                self._create_extras_xtb(group_key)
         # Only a trajectory is provided. Likely coordinates or package-specific
         # trajectory file like ASE.
         elif out_path is None and traj_path is not None:
@@ -267,6 +264,10 @@ class creator:
             for data_key in parsed_info[cat_key].keys():
                 data = parsed_info[cat_key][data_key]
                 self.rfile.put(f'{group_key}/{data_key}', data)
+        
+        # Extra stuff to do depending on package.
+        if self.parser.package == 'xtb':
+            self._create_extras_xtb(group_key)
         
         # MD5 stuff
         self.rfile.update_md5(group_key)
