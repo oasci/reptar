@@ -21,7 +21,10 @@
 # SOFTWARE.
 
 import numpy as np
-from xtb.interface import Calculator, Param
+try:
+    from xtb.interface import Calculator, Param
+except ImportError:
+    pass
 
 def xtb_engrad(
     Z, R, R_idxs, charge, mult, calc_acc=0.1, params=Param.GFN2xTB
