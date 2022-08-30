@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- PDB writer numbers each atom name.
 - Renamed ``File.add()`` to ``File.put()``
 - Return data from exdir as ``np.ndarray`` instead of ``np.memmap``.
 - `creator.group` is now `creator.from_calc`.
