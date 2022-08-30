@@ -27,21 +27,21 @@ from ..utils import z_to_element
 def write_pdb(
     pdb_path, Z, R, entity_ids, comp_ids, atom_type='HETATM'
 ):
-    """Write PDB file.
+    """Write PDB file containing a single structure or trajectory.
 
     Parameters
     ----------
     pdb_path : :obj:`str`
         Path to PDB file to write.
     Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers.
+        Atomic numbers of each structure in ``R``.
     R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates.
     entity_ids : :obj:`numpy.ndarray`, ndim: ``1``
         A uniquely identifying integer specifying what atoms belong to
         which entities. Entities can be a related set of atoms, molecules,
         or functional group. For example, a water and methanol molecule
-        could be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
+        would be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
     comp_ids : :obj:`numpy.ndarray`, ndim: ``1``
         Relates ``entity_id`` to a fragment label for chemical components
         or species. Labels could be ``WAT`` or ``h2o`` for water, ``MeOH``
@@ -52,7 +52,7 @@ def write_pdb(
     atom_type : :obj:`str`, default: ``'HETATM'``
         The PDB atom type to be used. Should almost always be ``HETATM``.
     """ 
-    atom_labels = [z_to_element[z] for z in Z]
+    element_symbols = [z_to_element[z] for z in Z]
 
     num_structures = len(R)
     num_atoms = len(Z)
@@ -69,9 +69,20 @@ def write_pdb(
             for i_atom in range(num_atoms):
                 entity_id = entity_ids[i_atom]
                 comp_id = comp_ids[entity_id]
-                atom_label = atom_labels[i_atom]
+                element_symbol = element_symbols[i_atom]
+                # Determines the number of atoms with the same atomic number
+                # in the entity before this atom.
+                atom_type_count = np.count_nonzero(
+                    Z[
+                        np.intersect1d(
+                            np.arange(i_atom), np.argwhere(entity_ids == entity_id).T[0]
+                        )
+                    ] == Z[i_atom]
+                )
+                atom_label = element_symbol + str(atom_type_count+1)
+
                 coords = R[i_structure][i_atom]
-    
+
                 f.write(
                     '{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n'.format(
                         str(atom_type), i_atom+1, str(atom_label), '',
