@@ -52,10 +52,23 @@ def write_pdb(
     atom_type : :obj:`str`, default: ``'HETATM'``
         The PDB atom type to be used. Should almost always be ``HETATM``.
     """ 
-    element_symbols = [z_to_element[z] for z in Z]
-
     num_structures = len(R)
     num_atoms = len(Z)
+
+    # Determine atom_labels once; will be the same for every structure.
+    element_symbols = [z_to_element[z] for z in Z]
+    atom_names = []
+    for i_atom in range(num_atoms):
+        entity_id = entity_ids[i_atom]
+        element_symbol = element_symbols[i_atom]
+        atom_type_count = np.count_nonzero(
+            Z[
+                np.intersect1d(
+                    np.arange(i_atom), np.argwhere(entity_ids == entity_id).T[0]
+                )
+            ] == Z[i_atom]
+        )
+        atom_names.append(element_symbol + str(atom_type_count+1))
 
     file_name = os.path.splitext(os.path.basename(pdb_path))[0]
     # Trims component ids to the first three letters
@@ -70,25 +83,16 @@ def write_pdb(
                 entity_id = entity_ids[i_atom]
                 comp_id = comp_ids[entity_id]
                 element_symbol = element_symbols[i_atom]
-                # Determines the number of atoms with the same atomic number
-                # in the entity before this atom.
-                atom_type_count = np.count_nonzero(
-                    Z[
-                        np.intersect1d(
-                            np.arange(i_atom), np.argwhere(entity_ids == entity_id).T[0]
-                        )
-                    ] == Z[i_atom]
-                )
-                atom_label = element_symbol + str(atom_type_count+1)
+                atom_name = atom_names[i_atom]
 
                 coords = R[i_structure][i_atom]
 
                 f.write(
                     '{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n'.format(
-                        str(atom_type), i_atom+1, str(atom_label), '',
+                        str(atom_type), i_atom+1, str(atom_name), '',
                         str(comp_id), 'A', entity_id+1, '',
                         coords[0], coords[1], coords[2],
-                        1.00, '', str(atom_label), ''
+                        1.00, '', str(element_symbol), ''
                     )
                 )
             if num_structures > 1:
