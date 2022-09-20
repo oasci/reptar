@@ -241,6 +241,9 @@ class File:
             if isinstance(data, exdir.core.attribute.Attribute):
                 data = dict(data)
         
+        if 'data' not in locals():
+            raise RuntimeError(f'{key} does not exist')
+        
         return data
     
     def get_keys(self, group_key):
