@@ -27,9 +27,9 @@ except ImportError:
     pass
 
 def xtb_engrad(
-    Z, R, R_idxs, charge, mult, calc_acc=0.1, params=Param.GFN2xTB
+    Z, R, R_idxs, charge, mult, calc_acc=0.1, params=None
 ):
-    """Ray remote function for computing total electronic energy and atomic
+    r"""Ray remote function for computing total electronic energy and atomic
     gradients using xtb.
 
     Parameters
@@ -49,9 +49,9 @@ def xtb_engrad(
     calc_acc : :obj:`int`, default: ``0.1``
         Numerical accuracy for calculation. For more information, visit the
         `documentation <https://xtb-python.readthedocs.io/en/latest\
-        /general-api.html#xtb.interface.Calculator.set_accuracy>`_.
-    params : default: ``xtb.interface.Param.GFN2xTB
-        xTB parameters.
+        /general-api.html#xtb.interface.Calculator.set_accuracy>`__.
+    params : default: ``None``
+        xTB parameters. Defaults to ``xtb.interface.Param.GFN2xTB`` if ``None``.
     
     Returns
     -------
@@ -68,8 +68,10 @@ def xtb_engrad(
     R = R[R_idxs]
     G = np.zeros(R.shape)
     E = np.zeros(R.shape[0])
+    if params is None:
+        params = Param.GFN2xTB
     for i in range(len(R)):
-        calc = Calculator(Param.GFN2xTB, Z, R[i], charge, n_upair_ele)
+        calc = Calculator(params, Z, R[i], charge, n_upair_ele)
         calc.set_accuracy(calc_acc)
         res = calc.singlepoint()
         g = res.get_gradient()

@@ -71,9 +71,9 @@ Reptar provides a single method, :meth:`~reptar.reptar_file.File.put`, to store 
 .. automethod:: reptar.File.put
     :noindex:
 
-Note that exdir groups must be initialized first with :meth:`~reptar.reptar_file.File.init_group` before adding data.
+Note that exdir groups must be initialized first with :meth:`~reptar.reptar_file.File.create_group` before adding data.
 
-.. automethod:: reptar.File.init_group
+.. automethod:: reptar.File.create_group
     :noindex:
 
 Saving

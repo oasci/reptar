@@ -89,7 +89,7 @@ Note that ``gradients`` and ``/gradients`` would translate to the same value (``
 
 We refer to a "reptar file" as any file that can be used with the ``reptar.File`` class.
 Creating a reptar file starts by having a set of data files generated from some calculation.
-Paths to these data files are passed into ``reptar.creator.group`` that extracts information using a ``reptar.parser`` class.
+Paths to these data files are passed into ``reptar.creator.from_calc`` that extracts information using a ``reptar.parser`` class.
 Information parsed from these files, ``parsed_info``, is then used to populate a ``reptar.File`` object.
 
 ## Reptar file data

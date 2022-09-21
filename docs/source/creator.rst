@@ -38,7 +38,7 @@ Reptar provides two ways to do this: by initializing a :class:`~reptar.creator` 
 
 Reptar can then parse information and create a group by specifying the paths to the relevant output files.
 
-.. automethod:: reptar.creator.group
+.. automethod:: reptar.creator.from_calc
     :noindex:
 
 Types of output files

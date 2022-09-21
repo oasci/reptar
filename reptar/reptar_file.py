@@ -489,8 +489,8 @@ class File:
                 # If value is not dict type then yield the value
                 yield (k, v)
     
-    def init_group(self, key):
-        """Initialize an exdir group with the specified key.
+    def create_group(self, key):
+        """Initialize/create an exdir group with the specified key.
 
         Parameters
         ----------
@@ -498,11 +498,7 @@ class File:
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
         """
-        parent_key, group_key = self.split_key(key)
-        if self.ftype == 'exdir':
-            parent = self.get(parent_key)
-            group = parent.create_group(group_key)
-        return group
+        return self.File_.create_group(key)
     
     def as_dict(self, group_key):
         """Get a group as a dictionary.

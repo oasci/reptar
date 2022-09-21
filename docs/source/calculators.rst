@@ -3,13 +3,13 @@ Calculators
 ===========
 
 Reptar provides a framework for computing common properties and electronic energies and gradients.
-`Ray <https://docs.ray.io/en/latest/index.html>`_ is used to parallelize computations when possible.
+`Ray <https://docs.ray.io/en/latest/index.html>`__ is used to parallelize computations when possible.
 
 The additional dependencies are:
 
-* `ray <https://docs.ray.io/en/latest/ray-overview/installation.html>`_ (required)
-* `psi4 <https://psicode.org/installs/v15/>`_
-* `xtb-python <https://github.com/grimme-lab/xtb-python#installation>`_
+* `ray <https://docs.ray.io/en/latest/ray-overview/installation.html>`__ (required)
+* `psi4 <https://psicode.org/installs/v15/>`__
+* `xtb-python <https://github.com/grimme-lab/xtb-python#installation>`__
 
 Energy and gradients
 ====================
@@ -26,7 +26,7 @@ Reptar provides a framework with a ray driver and premade ray task/worker functi
     ``worker_func`` should not already have the ``ray.remote`` decorator.
     This is automatically included when :class:`~reptar.calculators.drivers.driverENGRAD` is initialized.
 
-Reptar currently has a worker for `Psi4 <https://psicode.org/psi4manual/master/index.html>`_, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, and `xTB <https://xtb-docs.readthedocs.io/en/latest/contents.html>`_, :func:`~reptar.calculators.xtb_workers.xtb_engrad`. 
+Reptar currently has a worker for `Psi4 <https://psicode.org/psi4manual/master/index.html>`__, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, and `xTB <https://xtb-docs.readthedocs.io/en/latest/contents.html>`__, :func:`~reptar.calculators.xtb_workers.xtb_engrad`. 
 
 .. autofunction:: reptar.calculators.psi4_workers.psi4_engrad
     :noindex:
