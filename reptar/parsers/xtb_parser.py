@@ -53,9 +53,9 @@ class parserXTB(parser):
 
         self.geom_path = geom_path
         self.traj_path = traj_path
-        if traj_path is not None and geom_path is None:
+        if (traj_path is None) and (geom_path is None):
             raise ValueError(
-                'A geometry file must be specified with trajectory file'
+                'geom_path and traj_path cannot both be None'
             )
         
         self.parsed_info['runtime_info']['prov'] = 'xTB'
