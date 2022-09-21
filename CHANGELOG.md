@@ -9,7 +9,6 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - Support for Atomic Simulation Environment (ASE) trajectories.
 - Determine structure indices with respect to structure provenance specifications.
 - Simple structural descriptors.
-- Add or remove many-body contributions based on sampled structures.
 - Quick documentation for sampler.
 - Example script for GDML npz files.
 - Writer for standard XYZ files with optional comments.
@@ -20,6 +19,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Manual ``api`` documents with ``sphinx-multiversion``.
 - Raise ``RuntimeError`` when key does not exist in exdir.
 - PDB writer numbers each atom name.
 - Renamed ``File.add()`` to ``File.put()``.
@@ -38,6 +38,7 @@ This clears up previous ambiguous usage of "data" to refer to both a file and va
 
 ### Removed
 
+- Many-body expansion routines were incorporated into [mbGDML](https://keithgroup.github.io/mbGDML/index.html).
 - ``textWriter`` class (really had no purpose).
 
 ## [0.0.2] - 2022-05-03

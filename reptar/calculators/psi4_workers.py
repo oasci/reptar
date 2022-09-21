@@ -32,9 +32,9 @@ def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads, mem):
 
     Parameters
     ----------
-    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``1``
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of the atoms with repsect to ``R``.
-    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``3``
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
     R_idxs : :obj:`numpy.ndarray`, ndim: ``1``
