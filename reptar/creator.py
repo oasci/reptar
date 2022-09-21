@@ -37,7 +37,7 @@ defs_reserved = [
 
 def identify_parser(out_path):
     """Identifies the correct parser depending on some trigger.
-    Only supported packaged should be included in `triggers`.
+    Only supported packaged should be included in ``triggers``.
 
     Parameters
     ----------
