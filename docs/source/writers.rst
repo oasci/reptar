@@ -10,7 +10,7 @@ Reptar provides these scripts for you along with comprehensive unit tests to ens
 ASE
 ===
 
-The atomic simulation environment (ASE) provides `its own database format <https://wiki.fysik.dtu.dk/ase/tutorials/tut06_database/database.html>`_ for atomic data.
+The atomic simulation environment (ASE) provides `its own database format <https://wiki.fysik.dtu.dk/ase/tutorials/tut06_database/database.html>`__ for atomic data.
 You can use :func:`~reptar.writers.write_ase_db` to write these databases as shown in the example below.
 
 .. code-block:: python
@@ -59,14 +59,14 @@ You can use :func:`~reptar.writers.write_xyz_gap` to write these files as shown 
 GDML
 ====
 
-The gradient-domain machine learning (GDML) packages (`sGDML <http://quantum-machine.org/gdml/>`_ and `mbGDML <https://keithgroup.github.io/mbGDML/>`_) require datasets to be in a npz format.
+The gradient-domain machine learning (GDML) packages (`sGDML <http://quantum-machine.org/gdml/>`__ and `mbGDML <https://keithgroup.github.io/mbGDML/>`__) require datasets to be in a npz format.
 Since reptar innately supports npz files, you just need to use the ``from_dict`` option in :class:`~reptar.File`.
 An example script is shown below.
 
 .. note::
 
     When retrieving data from reptar files it is important to explicitly open in them ``r`` mode (to avoid accidentally overwriting data).
-    Exdir uses `memory maps <https://numpy.org/doc/stable/reference/generated/numpy.memmap.html>`_ to avoid automatically loading full arrays into memory.
+    Exdir uses `memory maps <https://numpy.org/doc/stable/reference/generated/numpy.memmap.html>`__ to avoid automatically loading full arrays into memory.
     You cannot make any changes to these data in `r` mode.
     Thus, we automatically convert all memmaps to arrays by default to avoid having to create array copies every time.
     You can request memmaps by using ``rfile.get(key, as_memmap=True)``.
