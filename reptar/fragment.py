@@ -37,12 +37,13 @@ def pairwise_distance(R, cutoff=1.5, num_frags=None):
     cutoff : :obj:`float`, default: ``1.5``
         Atoms within this distance is group together in a fragment.
     num_frags : :obj:`int`, default: ``None``
-        Known number of fragments in structure.
+        Known number of fragments in structure. No check is performed if
+        ``None``.
     
     Returns
     -------
     :obj:`numpy.ndarray`
-
+        Computed ``entity_ids`` of the structure.
     """
     if R.ndim != 2:
         raise ValueError('Array must have two dimensions.')

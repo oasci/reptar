@@ -1,8 +1,7 @@
 #!/usr/bin/env bash
+# Build sphinx documentation with multiversion.
+# Will not build current branch documentation; only main and tagged commits.
 cd "${0%/*}"
-rm -rf ./source/doc/
 rm -rf ./html/
-sphinx-apidoc --force -o ./source/doc/ ../reptar 
-# sphinx-build -nT ./source/ ./html/
-sphinx-multiversion -nT ./source ./html
+sphinx-multiversion -nT ./source/ ./html/
 touch ./html/.nojekyll

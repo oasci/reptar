@@ -452,7 +452,7 @@ class File:
         """Put data to file in a specific location.
 
         Note that there is some data postprocessing using
-        :meth:`~reptar.reptar_file.File.simplify_iter_data`.
+        :meth:`~reptar.File.simplify_iter_data`.
 
         Parameters
         ----------

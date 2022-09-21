@@ -2,7 +2,7 @@
 Parsers and Extractors
 ======================
 
-Parsers and extractors work together to retrieve data from supported files and store it in :attr:`~reptar.parsers.parser.parser.parsed_info`.
+Parsers and extractors work together to retrieve data from supported files and store it in :attr:`~reptar.parsers.parser.parsed_info`.
 
 Parsers
 =======
@@ -16,8 +16,8 @@ For example, we have an xTB parser class:
 
 ``parse``
 ---------
-After initializing a parser object with the relevant paths, you can then call the :meth:`~reptar.parsers.parser.parser.parse` method.
-Each package parser class must define its own :meth:`~reptar.parsers.parser.parser.parse` method.
+After initializing a parser object with the relevant paths, you can then call the :meth:`~reptar.parsers.parser.parse` method.
+Each package parser class must define its own :meth:`~reptar.parsers.parser.parse` method.
 
 .. automethod:: reptar.parsers.parser.parse
     :noindex:
@@ -101,7 +101,7 @@ For example, xTB will print energy summaries like the one below.
     :: atomisation energy       153.792759436621 Eh    ::
     :::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-Once reptar encounters the ``SUMMARY`` line, it activates the :meth:`~reptar.extractors.xtb_extractor.extractorXTB.summary_energies` method.
+Once reptar encounters the ``SUMMARY`` line, it activates the :meth:`~reptar.extractors.extractorXTB.summary_energies` method.
 Reptar then extracts information such as the total, SCC, and nuclear repulsion energy from this block of text.
 
 Custom extractors
