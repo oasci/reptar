@@ -57,7 +57,7 @@ def test_1h2o_120meoh_prod_sampling():
     dest = creator()
     dest.load(dest_path, mode='w', allow_remove=True)
     dest_key = '/wat.2met-pes'
-    dest.rfile.init_group(dest_key)
+    dest.rfile.create_group(dest_key)
 
     quantity = 100
     comp_labels = ('WAT', 'MET', 'MET')
@@ -111,7 +111,7 @@ def test_sampling_from_wat_2met_pes():
     source.load(src_path, mode='a')
     source_key = '/wat.2met-pes'
     dest_key = '/wat.met-pes'
-    source.rfile.init_group(dest_key)
+    source.rfile.create_group(dest_key)
 
     quantity = 100
     comp_labels = ('WAT', 'MET')

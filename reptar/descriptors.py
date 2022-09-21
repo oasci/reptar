@@ -104,6 +104,14 @@ def com_distance_sum(Z, R, entity_ids):
     """The sum of pairwise distances from each entity's center of mass to
     the total structure center of mass.
 
+    This descriptor, :math:`L`, is defined as
+    
+    .. math::
+        L = \sum_i^N l_i = \sum_i^N \Vert \mathbf{CM}_{i} - \mathbf{CM} \Vert_2
+    
+    where :math:`\mathbf{CM}` is the center of mass of the structure and
+    :math:`\mathbf{CM}_i` is the center of mass of monomer :math:`i`.
+
     Parameters
     ----------
     Z : :obj:`numpy.ndarray`, ndim: ``1``
@@ -118,8 +126,8 @@ def com_distance_sum(Z, R, entity_ids):
 
     Returns
     -------
-    :obj:`numpy.ndarray`, ndim: ``1``
-        Calculated distance metric.
+    :obj:`numpy.ndarray`
+        (ndim: ``1``) Calculated distance metric.
     """
     if R.ndim == 2:
         R = np.array([R])

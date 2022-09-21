@@ -33,7 +33,7 @@ Motivation
 
 The computational chemistry community often fails to openly provide raw and/or processed data used to their draw scientific conclusions.
 
-For large projects, frameworks such as `QCArchive <https://qcarchive.molssi.org/>`_, `Materials Project <https://materialsproject.org/>`_, `Pitt Quantum Repository <https://pqr.pitt.edu/>`_, `ioChem-BD <https://www.iochem-bd.org/>`_ and many others provide great storage solutions.
+For large projects, frameworks such as `QCArchive <https://qcarchive.molssi.org/>`__, `Materials Project <https://materialsproject.org/>`__, `Pitt Quantum Repository <https://pqr.pitt.edu/>`__, `ioChem-BD <https://www.iochem-bd.org/>`__ and many others provide great storage solutions.
 This approach would not be practical for fluid data pipelines and small-scale projects such as a single manuscript.
 
 Alternatively, you could use individual files in formats such as JSON, XML, YAML, npz, etc.
@@ -43,12 +43,12 @@ However, you often must choose between (1) a standardized parser that might not 
 Reptar is designed for easy data storage and analysis for individual projects.
 Customizable parsers provide a simple way to extract new data without submitting issues and pull requests (although this is highly encouraged).
 While files are the heart of reptar, it strives to be file-type agnostic by providing the same interface for all supported file types.
-The result is a user-specified file streamlined for analysis in Python and archival on places such as `GitHub <https://github.com/>`_ and `Zenodo <https://zenodo.org/>`_.
+The result is a user-specified file streamlined for analysis in Python and archival on places such as `GitHub <https://github.com/>`__ and `Zenodo <https://zenodo.org/>`__.
 
 Installation
 ============
 
-You can install reptar using ``pip install reptar`` or install the latest version directly from the `GitHub repository <https://github.com/aalexmmaldonado/reptar>`_.
+You can install reptar using ``pip install reptar`` or install the latest version directly from the `GitHub repository <https://github.com/aalexmmaldonado/reptar>`__.
 
 .. code-block:: bash
 
@@ -65,7 +65,7 @@ NumPy's npz format is useful for arrays; however, no nesting is possible and loa
 
 Exdir is a simple, yet powerful open file format that mimics the `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_ format with metadata and data stored in directories with YAML and npy files instead of a single binary file.
 This provides several advantages such as mixing human-readable YAML and binary NumPy files, being easier for version control, and only loading requested portions of datasets into memory.
-For more detailed information, please read this `Front. Neuroinform. article about exdir <https://doi.org/10.3389/fninf.2018.00016>`_.
+For more detailed information, please read this `Front. Neuroinform. article about exdir <https://doi.org/10.3389/fninf.2018.00016>`__.
 
 Key-value pairs
 ===============
@@ -84,7 +84,7 @@ Calculation to reptar file
 
 We refer to a "reptar file" as any file that can be used with the ``reptar.File`` class.
 Creating a reptar file starts by having a set of data files generated from some calculation.
-Paths to these data files are passed into ``reptar.creator.group`` that extracts information using a ``reptar.parser`` class.
+Paths to these data files are passed into ``reptar.creator.from_calc`` that extracts information using a ``reptar.parser`` class.
 Information parsed from these files, ``parsed_info``, is then used to populate a ``reptar.File`` object.
 
 Reptar file data
@@ -103,16 +103,16 @@ Other packages often require data to be formatted in their own specific way.
 Reptar provides ways to extract data from reptar files using ``File.get(key)`` and passing it into the desired ``reptar.writer`` function.
 Reptar currently automates the creation of:
 
-- `Atomic simulation environment (ASE) databases <https://wiki.fysik.dtu.dk/ase/tutorials/tut06_database/database.html>`_,
-- `Gaussian approximate potentials (GAP) extended XYZ files <https://libatoms.github.io/GAP/gap_fit.html#data>`_,
+- `Atomic simulation environment (ASE) databases <https://wiki.fysik.dtu.dk/ase/tutorials/tut06_database/database.html>`__,
+- `Gaussian approximate potentials (GAP) extended XYZ files <https://libatoms.github.io/GAP/gap_fit.html#data>`__,
 - Protein data bank (PDB) files,
-- `Schnetpack databases <https://schnetpack.readthedocs.io/en/stable/tutorials/tutorial_01_preparing_data.html>`_,
+- `Schnetpack databases <https://schnetpack.readthedocs.io/en/stable/tutorials/tutorial_01_preparing_data.html>`__,
 - XYZ files.
 
 License
 =======
 
-Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE>`_ for more information.
+Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE>`__ for more information.
 
 .. toctree::
     :hidden:
@@ -123,9 +123,8 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Writers <writers>
     Sampling <sampling>
     Calculators <calculators>
-    Many-body expansion <many-body-expansion>
     Descriptors <descriptors>
     Definitions <definitions>
     Examples <examples/examples>
-    API <doc/modules>
+    API <api/modules>
     Contributing <contributing>

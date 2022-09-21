@@ -52,13 +52,13 @@ Note that the ``/`` prefix is not required (``run/energy_pot`` works as well).
 Retrieving data
 ===============
 
-Reptar provides a single method, :meth:`~reptar.reptar_file.File.get`, to retrieve data from any of the supported file types.
+Reptar provides a single method, :meth:`~reptar.File.get`, to retrieve data from any of the supported file types.
 This can return any nested data stored in a loaded file including other groups.
 
 .. automethod:: reptar.File.get
     :noindex:
 
-You can also get a list of all non-group keys using :meth:`~reptar.reptar_file.File.get_keys`.
+You can also get a list of all non-group keys using :meth:`~reptar.File.get_keys`.
 
 .. automethod:: reptar.File.get_keys
     :noindex:
@@ -66,14 +66,14 @@ You can also get a list of all non-group keys using :meth:`~reptar.reptar_file.F
 Adding data
 ===========
 
-Reptar provides a single method, :meth:`~reptar.reptar_file.File.put`, to store data in any of the supported file types.
+Reptar provides a single method, :meth:`~reptar.File.put`, to store data in any of the supported file types.
 
 .. automethod:: reptar.File.put
     :noindex:
 
-Note that exdir groups must be initialized first with :meth:`~reptar.reptar_file.File.init_group` before adding data.
+Note that exdir groups must be initialized first with :meth:`~reptar.File.create_group` before adding data.
 
-.. automethod:: reptar.File.init_group
+.. automethod:: reptar.File.create_group
     :noindex:
 
 Saving
@@ -87,7 +87,7 @@ Besides exdir, all other file types need to be explicitly saved using the follow
 File conversion
 ===============
 
-A group from any file type can be directly converted to a dictionary using :meth:`~reptar.reptar_file.File.as_dict`.
+A group from any file type can be directly converted to a dictionary using :meth:`~reptar.File.as_dict`.
 
 .. automethod:: reptar.File.as_dict
     :noindex:
