@@ -23,9 +23,8 @@
 import os
 import shutil
 import numpy as np
-from .parsers import parserORCA, parserXTB
-from .utils import get_md5
-from .data import data
+from .parsers import parserORCA, parserXTB, parserASE
+from .reptar_file import File
 from pkg_resources import resource_stream
 import yaml
 
@@ -64,41 +63,73 @@ triggers = [
     (parserXTB, ["x T B"], True)
 ]
 
+def identify_trajectory(traj_path):
+    """Identifies the type of trajectory depending on a series of tests.
+    """
+    # ASE trajectory
+    try:
+        import ase
+        from ase.io.ulm import InvalidULMFileError
+        try:
+            traj = ase.io.trajectory.Trajectory(traj_path)
+            return parserASE
+        except InvalidULMFileError:
+            # Does have ase installed but is not a trajectory file.
+            pass
+    except ImportError:
+        # Do not have ase installed.
+        pass
+
 class creator:
     """Create groups from computational chemistry data.
-
-    Parameters
-    ----------
-    data : ``reptar.data``, optional
-        An initialized data object.
     """
 
-    def __init__(self, data=None):
-        if data is not None:
-            self.data = data
+    def __init__(self, rfile=None):
+        """
+        Parameters
+        ----------
+        rfile : :obj:`reptar.File`, default: ``None``
+            An initialized reptar File.
+        """
+        if rfile is not None:
+            self.rfile = rfile
     
     def load(
         self, file_path, mode='r', allow_remove=False, plugins=None
     ):
-        """Load a data file for creating/adding information.
+        """Load a reptar file for creating/adding information.
 
         Parameters
         ----------
         file_path : :obj:`str`
-            Path to a file supported by reptar. If it does not exist, then one will
-            be created if possible.
-        mode : :obj:`str`, optional
-            A file mode string that defines the read/write behavior. Defaults to
-            ``'r'``.
-        allow_remove : :obj:`bool`, optional
-            Allow the removal of exdir groups in ``w`` operation. Defaults to
-            ``False``.
-        plugins : :obj:`list`, optional
-            A list of instantiated exdir plugins. Defaults to ``None``.
+            Path to a file supported by reptar. If it does not exist, then one
+            will be created if possible.
+        mode : :obj:`str`, default: ``'r'``
+            A file mode string that defines the read/write behavior.
+        allow_remove : :obj:`bool`, default: ``False``
+            Allow the removal of exdir groups in ``w`` operation.
+        plugins : :obj:`list`, default: ``None``
+            A list of instantiated exdir plugins.
         """
-        self.data = data(
+        self.rfile = File(
             file_path, mode=mode, allow_remove=allow_remove, plugins=plugins
         )
+    
+    @property
+    def rfile(self):
+        """The reptar file to manage.
+
+        :obj:`reptar.File`
+        """
+        return self._rfile
+    
+    @rfile.setter
+    def rfile(self, value):
+        self._rfile = value
+
+    @rfile.deleter
+    def rfile(self, value):
+        del self._rfile
 
     def parse_output(
         self, out_path, geom_path=None, traj_path=None, extractors=None
@@ -109,26 +140,44 @@ class creator:
         ----------
         out_path : :obj:`str`
             Path to computational chemistry output file.
-        geom_path : :obj:`str`, optional
+        geom_path : :obj:`str`, default: ``None``
             Path to a file containing a single geometry.
-        traj_path : :obj:`str`, optional
+        traj_path : :obj:`str`, default: ``None``
             Path to a trajectory file from a geometry optimization, MD
             simulation, etc.
-        extractors : :obj:`list`, optional
+        extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
         """
+        # Handle paths.
         self.out_path = os.path.abspath(out_path)
         if geom_path is not None:
-            geom_path = os.path.abspath(geom_path)
+            self.geom_path = os.path.abspath(geom_path)
         if traj_path is not None:
-            traj_path = os.path.abspath(traj_path)
-        
-        self.geom_path = geom_path
-        self.traj_path = traj_path
+            self.traj_path = os.path.abspath(traj_path)
 
+        # Identify and run the parser.
         packageParser = identify_parser(self.out_path)
         self.parser = packageParser(
             self.out_path, geom_path=geom_path, traj_path=traj_path,
+            extractors=extractors
+        )
+        self.parsed_info = self.parser.parse()
+    
+    def parse_traj(self, traj_path, extractors=None):
+        """Parse a trajectory file.
+
+        Parameters
+        ----------
+        traj_path : :obj:`str`
+            Path to a trajectory file from a geometry optimization, MD
+            simulation, etc.
+        extractors : :obj:`list`, default: ``None``
+            Additional extractors for the parser to use.
+        """
+        self.traj_path = os.path.abspath(traj_path)
+        packageParser = identify_trajectory(self.traj_path)
+        self.parser = packageParser(
+            out_path=None, geom_path=None, traj_path=traj_path,
             extractors=extractors
         )
         self.parsed_info = self.parser.parse()
@@ -142,9 +191,10 @@ class creator:
             Key to the desired new group (including parent).
         """
         out_dir = os.path.dirname(self.out_path)
-        group = self.data.get(group_key)
+        group = self.rfile.get(group_key)
         
-        if self.data.ftype == 'exdir':
+        if self.rfile.ftype == 'exdir':
+            # Copy MD and xTB restart files if possible.
             md_restart_path = f'{out_dir}/mdrestart'
             if os.path.exists(md_restart_path):
                 raw = group.require_raw('restart_files')
@@ -160,24 +210,24 @@ class creator:
                     xtb_restart_path, os.path.join(raw_path, 'xtbrestart')
                 )
     
-    def group(
+    def from_calc(
         self, group_key, out_path=None, geom_path=None, traj_path=None,
         extractors=None
     ):
-        """Create a group using any data reptar can find from provided paths.
+        """Create a group from a supported calculation.
         
         Parameters
         ----------
         group_key : :obj:`str`
             Key to the desired new group (including parent).
-        out_path : :obj:`str`, optional
+        out_path : :obj:`str`, default: ``None``
             Path to the main log file generated by the package.
-        geom_path : :obj:`str`, optional
+        geom_path : :obj:`str`, default: ``None``
             Path to a file containing a single geometry.
-        traj_path : :obj:`str`, optional
+        traj_path : :obj:`str`, default: ``None``
             Path to a trajectory file from a geometry optimization, MD
             simulation, etc.
-        extractors : :obj:`list`, optional
+        extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
         
         Notes
@@ -186,46 +236,46 @@ class creator:
         ``geom_path`` provides an initial geometry not included in
         ``traj_path``.
         """
-        assert hasattr(self, 'data')
-        self.parse_output(
-            out_path, geom_path=geom_path, traj_path=traj_path,
-            extractors=extractors
-        )
-        parsed_info = self.parsed_info
+        assert hasattr(self, 'rfile')
 
-        if self.data.ftype == 'exdir':
-            self.data.init_group(group_key)
+        if self.rfile.ftype == 'exdir':
+            self.rfile.create_group(group_key)
+        
+        # Parsable calculations using an output file.
+        if out_path is not None:
+            self.parse_output(
+                out_path, geom_path=geom_path, traj_path=traj_path,
+                extractors=extractors
+            )
+            parsed_info = self.parsed_info
+
+        # Only a trajectory is provided. Likely coordinates or package-specific
+        # trajectory file like ASE.
+        elif out_path is None and traj_path is not None:
+            self.parse_traj(
+                traj_path, extractors=extractors
+            )
+            parsed_info = self.parsed_info
+        else:
+            return None
         
         # Loop through each category of data.
         for cat_key in parsed_info.keys():
             for data_key in parsed_info[cat_key].keys():
                 data = parsed_info[cat_key][data_key]
-                self.data.add(f'{group_key}/{data_key}', data)
+                self.rfile.put(f'{group_key}/{data_key}', data)
         
-        # MD5 stuff
-        md5 = get_md5(self.data, group_key)
-        self.data.add(f'{group_key}/md5', md5)
-        
-        try:
-            md5_arrays = get_md5(self.data, group_key, only_arrays=True)
-            self.data.add(f'{group_key}/md5_arrays', md5_arrays)
-        except Exception:
-            pass
-
-        try:
-            md5_structures = get_md5(self.data, group_key, only_structures=True)
-            self.data.add(f'{group_key}/md5_structures', md5_structures)
-        except Exception:
-            pass
-
         # Extra stuff to do depending on package.
         if self.parser.package == 'xtb':
             self._create_extras_xtb(group_key)
         
+        # MD5 stuff
+        self.rfile.update_md5(group_key)
+        
         # Adding version
-        self.data.add(f'{group_key}/reptar_version', __version__)
+        self.rfile.put(f'{group_key}/reptar_version', __version__)
 
-        return self.data
+        return self.rfile
     
     def ids(self, group_key, entity_ids, comp_ids):
         """Add ``entity_ids`` and ``comp_ids`` to a group.
@@ -234,30 +284,35 @@ class creator:
         ----------
         group_key : :obj:`str`
             Key to the group to add IDs to (including parent).
-        entity_ids : :obj:`numpy.ndarray`
+        entity_ids : :obj:`numpy.ndarray`, ndim: ``1``
             A uniquely identifying integer specifying what atoms belong to which
             entities. Entities can be a related set of atoms, molecules, or
             functional group.
-        comp_ids : :obj:`numpy.ndarray`
+        comp_ids : :obj:`numpy.ndarray`, ndim: ``1``
             Relates ``entity_id`` to a fragment label for chemical components
             or species. Labels could be ``WAT`` or ``h2o`` for water, ``MeOH``
             for methanol, ``bz`` for benzene, etc. There are no standardized
             labels for species. The index of the label is the respective
             ``entity_id``.
+        
+        Returns
+        -------
+        ``obj``
+            The reptar file group.
         """
         if isinstance(comp_ids, list):
             comp_ids = np.array(comp_ids)
         
-        self.data.add(f'{group_key}/entity_ids', entity_ids)
-        self.data.add(f'{group_key}/comp_ids', comp_ids)
+        self.rfile.put(f'{group_key}/entity_ids', entity_ids)
+        self.rfile.put(f'{group_key}/comp_ids', comp_ids)
 
         comp_ids_num = {}
         unique_comp_ids, comp_ids_freq = np.unique(comp_ids, return_counts=True)
         for comp_id, num in zip(unique_comp_ids, comp_ids_freq):
             comp_ids_num[str(comp_id)] = int(num)
         
-        self.data.add(f'{group_key}/comp_ids_num', comp_ids_num)
-        return self.data.get(group_key)
+        self.rfile.put(f'{group_key}/comp_ids_num', comp_ids_num)
+        return self.rfile.get(group_key)
     
     # TODO: Update ways we get data here.
     def definitions(self, definitions=None):
@@ -269,7 +324,7 @@ class creator:
 
         Parameters
         ----------
-        definitions : :obj:`list` [:obj:`str`], optional
+        definitions : :obj:`list` [:obj:`str`], default: ``None``
             Paths to data definition YAML files to congregate. Only the name
             (not a path) is required for ones provided by reptar.
         
@@ -304,4 +359,4 @@ class creator:
                     else:
                         pass
         
-        self.data.add('definitions', defs)
+        self.rfile.put('definitions', defs)

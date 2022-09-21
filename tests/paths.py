@@ -73,3 +73,34 @@ def get_1h2o_120meoh_prod_paths():
 def get_1h2o_120meoh_exdir_path():
     dir_path = path_xtb_641_md + '/1h2o.120meoh.pm.gfn2.exdir'
     return dir_path
+
+###############
+###   ASE   ###
+###############
+
+path_ase = '../examples/ase'
+
+###   v3.2.1   ###
+path_ase_321 = path_ase + '/v3.2.1'
+
+######   MD  ######
+path_ase_321_md = path_ase_321 + '/md'
+
+def get_1h2o_57h2o_pm_periodic_paths():
+    dir_path = path_ase_321_md + '/1h2o.57h2o.pm-periodic'
+    traj_path = dir_path + '/1h2o.57h2o.pm-periodic.traj'
+    return dir_path, traj_path
+
+################
+###   Data   ###
+################
+
+path_data = './data'
+
+def get_140h2o_samples_path():
+    exdir_path = os.path.join(path_data, '140h2o-xtb.md-samples.exdir')
+    return exdir_path
+
+def get_temelso_path():
+    exdir_path = os.path.join(path_data, 'h2o-temelso.etal.exdir')
+    return exdir_path

@@ -4,6 +4,7 @@ python:
 install:
   - pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy pyyaml
   - pip install Sphinx furo coverage bump2version versioneer
+  - pip install ase schnetpack
   - pip install pytest-cov codecov
 script:
   - pip install .

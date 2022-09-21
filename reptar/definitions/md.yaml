@@ -44,7 +44,7 @@ runtime_info:
 outputs:
   avg_energy_tot:
     description: >+
-      Average total energy during a MD simulation.
+      Average total energy during a MD simulation in Hartrees.
     storage:
       - attribute
     type: float
@@ -56,14 +56,20 @@ outputs:
     type: float
   energy_ke:
     description: >+
-      TODO
+      Kinetic energy of the system in Hartrees.
     storage:
       - attribute
       - dataset
     type: float
+  temp:
+    description: >+
+      Instantaneous temperature in Kelvin.
+    storage:
+      - dataset
+    type: float
   velcs:
     description: >+
-      TODO velocities
+      Atomic velocities in Angstrom/fs.
     storage:
       - dataset
     type: float

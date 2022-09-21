@@ -20,9 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import collections.abc
 import hashlib
 import numpy as np
-import collections.abc
+import os
 
 element_to_z = {
     'H': 1, 'He': 2, 'Li': 3, 'Be': 4, 'B': 5, 'C': 6, 'N': 7, 'O': 8, 'F': 9,
@@ -76,7 +77,7 @@ def get_files(path, expression, recursive=True):
         Specifies the directory to search.
     expression : :obj:`str`
         Expression to be tested against all file names in ``path``.
-    recursive : :obj:`bool`, optional
+    recursive : :obj:`bool`, default: ``True``
         Recursively find all files in all subdirectories.
     
     Returns
@@ -187,18 +188,20 @@ def parse_stringfile(stringfile_path):
                     data[-1].append([float(i) for i in line_split[1:]])
     return Z, comments, data
 
-def get_md5(data, group_key, only_arrays=False, only_structures=False):
+def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
     """Creates MD5 hash for a group.
 
     Parameters
     ----------
-    group : ``exdir.Object``
-        An exdir object (``File`` or ``Group``)
-    only_arrays : :obj:`bool`, optional
+    rfile : :obj:`reptar.File`
+        A reptar file.
+    group_key : :obj:`str`
+        Key to the desired group.
+    only_arrays : :obj:`bool`, default: ``False``
         Generate the MD5 hash using only arrays. This creates a data-centered
         MD5 that is not affected by data that are commonly added or
         changed. Defaults to ``False``.
-    only_structures : :obj:`bool`, optional
+    only_structures : :obj:`bool`, default: ``False``
         Generate the MD5 has with only ``atomic_numbers`` and ``geometry``
         if possible). This is more static than ``only_arrays`` and should be
         used to track sampling (i.e., ``r_prov_ids``).
@@ -213,23 +216,23 @@ def get_md5(data, group_key, only_arrays=False, only_structures=False):
 
     if only_structures:
         try:
-            Z = data.get(f'{group_key}/atomic_numbers')
+            Z = rfile.get(f'{group_key}/atomic_numbers')
             Z = Z.ravel()
             md5_hash.update(hashlib.md5(Z).digest())
         except Exception:
             pass
         try:
-            R = data.get(f'{group_key}/geometry')
+            R = rfile.get(f'{group_key}/geometry')
             R = R.ravel()
             md5_hash.update(hashlib.md5(R).digest())
         except Exception:
             pass
     else:
-        keys = data.get_keys(group_key)
+        keys = rfile.get_keys(group_key)
         for key in keys:
             if 'md5' in key:
                 continue
-            d = data.get(f'{group_key}/{key}')
+            d = rfile.get(f'{group_key}/{key}')
             if isinstance(d, np.ndarray):
                 d = d.ravel()
                 md5_hash.update(hashlib.md5(d).digest())
@@ -310,9 +313,9 @@ def center_structures(Z, R):
 
     Parameters
     ----------
-    Z : :obj:`numpy.ndarray`
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of the atoms in every structure.
-    R : :obj:`numpy.ndarray`
+    R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian atomic coordinates of data set structures.
     
     Returns
@@ -357,3 +360,41 @@ def combine_dicts(dict1, dict2):
         else:
             dict1[k] = v
     return dict1
+
+def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
+    """Find the structure indices of a parent r_prov_specs using a subset of
+    the specifications.
+
+    Useful for identifying structure indices when ``r_prov_specs_subset`` is in
+    a different order.
+    
+    Parameters
+    ----------
+    r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2``
+        Structure provenance specifications.
+    r_prov_specs_subset : :obj:`numpy.ndarray`, ndim: ``2``
+        Specifications in no particular order.
+    
+    Returns
+    -------
+    :obj:`numpy.ndarray`, ndim: ``1``
+        Structure indices of ``r_prov_specs_subset`` with respect to
+        ``r_prov_specs``. Specifications that cannot be found will have
+        ``NaN`` as their element.
+    
+    Example
+    -------
+    >>> r_prov_specs = np.array([[0, 0, 1], [0, 0, 2], [1, 1, 1]])
+    >>> r_prov_specs_subset = np.array([[0, 0, 1], [1, 1, 1]])
+    >>> find_parent_r_idxs(r_prov_specs, r_prov_specs_subset)
+    [0, 2]
+    
+    """
+    r_idxs = np.empty(r_prov_specs_subset.shape[0])
+    r_idxs[:] = np.NaN
+    for i in range(len(r_idxs)):
+        r_prov_spec = r_prov_specs_subset[i]
+        r_idx = np.where((r_prov_spec == r_prov_specs).all(1))[0]
+        if len(r_idx) == 1:
+            r_idxs[i] = r_idx[0]
+    return r_idxs.astype('int')

@@ -26,8 +26,7 @@ import shutil
 def pytest_sessionstart(session):  # pytest_configure(config)
     """Creates a tmp directory for writing files."""
     path = './tests/tmp'
-    if not os.path.exists(path):
-        os.makedirs(path)
-    else:
-        shutil.rmtree(path)           # Removes all the subdirectories!
-        os.makedirs(path)
+    if os.path.exists(path):
+        shutil.rmtree(path)
+    os.makedirs(path)
+    

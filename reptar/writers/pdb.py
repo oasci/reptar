@@ -20,81 +20,80 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .writer import reptarWriter
+import numpy as np
+import os
 from ..utils import z_to_element
-
-class pdbWriter(reptarWriter):
-    """Writes PDB file from reptar group.
-    """
-
-    def __init__(self):
-        super().__init__()
     
-    def write(
-        self, data, group_key, atom_type='HETATM', file_name=None, save_dir=None,
-        R_limits=None
-    ):
-        """Parses trajectory file and extracts information.
+def write_pdb(
+    pdb_path, Z, R, entity_ids, comp_ids, atom_type='HETATM'
+):
+    """Write PDB file containing a single structure or trajectory.
 
-        Parameters
-        ----------
-        data : ``reptar.data``
-            A reptar data object.
-        group_key : :obj:`str`
-            Key to the desired group.
-        atom_type : :obj:`str`, optional
-            The PDB atom type to be used. Should almost always be ``HETATM``.
-        file_name : :obj:`str`, optional
-            Name of the PDB file. Defaults to ``'structure'``.
-        save_dir : :obj:`str`, optional
-            Directory to save the PDB file. Defaults to the current directory.
-        R_limits : :obj:`tuple` (:obj:`int`), optional
-            Slicing limits specifying start and stop index. If ``None`` is used
-            it does not change the beginning or end of the array. For example,
-            ``(None, 100)`` would only print the first 100 structures.
-        """
-        R = data.get(f'{group_key}/geometry')
-        if R.ndim == 2:
-            R = np.array([R])
-        if R_limits is not None:
-            R = R[slice(*R_limits)]
-        Z = data.get(f'{group_key}/atomic_numbers')
-        atom_labels = [z_to_element[i] for i in Z]
-        entity_ids = data.get(f'{group_key}/entity_ids')
-        comp_ids = data.get(f'{group_key}/comp_ids')
-        
-        if file_name is None:
-            file_name = 'structure'
-        if save_dir is None:
-            save_dir = '.'
-        else:
-            if save_dir[-1] == '/':
-                save_dir = save_dir[:-1]
+    Parameters
+    ----------
+    pdb_path : :obj:`str`
+        Path to PDB file to write.
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
+        Atomic numbers of each structure in ``R``.
+    R : :obj:`numpy.ndarray`, ndim: ``3``
+        Cartesian coordinates.
+    entity_ids : :obj:`numpy.ndarray`, ndim: ``1``
+        A uniquely identifying integer specifying what atoms belong to
+        which entities. Entities can be a related set of atoms, molecules,
+        or functional group. For example, a water and methanol molecule
+        would be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
+    comp_ids : :obj:`numpy.ndarray`, ndim: ``1``
+        Relates ``entity_id`` to a fragment label for chemical components
+        or species. Labels could be ``WAT`` or ``h2o`` for water, ``MeOH``
+        for methanol, ``bz`` for benzene, etc. There are no standardized
+        labels for species. The index of the label is the respective
+        ``entity_id``. For example, a water and methanol molecule could
+        be ``['h2o', 'meoh']``.
+    atom_type : :obj:`str`, default: ``'HETATM'``
+        The PDB atom type to be used. Should almost always be ``HETATM``.
+    """ 
+    num_structures = len(R)
+    num_atoms = len(Z)
 
-        num_structures = len(R)
-        num_atoms = len(Z)
-        with open(f'{save_dir}/{file_name}.pdb', 'w') as f:
-            f.write(file_name+'\n')
-            f.write(f'{num_atoms}\n')  
-            for i_structure in range(num_structures):
-                if i_structure != 0:
-                    f.write('MODEL\n')
-                for i_atom in range(num_atoms):
-                    entity_id = entity_ids[i_atom]
-                    comp_id = comp_ids[entity_id]  # TODO: Handle component ids that are longer than three letters.
-                    atom_label = atom_labels[i_atom]
-                    coords = R[i_structure][i_atom]
-        
-                    f.write(
-                        '{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n'.format(
-                            str(atom_type), i_atom+1, str(atom_label), '',
-                            str(comp_id), 'A', entity_id+1, '',
-                            coords[0], coords[1], coords[2],
-                            1.00, '', str(atom_label), ''
-                        )
+    # Determine atom_labels once; will be the same for every structure.
+    element_symbols = [z_to_element[z] for z in Z]
+    atom_names = []
+    for i_atom in range(num_atoms):
+        entity_id = entity_ids[i_atom]
+        element_symbol = element_symbols[i_atom]
+        atom_type_count = np.count_nonzero(
+            Z[
+                np.intersect1d(
+                    np.arange(i_atom), np.argwhere(entity_ids == entity_id).T[0]
+                )
+            ] == Z[i_atom]
+        )
+        atom_names.append(element_symbol + str(atom_type_count+1))
+
+    file_name = os.path.splitext(os.path.basename(pdb_path))[0]
+    # Trims component ids to the first three letters
+    comp_ids = np.array([comp_id[:3] for comp_id in comp_ids])
+    with open(pdb_path, 'w') as f:
+        f.write(file_name+'\n')
+        f.write(f'{num_atoms}\n')  
+        for i_structure in range(num_structures):
+            if i_structure != 0:
+                f.write('MODEL\n')
+            for i_atom in range(num_atoms):
+                entity_id = entity_ids[i_atom]
+                comp_id = comp_ids[entity_id]
+                element_symbol = element_symbols[i_atom]
+                atom_name = atom_names[i_atom]
+
+                coords = R[i_structure][i_atom]
+
+                f.write(
+                    '{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n'.format(
+                        str(atom_type), i_atom+1, str(atom_name), '',
+                        str(comp_id), 'A', entity_id+1, '',
+                        coords[0], coords[1], coords[2],
+                        1.00, '', str(element_symbol), ''
                     )
-                if num_structures > 1:
-                    f.write('ENDMDL\n')
-                
-    
-    
+                )
+            if num_structures > 1:
+                f.write('ENDMDL\n')

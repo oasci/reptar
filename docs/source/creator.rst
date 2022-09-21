@@ -23,8 +23,8 @@ Reptar currently supports the following packages and jobs.
 Group creation
 ==============
 
-First, a :ref:`data<data>` object needs to be loaded into the creator.
-Reptar provides two ways to do this: by initializing a :class:`~reptar.creator` object with a :ref:`data<data>` object, or by using the :meth:`~reptar.creator.creator.load` method.
+First, a :ref:`File<file>` object needs to be loaded into the creator.
+Reptar provides two ways to do this: by initializing a :class:`~reptar.creator` object with a :ref:`File<file>` object, or by using the :meth:`~reptar.creator.creator.load` method.
 
 .. autoclass:: reptar.creator
     :noindex:
@@ -32,9 +32,13 @@ Reptar provides two ways to do this: by initializing a :class:`~reptar.creator` 
 .. automethod:: reptar.creator.load
     :noindex:
 
+.. note::
+
+    This :ref:`File<file>` object is stored in the :attr:`~reptar.creator.creator.rfile` attribute.
+
 Reptar can then parse information and create a group by specifying the paths to the relevant output files.
 
-.. automethod:: reptar.creator.group
+.. automethod:: reptar.creator.from_calc
     :noindex:
 
 Types of output files
@@ -71,7 +75,7 @@ TODO:
 .. automethod:: reptar.creator.ids
     :noindex:
 
-Data definitions
+File definitions
 ----------------
 
 TODO:

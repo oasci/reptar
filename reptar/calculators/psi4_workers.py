@@ -21,20 +21,23 @@
 # SOFTWARE.
 
 import numpy as np
-import psi4
+try:
+    import psi4
+except ImportError:
+    pass
 
 def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads, mem):
-    """Worker function for computing total electronic energy and atomic
+    r"""Worker function for computing total electronic energy and atomic
     gradients using Psi4.
 
     Parameters
     ----------
-    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`
+    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of the atoms with repsect to ``R``.
-    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`
+    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
-    R_idxs : :obj:`numpy.ndarray`
+    R_idxs : :obj:`numpy.ndarray`, ndim: ``1``
         Indices of the structures from ``R`` to compute energies and gradients
         for.
     charge : :obj:`int`
@@ -44,22 +47,22 @@ def psi4_engrad(Z, R, R_idxs, charge, mult, method, options, threads, mem):
     method : :obj:`str`
         Specifies the Psi4 method used for the gradient. For more information,
         please see `the Psi4 documentation <https://psicode.org/psi4manual/\
-        master/opt.html#geometry-optimization-w-w-optimize-and-gradient>`_ for
+        master/opt.html#geometry-optimization-w-w-optimize-and-gradient>`__ for
         your specific version.
     options : :obj:`dict`
         `Psi4 control keywords <https://psicode.org/psi4manual/master\
-        /psithoninput.html#job-control-keywords>`_ using the PsiAPI format.
+        /psithoninput.html#job-control-keywords>`__ using the PsiAPI format.
         Some common ones are ``basis``, ``e_convergence``, ``d_convergence``,
         and ``reference``.
     threads : :obj:`int`
         Number of threads for Psi4. This is almost always the number of cores
         being used for the worker. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api\
-        /psi4.core.set_num_threads.html#psi4.core.set_num_threads>`_.
+        /psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
     mem : :obj:`int`, :obj:`float`, :obj:`str`
         The amount of memory available. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api\
-        /psi4.driver.set_memory.html#psi4.driver.set_memory>`_.
+        /psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
     
     Returns
     -------

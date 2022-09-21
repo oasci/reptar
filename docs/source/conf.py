@@ -37,6 +37,8 @@ extensions = [
     'sphinx_multiversion'
 ]
 
+suppress_warnings = ['autosectionlabel.*']
+
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
@@ -51,6 +53,9 @@ intersphinx_mapping = {
     'python': ('https://docs.python.org/3', None),
     'numpy': ('https://numpy.org/doc/stable/', None)
 }
+
+# Include __init__ docstring for classes
+autoclass_content = 'both'
 
 # -- Options for HTML output -------------------------------------------------
 

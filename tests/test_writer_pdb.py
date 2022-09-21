@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Tests sampling structures from exdir Groups"""
+"""Tests writing PDB files from group"""
 
 import pytest
 import os
 import numpy as np
-from reptar import creator
-from reptar.writers import pdbWriter
+from reptar import File
+from reptar.writers import write_pdb
 
 import sys
 sys.path.append("..")
@@ -35,26 +35,26 @@ from .paths import *
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+# Source paths
+xtb_dir = './tmp/xtb'
+
 # Writing paths
-xtb_dir = './tmp/xtb/'
-os.makedirs(xtb_dir, exist_ok=True)
+writing_dir = './tmp/writing/'
+os.makedirs(writing_dir, exist_ok=True)
 
 def test_pdb_writer_1h2o_120meoh_prod():
-    """Writing short PDB file from exdir file.
-    """
+    """Writing short PDB file from exdir file"""
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
+    pdb_path = os.path.join(writing_dir, '1h2o_120meoh_md_prod_1.pdb')
 
-    create = creator()
-    create.load(exdir_path, mode='r')
+    rfile = File(exdir_path, mode='r')
 
-    writer = pdbWriter()
-    writer.write(
-        create.data, '/prod_1', file_name='prod_1',
-        save_dir='./tmp', R_limits=(None, 5)
+    Z = rfile.get('prod_1/atomic_numbers')
+    R = rfile.get('prod_1/geometry')[:5]
+    entity_ids = rfile.get('prod_1/entity_ids')
+    comp_ids = rfile.get('prod_1/comp_ids')
+    write_pdb(
+        pdb_path, Z, R, entity_ids, comp_ids
     )
 
-    # TODO: Write any tests?
-
-    os.remove('./tmp/prod_1.pdb')
-
-
+    # TODO: Write tests

@@ -26,7 +26,7 @@ import pytest
 import os
 import numpy as np
 from reptar import creator
-from reptar.utils import get_md5, gen_entity_ids, gen_comp_ids
+from reptar.utils import gen_entity_ids, gen_comp_ids
 
 import sys
 sys.path.append("..")
@@ -49,14 +49,14 @@ def test_6h2o_temelso_engrad_exdir():
     create = creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     create.definitions(definitions=['qc', 'pes', 'molprop'])
-    create.group('/engrad', out_path=out_path)
+    create.from_calc('/engrad', out_path=out_path)
 
     # Reading tests.
     create = creator()
     create.load(exdir_path, mode='r')
-    assert create.data.get('/engrad/energy_scf') == -12419.360138637763
+    assert create.rfile.get('/engrad/energy_scf') == -12419.360138637763
     assert np.array_equal(
-        create.data.get('/engrad/dipole_moment'),
+        create.rfile.get('/engrad/dipole_moment'),
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )
 
@@ -70,15 +70,15 @@ def test_6h2o_temelso_engrad_json():
     # Writing tests.
     create = creator()
     create.load(json_path, mode='w')
-    create.group('/', out_path=out_path)
-    create.data.save()
+    create.from_calc('/', out_path=out_path)
+    create.rfile.save()
 
     # Reading tests.
     create = creator()
     create.load(json_path, mode='r')
-    assert create.data.get('energy_scf') == -12419.360138637763
+    assert create.rfile.get('energy_scf') == -12419.360138637763
     assert np.array_equal(
-        create.data.get('dipole_moment'),
+        create.rfile.get('dipole_moment'),
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )
 
@@ -91,14 +91,14 @@ def test_6h2o_temelso_engrad_npz():
 
     create = creator()
     create.load(npz_path, mode='w')
-    create.group('/', out_path=out_path)
-    create.data.save()
+    create.from_calc('/', out_path=out_path)
+    create.rfile.save()
 
     # Reading tests.
     create = creator()
     create.load(npz_path, mode='r')
-    assert create.data.get('energy_scf') == -12419.360138637763
+    assert create.rfile.get('energy_scf') == -12419.360138637763
     assert np.array_equal(
-        create.data.get('dipole_moment'),
+        create.rfile.get('dipole_moment'),
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )

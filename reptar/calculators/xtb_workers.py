@@ -21,35 +21,37 @@
 # SOFTWARE.
 
 import numpy as np
-from xtb.interface import Calculator, Param
+try:
+    from xtb.interface import Calculator, Param
+except ImportError:
+    pass
 
 def xtb_engrad(
-    Z, R, R_idxs, charge, mult, calc_acc=0.1, params=Param.GFN2xTB
+    Z, R, R_idxs, charge, mult, calc_acc=0.1, params=None
 ):
-    """Ray remote function for computing total electronic energy and atomic
+    r"""Ray remote function for computing total electronic energy and atomic
     gradients using xtb.
 
     Parameters
     ----------
-    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`
+    Z : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``1``
         Atomic numbers of the atoms with repsect to ``R``.
-    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`
+    R : ``ray.ObjectRef`` of :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
-    R_idxs : :obj:`numpy.ndarray`
+    R_idxs : :obj:`numpy.ndarray`, ndim: ``1``
         Indices of the structures from ``R`` to compute energies and gradients
         for.
     charge : :obj:`int`
         Total molecular charge.
     mult : :obj:`int`
         Total multiplicity.
-    calc_acc : :obj:`str`, optional
+    calc_acc : :obj:`int`, default: ``0.1``
         Numerical accuracy for calculation. For more information, visit the
         `documentation <https://xtb-python.readthedocs.io/en/latest\
-        /general-api.html#xtb.interface.Calculator.set_accuracy>`_.
-        Defaults to ``0.1``.
-    params, optional
-        xTB parameters. Defaults to ``Param.GFN2xTB``.
+        /general-api.html#xtb.interface.Calculator.set_accuracy>`__.
+    params : default: ``None``
+        xTB parameters. Defaults to ``xtb.interface.Param.GFN2xTB`` if ``None``.
     
     Returns
     -------
@@ -66,8 +68,10 @@ def xtb_engrad(
     R = R[R_idxs]
     G = np.zeros(R.shape)
     E = np.zeros(R.shape[0])
+    if params is None:
+        params = Param.GFN2xTB
     for i in range(len(R)):
-        calc = Calculator(Param.GFN2xTB, Z, R[i], charge, n_upair_ele)
+        calc = Calculator(params, Z, R[i], charge, n_upair_ele)
         calc.set_accuracy(calc_acc)
         res = calc.singlepoint()
         g = res.get_gradient()

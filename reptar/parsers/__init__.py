@@ -1,7 +1,8 @@
 from .parser import parser
 from .orca_parser import parserORCA
 from .xtb_parser import parserXTB
+from .ase_parser import parserASE
 
 __all__ = [
-    'parser', 'parserORCA', 'parserXTB'
+    'parser', 'parserORCA', 'parserXTB', 'parserASE'
 ]
