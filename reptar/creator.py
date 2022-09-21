@@ -239,7 +239,7 @@ class creator:
         assert hasattr(self, 'rfile')
 
         if self.rfile.ftype == 'exdir':
-            self.rfile.init_group(group_key)
+            self.rfile.create_group(group_key)
         
         # Parsable calculations using an output file.
         if out_path is not None:
