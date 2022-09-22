@@ -7,7 +7,7 @@ Open data is a crucial for making this happen, but established solutions often c
 In order to make this as easy as possible, reptar provides a :class:`~reptar.creator` class that handles turning calculations into reproducible data.
 By providing a customizable parser framework, reptar will automatically take care of storing the essential information while leaving the option for the user to easily parse their own data.
 
-Reptar currently supports the following packages and jobs.
+Reptar supports the following packages and jobs with their respective tests.
 
 .. table::
     :align: center
@@ -15,8 +15,9 @@ Reptar currently supports the following packages and jobs.
     ====================  ======================= ========================= ============= ============= ======================
     **Package**           **Single point energy** **Geometry optimization** **Frequency** **Gradients** **Molecular dynamics**
     --------------------  ----------------------- ------------------------- ------------- ------------- ----------------------
+    ASE                                           X                                                     X                          
     ORCA                  X                                                               X                
-    xTB                                                                                                 X                                                          
+    xTB                                           X                                                     X                                                          
     ====================  ======================= ========================= ============= ============= ======================
 
 
