@@ -30,7 +30,7 @@ from reptar.utils import gen_entity_ids, gen_comp_ids
 
 import sys
 sys.path.append("..")
-from .paths import get_1h2o_120meoh_eq_paths, get_1h2o_120meoh_prod_paths
+from .paths import get_1h2o_120meoh_eq_paths, get_1h2o_120meoh_prod_paths, get_50h2o_opt_paths
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -182,3 +182,26 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
     assert npz_file.get('energy_pot')[0] == -991.881189902216
     assert npz_file.get('energy_pot')[-1] == -991.818996146108
     assert npz_file.get('wall_potential')[0]['sphere_radius'] == 12.500003
+
+@pytest.mark.order(0)
+def test_50h2o_opt_to_exdir():
+    """
+    """
+    dir_path, _, out_path, traj_path = get_50h2o_opt_paths()
+    exdir_path = os.path.join(xtb_dir, '50h2o-opt.exdir')
+
+    create_exdir = creator()
+    create_exdir.load(exdir_path, mode='w')
+    group_key = '0-gfn2-opt'
+    rfile = create_exdir.from_calc(
+        group_key, out_path=out_path, traj_path=traj_path
+    )
+    
+    assert rfile.get(f'{group_key}/geometry').shape == (443, 150, 3)
+    assert rfile.get(f'{group_key}/geometry')[0][3][1] == 0.444317
+    assert rfile.get(f'{group_key}/geometry')[1][3][1] == 0.52429930506397
+    assert rfile.get(f'{group_key}/geometry')[-1][-1][2] == 5.45681802010986
+    assert rfile.get(f'{group_key}/energy_scf').shape == (443,)
+    assert rfile.get(f'{group_key}/energy_scf')[0] == -253.585934933030
+    assert rfile.get(f'{group_key}/energy_scf')[1] == -253.6792539
+    assert rfile.get(f'{group_key}/energy_scf')[-1] == -254.459412930153

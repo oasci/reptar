@@ -230,6 +230,11 @@ class creator:
         extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
         
+        Returns
+        -------
+        :obj:`reptar.File`
+            The entire reptar file after creating the new group.
+        
         Notes
         -----
         If both ``geom_path`` and ``traj_path`` are provided, it is assumed that

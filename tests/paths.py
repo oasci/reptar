@@ -48,6 +48,19 @@ def get_6h2o_temelso_pr_engrad():
 
 path_xtb = '../examples/xtb'
 
+###   v6.5.1   ###
+path_xtb_651 = path_xtb + '/v6.5.1'
+
+######   OPT  ######
+path_xtb_651_opt = os.path.join(path_xtb_651, 'opt')
+
+def get_50h2o_opt_paths():
+    dir_path = os.path.join(path_xtb_651_opt, '50h2o.gfn2')
+    calc_path = os.path.join(dir_path, '50h2o-gfn2-opt')
+    out_path = os.path.join(calc_path, '50h2o-gfn2-opt.out')
+    traj_path = os.path.join(calc_path, '50h2o-gfn2-opt.log')
+    return dir_path, calc_path, out_path, traj_path
+
 ###   v6.4.1   ###
 path_xtb_641 = path_xtb + '/v6.4.1'
 

@@ -79,15 +79,19 @@ class parserXTB(parser):
             Z.extend(Z_traj)
             R.extend(R_traj)
 
-            energy_pot = []
-            # grad_norm = []
-            for comment in comments:
-                comment = comment.split()
-                energy_pot.append(float(comment[1]))
-                # grad_norm.append(float(comment[3]))
-            self.parsed_info['outputs']['energy_pot'].extend(
-                energy_pot
-            )
+            # Adds potential energies from trajectory file for MD simulations.
+            if self.parsed_info['runtime_info']['calc_driver'] == 'molecular_dynamics':
+                energy_pot = []
+                # grad_norm = []
+                for comment in comments:
+                    comment = comment.split()
+                    energy_pot.append(float(comment[1]))
+                    # grad_norm.append(float(comment[3]))
+                if 'energy_pot' not in self.parsed_info['outputs'].keys():
+                    self.parsed_info['outputs']['energy_pot'] = []
+                self.parsed_info['outputs']['energy_pot'].extend(
+                    energy_pot
+                )
         
         if len(set(tuple(i) for i in Z)) == 1:
             Z = Z[0]
@@ -118,8 +122,8 @@ class parserXTB(parser):
         # Note that we overwrite this data later, but it is better to ensure
         # consistency than punting to later in the code.
         if self.parsed_info['runtime_info']['calc_driver'] == 'optimization':
-            del self.parsed_info['properties']['energy_scf'][1]
-            del self.parsed_info['properties']['energy_scf'][-2]
+            del self.parsed_info['outputs']['energy_scf'][1]
+            del self.parsed_info['outputs']['energy_scf'][-2]
         
         if 'success' not in self.parsed_info['runtime_info'].keys():
             self.parsed_info['runtime_info']['success'] = False
