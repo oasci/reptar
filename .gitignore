@@ -111,3 +111,6 @@ timer.dat
 
 # Pytest tmp
 tests/tmp/
+
+# Reptar data
+examples/reptar-data

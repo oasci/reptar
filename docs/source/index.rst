@@ -26,7 +26,7 @@ A tool for storing and analyzing manuscript-scale computational chemistry data.
 .. image:: https://img.shields.io/github/license/aalexmmaldonado/reptar
     :target: https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE
 
-**Disclaimer:** Reptar is under active development and not ready for use.
+**Disclaimer:** reptar is under active development and is not suitable for production.
 
 Motivation
 ==========
@@ -79,16 +79,16 @@ Note that ``gradients`` and ``/gradients`` would translate to the same value (``
 Workflow
 ========
 
-Calculation to reptar file
---------------------------
+Storing data
+------------
 
 We refer to a "reptar file" as any file that can be used with the ``reptar.File`` class.
 Creating a reptar file starts by having a set of data files generated from some calculation.
 Paths to these data files are passed into ``reptar.creator.from_calc`` that extracts information using a ``reptar.parser`` class.
 Information parsed from these files, ``parsed_info``, is then used to populate a ``reptar.File`` object.
 
-Reptar file data
-----------------
+Accessing data
+--------------
 
 Data can be added or retrieved using the same interface regardless of the underlying file format (e.g., exdir, JSON, and npz).
 The only thing required is the respective ``key`` specifying where its stored.
@@ -96,8 +96,8 @@ Then, ``File.put(key, data)`` can be used to add ``data`` to the reptar file and
 
 When working with JSON and npz files, ``File.save()`` must be explicitly called after any modification.
 
-Reptar file to other format
----------------------------
+Writing to other formats
+------------------------
 
 Other packages often require data to be formatted in their own specific way.
 Reptar provides ways to extract data from reptar files using ``File.get(key)`` and passing it into the desired ``reptar.writer`` function.
