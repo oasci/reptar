@@ -8,6 +8,7 @@ install:
   - pip install pytest-cov codecov
 script:
   - pip install .
+  - git clone https://github.com/aalexmmaldonado/reptar-data ./examples/reptar-data
   - pytest --cov=./reptar
 after_success:
   - ./docs/build-docs.sh
