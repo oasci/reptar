@@ -89,6 +89,22 @@ def get_1h2o_120meoh_exdir_path():
     dir_path = os.path.join(path_xtb_641_md, '1h2o.120meoh.pm.gfn2.exdir')
     return dir_path
 
+#################
+###   CREST   ###
+#################
+
+path_crest = os.path.join(data_path, 'crest')
+
+###   v2.12   ###
+path_crest_212 = os.path.join(path_crest, 'v2.12')
+
+def get_crest_50h2o_nci_paths():
+    calc_path = os.path.join(path_crest_212, '50h2o-nci')
+    out_path = os.path.join(calc_path, '50h2o-gfn2-crest.out')
+    conf_path = os.path.join(calc_path, 'crest_conformers.xyz')
+    rot_path = os.path.join(calc_path, 'crest_rotamers.xyz')
+    return calc_path, out_path, conf_path, rot_path
+
 ###############
 ###   ASE   ###
 ###############

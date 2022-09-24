@@ -5,6 +5,7 @@
 
     extractor
     extractorASE
+    extractorCREST
     extractorORCA
     extractorXTB
 

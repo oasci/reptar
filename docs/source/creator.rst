@@ -15,11 +15,20 @@ Reptar supports the following packages and jobs with their respective tests.
     ====================  ======================= ========================= ============= ============= ======================
     **Package**           **Single point energy** **Geometry optimization** **Frequency** **Gradients** **Molecular dynamics**
     --------------------  ----------------------- ------------------------- ------------- ------------- ----------------------
-    ASE                                           X                                                     X                          
-    ORCA                  X                                                               X                
-    xTB                                           X                                                     X                                                          
+    `ASE`_                                        X                                                     X                          
+    `ORCA`_               X                                                               X                
+    `xTB`_                                        X                                                     X                                                          
     ====================  ======================= ========================= ============= ============= ======================
 
+Other calculation types and packages other than the ones above are supported as well.
+
+`CREST`_
+   - Non-covalent cluster conformer and rotamer searches.
+
+.. _ASE: https://wiki.fysik.dtu.dk/ase/
+.. _ORCA: https://sites.google.com/site/orcainputlibrary/home
+.. _xTB: https://xtb-docs.readthedocs.io/en/latest/contents.html
+.. _CREST: https://crest-lab.github.io/crest-docs/
 
 Group creation
 ==============
@@ -45,7 +54,7 @@ Reptar can then parse information and create a group by specifying the paths to 
 Types of output files
 ---------------------
 
-There are currently three supported types of output files used (that also depend on the package).
+There are currently three basic types of output files used.
 
 .. glossary::
 
@@ -58,9 +67,11 @@ There are currently three supported types of output files used (that also depend
     ``traj_path``
         The trajectory specifying the structural evolution during a job (e.g., geometry optimization or MD simulation).
 
-.. note::
+.. attention::
     
-    If both ``geom_path`` and ``traj_path`` are provided, the structure defined in ``geom_path`` is considered the first structure.
+    If both ``geom_path`` and ``traj_path`` are provided, the structure defined in ``geom_path`` is considered the initial structure.
+
+Some package parsers (e.g., :class:`reptar.parsers.parserCREST`) require other output files.
 
 Additional data
 ===============
