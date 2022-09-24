@@ -23,7 +23,7 @@
 import os
 import shutil
 import numpy as np
-from .parsers import parserORCA, parserXTB, parserASE
+from .parsers import parserORCA, parserXTB, parserASE, parserCREST
 from .reptar_file import File
 from pkg_resources import resource_stream
 import yaml
@@ -59,8 +59,9 @@ def identify_parser(out_path):
 
 # Triggers to identify output files.
 triggers = [
-    (parserORCA, ["O   R   C   A"], True),
-    (parserXTB, ["x T B"], True)
+    (parserORCA, ['O   R   C   A'], True),
+    (parserXTB, ['x T B'], True),
+    (parserCREST, ['C R E S T'], True),
 ]
 
 def identify_trajectory(traj_path):
@@ -132,9 +133,13 @@ class creator:
         del self._rfile
 
     def parse_output(
-        self, out_path, geom_path=None, traj_path=None, extractors=None
+        self, out_path, geom_path=None, traj_path=None, extractors=None,
+        **kwargs
     ):
-        """Parse output file using cclib and custom parser.
+        r"""Parse output file using cclib and custom parser.
+
+        Sets the ``reptar.creator.parser`` and ``reptar.creator.parsed_info``
+        attributes.
 
         Parameters
         ----------
@@ -147,6 +152,8 @@ class creator:
             simulation, etc.
         extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
+        **kwargs
+            Additional paths to output files. Passed to the package's parser.
         """
         # Handle paths.
         self.out_path = os.path.abspath(out_path)
@@ -159,7 +166,7 @@ class creator:
         packageParser = identify_parser(self.out_path)
         self.parser = packageParser(
             self.out_path, geom_path=geom_path, traj_path=traj_path,
-            extractors=extractors
+            extractors=extractors, **kwargs
         )
         self.parsed_info = self.parser.parse()
     
@@ -212,7 +219,7 @@ class creator:
     
     def from_calc(
         self, group_key, out_path=None, geom_path=None, traj_path=None,
-        extractors=None
+        extractors=None, **kwargs
     ):
         """Create a group from a supported calculation.
         
@@ -229,6 +236,9 @@ class creator:
             simulation, etc.
         extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
+        **kwargs
+            Additional paths to output files. Passed into
+            ``creator.parse_output()``.
         
         Returns
         -------
@@ -250,7 +260,7 @@ class creator:
         if out_path is not None:
             self.parse_output(
                 out_path, geom_path=geom_path, traj_path=traj_path,
-                extractors=extractors
+                extractors=extractors, **kwargs
             )
             parsed_info = self.parsed_info
 

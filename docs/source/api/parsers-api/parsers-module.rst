@@ -5,5 +5,6 @@
 
     parser
     parserASE
+    parserCREST
     parserORCA
     parserXTB

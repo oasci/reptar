@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Support for CREST conformer and rotamer searches.
 - Support for Atomic Simulation Environment (ASE) trajectories.
 - Determine structure indices with respect to structure provenance specifications.
 - Simple structural descriptors.
