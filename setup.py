@@ -6,7 +6,7 @@ from setuptools import setup, find_packages
 import versioneer
 
 requirements = [
-    'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy', 'qcelemental'
+    'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy', 'qcelemental', 'pyyaml'
 ]
 
 setup_requirements = ['versioneer']
