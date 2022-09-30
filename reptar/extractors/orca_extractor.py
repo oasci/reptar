@@ -42,6 +42,7 @@ class extractorORCA(extractor):
             (lambda line: True if ('MULLIKEN ATOMIC CHARGES' == line.strip()) else False, 'mulliken_charges'),
             (lambda line: True if ('LOEWDIN ATOMIC CHARGES' == line.strip()) else False, 'loewdin_charges'),
             (lambda line: True if ('DIPOLE MOMENT' == line.strip()) else False, 'dipole'),
+            (lambda line: True if ('FINAL SINGLE POINT ENERGY' in line) else False, 'final_energy_ele'),
             (lambda line: True if ('Geometry convergence' in line and '----------------------' in line) else False, 'geo_conv'),
             (lambda line: True if ('VIBRATIONAL FREQUENCIES' == line[:23]) else False, 'frequencies'),
             (lambda line: True if ('NORMAL MODES' == line[:12]) else False, 'normal_modes'),
@@ -611,14 +612,34 @@ class extractorORCA(extractor):
             )
             """
             line = next(f)
+    
+    def final_energy_ele(self, f, line):
+        """Final electronic energy with all requested contributions.
 
+        Parameters
+        ----------
+        f : :obj:`io.TextIOWrapper`
+            Buffered text stream of the file.
+        line : :obj:`str`
+            Parsed line from ``f``.
+        
+        Notes
+        -----
+        Example trigger text for this extractor.
+
+        .. code-block:: text
+
+            -------------------------   --------------------
+            FINAL SINGLE POINT ENERGY      -457.961331933491
+            -------------------------   --------------------
+        """
+        if 'energy_ele' not in self.parsed_info['outputs'].keys():
+            self.parsed_info['outputs']['energy_ele'] = []
+        energy_ele = line.split()[-1]
+        self.parsed_info['outputs']['energy_ele'].append(float(energy_ele))
     
     def dipole(self, f, line):
         """The X, Y, and Z dipole components.
-
-        Final QCJSON specifies the method of the dipole moment (e.g.,
-        ``'scf_dipole_moment'``, ``'mp2_dipole_moment'``). For now, we just
-        store it as ``'dipole_moment'``.
 
         Parameters
         ----------
