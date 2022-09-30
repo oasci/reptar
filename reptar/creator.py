@@ -217,33 +217,6 @@ class creator:
                     xtb_restart_path, os.path.join(raw_path, 'xtbrestart')
                 )
     
-    def from_dict(self, group_key, data, nested=False):
-        """Adds all keys and values from :obj:`dict` to group.
-
-        Used to add ``parsed_info`` and other custom data to groups. This is
-        automatically called by ``creator.from_calc()``.
-
-        Parameters
-        ----------
-        group_key : :obj:`str`
-            Key to the desired new group.
-        data : :obj:`dict`
-            Key-value pairs of data to add to group. For example, the
-            ``parsed_info`` attribute after parsing a calculation.
-        nested : :obj:`bool`, default: ``True``
-            If``data`` contains one level of nested dictionaries. This is the
-            case for ``parsed_info``.
-        """
-        if nested:
-            for cat_key in data.keys():
-                for data_key in data[cat_key].keys():
-                    value = data[cat_key][data_key]
-                    self.rfile.put(f'{group_key}/{data_key}', value)
-        else:
-            for data_key in data.keys():
-                value = data[data_key]
-                self.rfile.put(f'{group_key}/{data_key}', value)
-    
     def from_calc(
         self, group_key, out_path=None, geom_path=None, traj_path=None,
         extractors=None, **kwargs
@@ -302,7 +275,7 @@ class creator:
             return None
         
         # Add all data to group.
-        self.from_dict(group_key, parsed_info, nested=True)
+        self.rfile.put_all(group_key, parsed_info, nested=True)
         
         # Extra stuff to do depending on package.
         if self.parser.package == 'xtb':

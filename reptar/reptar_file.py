@@ -317,15 +317,14 @@ class File:
     def simplify_iter_data(self, data):
         """Simplify iterative data if possible.
 
-        Attempts to simplify iterative objects by the type and/or number of
-        elements. For example, iterative data with only one element will return
-        just that element.
+        Checks contents of lists, tuples, and arrays to see if we can simplify.
+        For example, if a list has only one element this method will return
+        just the element.
 
-        This is mainly used when adding data to a file. When parsing data we
-        will not know if there will be multiple values of certain data (e.g.,
-        multiple single point energies) until we finish parsing. Thus, we assume
-        there will be multiple values while parsing then simplify any iterative
-        objects at the end.
+        This becomes important when adding parsed data to a file. During
+        parsing, there is a possibility we could have one or more of the same
+        property. We instead assume there will be multiple. Then as a
+        postprocessing step we simplify cases where only one value was parsed.
         
         Parameters
         ----------
@@ -467,6 +466,37 @@ class File:
             self._put_to_exdir(key, data)
         elif self.ftype == 'json' or self.ftype == 'npz':
             self._put_to_dict(key, data)
+    
+    def put_all(self, group_key, data, nested=False):
+        """Adds all data from :obj:`dict` to group.
+
+        This is just a loop over :meth:`~reptar.File.put` for each key-value pair.
+
+        Parameters
+        ----------
+        group_key : :obj:`str`
+            Key to the desired new group.
+        data : :obj:`dict`
+            Key-value pairs of data to add to group. For example, the
+            ``parsed_info`` attribute after parsing a calculation.
+        nested : :obj:`bool`, default: ``True``
+            If``data`` contains one level of nested dictionaries. This is the
+            case for ``parsed_info``.
+        
+        Returns
+        -------
+        """
+        if nested:
+            for cat_key in data.keys():
+                for data_key in data[cat_key].keys():
+                    value = data[cat_key][data_key]
+                    self.put(f'{group_key}/{data_key}', value)
+        else:
+            for data_key in data.keys():
+                value = data[data_key]
+                self.put(f'{group_key}/{data_key}', value)
+        
+        return self.File_
     
     def _iter_dict(self, dic):
         """Iterate over nested dictionary.
