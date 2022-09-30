@@ -183,7 +183,7 @@ class parser(ABC):
                 
                 if attr == 'scfenergies':
                     parsed_info['outputs']['energy_scf'] = \
-                        cclib_data.scfenergies
+                        cclib_data.scfenergies / 27.21138505  # eV -> Eh
                 
                 if attr == 'nbasis':
                     parsed_info['runtime_info']['basis_n_func'] = \

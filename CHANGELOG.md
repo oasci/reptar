@@ -20,6 +20,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Convert scf energies from cclib to Hartree by default.
 - Moved example calculations to [reptar-data](https://github.com/aalexmmaldonado/reptar-data).
 - Manual ``api`` documents with ``sphinx-multiversion``.
 - Raise ``RuntimeError`` when key does not exist in exdir.
