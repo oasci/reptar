@@ -92,11 +92,13 @@ Creating a reptar file starts by having a set of data files generated from some 
 Paths to these data files are passed into ``reptar.creator.from_calc`` that extracts information using a ``reptar.parser`` class.
 Information parsed from these files, ``parsed_info``, is then used to populate a ``reptar.File`` object.
 
+Data can also be manually added by using ``File.put(key, data)`` where ``key`` is a string specifying where to store the data.
+
 ## Accessing data
 
 Data can be added or retrieved using the same interface regardless of the underlying file format (e.g., exdir, JSON, and npz).
-The only thing required is the respective ``key`` specifying where its stored.
-Then, ``File.put(key, data)`` can be used to add ``data`` to the reptar file and ``File.get(key)`` can retrieve it.
+The only thing required is the respective ``key`` specifying where it is stored.
+Then, ``File.get(key)`` can retrieve the data.
 
 When working with JSON and npz files, ``File.save()`` must be explicitly called after any modification.
 
