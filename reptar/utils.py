@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import collections.abc
+import itertools
 import hashlib
 import numpy as np
 import os
@@ -398,3 +399,47 @@ def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
         if len(r_idx) == 1:
             r_idxs[i] = r_idx[0]
     return r_idxs.astype('int')
+
+def gen_combs(sets, replacement=False):
+    """Generate combinations from multiple sets.
+
+    Parameters
+    ----------
+    sets : :obj:`list` or :obj:`tuple`, ndim: ``2``
+        An iterable that contains multiple sets.
+    replacement : :obj:`bool`, default: ``False``
+        Allows repeated combinations in different order. If ``False``,
+        ``(0, 1)`` and ``(1, 0)`` could be possible if there is overlap
+        in the sets.
+    
+    Yields
+    ------
+    :obj:`tuple`
+        Combination of one element per set in ``sets``.
+    
+    Examples
+    --------
+    >>> sets = ((0,) (1, 2), (1, 2, 3))
+    >>> combs = gen_combs(sets)
+    >>> for comb in combs:
+    ...     print(comb)
+    ... 
+    (0, 1, 2)
+    (0, 1, 3)
+    (0, 2, 3)
+    """
+    combs = itertools.product(*sets)
+    # Excludes combinations that have repeats (e.g., (0, 0) and (1, 1. 2)).
+    combs = itertools.filterfalse(
+        lambda x: len(set(x)) <  len(x), combs
+    )
+    # At this point, there are still duplicates in this iterator.
+    # For example, (0, 1) and (1, 0) are still included.
+    for comb in combs:
+        # Sorts options is to avoid duplicate structures.
+        # For example, if combination is (1, 0) the sorted version is not
+        # equal and will not be included.
+        if not replacement:
+            if sorted(comb) != list(comb):
+                continue
+        yield comb

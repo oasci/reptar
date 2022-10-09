@@ -10,6 +10,7 @@
     find_parent_r_idxs
     get_files
     get_md5
+    gen_combs
     gen_comp_ids
     gen_entity_ids
     parse_stringfile

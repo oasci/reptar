@@ -45,6 +45,11 @@ This clears up previous ambiguous usage of "data" to refer to both a file and va
 - Many-body expansion routines were incorporated into [mbGDML](https://keithgroup.github.io/mbGDML/index.html).
 - ``textWriter`` class (really had no purpose).
 
+### Fixed
+
+- ``_generate_structure_samples`` when ``quantity`` is all.
+Would incorrectly generate combinations with replacement.
+
 ## [0.0.2] - 2022-05-03
 
 ### Added

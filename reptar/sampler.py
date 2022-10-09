@@ -24,7 +24,7 @@ import itertools
 import numpy as np
 from random import randrange, choice
 from .utils import center_structures as get_center_structures
-from .utils import get_md5
+from .utils import get_md5, gen_combs
 from . import __version__
 
 def _initialize_structure_sampling_arrays(
@@ -79,7 +79,7 @@ def _initialize_structure_sampling_arrays(
         # Determine the maximum amount of structures we can sample from a single
         # source structure.
         combs_per_structure = sum(
-            1 for _ in itertools.product(*entity_ids_samples)
+            1 for _ in _generate_structure_samples(quantity, [0], entity_ids_samples)
         )
         size_quantity = int(combs_per_structure*len(R_source))
         sampling_all = True
@@ -188,8 +188,8 @@ def _generate_structure_samples(
     # Sampling all possible structures.
     elif quantity == 'all':
         for R_selection_idx in structure_idxs:
-            #all_combinations = unique_prod(*entity_ids_samples)
-            for comb in itertools.product(*entity_ids_samples):
+            combs = gen_combs(entity_ids_samples, replacement=False)
+            for comb in combs:
                 if len(comb) != len(set(comb)):
                     continue
                 selection = [R_selection_idx] + list(comb)
