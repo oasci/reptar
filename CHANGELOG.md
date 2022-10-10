@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Saver class for long calculations.
 - Parse final electronic energies from ORCA.
 - Support for CREST conformer and rotamer searches.
 - Support for Atomic Simulation Environment (ASE) trajectories.
@@ -21,6 +22,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Calculators now use keyword arguments.
+- Cleaned up ray calculations.
 - Convert scf energies from cclib to Hartree by default.
 - Moved example calculations to [reptar-data](https://github.com/aalexmmaldonado/reptar-data).
 - Manual ``api`` documents with ``sphinx-multiversion``.

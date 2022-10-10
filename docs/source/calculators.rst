@@ -76,13 +76,17 @@ The following example demonstrates a parallelized workflow for computing MP2/cc-
     }
     psi4_threads = n_cpus_worker
     psi4_mem = '2 GB'
-    psi4_args = (charge, mult, psi4_method, psi4_options, psi4_threads, psi4_mem)
+    psi4_kwargs = {
+        'charge': charge, 'mult': mult, 'psi4_method': psi4_method,
+        'psi4_options': psi4_options, 'psi4_threads': psi4_threads,
+        'psi4_mem': psi4_mem
+    }
 
     # Creating engrad driver.
     max_calcs = 20  # Manually trims R to the first 20 structures (can remove).
     engrads = driverENGRAD(
-        Z, R, E, G, psi4_engrad, psi4_args, n_cpus,
-        n_cpus_worker=n_cpus_worker, end_slice=max_calcs
+        Z, R, E, G, psi4_engrad, psi4_kwargs, n_cpus,
+        n_cpus_worker=n_cpus_worker, chunk_size=2, end_slice=max_calcs
     )
 
     # Run parallel Psi4 calculations
