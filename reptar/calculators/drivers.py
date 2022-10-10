@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ..utils import chunk_iterable
 import math
 import numpy as np
 try:
@@ -33,14 +34,14 @@ class driverENGRAD:
     Creates and manages ray tasks using specified worker.
     """
     def __init__(
-        self, Z, R, E, G, worker, worker_args, n_cpus, n_cpus_worker=4,
-        start_slice=None, end_slice=None
+        self, Z, R, E, G, worker, worker_kwargs, n_cpus, n_cpus_worker=1,
+        chunk_size=50, start_slice=None, end_slice=None
     ):
         """
         Parameters
         ----------
         Z : :obj:`numpy.ndarray`, ndim: ``1``
-            Atomic numbers of the atoms with repsect to ``R``. Should have shape
+            Atomic numbers of the atoms with respect to ``R``. Should have shape
             ``(i,)`` where ``i`` is the number of atoms in the system.
         R : :obj:`numpy.ndarray`, ndim: ``3``
             Cartesian coordinates of all structures in group. Should have shape
@@ -54,25 +55,26 @@ class driverENGRAD:
         G : :obj:`numpy.ndarray`, ndim: ``3``
             Atomic gradients of all structures in ``R``. Gradients that need to be
             calculated should have ``NaN`` in the corresponding elements. Should
-            have the same shape as ``R``. Units are in Hartrees/Angstroms
+            have the same shape as ``R``. Units are in Hartrees/Angstrom.
         worker : ``callable``
             The desired worker function to compute energy and gradients. It should
             be the same as any previous calculations. The ``ray.remote`` decorator
             will be applied automatically.
-        worker_args : :obj:`tuple`, ndim: ``1``
-            The other required arguments for the worker function after ``Z``,
+        worker_kwargs : :obj:`tuple`, ndim: ``1``
+            The other keyword arguments for the worker function after ``Z``,
             ``R``, and ``R_idxs``.
         n_cpus : :obj:`int`
-            Total number of CPUs to use for all workers (same as ``num_cpus``
-            when initalizing ray).
-        n_cpus_worker : :obj:`int`, default: ``4``
-            Number of CPUs to dedicate to each worker.
+            Total number of CPUs we can use for ray tasks.
+        n_cpus_worker : :obj:`int`, default: ``1``
+            Number of CPUs to dedicate to each task.
+        chunk_size : :obj:`int`, default: ``50``
+            Number of calculations per task to do. This should be enough to make
+            the ray task overhead significantly less than calculations.
         start_slice : :obj:`int`, default: ``None``
             Trims ``R`` to start at this index.
         end_slice : :obj:`int`, default: ``None``
             Trims ``R`` to end at this index.
         """
-        assert ray.is_initialized()
         # Check arrays (obsessively)
         assert R.ndim == 3
         assert Z.shape[0] == R.shape[1]
@@ -87,18 +89,22 @@ class driverENGRAD:
         self.R = ray.put(R)
         self.E = E
         self.G = G
-        self.worker_args = worker_args
+        self.worker = worker
+        self.worker_kwargs = worker_kwargs
         self.start_slice = start_slice
         self.end_slice = end_slice
-        self.n_parallel_workers = math.floor(n_cpus/n_cpus_worker)
-        
-        # Initializes all ray tasks.
-        worker = ray.remote(worker)
-        self.worker_list = [
-            worker.options(num_cpus=n_cpus_worker).remote(
-                self.Z, self.R, R_idxs, *worker_args
-            ) for R_idxs in self._task_R_idxs()
-        ]
+
+        self.n_cpus = n_cpus
+        self.n_cpus_worker = n_cpus_worker
+        self.chunk_size = chunk_size
+        self.n_workers = math.floor(n_cpus/n_cpus_worker)
+
+        if not ray.is_initialized():
+            # Try to connect to already running ray service (from ray cli).
+            try:
+                ray.init(address='auto')
+            except ConnectionError:
+                ray.init(num_cpus=num_cpus)
     
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
@@ -114,39 +120,13 @@ class driverENGRAD:
         idx_todo = np.argwhere(np.isnan(E))[:,0]
         return idx_todo
     
-    def _task_R_idxs(self):
-        """Generates the assigned structures for each worker.
+    def run(self, saver=None):
+        """Run the calculations.
 
-        Yields
-        ------
-        :obj:`numpy.ndarray`
-            ``R`` indices for the worker.
-        """
-        if not hasattr(self, 'task_size'):
-            self.task_size = self._task_size()
-            if self.task_size == 0:
-                e = 'No calculations to run (task_size is zero)'
-                raise ValueError(e)
-        task_size = self.task_size
-        idx_todo = self._idx_todo()
-        for i in range(0, len(idx_todo), task_size):
-            r_idxs = idx_todo[i:i + task_size]
-            yield r_idxs
-    
-    def _task_size(self):
-        """Determines the number of calculations per worker.
-        
-        Returns
-        -------
-        :obj:`int`
-            Desired number of calculations per work.
-        """
-        n_todo = len(self._idx_todo())
-        task_size = math.ceil(n_todo/self.n_parallel_workers)
-        return task_size
-    
-    def run(self):
-        """Run the workers.
+        Parameters
+        ----------
+        saver : :obj:`reptar.calculators.save.Saver`, optional
+            Save data after every worker finishes.
 
         Returns
         -------
@@ -155,12 +135,36 @@ class driverENGRAD:
         :obj:`numpy.ndarray`
             The atomic gradients array, ``E``, after all computations.
         """
-        worker_list = self.worker_list
-        while len(worker_list) != 0:
-            done_id, worker_list = ray.wait(worker_list)
+        worker = ray.remote(self.worker)
+        idxs_todo = self._idx_todo()
+        chunker = chunk_iterable(idxs_todo, self.chunk_size)
+
+        # Initialize ray workers
+        workers = []
+        def add_worker(workers, chunker):
+            try:
+                chunk = list(next(chunker))
+                workers.append(
+                    worker.options(num_cpus=self.n_cpus_worker).remote(
+                        chunk, self.Z, self.R, **self.worker_kwargs
+                    )
+                )
+            except StopIteration:
+                pass
+        for _ in range(self.n_workers):
+            add_worker(workers, chunker)
+        
+        # Start calculations
+        while len(workers) != 0:
+            done_id, workers = ray.wait(workers)
             
-            R_idx_done, E_done, G_done = ray.get(done_id)[0]
-            self.E[R_idx_done] = E_done
-            self.G[R_idx_done] = G_done
+            idx_done, E_done, G_done = ray.get(done_id)[0]
+            self.E[idx_done] = E_done
+            self.G[idx_done] = G_done
+
+            if saver is not None:
+                saver.save((self.E, self.G))
+            
+            add_worker(workers, chunker)
         
         return self.E, self.G

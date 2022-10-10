@@ -443,3 +443,22 @@ def gen_combs(sets, replacement=False):
             if sorted(comb) != list(comb):
                 continue
         yield comb
+
+def chunk_iterable(iterable, n):
+    """Chunk an iterable into ``n`` objects.
+
+    Parameters
+    ----------
+    iterable : ``iterable``
+        Iterable to chunk.
+    n : :obj:`int`
+        Size of each chunk.
+    
+    Yields
+    ------
+    :obj:`tuple`
+        ``n`` objects.
+    """
+    iterator = iter(iterable)
+    for first in iterator:
+        yield tuple(itertools.chain([first], itertools.islice(iterator, n - 1)))
