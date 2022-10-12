@@ -86,6 +86,9 @@ class driverENGRAD:
         assert R.shape[2] == 3
         assert G.shape[2] == 3
 
+        if not ray.is_initialized():
+            ray.init(address=ray_address)
+
         # Storing arrays and other information
         self.Z = ray.put(Z)
         self.R = ray.put(R)
@@ -100,9 +103,6 @@ class driverENGRAD:
         self.n_cpus_worker = n_cpus_worker
         self.chunk_size = chunk_size
         self.n_workers = math.floor(n_cpus/n_cpus_worker)
-
-        if not ray.is_initialized():
-            ray.init(address=ray_address)
     
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
