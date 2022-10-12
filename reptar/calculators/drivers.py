@@ -35,7 +35,7 @@ class driverENGRAD:
     """
     def __init__(
         self, Z, R, E, G, worker, worker_kwargs, n_cpus, n_cpus_worker=1,
-        chunk_size=50, start_slice=None, end_slice=None
+        chunk_size=50, start_slice=None, end_slice=None, ray_address='auto'
     ):
         """
         Parameters
@@ -74,6 +74,8 @@ class driverENGRAD:
             Trims ``R`` to start at this index.
         end_slice : :obj:`int`, default: ``None``
             Trims ``R`` to end at this index.
+        ray_address : :obj:`str`, default: ``'auto'``
+            Ray cluster address to connect to.
         """
         # Check arrays (obsessively)
         assert R.ndim == 3
@@ -100,11 +102,7 @@ class driverENGRAD:
         self.n_workers = math.floor(n_cpus/n_cpus_worker)
 
         if not ray.is_initialized():
-            # Try to connect to already running ray service (from ray cli).
-            try:
-                ray.init(address='auto')
-            except ConnectionError:
-                ray.init(num_cpus=num_cpus)
+            ray.init(address=ray_address)
     
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
