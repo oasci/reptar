@@ -93,7 +93,7 @@ class File:
                 # Since everything is stored in arrays, we clean up array data.
                 for k,v in File_.items():
                     if self._is_iter(v):
-                        v = self.simplify_iter_data(v)
+                        v = self.simplify_iter_data(v, k.split('/')[-1])
                         File_[k] = v
             else:
                 File_ = {}
@@ -314,12 +314,16 @@ class File:
         else:
             return False
     
-    def simplify_iter_data(self, data):
+    def simplify_iter_data(self, data, data_key):
         """Simplify iterative data if possible.
 
         Checks contents of lists, tuples, and arrays to see if we can simplify.
         For example, if a list has only one element this method will return
         just the element.
+
+        Some exceptions are used to maintain consistency. For example, atomic
+        numbers will always remain a 1D array even if there is only one
+        atom.
 
         This becomes important when adding parsed data to a file. During
         parsing, there is a possibility we could have one or more of the same
@@ -343,6 +347,8 @@ class File:
             # just store it as an attribute. However, we have
             # to be careful when the single item is an array.
             if len(data) == 1:
+                if data_key in ['atomic_numbers', 'entity_ids', 'comp_ids']:
+                    return data
                 data = data[0]
             # If all the items are not all strings then we make
             # the dataset.
@@ -362,6 +368,8 @@ class File:
         else:
             # If only one item we store it as a value.
             if data.shape == (1,):
+                if data_key in ['atomic_numbers', 'entity_ids', 'comp_ids']:
+                    return data
                 data = data[0].item()
         
         return data
@@ -386,7 +394,7 @@ class File:
         
         is_iter = self._is_iter(data)
         if is_iter:
-            data = self.simplify_iter_data(data)
+            data = self.simplify_iter_data(data, keys[-1])
 
         add_dic = {keys[-1]: data}
         for key in reversed(keys[:-1]):
@@ -427,7 +435,7 @@ class File:
         # We make anything else an exdir dataset.
         is_iter = self._is_iter(data)
         if is_iter:
-            data = self.simplify_iter_data(data)
+            data = self.simplify_iter_data(data, data_key)
             if isinstance(data, np.ndarray):
                 store_as = 'dset'
             else:
