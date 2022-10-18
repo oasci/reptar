@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- ``psi4_energy`` worker.
 - Saver class for long calculations.
 - Parse final electronic energies from ORCA.
 - Support for CREST conformer and rotamer searches.
