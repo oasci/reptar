@@ -50,6 +50,7 @@ This clears up previous ambiguous usage of "data" to refer to both a file and va
 
 ### Fixed
 
+- ``psi4_engrad`` no longer translates and rotates molecules to origin (which would result in incorrect gradients).
 - ``_generate_structure_samples`` when ``quantity`` is all.
 Would incorrectly generate combinations with replacement.
 

@@ -73,6 +73,13 @@ def psi4_engrad(
     :obj:`numpy.ndarray`
         Atomic gradients of computed structures in the same order as ``idxs``.
         Units of Hartree/Angstrom.
+    
+    Notes
+    -----
+    Psi4 uses QCElemental to build molecules from arrays.
+    There is some postprocessing in the `from_arrays routine <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.molparse.from_arrays.html#from-arrays>`__.
+    QCElemental will translate and rotate molecules which affects computed gradients.
+    Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
     """
     psi4.core.set_num_threads(threads)
     psi4.set_memory(mem)
@@ -84,7 +91,7 @@ def psi4_engrad(
     for i in range(len(R)):
         mol = psi4.core.Molecule.from_arrays(
             geom=R[i], elez=Z, molecular_charge=charge,
-            molecular_multiplicity=mult
+            molecular_multiplicity=mult, fix_com=True, fix_orientation=True
         )
         g, wfn_mp2 = psi4.gradient(method, molecule=mol, return_wfn=True)
         g = g.to_array()
