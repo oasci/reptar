@@ -5,8 +5,8 @@
 <h4 align="center" style="padding-bottom: 0.5em;"><a href="https://www.aalexmmaldonado.com/reptar/">Documentation</a></h4>
 
 <p align="center">
-    <a href="https://app.travis-ci.com/github/aalexmmaldonado/reptar" target="_blank">
-        <img src="https://app.travis-ci.com/aalexmmaldonado/reptar.svg?branch=main" alt="Travis Build">
+    <a href="https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml">
+        <img src="https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml/badge.svg" alt="Build Status ">
     </a>
     <a href="https://codecov.io/gh/aalexmmaldonado/reptar">
         <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD" alt="codecov">
