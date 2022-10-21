@@ -19,13 +19,13 @@ jobs:
 
     steps:
     - name: Checkout reptar
-        uses: actions/checkout@v2.5.0
+      uses: actions/checkout@v2.5.0
     - name: Checkout reptar-data
       uses: actions/checkout@v2.5.0
       with:
         repository: 'aalexmmaldonado/reptar-data'
         lfs: true
-        path: './examples'
+        path: reptar/examples/reptar-data
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
