@@ -4,8 +4,14 @@ jobs:
   run:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
+      - name: Checkout reptar
+        uses: actions/checkout@v2.5.0
+      - name: Checkout reptar-data
+        uses: actions/checkout@v2.5.0
+        with:
+          repository: 'aalexmmaldonado/reptar-data'
+          lfs: true
+          path: './examples'
       - name: Set up Python 3.10
         uses: actions/setup-python@v2
         with:
@@ -15,7 +21,7 @@ jobs:
           python -m pip install --upgrade pip
           python -m pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental pyyaml
           python -m pip install ase
-          python -m pip install pytest-cov
+          python -m pip install pytest-cov pytest-order
       - name: Run tests and collect coverage
         run: pytest --cov 
       - name: Upload coverage to Codecov
