@@ -11,7 +11,9 @@ requirements = [
 
 setup_requirements = ['versioneer']
 
-test_requirements = requirements.append(['pytest', 'pytest-order'])
+test_requirements = requirements.append(
+    ['pytest', 'pytest-order', 'ase']
+)
 
 setup(
     install_requires=requirements,
