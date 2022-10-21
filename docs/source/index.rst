@@ -4,9 +4,9 @@ Reptar
 
 A tool for storing and analyzing manuscript-scale computational chemistry data.
 
-.. image:: https://app.travis-ci.com/aalexmmaldonado/reptar.svg?branch=main
-    :target: https://app.travis-ci.com/github/aalexmmaldonado/reptar
-    :alt: Travis-CI build status
+.. image:: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml/badge.svg
+    :target: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml
+    :alt: Python package build
 
 .. image:: https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD
     :target: https://codecov.io/gh/aalexmmaldonado/reptar
