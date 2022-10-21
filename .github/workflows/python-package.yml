@@ -25,7 +25,7 @@ jobs:
       with:
         repository: 'aalexmmaldonado/reptar-data'
         lfs: true
-        path: reptar/examples/reptar-data
+        path: examples/reptar-data
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v3
       with:
