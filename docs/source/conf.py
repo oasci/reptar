@@ -85,3 +85,9 @@ html_sidebars = {
         'versions.html',
     ],
 }
+
+# Manually copy over files to the root. These can then be referenced outside of the
+# download directive.
+html_extra_path = [
+    './files/30h2o-md/30h2o-gfn2-opt.xyz',
+]

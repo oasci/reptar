@@ -101,7 +101,7 @@ def _initialize_structure_sampling_arrays(
     sampled_R_empty = np.empty((size_quantity, number_of_atoms, 3))
     sampled_R_empty[:] = np.nan
     if R is None:
-        idx_selection = 0  # Starting index of the newley sampled structures.
+        idx_selection = 0  # Starting index of the newly sampled structures.
         R = sampled_R_empty
     else:
         idx_selection = len(R)
