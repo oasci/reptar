@@ -17,7 +17,7 @@ For example, below is the input file for a NVT MD simulation of 30 water molecul
 
 .. raw:: html
 
-    <script src="http://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
+    <script src="https://3Dmol.csb.pitt.edu/build/3Dmol-min.js"></script>
 
     <div style="height: 500px; width: 500px;"
     class='viewer_3Dmoljs' data-datatype='xyz'
