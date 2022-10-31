@@ -198,8 +198,8 @@ def _generate_structure_samples(
 def sample_structures(
     source_file, source_key, quantity, comp_labels, r_prov_ids, source_r_prov_specs,
     Z=None, R=None, r_prov_specs=None, structure_idxs=None,
-    criteria=None, z_slice=None, cutoff=None, center_structures=False,
-    sampling_updates=False, copy_EG=False, E=None, G=None,
+    criteria=None, center_structures=False, sampling_updates=False,
+    copy_EG=False, E=None, G=None,
     energy_label_source='energy_ele', grad_label_source='grads'
 ):
     """Randomly samples structures from a source.
@@ -238,24 +238,16 @@ def sample_structures(
     structure_idxs : :obj:`tuple`, ndim: ``1``, default: ``None``
         Possible structure indices in the source to sample from.
         ``None`` means we can sample from any structure.
-    criteria : ``callable``, default: ``None``
-        Structure criteria during the sampling procedure. If ``None``, then no
-        criteria will be used.
-    z_slice : :obj:`numpy.ndarray`, ndim: ``1``, default: ``None``
-        Indices of the atoms to be used for the cutoff calculation. Defaults
-        to ``[]`` is no criteria is selected or if it is not required for
-        the selected criteria.
-    cutoff : :obj:`list`, ndim: ``1``, default: ``None``
-        Distance cutoff between the atoms selected by ``z_slice``. Must be
-        in the same units (e.g., Angstrom) as ``R``. Defaults to ``None`` if
-        no criteria is selected or a cutoff is not desired.
+    criteria : ``reptar.descriptor.criteria``, default: ``None``
+        Criteria object used to accept or reject a structure based on some
+        descriptor.
     center_structures : :obj:`bool`, default: ``False``
         Move the center of mass of each structure to the origin thereby 
         centering each structure (and losing the original coordinates of
         the structure).
     sampling_updates : :obj:`bool`, default: ``False``
         Will print for every 100 successfully sampled structures.
-    copy_EG : :obj:`bool`, default: ``True``
+    copy_EG : :obj:`bool`, default: ``False``
         Creates datasets for energies and gradients (using ``energy_label`` and 
         ``grad_label``) and attempts to copy data from the source if possible.
         If no compatible data is available it will just store :obj:`numpy.NaN`.
@@ -295,6 +287,8 @@ def sample_structures(
     The order of ``atomic_numbers`` must be the same for each entity.
     For example, if a water molecule with label ``'h2o'`` has ``atomic_numbers``
     of ``[8, 1, 1]`` then every other entity must have the same.
+
+    ``entity_ids`` are automatically included in ``criteria.accept()``.
     """
     # Get data from structure source.
     Z_source = source_file.get(f'{source_key}/atomic_numbers')
@@ -394,17 +388,17 @@ def sample_structures(
                 break
 
         ###   Sampling updates   ###
-        # Prints progress information every 500 successful samples.
+        # Prints progress information every 1000 successful samples.
         if sampling_updates:
             if not sampling_all:
-                if num_accepted%500 == 0 \
+                if num_accepted%1000 == 0 \
                     and num_accepted != prev_num_accepted_print:
                     prev_num_accepted_print = num_accepted
-                    print(f'Successfully sampled {num_accepted} structures')
+                    print(f'Sampled {num_accepted} structures')
             else:
-                if (num_accepted+1)%500 == 0:
+                if (num_accepted+1)%1000 == 0:
                     print(
-                        f'Successfully sampled {num_accepted+1} structures'
+                        f'Sampled {num_accepted+1} structures'
                     )
         
         ###   Handle r_prov_specs   ###
@@ -422,7 +416,7 @@ def sample_structures(
         if (r_prov_specs[:idx_selection]==selection).all(1).any():
             continue
         
-        ###   Checks structure criteria   ###
+        ###   Checks structure descriptor   ###
         # Creates mask for atoms in the selection.
         r_index_source = selection[1]
         atom_idx_mask_gen = (
@@ -432,14 +426,12 @@ def sample_structures(
             np.array(list(atom_idx_mask_gen)), axis=0
         )
 
-        entity_ids_selection = entity_ids_source[atom_idx_mask]
         r_selection = R_source[r_index_source][atom_idx_mask]
+        entity_ids_selection = entity_ids_source[atom_idx_mask]
+        desc_kwargs = {'entity_ids': entity_ids_selection}
         if criteria is not None:
-            # TODO: Update criteria to test for multiple structure (i.e., 3 dimensions)
-            accept_r, _ = criteria(
-                Z, r_selection, z_slice, entity_ids_selection, cutoff
-            )
-            # If criteria is not met, will not include sample.
+            accept_r, _ = criteria.accept(Z, r_selection, **desc_kwargs)
+            # If descriptor is not met, will not include sample.
             if not accept_r:
                 continue
         
@@ -470,8 +462,7 @@ def sample_structures(
 
 def add_structures_to_group(
     source_file, source_key, dest_file, dest_key, quantity,
-    comp_labels, structure_idxs=None, criteria=None,
-    z_slice=[], cutoff=[], center_structures=False, sampling_updates=False,
+    comp_labels, structure_idxs=None, criteria=None, center_structures=False, sampling_updates=False,
     copy_EG=False, energy_labels=('energy_ele',), grad_labels=('grads',),
     write=True
 ):
@@ -499,19 +490,12 @@ def add_structures_to_group(
     structure_idxs : :obj:`tuple`, ndim: ``1``, default: ``None``
         Possible structure indices in the source to sample from.
         ``None`` means we can sample from any structure.
-    criteria : ``callable``, default: ``None``
-        Structure criteria during the sampling procedure. If ``None``, then no
-        criteria will be used.
-    z_slice : :obj:`numpy.ndarray`, ndim: ``1``, default: ``None``
-        Indices of the atoms to be used for the cutoff calculation.
-    cutoff : :obj:`list`, ndim: ``1``, default: ``None``
-        Distance cutoff between the atoms selected by ``z_slice``. Must be
-        in the same units (e.g., Angstrom) as ``R``. Defaults to ``None`` if
-        no criteria is selected or a cutoff is not desired.
+    criteria : ``reptar.descriptor.criteria``, default: ``None``
+        Criteria object used to accept or reject a structure based on some
+        descriptor.
     center_structures : :obj:`bool`, default: ``False``
         Move the center of mass of each structure to the origin thereby 
-        centering each structure (and losing the original coordinates of
-        the structure).
+        centering each structure (and losing the original coordinates).
     sampling_updates : :obj:`bool`, default: ``False``
         Will print for every 100 successfully sampled structures.
     copy_EG : :obj:`bool`, default: ``True``
@@ -535,6 +519,8 @@ def add_structures_to_group(
     -----
     Nothing is saved until all checks are passed to avoid irreversible changes
     to already existing ``Group``.
+
+    ``entity_ids`` are automatically included in ``criteria.accept()``.
     """
     # Grabs data from destination if exists.
     try:
@@ -665,9 +651,9 @@ def add_structures_to_group(
     Z, R, E, G, entity_ids_sampled, r_prov_specs = sample_structures(
         source_file, source_key, quantity, comp_labels, new_r_prov_ids,
         source_r_prov_specs, Z=Z, R=R, r_prov_specs=r_prov_specs,
-        structure_idxs=structure_idxs, criteria=criteria, z_slice=z_slice,
-        cutoff=cutoff, center_structures=center_structures,
-        sampling_updates=sampling_updates, copy_EG=copy_EG, E=E, G=G,
+        structure_idxs=structure_idxs, criteria=criteria,
+        center_structures=center_structures, sampling_updates=sampling_updates,
+        copy_EG=copy_EG, E=E, G=G,
         energy_label_source=energy_labels[0], grad_label_source=grad_labels[0]
     )
 
