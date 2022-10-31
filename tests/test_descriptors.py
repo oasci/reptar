@@ -47,13 +47,11 @@ def test_max_atom_pair_dist_3h2o():
     Z = exdir_file.get(f'{group_key}/atomic_numbers')
     R = exdir_file.get(f'{group_key}/geometry')
 
-    desc_args = (Z, R)
-    v_desc, accept = descriptors.criteria(
-        descriptors.max_atom_pair_dist, desc_args, 9.0
-    )
+    criteria = descriptors.Criteria(descriptors.max_atom_pair_dist, {}, 9.0)
+    accept, v_desc = criteria.accept(Z, R)
 
-    assert v_desc[i_test] == 8.96801858001878
     assert accept[i_test] == True
+    assert v_desc[i_test] == 8.96801858001878
 
 def test_com_distance_sum_3h2o():
     """Computing 2-body energy and gradient contributions.
@@ -68,10 +66,10 @@ def test_com_distance_sum_3h2o():
     R = exdir_file.get(f'{group_key}/geometry')
     entity_ids = exdir_file.get(f'{group_key}/entity_ids')
 
-    desc_args = (Z, R, entity_ids)
-    v_desc, accept = descriptors.criteria(
-        descriptors.com_distance_sum, desc_args, 9.0
+    criteria = descriptors.Criteria(
+        descriptors.com_distance_sum, {'entity_ids': entity_ids}, 9.0
     )
+    accept, v_desc = criteria.accept(Z, R)
 
-    assert v_desc[i_test] == 9.020805161988154
     assert accept[i_test] == False
+    assert v_desc[i_test] == 9.020805161988154

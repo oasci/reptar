@@ -20,11 +20,60 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Implementations of structural criteria."""
+"""Implementations of structural descriptors and criteria."""
 
 import itertools
 import numpy as np
 from .utils import z_to_mass
+
+class Criteria(object):
+    """Descriptor criteria for accepting a structure based on a descriptor
+    and cutoff.
+    """
+
+    def __init__(self, desc, desc_kwargs, cutoff):
+        """
+        Parameters
+        ----------
+        desc : ``callable``
+            Computes the descriptor. First two arguments must be ``Z`` and
+            ``R``.
+        desc_kwargs : :obj:`dict`
+            Keyword arguments for the descriptor function after ``Z`` and ``R``.
+            This can be an empty tuple.
+        """
+        self.desc = desc
+        self.desc_kwargs = desc_kwargs
+        self.cutoff = cutoff
+    
+    def accept(self, Z, R, **kwargs):
+        """Determine if we accept the structure.
+
+        Parameters
+        ----------
+        Z : :obj:`numpy.ndarray`
+            Atomic numbers of the structure.
+        R : :obj:`numpy.ndarray`, ndim: ``2`` or ``3``
+            Cartesian coordinates of the structure.
+        kwargs
+            Additional keyword arguments to pass into the descriptor function.
+        
+        Returns
+        -------
+        :obj:`bool` or :obj:`numpy.ndarray`
+            If the descriptor is less than the cutoff.
+        :obj:`float` or :obj:`numpy.ndarray`
+            The value of the descriptor.
+        """
+        if R.ndim == 2:
+            R = R[None, ...]
+        n_R = R.shape[0]
+        desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
+        accept_r = (desc_v < self.cutoff)
+        if n_R == 1:
+            accept_r = accept_r[0]
+            desc_v = desc_v[0]
+        return accept_r, desc_v
 
 def get_center_of_mass(Z, R):
     """Compute the center of mass.
@@ -49,29 +98,6 @@ def get_center_of_mass(Z, R):
     R_masses = np.full(R.shape, masses)
     cm_structure = np.average(R, axis=1, weights=R_masses)
     return cm_structure
-
-def criteria(desc, desc_args, cutoff):
-    """Evaluates some descriptor criteria.
-
-    Parameters
-    ----------
-    desc : ``callable``
-        A descriptor function.
-    desc_args : :obj:`tuple`, ndim: ``1``
-        All of the descriptor function arguments.
-    cutoff : :obj:`float`
-        Descriptor cutoff.
-    
-    Returns
-    -------
-    :obj:`numpy.ndarray`, ndim: ``1``
-        Descriptor values.
-    :obj:`numpy.ndarray`, ndim: ``1``
-        If the descriptor value is less than or equal to the cutoff.
-    """
-    v_desc = desc(*desc_args)
-    accept = v_desc <= cutoff
-    return v_desc, accept
 
 def max_atom_pair_dist(Z, R):
     """The largest atomic pairwise distance.
