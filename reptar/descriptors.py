@@ -41,8 +41,9 @@ class Criteria(object):
         desc_kwargs : :obj:`dict`
             Keyword arguments for the descriptor function after ``Z`` and ``R``.
             This can be an empty tuple.
-        cutoff : :obj:`float`
-            Cutoff to accept or reject a structure.
+        cutoff : :obj:`float` or ``None``
+            Cutoff to accept or reject a structure. If ``None``, all structures
+            are accepted.
         bound : :obj:`str`, default: ``'upper'``
             What bound does the cutoff represent? ``'upper'`` means any
             descriptor that is equal to or larger than the cutoff will be
@@ -79,10 +80,13 @@ class Criteria(object):
             R = R[None, ...]
         n_R = R.shape[0]
         desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
-        if self.bound == 'upper':
-            accept_r = (desc_v < self.cutoff)
-        else:  # lower
-            accept_r = (desc_v > self.cutoff)
+        if self.cutoff is not None:
+            if self.bound == 'upper':
+                accept_r = (desc_v < self.cutoff)
+            else:  # lower
+                accept_r = (desc_v > self.cutoff)
+        else:
+            accept_r = np.full(desc_v.shape, True)
         if n_R == 1:
             accept_r = accept_r[0]
             desc_v = desc_v[0]
