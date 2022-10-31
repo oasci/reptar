@@ -700,7 +700,7 @@ def add_structures_to_group(
                     dest_file.put(f'{dest_key}/{g_label}', g_data_new)
         dest_file.put(f'{dest_key}/entity_ids', entity_ids)
         dest_file.put(f'{dest_key}/r_prov_ids', new_r_prov_ids)
-        dest_file.put(f'{dest_key}/r_prov_specs', r_prov_specs)
+        dest_file.put(f'{dest_key}/r_prov_specs', r_prov_specs.astype(np.int64))
         dest_file.put(f'{dest_key}/r_centered', center_structures)
         dest_file.put(f'{dest_key}/comp_ids', comp_ids)
 
