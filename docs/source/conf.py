@@ -34,7 +34,8 @@ extensions = [
     'sphinx.ext.intersphinx',
     'sphinx.ext.viewcode',
     'sphinx.ext.autosectionlabel',
-    'sphinx_multiversion'
+    'sphinx_multiversion',
+    'sphinx_design',
 ]
 
 suppress_warnings = ['autosectionlabel.*']
@@ -90,4 +91,5 @@ html_sidebars = {
 # download directive.
 html_extra_path = [
     './files/30h2o-md/30h2o-gfn2-opt.xyz',
+    './files/30h2o-md/30h2o.pm.xyz',
 ]
