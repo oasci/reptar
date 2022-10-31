@@ -31,7 +31,7 @@ class Criteria(object):
     and cutoff.
     """
 
-    def __init__(self, desc, desc_kwargs, cutoff):
+    def __init__(self, desc, desc_kwargs, cutoff, bound='upper'):
         """
         Parameters
         ----------
@@ -41,10 +41,20 @@ class Criteria(object):
         desc_kwargs : :obj:`dict`
             Keyword arguments for the descriptor function after ``Z`` and ``R``.
             This can be an empty tuple.
+        cutoff : :obj:`float`
+            Cutoff to accept or reject a structure.
+        bound : :obj:`str`, default: ``'upper'``
+            What bound does the cutoff represent? ``'upper'`` means any
+            descriptor that is equal to or larger than the cutoff will be
+            rejected. ``'lower'`` means anything equal to or smaller than the
+            cutoff.
         """
         self.desc = desc
         self.desc_kwargs = desc_kwargs
         self.cutoff = cutoff
+        bound = bound.lower()
+        assert bound in ['upper', 'lower']
+        self.bound = bound
     
     def accept(self, Z, R, **kwargs):
         """Determine if we accept the structure.
@@ -69,7 +79,10 @@ class Criteria(object):
             R = R[None, ...]
         n_R = R.shape[0]
         desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
-        accept_r = (desc_v < self.cutoff)
+        if self.bound == 'upper':
+            accept_r = (desc_v < self.cutoff)
+        else:  # lower
+            accept_r = (desc_v > self.cutoff)
         if n_R == 1:
             accept_r = accept_r[0]
             desc_v = desc_v[0]
