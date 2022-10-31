@@ -41,18 +41,21 @@ class Criteria(object):
         desc_kwargs : :obj:`dict`
             Keyword arguments for the descriptor function after ``Z`` and ``R``.
             This can be an empty tuple.
-        cutoff : :obj:`float` or ``None``
+        cutoff : :obj:`float`, ``None``, or :obj:`tuple`
             Cutoff to accept or reject a structure. If ``None``, all structures
-            are accepted.
+            are accepted. If a :obj:`tuple` is provided, structures that are
+            within these cutoffs will be accepted.
         bound : :obj:`str`, default: ``'upper'``
             What bound does the cutoff represent? ``'upper'`` means any
             descriptor that is equal to or larger than the cutoff will be
             rejected. ``'lower'`` means anything equal to or smaller than the
-            cutoff.
+            cutoff. If ``cutoff`` is a tuple, we ignore this.
         """
         self.desc = desc
         self.desc_kwargs = desc_kwargs
         self.cutoff = cutoff
+        if isinstance(self.cutoff, tuple) or isinstance(self.cutoff, list):
+            self.cutoff = sorted(self.cutoff)  # Will always be a list.
         bound = bound.lower()
         assert bound in ['upper', 'lower']
         self.bound = bound
@@ -81,10 +84,13 @@ class Criteria(object):
         n_R = R.shape[0]
         desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
         if self.cutoff is not None:
-            if self.bound == 'upper':
-                accept_r = (desc_v < self.cutoff)
-            else:  # lower
-                accept_r = (desc_v > self.cutoff)
+            if isinstance(self.cutoff, list):
+                accept_r = (self.cutoff[0] < desc_v) & (desc_v < self.cutoff[1])
+            else:
+                if self.bound == 'upper':
+                    accept_r = (desc_v < self.cutoff)
+                else:  # lower
+                    accept_r = (desc_v > self.cutoff)
         else:
             accept_r = np.full(desc_v.shape, True)
         if n_R == 1:
