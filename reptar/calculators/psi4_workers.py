@@ -91,7 +91,6 @@ def psi4_energy(
         E[i] = psi4.energy(method, molecule=mol, return_wfn=False)
     return idxs, E
 
-
 def psi4_engrad(
     idxs, Z, R, charge=0, mult=1, method='mp2', options=None, threads=1,
     mem='1 GB'

@@ -385,12 +385,6 @@ def sample_structures(
     ):
         num_generated += 1
 
-        ###   Sampling maintenance   ###
-        # Ends sampling for number quantities.
-        if not sampling_all:
-            if num_accepted == int(quantity):
-                break
-
         ###   Sampling updates   ###
         # Prints progress information every 1000 successful samples.
         if sampling_updates:
@@ -404,6 +398,12 @@ def sample_structures(
                     print(
                         f'Sampled {num_accepted+1} structures'
                     )
+
+        ###   Sampling maintenance   ###
+        # Ends sampling for number quantities.
+        if not sampling_all:
+            if num_accepted == int(quantity):
+                break
         
         ###   Handle r_prov_specs   ###
         # Determines the correct prov specification based on the sample and source.
