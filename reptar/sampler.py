@@ -367,6 +367,10 @@ def sample_structures(
         entity_ids_source, entity_ids_samples, copy_EG
     )
 
+    # This array is used to check if there any repeated structures.
+    # TODO: cannot think of a better way to do this.
+    r_prov_specs_check = np.copy(r_prov_specs)
+
     ###   Sampling counters   ###
     # TODO: clean up progress printing (look into MDAnalysis rdf)
     num_generated = 0  # Number of structures we generated (includes rejected).
@@ -407,13 +411,37 @@ def sample_structures(
         # Just need to retrieve the source_r_prov_id of a source that is
         # from sampled structures.
         if source_r_prov_specs is not None:
-            source_r_prov_id = source_r_prov_specs[selection[0]][0]
+            orig_r_prov_specs = source_r_prov_specs[selection[0]]
+            source_r_prov_id = orig_r_prov_specs[0]
+
+            selection_r_prov_spec = np.empty(r_prov_specs[0].shape, dtype=np.float64)  # Converts to int64 later
+            # Original r_prov_id and structure index
+            selection_r_prov_spec[:2] = orig_r_prov_specs[:2] 
+            # Original entity_ids
+            selection_r_prov_spec[2:] = orig_r_prov_specs[2:][selection[1:]]
+        
         selection.insert(0, source_r_prov_id)
 
 
         # Check if selection is already in the destination.
-        # If it is, we do not include this selection and try again.
-        if (r_prov_specs[:idx_selection]==selection).all(1).any():
+        # This is done by checking if the selection r_prov_spec is already included.
+        # If it is, we do not include this selection and sample again.
+        # We do this by adding the appropriately sorted selection_r_prov_spec to
+        # a test array (we only sort the entity_ids).
+        if source_r_prov_specs is not None:
+            r_prov_specs_check[idx_selection][:2] = selection_r_prov_spec[:2]
+            r_prov_specs_check[idx_selection][2:] = np.sort(
+                selection_r_prov_spec[2:], axis=0
+            )
+        else:
+            r_prov_specs_check[idx_selection][:2] = selection[:2]
+            r_prov_specs_check[idx_selection][2:] = np.sort(
+                selection[2:], axis=0
+            )
+        # This quickly checks if the sorted r_prov_spec is already included.
+        # NOTE that this is one of the main reason sampling gets slower with
+        # more structures (more to check).
+        if (r_prov_specs_check[:idx_selection]==r_prov_specs_check[idx_selection]).all(1).any():
             continue
         
         ###   Checks structure descriptor   ###
@@ -435,10 +463,14 @@ def sample_structures(
             if not accept_r:
                 continue
         
-        
         ###   SUCCESSFUL SAMPLE   ###
         R[idx_selection] = r_selection
-        r_prov_specs[idx_selection] = selection
+        
+        if source_r_prov_specs is not None:
+            r_prov_specs[idx_selection] = selection_r_prov_spec
+        else:
+            r_prov_specs[idx_selection] = selection
+        
         if copy_EG:
             if E_source is not None:
                 E[idx_selection] = E_source[r_index_source]
