@@ -9,6 +9,8 @@ To directly add structures to a group you can use the driver function :func:`~re
 Examples
 ========
 
+.. _30h2o sampling tutorial:
+
 Water fragments from MD
 -----------------------
 

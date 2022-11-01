@@ -36,6 +36,7 @@ extensions = [
     'sphinx.ext.autosectionlabel',
     'sphinx_multiversion',
     'sphinx_design',
+    'sphinxcontrib.mermaid',
 ]
 
 suppress_warnings = ['autosectionlabel.*']
