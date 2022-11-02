@@ -17,9 +17,6 @@
     <a href="https://doi.org/10.5281/zenodo.6508586">
         <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.6508586.svg" alt="DOI">
     </a>
-    <a href="https://lgtm.com/projects/g/aalexmmaldonado/reptar/context:python">
-        <img src="https://img.shields.io/lgtm/grade/python/g/aalexmmaldonado/reptar.svg?logo=lgtm&logoWidth=18" alt="Language grade: Python">
-    </a>
     <a href="https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE" target="_blank">
         <img src="https://img.shields.io/github/license/aalexmmaldonado/reptar" alt="License">
     </a>

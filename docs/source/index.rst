@@ -20,9 +20,6 @@ A tool for storing and analyzing manuscript-scale computational chemistry data.
    :target: https://doi.org/10.5281/zenodo.6508586
    :alt: Zenodo doi
 
-.. image:: https://img.shields.io/lgtm/grade/python/g/aalexmmaldonado/reptar.svg?logo=lgtm&logoWidth=18
-    :target: https://lgtm.com/projects/g/aalexmmaldonado/reptar/context:python
-
 .. image:: https://img.shields.io/github/license/aalexmmaldonado/reptar
     :target: https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE
 
