@@ -19,9 +19,8 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          python -m pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental pyyaml pint==0.19.2
-          python -m pip install ase
-          python -m pip install pytest-cov pytest-order
+          python -m pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml
+          python -m pip install pytest-cov pytest-order ase
       - name: Run tests and collect coverage
         run: pytest --cov 
       - name: Upload coverage to Codecov
