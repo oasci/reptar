@@ -5,10 +5,9 @@
 from setuptools import setup, find_packages
 import versioneer
 
-# NOTE `qcelemental` uses `from pint import quantity` which was removed in v0.20.0 of `pint`.
 requirements = [
-    'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy', 'qcelemental', 'pyyaml',
-    'pint<=0.19.2'
+    'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy', 'qcelemental>=0.25.1',
+    'pyyaml'
 ]
 
 setup_requirements = ['versioneer']
