@@ -84,6 +84,7 @@ class Criteria(object):
         n_R = R.shape[0]
         if self.cutoff is None:
             accept_r = np.full(n_R, True)
+            return accept_r, None
         else:
             desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
             if isinstance(self.cutoff, list):
@@ -93,10 +94,10 @@ class Criteria(object):
                     accept_r = (desc_v < self.cutoff)
                 else:  # lower
                     accept_r = (desc_v > self.cutoff)
-        if n_R == 1:
-            accept_r = accept_r[0]
-            desc_v = desc_v[0]
-        return accept_r, desc_v
+            if n_R == 1:
+                accept_r = accept_r[0]
+                desc_v = desc_v[0]
+            return accept_r, desc_v
 
 def get_center_of_mass(Z, R):
     """Compute the center of mass.
