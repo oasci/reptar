@@ -82,8 +82,10 @@ class Criteria(object):
         if R.ndim == 2:
             R = R[None, ...]
         n_R = R.shape[0]
-        desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
-        if self.cutoff is not None:
+        if self.cutoff is None:
+            accept_r = np.full(n_R, True)
+        else:
+            desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
             if isinstance(self.cutoff, list):
                 accept_r = (self.cutoff[0] < desc_v) & (desc_v < self.cutoff[1])
             else:
@@ -91,8 +93,6 @@ class Criteria(object):
                     accept_r = (desc_v < self.cutoff)
                 else:  # lower
                     accept_r = (desc_v > self.cutoff)
-        else:
-            accept_r = np.full(desc_v.shape, True)
         if n_R == 1:
             accept_r = accept_r[0]
             desc_v = desc_v[0]
