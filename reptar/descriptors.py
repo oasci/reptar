@@ -183,6 +183,9 @@ def com_distance_sum(Z, R, entity_ids):
         R = np.array([R])
     cm_structures = get_center_of_mass(Z, R)
 
+    if not isinstance(entity_ids, np.ndarray):
+        entity_ids = np.array(entity_ids)
+
     d_sum = np.zeros(R.shape[0])
     for entity_id in set(entity_ids):
         atom_idxs = np.where(entity_ids == entity_id)[0]
