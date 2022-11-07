@@ -21,6 +21,7 @@ sys.path.insert(0, os.path.abspath('../'))
 project = 'reptar'
 copyright = '2022, Alex M. Maldonado'
 author = 'Alex M. Maldonado'
+html_title = 'reptar'
 
 
 # -- General configuration ---------------------------------------------------

@@ -38,7 +38,7 @@ def psi4_energy(
         Indices of the structures from ``R`` to compute energies and gradients
         for.
     Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with repsect to ``R``.
+        Atomic numbers of the atoms with respect to ``R``.
     R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
@@ -104,7 +104,7 @@ def psi4_engrad(
         Indices of the structures from ``R`` to compute energies and gradients
         for.
     Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with repsect to ``R``.
+        Atomic numbers of the atoms with respect to ``R``.
     R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
