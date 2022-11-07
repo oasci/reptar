@@ -49,7 +49,7 @@ class Criteria(object):
             What bound does the cutoff represent? ``'upper'`` means any
             descriptor that is equal to or larger than the cutoff will be
             rejected. ``'lower'`` means anything equal to or smaller than the
-            cutoff. If ``cutoff`` is a tuple, we ignore this.
+            cutoff is rejected. If ``cutoff`` is a tuple, we ignore this.
         """
         self.desc = desc
         self.desc_kwargs = desc_kwargs
@@ -59,9 +59,25 @@ class Criteria(object):
         bound = bound.lower()
         assert bound in ['upper', 'lower']
         self.bound = bound
+
+        self.attr_precedence = False
+        """Specifies if ``Criteria.desc_kwargs`` has precedence over ``kwargs``
+        passed directly into :meth:`~reptar.descriptors.Criteria.accept()`.
+
+        If ``False``, then duplicate keys passed into
+        :meth:`~reptar.descriptors.Criteria.accept()` are used instead of those
+        in ``Criteria.desc_kwargs``.
+
+        **Default:** ``False``
+
+        :type: :obj:`bool`
+        """
     
     def accept(self, Z, R, **kwargs):
         """Determine if we accept the structure.
+
+        If duplicate keys are provided in ``kwargs`` and ``self.desc_kwargs``,
+        ``kwargs`` passed here have preference.
 
         Parameters
         ----------
@@ -86,7 +102,18 @@ class Criteria(object):
             accept_r = np.full(n_R, True)
             return accept_r, None
         else:
-            desc_v = self.desc(Z, R, **self.desc_kwargs, **kwargs)
+            # Checks and handles duplicate keys.
+            check_keys = tuple(kwargs.keys())
+            desc_kwargs = self.desc_kwargs
+            for key in check_keys:
+                if key in desc_kwargs.keys():
+                    if self.attr_precedence:
+                        del kwargs[key]
+                    else:
+                        del desc_kwargs[key]
+
+            # Computes descriptor and acceptance.
+            desc_v = self.desc(Z, R, **desc_kwargs, **kwargs)
             if isinstance(self.cutoff, list):
                 accept_r = (self.cutoff[0] < desc_v) & (desc_v < self.cutoff[1])
             else:
@@ -94,9 +121,11 @@ class Criteria(object):
                     accept_r = (desc_v < self.cutoff)
                 else:  # lower
                     accept_r = (desc_v > self.cutoff)
+            
             if n_R == 1:
                 accept_r = accept_r[0]
                 desc_v = desc_v[0]
+            
             return accept_r, desc_v
 
 def get_center_of_mass(Z, R):
