@@ -38,6 +38,7 @@ extensions = [
     'sphinx_multiversion',
     'sphinx_design',
     'sphinxcontrib.mermaid',
+    'sphinxemoji.sphinxemoji',
 ]
 
 suppress_warnings = ['autosectionlabel.*']
