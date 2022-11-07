@@ -28,4 +28,5 @@ setup(
     zip_safe=False,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
+    scripts=['scripts/reptar-write-xyz']
 )
