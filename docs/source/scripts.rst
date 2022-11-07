@@ -9,7 +9,7 @@ Reptar has a few helper scripts to make life easier.
 
 We love to work in XYZ files; however, text files can quickly grow in size.
 Binary files, like ``npy``, store the same data in less space.
-Most visualization packages require XYZ files, so this script quickly looks 
+Most visualization packages require XYZ files, so this script quickly looks up the relevant data in a group and writes an XYZ file.
 
 .. code-block:: bash
 
@@ -38,7 +38,7 @@ Most visualization packages require XYZ files, so this script quickly looks
         $ ls
         file.exdir
         $ reptar-write-xyz ./file.exdir/parent_key/group_key
-        reptar v0.0.2+73.g88e53e0
+        reptar v0.0.2+74.g9d22eb8
         Parsing args
         Collecting data
         Writing XYZ file
