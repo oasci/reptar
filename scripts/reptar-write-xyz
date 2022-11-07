@@ -1,0 +1,87 @@
+#!/usr/bin/env python3
+
+# MIT License
+# 
+# Copyright (c) 2022, Alex M. Maldonado
+# 
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+# 
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+import os
+import argparse
+
+from reptar import __version__ as reptar_version
+from reptar import File
+from reptar.writers import write_xyz
+import numpy as np
+
+def main():
+    
+    parser = argparse.ArgumentParser(
+        description='Write XYZ file from exdir file.'
+    )
+    parser.add_argument(
+        'group_key', type=str, nargs='?',
+        help='Path to group key. Will take absolute path and split '
+        'based on `.exdir`.'
+    )
+    parser.add_argument(
+        '--comment_key', type=str, nargs='?', default='',
+        help='Label of data to include as xyz comment. If "energy" or "grad" is in '
+        'the key, then we convert to kcal/mol.'
+    )
+    parser.add_argument(
+        '--save_dir', type=str, nargs='?', default='.',
+        help='Directory to save XYZ file.'
+    )
+
+    args = parser.parse_args()
+    print(f'reptar {reptar_version}')
+
+
+    abs_path = os.path.abspath(args.group_key)
+    comment_key = args.comment_key
+    save_dir = args.save_dir
+
+    idx_split = abs_path.rfind('.exdir') + 6
+    exdir_path, group_key = abs_path[:idx_split], abs_path[idx_split:]
+
+    rfile = File(exdir_path, mode='r')
+
+    Z = rfile.get(f'{group_key}/atomic_numbers')
+    R = rfile.get(f'{group_key}/geometry')
+    if comment_key != '':
+        comments = rfile.get(f'{group_key}/{comment_key}')
+    else:
+        comments = None
+    
+    if isinstance(comments, np.ndarray):
+        if comments.ndim > 1:
+            raise ValueError(
+                f'Comments has {comments.ndim} dimensions, but it must be 1.'
+            )
+        else:
+            if 'energy' in comment_key or 'grad' in comment_key:
+                hartree2kcalmol = 627.5094737775374055927342256  # Psi4 constant
+                comments *= hartree2kcalmol
+            comments = [str(i) for i in comments]
+    write_xyz(os.path.join(save_dir, 'data.xyz'), Z, R, comments=comments)
+
+
+if __name__ == "__main__":
+    main()
