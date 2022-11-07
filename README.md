@@ -107,9 +107,9 @@ Reptar currently automates the creation of:
 
 - [Atomic simulation environment (ASE) databases](https://wiki.fysik.dtu.dk/ase/tutorials/tut06_database/database.html),
 - [Gaussian approximate potentials (GAP) extended XYZ files](https://libatoms.github.io/GAP/gap_fit.html#data),
-- Protein data bank (PDB) files,
+- [Protein data bank (PDB) files](https://www.wwpdb.org/documentation/file-format),
 - [Schnetpack databases](https://schnetpack.readthedocs.io/en/stable/tutorials/tutorial_01_preparing_data.html),
-- XYZ files.
+- [XYZ files](https://en.wikipedia.org/wiki/XYZ_file_format).
 
 # License
 

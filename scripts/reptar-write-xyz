@@ -53,7 +53,7 @@ def main():
     args = parser.parse_args()
     print(f'reptar {reptar_version}')
 
-
+    print('Parsing args')
     abs_path = os.path.abspath(args.group_key)
     comment_key = args.comment_key
     save_dir = args.save_dir
@@ -61,8 +61,8 @@ def main():
     idx_split = abs_path.rfind('.exdir') + 6
     exdir_path, group_key = abs_path[:idx_split], abs_path[idx_split:]
 
+    print('Collecting data')
     rfile = File(exdir_path, mode='r')
-
     Z = rfile.get(f'{group_key}/atomic_numbers')
     R = rfile.get(f'{group_key}/geometry')
     if comment_key != '':
@@ -71,6 +71,7 @@ def main():
         comments = None
     
     if isinstance(comments, np.ndarray):
+        print('Handling comment data')
         if comments.ndim > 1:
             raise ValueError(
                 f'Comments has {comments.ndim} dimensions, but it must be 1.'
@@ -80,8 +81,9 @@ def main():
                 hartree2kcalmol = 627.5094737775374055927342256  # Psi4 constant
                 comments *= hartree2kcalmol
             comments = [str(i) for i in comments]
+    print('Writing XYZ file')
     write_xyz(os.path.join(save_dir, 'data.xyz'), Z, R, comments=comments)
-
+    print('Done!')
 
 if __name__ == "__main__":
     main()
