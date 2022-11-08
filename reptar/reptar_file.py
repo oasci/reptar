@@ -506,6 +506,18 @@ class File:
         
         return self.File_
     
+    def copy(self, source_key, dest_key):
+        """Copy data from a source to a destination.
+
+        Parameters
+        ----------
+        source_key : :obj:`str`
+            Key of the data to copy.
+        dest_key : :obj:`str`
+            Where to copy the data do.
+        """
+        self.put(dest_key, self.get(source_key))
+    
     def _iter_dict(self, dic):
         """Iterate over nested dictionary.
 
