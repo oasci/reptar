@@ -59,7 +59,12 @@ class driverENERGY:
         worker_kwargs : :obj:`tuple`, ndim: ``1``
             The other keyword arguments for the worker function after
             ``R_idxs``, ``Z``, and ``R``.
-        n_cpus : :obj:`int`
+        use_ray : :obj:`bool`, default: ``False``
+            Use ray to parallelize calculations. If ``False``, calculations are
+            done serially. ``False`` can be useful when running locally or only
+            a few calculations are needed. ``True`` is useful for tons of
+            calculations.
+        n_cpus : :obj:`int`, default: ``1``
             Total number of CPUs we can use for ray tasks.
         n_cpus_worker : :obj:`int`, default: ``1``
             Number of CPUs to dedicate to each task.
@@ -79,12 +84,9 @@ class driverENERGY:
         assert R.shape[0] == E.shape[0]
         assert R.shape[2] == 3
 
-        if not ray.is_initialized():
-            ray.init(address=ray_address)
-
         # Storing arrays and other information
-        self.Z = ray.put(Z)
-        self.R = ray.put(R)
+        self.Z = Z
+        self.R = R
         self.E = E
         self.worker = worker
         self.worker_kwargs = worker_kwargs
@@ -95,6 +97,14 @@ class driverENERGY:
         self.n_cpus_worker = n_cpus_worker
         self.chunk_size = chunk_size
         self.n_workers = math.floor(n_cpus/n_cpus_worker)
+
+        self.use_ray = use_ray
+        if use_ray:
+            if not ray.is_initialized():
+                ray.init(address=ray_address)
+            
+            self.Z = ray.put(Z)
+            self.R = ray.put(R)
     
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
@@ -123,36 +133,44 @@ class driverENERGY:
         :obj:`numpy.ndarray`
             The total electronic energy array, ``E``, after all computations.
         """
-        worker = ray.remote(self.worker)
+        worker = self.worker
         idxs_todo = self._idx_todo()
         chunker = chunk_iterable(idxs_todo, self.chunk_size)
 
-        # Initialize ray workers
-        workers = []
-        def add_worker(workers, chunker):
-            try:
-                chunk = list(next(chunker))
-                workers.append(
-                    worker.options(num_cpus=self.n_cpus_worker).remote(
-                        chunk, self.Z, self.R, **self.worker_kwargs
-                    )
+        if not self.use_ray:
+            for idx in idxs_todo:
+                _, E_done = worker(
+                    [idx], self.Z, self.R, **self.worker_kwargs
                 )
-            except StopIteration:
-                pass
-        for _ in range(self.n_workers):
-            add_worker(workers, chunker)
-        
-        # Start calculations
-        while len(workers) != 0:
-            done_id, workers = ray.wait(workers)
+                self.E[idx] = E_done
+        else:
+            worker = ray.remote(worker)
+            # Initialize ray workers
+            workers = []
+            def add_worker(workers, chunker):
+                try:
+                    chunk = list(next(chunker))
+                    workers.append(
+                        worker.options(num_cpus=self.n_cpus_worker).remote(
+                            chunk, self.Z, self.R, **self.worker_kwargs
+                        )
+                    )
+                except StopIteration:
+                    pass
+            for _ in range(self.n_workers):
+                add_worker(workers, chunker)
             
-            idx_done, E_done = ray.get(done_id)[0]
-            self.E[idx_done] = E_done
+            # Start calculations
+            while len(workers) != 0:
+                done_id, workers = ray.wait(workers)
+                
+                idx_done, E_done = ray.get(done_id)[0]
+                self.E[idx_done] = E_done
 
-            if saver is not None:
-                saver.save((self.E))
-            
-            add_worker(workers, chunker)
+                if saver is not None:
+                    saver.save((self.E))
+                
+                add_worker(workers, chunker)
         
         return self.E
 
@@ -163,8 +181,9 @@ class driverENGRAD:
     Creates and manages ray tasks using specified worker.
     """
     def __init__(
-        self, Z, R, E, G, worker, worker_kwargs, n_cpus, n_cpus_worker=1,
-        chunk_size=50, start_slice=None, end_slice=None, ray_address='auto'
+        self, Z, R, E, G, worker, worker_kwargs, use_ray=False, n_cpus=1,
+        n_cpus_worker=1, chunk_size=50, start_slice=None, end_slice=None,
+        ray_address='auto'
     ):
         """
         Parameters
@@ -192,7 +211,12 @@ class driverENGRAD:
         worker_kwargs : :obj:`tuple`, ndim: ``1``
             The other keyword arguments for the worker function after
             ``R_idxs``, ``Z``, and ``R``.
-        n_cpus : :obj:`int`
+        use_ray : :obj:`bool`, default: ``False``
+            Use ray to parallelize calculations. If ``False``, calculations are
+            done serially. ``False`` can be useful when running locally or only
+            a few calculations are needed. ``True`` is useful for tons of
+            calculations.
+        n_cpus : :obj:`int`, default: ``1``
             Total number of CPUs we can use for ray tasks.
         n_cpus_worker : :obj:`int`, default: ``1``
             Number of CPUs to dedicate to each task.
@@ -215,12 +239,9 @@ class driverENGRAD:
         assert R.shape[2] == 3
         assert G.shape[2] == 3
 
-        if not ray.is_initialized():
-            ray.init(address=ray_address)
-
         # Storing arrays and other information
-        self.Z = ray.put(Z)
-        self.R = ray.put(R)
+        self.Z = Z
+        self.R = R
         self.E = E
         self.G = G
         self.worker = worker
@@ -232,6 +253,14 @@ class driverENGRAD:
         self.n_cpus_worker = n_cpus_worker
         self.chunk_size = chunk_size
         self.n_workers = math.floor(n_cpus/n_cpus_worker)
+
+        self.use_ray = use_ray
+        if use_ray:
+            if not ray.is_initialized():
+                ray.init(address=ray_address)
+            
+            self.Z = ray.put(Z)
+            self.R = ray.put(R)
     
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
@@ -262,37 +291,46 @@ class driverENGRAD:
         :obj:`numpy.ndarray`
             The atomic gradients array, ``E``, after all computations.
         """
-        worker = ray.remote(self.worker)
+        worker = self.worker
         idxs_todo = self._idx_todo()
         chunker = chunk_iterable(idxs_todo, self.chunk_size)
 
-        # Initialize ray workers
-        workers = []
-        def add_worker(workers, chunker):
-            try:
-                chunk = list(next(chunker))
-                workers.append(
-                    worker.options(num_cpus=self.n_cpus_worker).remote(
-                        chunk, self.Z, self.R, **self.worker_kwargs
-                    )
+        if not self.use_ray:
+            for idx in idxs_todo:
+                _, E_done, G_done = worker(
+                    [idx], self.Z, self.R, **self.worker_kwargs
                 )
-            except StopIteration:
-                pass
-        for _ in range(self.n_workers):
-            add_worker(workers, chunker)
-        
-        # Start calculations
-        while len(workers) != 0:
-            done_id, workers = ray.wait(workers)
+                self.E[idx] = E_done
+                self.G[idx] = G_done
+        else:
+            worker = ray.remote(worker)
+            # Initialize ray workers
+            workers = []
+            def add_worker(workers, chunker):
+                try:
+                    chunk = list(next(chunker))
+                    workers.append(
+                        worker.options(num_cpus=self.n_cpus_worker).remote(
+                            chunk, self.Z, self.R, **self.worker_kwargs
+                        )
+                    )
+                except StopIteration:
+                    pass
+            for _ in range(self.n_workers):
+                add_worker(workers, chunker)
             
-            idx_done, E_done, G_done = ray.get(done_id)[0]
-            self.E[idx_done] = E_done
-            self.G[idx_done] = G_done
+            # Start calculations
+            while len(workers) != 0:
+                done_id, workers = ray.wait(workers)
+                
+                idx_done, E_done, G_done = ray.get(done_id)[0]
+                self.E[idx_done] = E_done
+                self.G[idx_done] = G_done
 
-            if saver is not None:
-                saver.save((self.E, self.G))
-            
-            add_worker(workers, chunker)
+                if saver is not None:
+                    saver.save((self.E, self.G))
+                
+                add_worker(workers, chunker)
         
         return self.E, self.G
 
@@ -302,7 +340,7 @@ class driverOPT:
     Creates and manages ray tasks using specified worker.
     """
     def __init__(
-        self, Z, R, R_opt, E, G, worker, worker_kwargs, n_cpus, use_ray=False,
+        self, Z, R, R_opt, E, G, worker, worker_kwargs, use_ray=False, n_cpus=1,
         n_cpus_worker=1, chunk_size=1, start_slice=None, end_slice=None,
         ray_address='auto'
     ):
@@ -335,7 +373,12 @@ class driverOPT:
         worker_kwargs : :obj:`tuple`, ndim: ``1``
             The other keyword arguments for the worker function after
             ``R_idxs``, ``Z``, and ``R``.
-        n_cpus : :obj:`int`
+        use_ray : :obj:`bool`, default: ``False``
+            Use ray to parallelize calculations. If ``False``, calculations are
+            done serially. ``False`` can be useful when running locally or only
+            a few calculations are needed. ``True`` is useful for tons of
+            calculations.
+        n_cpus : :obj:`int`, default: ``1``
             Total number of CPUs we can use for ray tasks.
         n_cpus_worker : :obj:`int`, default: ``1``
             Number of CPUs to dedicate to each task.

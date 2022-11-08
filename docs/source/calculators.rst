@@ -412,13 +412,14 @@ TODO: Finish this section.
             E_key = f'{group_key}/energy_ele_df.mp2.def2tzvppd'
             G_key = f'{group_key}/grads_df.mp2.def2tzvppd'
 
-            n_cpus = int(sys.argv[1])
             ray_address = str(sys.argv[2])
 
+            use_ray = True
+            n_cpus = int(sys.argv[1])
             n_cpus_worker = 4
             driver_kwargs = {
-                'n_cpus_worker': n_cpus_worker, 'chunk_size': 50,
-                'start_slice': None, 'end_slice': None, 'ray_address': ray_address
+                'use_ray': use_ray, 'n_cpus': n_cpus, 'n_cpus_worker': n_cpus_worker,
+                'chunk_size': 50, 'start_slice': None, 'end_slice': None, 'ray_address': ray_address
             }
 
             mem = 2*n_cpus_worker
