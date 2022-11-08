@@ -143,6 +143,9 @@ class driverENERGY:
                     [idx], self.Z, self.R, **self.worker_kwargs
                 )
                 self.E[idx] = E_done
+
+                if saver is not None:
+                    saver.save((self.E))
         else:
             worker = ray.remote(worker)
             # Initialize ray workers
@@ -302,6 +305,9 @@ class driverENGRAD:
                 )
                 self.E[idx] = E_done
                 self.G[idx] = G_done
+
+                if saver is not None:
+                    saver.save((self.E, self.G))
         else:
             worker = ray.remote(worker)
             # Initialize ray workers
