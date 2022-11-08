@@ -477,7 +477,7 @@ TODO: Finish this section.
 
             # Setup and run energy and gradient calculations.
             driver = driverENGRAD(
-                Z, R, E, G, worker, worker_kwargs, n_cpus, **driver_kwargs
+                Z, R, E, G, worker, worker_kwargs, **driver_kwargs
             )
             t_start = time.time()
             driver.run(saver=saver)
