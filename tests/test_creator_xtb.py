@@ -76,7 +76,9 @@ def test_1h2o_120meoh_md_exdir():
         'prod_1', out_path=out_path_prod,
         geom_path=geom_path_prod, traj_path=traj_path_prod
     )
-    create.ids('prod_1', entity_ids, comp_ids)
+    # Copy over entity and comp IDs.
+    create.rfile.copy('eq_1/entity_ids', 'prod_1/entity_ids')
+    create.rfile.copy('eq_1/comp_ids', 'prod_1/comp_ids')
 
     create.rfile.put('readme',
         '500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n'
