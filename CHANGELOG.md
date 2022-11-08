@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- ``driverOPT`` and ``psi4_opt`` worker.
 - ``reptar-write-xyz`` script for writing xyz files from command line.
 - ``driverENERGY`` for just energy calculations.
 - ``psi4_energy`` worker.
