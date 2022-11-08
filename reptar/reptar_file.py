@@ -455,7 +455,7 @@ class File:
                 group.__delitem__(data_key)
                 group.create_dataset(data_key, data=data)
 
-    def put(self, key, data):
+    def put(self, key, data, with_md5_update=True):
         """Put data to file in a specific location.
 
         Note that there is some data postprocessing using
@@ -468,12 +468,19 @@ class File:
             separated by ``/``.
         data : ``obj``
             Data to add to file.
+        with_md5_update : :obj:`bool`, default: ``True``
+            Update MD5 hashes after putting data.
         """
         key = self.clean_key(key)
         if self.ftype == 'exdir':
             self._put_to_exdir(key, data)
         elif self.ftype == 'json' or self.ftype == 'npz':
             self._put_to_dict(key, data)
+        
+        # Update MD5 of group
+        if with_md5_update:
+            group_key, _ = self.split_key(key)
+            self.update_md5(group_key)
     
     def put_all(self, group_key, data, nested=False):
         """Adds all data from :obj:`dict` to group.
@@ -583,17 +590,22 @@ class File:
             Desired group.
         """
         md5 = get_md5(self, group_key)
-        self.put(f'{group_key}/md5', md5)
+        self.put(f'{group_key}/md5', md5, with_md5_update=False)
         
         try:
             md5_arrays = get_md5(self, group_key, only_arrays=True)
-            self.put(f'{group_key}/md5_arrays', md5_arrays)
+            self.put(
+                f'{group_key}/md5_arrays', md5_arrays, with_md5_update=False
+            )
         except Exception:
             pass
 
         try:
             md5_structures = get_md5(self, group_key, only_structures=True)
-            self.put(f'{group_key}/md5_structures', md5_structures)
+            self.put(
+                f'{group_key}/md5_structures', md5_structures,
+                with_md5_update=False
+            )
         except Exception:
             pass
     
