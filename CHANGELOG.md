@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- ``with_md5_update`` option for putting data in reptar files.
 - ``File.copy()`` method to help copying data between groups.
 - ``driverOPT`` and ``psi4_opt`` worker.
 - ``reptar-write-xyz`` script for writing xyz files from command line.
@@ -26,6 +27,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Use ``qcelemental.periodictable`` for atomic numbers, symbols, and masses instead of manual dictionaries.
 - All drivers have a ``use_ray`` parameter that defaults to ``False``.
 - Calculators now use keyword arguments.
 - Cleaned up ray calculations.
@@ -36,20 +38,21 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 - PDB writer numbers each atom name.
 - Renamed ``File.add()`` to ``File.put()``.
 - Return data from exdir as ``np.ndarray`` instead of ``np.memmap``.
-- `creator.group` is now `creator.from_calc`.
+- ``creator.group`` is now ``creator.from_calc``.
 - Specify array dimensions in docstrings.
 - Do not import every submodule in reptar.
 That way, optional calculation dependencies are not required when importing reptar.
 - Upgrades to README.
 - PDB writer is now a function instead of class.
 - PDB writer requires arrays instead of reptar files and group keys.
-- Rename `data` class to `File`.
+- Rename ``data`` class to ``File``.
 This clears up previous ambiguous usage of "data" to refer to both a file and value of a key.
 - Rename reptarWriter to textWriter (more specific).
 - Require setting the memory for Psi4 worker.
 
 ### Removed
 
+- ``element_to_z``, ``z_to_element``, and ``z_to_mass`` in ``reptar.utils``.
 - Many-body expansion routines were incorporated into [mbGDML](https://keithgroup.github.io/mbGDML/index.html).
 - ``textWriter`` class (really had no purpose).
 
