@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
-from ..utils import z_to_element
+from qcelemental import periodictable as ptable
     
 def string_xyz_arrays(Z, R, *args, precision=10):
     """Create string of array data in XYZ format for a single structure.
@@ -48,7 +48,7 @@ def string_xyz_arrays(Z, R, *args, precision=10):
     """
     struct_string = ''
     for i in range(len(Z)):
-        atom_string = str(z_to_element[Z[i]])
+        atom_string = ptable.to_symbol(Z[i])
         for arr in (R, *args):
             if arr is not None:
                 atom_string += '    '

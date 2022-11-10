@@ -22,7 +22,7 @@
 
 import numpy as np
 import os
-from ..utils import z_to_element
+from ..utils import atoms_by_element
     
 def write_pdb(
     pdb_path, Z, R, entity_ids, comp_ids, atom_type='HETATM'
@@ -56,7 +56,7 @@ def write_pdb(
     num_atoms = len(Z)
 
     # Determine atom_labels once; will be the same for every structure.
-    element_symbols = [z_to_element[z] for z in Z]
+    element_symbols = atoms_by_element(Z)
     atom_names = []
     for i_atom in range(num_atoms):
         entity_id = entity_ids[i_atom]

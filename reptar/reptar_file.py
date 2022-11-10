@@ -455,7 +455,7 @@ class File:
                 group.__delitem__(data_key)
                 group.create_dataset(data_key, data=data)
 
-    def put(self, key, data, with_md5_update=True):
+    def put(self, key, data, with_md5_update=False):
         """Put data to file in a specific location.
 
         Note that there is some data postprocessing using
@@ -468,7 +468,7 @@ class File:
             separated by ``/``.
         data : ``obj``
             Data to add to file.
-        with_md5_update : :obj:`bool`, default: ``True``
+        with_md5_update : :obj:`bool`, default: ``False``
             Update MD5 hashes after putting data.
         """
         key = self.clean_key(key)
@@ -513,7 +513,7 @@ class File:
         
         return self.File_
     
-    def copy(self, source_key, dest_key):
+    def copy(self, source_key, dest_key, with_md5_update=False):
         """Copy data from a source to a destination.
 
         Parameters
@@ -523,7 +523,7 @@ class File:
         dest_key : :obj:`str`
             Where to copy the data do.
         """
-        self.put(dest_key, self.get(source_key))
+        self.put(dest_key, self.get(source_key), with_md5_update)
     
     def _iter_dict(self, dic):
         """Iterate over nested dictionary.

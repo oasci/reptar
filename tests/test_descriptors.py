@@ -72,4 +72,4 @@ def test_com_distance_sum_3h2o():
     accept, v_desc = criteria.accept(Z, R)
 
     assert accept[i_test] == False
-    assert v_desc[i_test] == 9.020805161988154
+    assert v_desc[i_test] == 9.020819657050316

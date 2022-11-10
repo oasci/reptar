@@ -24,7 +24,7 @@
 
 import itertools
 import numpy as np
-from .utils import z_to_mass
+from qcelemental import periodictable as ptable
 
 class Criteria(object):
     """Descriptor criteria for accepting a structure based on a descriptor
@@ -147,7 +147,7 @@ def get_center_of_mass(Z, R):
         R = np.array([R])
     masses = np.empty(R[0].shape)
     for i in range(len(masses)):
-        masses[i,:] = z_to_mass[Z[i]]
+        masses[i,:] = ptable.to_mass(Z[i])
     R_masses = np.full(R.shape, masses)
     cm_structure = np.average(R, axis=1, weights=R_masses)
     return cm_structure
