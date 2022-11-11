@@ -58,6 +58,10 @@ This clears up previous ambiguous usage of "data" to refer to both a file and va
 
 ### Fixed
 
+- Previously, coordinates were sliced based on a boolean mask during sampling.
+The specific order of ``entity_ids`` in ``r_prov_specs`` is no longer correct.
+For example, if the selection as ``[0, 382, 82, 45, 100]`` then the actual coordinates would be in order of ``45``, ``82``, and then ``100``, which is incorrect.
+Any sampled structures before this commit do not have correct ``r_prov_specs`` with respect to the source.
 - ``psi4_engrad`` no longer translates and rotates molecules to origin (which would result in incorrect gradients).
 - ``_generate_structure_samples`` when ``quantity`` is all.
 Would incorrectly generate combinations with replacement.

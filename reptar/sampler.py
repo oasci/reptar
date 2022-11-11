@@ -25,7 +25,58 @@ import numpy as np
 from random import randrange, choice
 from .utils import center_structures as get_center_structures
 from .utils import get_md5, gen_combs
-from . import __version__
+from . import __version__ as reptar_version
+
+def entity_mask_gen(entity_ids, entities):
+    """Generate an atom mask for a single entity.
+
+    Parameters
+    ----------
+    entity_ids : :obj:`numpy.ndarray`
+        ``entity_ids`` for the data you are going to mask.
+    entities : ``iterable``
+        A collection of ``entity_ids`` that we will mask individually.
+    
+    Yields
+    ------
+    :obj:`numpy.ndarray`
+        Atom mask for some data such as ``Z``, ``R``, ``E``, ``G``, etc.
+    
+    Examples
+    --------
+    Suppose we want to slice each entity's structures from an array ``r``.
+
+    >>> r = np.array(
+    ...     [[ 1.62983581, -5.72097814,  3.33683543],
+    ...      [ 1.18517275, -4.99524281,  2.8550542 ],
+    ...      [ 2.54530238, -5.47454298,  3.2638527 ],
+    ...      [ 3.29853071,  5.74803325, -5.55958208],
+    ...      [ 2.39044514,  5.71619898, -5.6366701 ],
+    ...      [ 3.44827586,  6.41505464, -4.85337475],
+    ...      [-4.89465455, -0.18369004,  2.24627128],
+    ...      [-5.57558564,  0.09906561,  1.66343969],
+    ...      [-4.52877354,  0.7259792 ,  2.33425484]]
+    ... )
+    >>> entity_ids = np.array([0, 0, 0, 1, 1, 1, 2, 2, 2])
+    >>> mask_gen = entity_mask_gen(entity_ids, [0, 2, 1])
+    >>> next(mask_gen)
+    array([ True,  True,  True, False, False, False, False, False, False])
+    >>> next(mask_gen)
+    array([False, False, False, False, False, False,  True,  True,  True])
+    >>> next(mask_gen)
+    array([False, False, False,  True,  True,  True, False, False, False])
+
+    """
+    # Try to catch the error of passing a single number instead of iterable.
+    try:
+        len(entities)
+    except TypeError as e:
+        if 'has no len()' in str(e):
+            entities = [entities]
+        else:
+            raise
+    for entity_id in entities:
+        yield (entity_ids == entity_id)
 
 def _initialize_structure_sampling_arrays(
     Z, R, E, G, r_prov_specs, quantity, comp_labels, R_source,
@@ -101,10 +152,10 @@ def _initialize_structure_sampling_arrays(
     sampled_R_empty = np.empty((size_quantity, number_of_atoms, 3))
     sampled_R_empty[:] = np.nan
     if R is None:
-        idx_selection = 0  # Starting index of the newly sampled structures.
+        idx_sel = 0  # Starting index of the newly sampled structures.
         R = sampled_R_empty
     else:
-        idx_selection = len(R)
+        idx_sel = len(R)
         R = np.concatenate((R, sampled_R_empty), axis=0)
     
     if copy_EG:
@@ -134,7 +185,7 @@ def _initialize_structure_sampling_arrays(
             (r_prov_specs, sampled_r_prov_specs_empty), axis=0
         )
     
-    return (Z, R, E, G, r_prov_specs, sampling_all, idx_selection)
+    return (Z, R, E, G, r_prov_specs, sampling_all, idx_sel)
 
 def _generate_structure_samples(
     quantity, structure_idxs, entity_ids_samples
@@ -345,7 +396,7 @@ def sample_structures(
                 except AssertionError:
                     e = f'Atomic numbers do not match for entity_id of {other_entity}'
                     raise AssertionError(e)
-    entity_ids = np.array(entity_ids)
+    entity_ids = np.array(entity_ids)  # Destination entity_ids
     
     Z_sample = np.array(Z_sample)
     if Z is not None:
@@ -358,10 +409,15 @@ def sample_structures(
             raise AssertionError(e)
     else:
         Z = Z_sample
+    n_Z = len(Z)
 
+    # Create a single selection array that we update with samples
+    r_sel = np.empty((n_Z, 3), dtype=np.float64)
+    if G_source is not None:
+        g_sel = np.empty((n_Z, 3), dtype=np.float64)
 
     ###   Initialize all arrays   ###
-    Z, R, E, G, r_prov_specs, sampling_all, idx_selection = \
+    Z, R, E, G, r_prov_specs, sampling_all, idx_sel = \
         _initialize_structure_sampling_arrays(
         Z, R, E, G, r_prov_specs, quantity, comp_labels, R_source,
         entity_ids_source, entity_ids_samples, copy_EG
@@ -429,67 +485,65 @@ def sample_structures(
         # We do this by adding the appropriately sorted selection_r_prov_spec to
         # a test array (we only sort the entity_ids).
         if source_r_prov_specs is not None:
-            r_prov_specs_check[idx_selection][:2] = selection_r_prov_spec[:2]
-            r_prov_specs_check[idx_selection][2:] = np.sort(
+            r_prov_specs_check[idx_sel][:2] = selection_r_prov_spec[:2]
+            r_prov_specs_check[idx_sel][2:] = np.sort(
                 selection_r_prov_spec[2:], axis=0
             )
         else:
-            r_prov_specs_check[idx_selection][:2] = selection[:2]
-            r_prov_specs_check[idx_selection][2:] = np.sort(
+            r_prov_specs_check[idx_sel][:2] = selection[:2]
+            r_prov_specs_check[idx_sel][2:] = np.sort(
                 selection[2:], axis=0
             )
         # This quickly checks if the sorted r_prov_spec is already included.
         # NOTE that this is one of the main reason sampling gets slower with
         # more structures (more to check).
-        if (r_prov_specs_check[:idx_selection]==r_prov_specs_check[idx_selection]).all(1).any():
+        if (r_prov_specs_check[:idx_sel]==r_prov_specs_check[idx_sel]).all(1).any():
             continue
         
         ###   Checks structure descriptor   ###
         # Creates mask for atoms in the selection.
         r_index_source = selection[1]
-        atom_idx_mask_gen = (
-            entity_ids_source == entity_id for entity_id in selection[2:]
-        )
-        atom_idx_mask = np.bitwise_or.reduce(
-            np.array(list(atom_idx_mask_gen)), axis=0
-        )
+        for entity_id_sel,entity_mask in \
+          enumerate(entity_mask_gen(entity_ids_source, selection[2:])):
+            r_sel[(entity_ids==entity_id_sel)] = R_source[r_index_source][entity_mask]
 
-        r_selection = R_source[r_index_source][atom_idx_mask]
-        entity_ids_selection = entity_ids_source[atom_idx_mask]
-        desc_kwargs = {'entity_ids': entity_ids_selection}
         if criteria is not None:
-            accept_r, _ = criteria.accept(Z, r_selection, **desc_kwargs)
+            accept_r, _ = criteria.accept(Z, r_sel)
             # If descriptor is not met, will not include sample.
             if not accept_r:
                 continue
         
         ###   SUCCESSFUL SAMPLE   ###
-        R[idx_selection] = r_selection
+        R[idx_sel] = r_sel
         
         if source_r_prov_specs is not None:
-            r_prov_specs[idx_selection] = selection_r_prov_spec
+            r_prov_specs[idx_sel] = selection_r_prov_spec
         else:
-            r_prov_specs[idx_selection] = selection
+            r_prov_specs[idx_sel] = selection
         
         if copy_EG:
             if E_source is not None:
-                E[idx_selection] = E_source[r_index_source]
+                E[idx_sel] = E_source[r_index_source]
             if G_source is not None:
-                G[idx_selection] = G_source[r_index_source][atom_idx_mask]
+                if G_source is not None:
+                    for entity_id_sel,entity_mask in \
+                    enumerate(entity_mask_gen(entity_ids_source, selection[2:])):
+                        g_sel[(entity_ids==entity_id_sel)] = G_source[r_index_source][entity_mask]
+                G[idx_sel] = g_sel
         
         num_accepted += 1
-        idx_selection += 1
+        idx_sel += 1  # Index of selection
     
     if copy_EG:
-        E = E[:idx_selection]
-        G = G[:idx_selection]
+        E = E[:idx_sel]
+        G = G[:idx_sel]
 
     # Center structures by moving the center of mass to the origin.
     if center_structures:
         R = get_center_structures(Z, R)
     
     return (
-        Z, R[:idx_selection], E, G, entity_ids, r_prov_specs[:idx_selection]
+        Z, R[:idx_sel], E, G, entity_ids, r_prov_specs[:idx_sel]
     )
 
 def add_structures_to_group(
@@ -737,6 +791,6 @@ def add_structures_to_group(
         dest_file.put(f'{dest_key}/comp_ids', comp_ids)
 
         dest_file.update_md5(dest_key)
-        dest_file.put(f'{dest_key}/reptar_version', __version__)
+        dest_file.put(f'{dest_key}/reptar_version', reptar_version)
 
     return dest_file
