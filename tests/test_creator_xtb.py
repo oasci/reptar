@@ -193,7 +193,7 @@ def test_50h2o_opt_to_exdir():
     exdir_path = os.path.join(xtb_dir, '50h2o-opt.exdir')
 
     create_exdir = creator()
-    create_exdir.load(exdir_path, mode='w')
+    create_exdir.load(exdir_path, mode='w', allow_remove=True)
     group_key = '0-gfn2-opt'
     rfile = create_exdir.from_calc(
         group_key, out_path=out_path, traj_path=traj_path
