@@ -82,9 +82,31 @@ def test_1h2o_120meoh_prod_sampling():
         dest.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
 
+    # Checks that the correct geometries are sampled and in the correct order.
+    R_source = source.rfile.get(f'{source_key}/geometry')
+    entity_ids_source = source.rfile.get(f'{source_key}/entity_ids')
+
+    R_sampled = dest.rfile.get(f'{dest_key}/geometry')
+    r_prov_specs = dest.rfile.get(f'{dest_key}/r_prov_specs')
+    
+
+    for i in range(len(r_prov_specs)):
+        r_sampled = R_sampled[i]
+        r_prov_spec = r_prov_specs[i]
+        source_idx = r_prov_spec[1]
+        
+        idx_atom_check = 0
+        for entity_id in r_prov_spec[2:]:
+            entity_mask = (entity_ids_source == entity_id)
+            r_source_frag = R_source[source_idx][entity_mask]
+            assert r_sampled[idx_atom_check][0] == r_source_frag[0][0]
+            idx_atom_check += int(r_source_frag.shape[0])
+
+    # Test additional sampling
     add_structures_to_group(
         source.rfile, source_key, dest.rfile, dest_key,
-        quantity, comp_labels, center_structures=True, copy_EG=False, write=True
+        quantity, comp_labels, center_structures=True, copy_EG=False,
+        write=True
     )
     assert np.array_equal(
         dest.rfile.get(f'{dest_key}/atomic_numbers'),
@@ -101,6 +123,7 @@ def test_1h2o_120meoh_prod_sampling():
     assert np.array_equal(
         dest.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
+
 
 def test_sampling_from_wat_2met_pes():
     """Sampling from a sampled exdir group.

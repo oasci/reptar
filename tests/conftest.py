@@ -26,7 +26,5 @@ import shutil
 def pytest_sessionstart(session):  # pytest_configure(config)
     """Creates a tmp directory for writing files."""
     path = './tests/tmp'
-    if os.path.exists(path):
-        shutil.rmtree(path)
-    os.makedirs(path)
+    os.makedirs(path, exist_ok=True)
     
