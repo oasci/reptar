@@ -25,6 +25,7 @@ import numpy as np
 from random import randrange, choice
 from .utils import center_structures as get_center_structures
 from .utils import get_md5, gen_combs
+from .periodic import Cell
 from . import __version__ as reptar_version
 
 def entity_mask_gen(entity_ids, entities):
@@ -77,6 +78,30 @@ def entity_mask_gen(entity_ids, entities):
             raise
     for entity_id in entities:
         yield (entity_ids == entity_id)
+
+def r_from_entities(R, entity_ids, entities):
+    """Slice a geometries containing each entity in the same order as
+    ``entities``.
+
+    Parameters
+    ----------
+    R : :obj:`numpy.ndarray`, ndim: ``2``
+        Coordinates of a single structure.
+    entity_ids : :obj:`numpy.ndarray`
+        Entity IDs of ``R``.
+    entities : ``iterable``
+        A collection of ``entity_ids`` that we will mask individually.
+    
+    Notes
+    -----
+    None of the sample routines here use this function. We instead continuously
+    update a single array instead of allocating a new one each time.
+    This is useful for importing into scripts.
+    """
+    r_sel = []
+    for entity_mask in entity_mask_gen(entity_ids, entities):
+        r_sel.extend(R[entity_mask])
+    return np.array(r_sel)
 
 def _initialize_structure_sampling_arrays(
     Z, R, E, G, r_prov_specs, quantity, comp_labels, R_source,
@@ -250,8 +275,8 @@ def sample_structures(
     source_file, source_key, quantity, comp_labels, r_prov_ids, source_r_prov_specs,
     Z=None, R=None, r_prov_specs=None, structure_idxs=None,
     criteria=None, center_structures=False, sampling_updates=False,
-    copy_EG=False, E=None, G=None,
-    energy_label_source='energy_ele', grad_label_source='grads'
+    copy_EG=False, E=None, G=None, energy_label_source='energy_ele',
+    grad_label_source='grads', periodic_cell=None
 ):
     """Randomly samples structures from a source.
 
@@ -297,7 +322,7 @@ def sample_structures(
         centering each structure (and losing the original coordinates of
         the structure).
     sampling_updates : :obj:`bool`, default: ``False``
-        Will print for every 100 successfully sampled structures.
+        Will print for every 1000 successfully sampled structures.
     copy_EG : :obj:`bool`, default: ``False``
         Creates datasets for energies and gradients (using ``energy_label`` and 
         ``grad_label``) and attempts to copy data from the source if possible.
@@ -314,6 +339,9 @@ def sample_structures(
         Specifies source dataset name containing atomic gradients to copy.
         If ``copy_EG`` is ``True`` with no valid gradient datasets then an empty
         array is created.
+    periodic_cell : :obj:`reptar.periodic.Cell`, default: ``None``
+        If the source is under periodic boundary conditions. Will apply the
+        minimum image convention to sampled structures.
     
     Returns
     -------
@@ -500,13 +528,22 @@ def sample_structures(
         if (r_prov_specs_check[:idx_sel]==r_prov_specs_check[idx_sel]).all(1).any():
             continue
         
-        ###   Checks structure descriptor   ###
-        # Creates mask for atoms in the selection.
+        # Slices atoms to build sampled coordinates.
+        # Must be done to preserve same order as r_prov_specs
         r_index_source = selection[1]
         for entity_id_sel,entity_mask in \
           enumerate(entity_mask_gen(entity_ids_source, selection[2:])):
             r_sel[(entity_ids==entity_id_sel)] = R_source[r_index_source][entity_mask]
+        
+        # Enforce minimum image convention if periodic.
+        if periodic_cell is not None:
+            r_sel_periodic = periodic_cell.r_mic(r_sel)
+            if r_sel_periodic is None:
+                continue
+            else:
+                r_sel = r_sel_periodic
 
+        # Checks any structural criteria.
         if criteria is not None:
             accept_r, _ = criteria.accept(Z, r_sel)
             # If descriptor is not met, will not include sample.
@@ -661,6 +698,14 @@ def add_structures_to_group(
             raise AssertionError(e)
     else:
         comp_ids = np.array(comp_labels)
+    
+    ###   Handle periodic structures   ###
+    try:
+        periodic_cell_vectors = source_file.get(f'{source_key}/periodic_cell')
+        periodic_mic_cutoff = source_file.get(f'{source_key}/periodic_mic_cutoff')
+        periodic_cell = Cell(periodic_cell_vectors, periodic_mic_cutoff)
+    except Exception as e:
+        periodic_cell = None
 
 
     # Prepare source r_prov_ids and r_prov_specs.
@@ -740,7 +785,8 @@ def add_structures_to_group(
         structure_idxs=structure_idxs, criteria=criteria,
         center_structures=center_structures, sampling_updates=sampling_updates,
         copy_EG=copy_EG, E=E, G=G,
-        energy_label_source=energy_labels[0], grad_label_source=grad_labels[0]
+        energy_label_source=energy_labels[0], grad_label_source=grad_labels[0],
+        periodic_cell=periodic_cell
     )
 
     num_sampled = R.shape[0] - n_R_initial

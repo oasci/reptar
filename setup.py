@@ -7,13 +7,13 @@ import versioneer
 
 requirements = [
     'numpy', 'exdir>=0.4.2', 'cclib>=1.7.0', 'scipy', 'qcelemental>=0.25.1',
-    'pyyaml'
+    'pyyaml', 'ase'
 ]
 
 setup_requirements = ['versioneer']
 
 test_requirements = requirements.append(
-    ['pytest', 'pytest-order', 'ase']
+    ['pytest', 'pytest-order']
 )
 
 setup(
