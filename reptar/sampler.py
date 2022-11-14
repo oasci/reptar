@@ -23,6 +23,7 @@
 import itertools
 import numpy as np
 from random import randrange, choice
+from .calculators.save import Saver
 from .utils import center_structures as get_center_structures
 from .utils import get_md5, gen_combs
 from .periodic import Cell
@@ -103,9 +104,38 @@ def r_from_entities(R, entity_ids, entities):
         r_sel.extend(R[entity_mask])
     return np.array(r_sel)
 
+def _add_structures_to_R(R, n_to_add, n_atoms):
+    R_to_add = np.empty((n_to_add, n_atoms, 3))
+    R_to_add[:] = np.nan
+    if R is None:
+        idx_sel = 0  # Starting index of the newly sampled structures.
+        R = R_to_add
+    else:
+        idx_sel = len(R)
+        R = np.concatenate((R, R_to_add), axis=0)
+    return idx_sel, R
+
+def _add_structures_to_E(E, n_to_add):
+    E_to_add = np.empty(n_to_add)
+    E_to_add[:] = np.nan
+    if E is None:
+        E = E_to_add
+    else:
+        E = np.concatenate((E, E_to_add))
+    return E
+
+def _add_structures_to_G(G, n_to_add, n_atoms):
+    G_to_add = np.empty((n_to_add, n_atoms, 3))
+    G_to_add[:] = np.nan
+    if G is None:
+        G = G_to_add
+    else:
+        G = np.concatenate((G, G_to_add), axis=0)
+    return G
+
 def _initialize_structure_sampling_arrays(
     Z, R, E, G, r_prov_specs, quantity, comp_labels, R_source,
-    entity_ids_source, entity_ids_samples, copy_EG
+    entity_ids_source, entity_ids_samples, copy_EG, all_size=50000
 ):
     """Creates or extends arrays for sampling structures.
 
@@ -147,6 +177,9 @@ def _initialize_structure_sampling_arrays(
         Creates datasets for energies and gradients (using ``energy_label`` and 
         ``grad_label``) and attempts to copy data from the source if possible.
         If no compatible data is available it will just store :obj:`numpy.NaN`.
+    all_size : :obj:`int`, default: ``50000``
+        Number of structures to initialize ``R`` array when sampling all.
+        Sampling routines will automatically resize this when necessary.
     """
     # Either creates new ones or concatenates to
     # original destination data.
@@ -158,6 +191,12 @@ def _initialize_structure_sampling_arrays(
             1 for _ in _generate_structure_samples(quantity, [0], entity_ids_samples)
         )
         size_quantity = int(combs_per_structure*len(R_source))
+
+        # Sometimes we want to sample all with a criteria. Criteria should
+        # drastically reduce the number of sampled structures. So, we just
+        # initialize a large array with ``all_size``.
+        if size_quantity > all_size:
+            size_quantity = all_size
         sampling_all = True
     else:
         size_quantity = int(quantity)
@@ -174,29 +213,11 @@ def _initialize_structure_sampling_arrays(
     else:
         assert len(Z) == number_of_atoms
     
-    sampled_R_empty = np.empty((size_quantity, number_of_atoms, 3))
-    sampled_R_empty[:] = np.nan
-    if R is None:
-        idx_sel = 0  # Starting index of the newly sampled structures.
-        R = sampled_R_empty
-    else:
-        idx_sel = len(R)
-        R = np.concatenate((R, sampled_R_empty), axis=0)
+    idx_sel, R = _add_structures_to_R(R, size_quantity, number_of_atoms)
     
     if copy_EG:
-        sampled_E_empty = np.empty(sampled_R_empty.shape[0])
-        sampled_E_empty[:] = np.nan
-        if E is None:
-            E = sampled_E_empty
-        else:
-            E = np.concatenate((E, sampled_E_empty))
-        
-        sampled_G_empty = np.empty((size_quantity, number_of_atoms, 3))
-        sampled_G_empty[:] = np.nan
-        if G is None:
-            G = sampled_G_empty
-        else:
-            G = np.concatenate((G, sampled_G_empty), axis=0)
+        E = _add_structures_to_E(E, n_to_add)
+        G = _add_structures_to_G(G, n_to_add, n_atoms)
     else:
         E = None
         G = None
@@ -276,7 +297,7 @@ def sample_structures(
     Z=None, R=None, r_prov_specs=None, structure_idxs=None,
     criteria=None, center_structures=False, sampling_updates=False,
     copy_EG=False, E=None, G=None, energy_label_source='energy_ele',
-    grad_label_source='grads', periodic_cell=None
+    grad_label_source='grads', periodic_cell=None, saver=None
 ):
     """Randomly samples structures from a source.
 
@@ -460,7 +481,8 @@ def sample_structures(
     num_generated = 0  # Number of structures we generated (includes rejected).
     num_accepted = 0  # Number of structures successfully sampled.
     prev_num_accepted_print = 0  # Workaround to control printing.
-    
+    do_save = False
+
     ###   Begin sampling structures   ###
     if structure_idxs is None:
         structure_idxs = tuple(range(0, len(R_source)))
@@ -469,19 +491,38 @@ def sample_structures(
     ):
         num_generated += 1
 
-        ###   Sampling updates   ###
-        # Prints progress information every 1000 successful samples.
+        ###   Sampling updates and Saver   ###
+        # Prints progress information every 1000 successful samples.            
         if sampling_updates:
             if not sampling_all:
                 if num_accepted%1000 == 0 \
-                    and num_accepted != prev_num_accepted_print:
+                and num_accepted != prev_num_accepted_print:
                     prev_num_accepted_print = num_accepted
                     print(f'Sampled {num_accepted} structures')
+                    do_save = True
             else:
                 if (num_accepted+1)%1000 == 0:
                     print(
                         f'Sampled {num_accepted+1} structures'
                     )
+                    do_save = True
+        
+        if saver is not None and do_save:
+            if center_structures:
+                R_to_save = get_center_structures(Z, R[:idx_sel])
+            else:
+                R_to_save = R[:idx_sel]
+            if copy_EG:
+                saver.save(
+                    R_to_save, r_prov_ids,
+                    r_prov_specs[:idx_sel].astype(np.int64), E, G
+                )
+            else:
+                saver.save(
+                    R_to_save, r_prov_ids,
+                    r_prov_specs[:idx_sel].astype(np.int64)
+                )
+            do_save = False
 
         ###   Sampling maintenance   ###
         # Ends sampling for number quantities.
@@ -551,6 +592,11 @@ def sample_structures(
                 continue
         
         ###   SUCCESSFUL SAMPLE   ###
+        # Check R size
+        if idx_sel >= R.shape[0]:
+            idx_sel, R = _add_structures_to_R(R, 5000, n_Z)
+            E = _add_structures_to_E(E, 5000)
+            G = _add_structures_to_G(G, 5000, n_atoms)
         R[idx_sel] = r_sel
         
         if source_r_prov_specs is not None:
@@ -584,10 +630,10 @@ def sample_structures(
     )
 
 def add_structures_to_group(
-    source_file, source_key, dest_file, dest_key, quantity,
-    comp_labels, structure_idxs=None, criteria=None, center_structures=False, sampling_updates=False,
-    copy_EG=False, energy_labels=('energy_ele',), grad_labels=('grads',),
-    write=True
+    source_file, source_key, dest_file, dest_key, quantity, comp_labels,
+    structure_idxs=None, criteria=None, center_structures=False,
+    sampling_updates=False, copy_EG=False, energy_labels=('energy_ele',),
+    grad_labels=('grads',), write=True, saver=None
 ):
     """Adds randomly sampled structures to a group.
 
@@ -644,6 +690,9 @@ def add_structures_to_group(
     to already existing ``Group``.
 
     ``entity_ids`` are automatically included in ``criteria.accept()``.
+
+    Both ``periodic_cell`` and ``periodic_mic_cutoff`` are required in source
+    for periodic sampling. These are automatically found in this routine.
     """
     # Grabs data from destination if exists.
     try:
@@ -778,6 +827,22 @@ def add_structures_to_group(
     else:
         n_R_initial = R.shape[0]
     
+    # Saver
+    if write:
+        if copy_EG:
+            saver = Saver(
+                dest_file.fpath,
+                (f'{dest_key}/geometry', f'{dest_key}/r_prov_ids',
+                f'{dest_key}/r_prov_specs', f'{dest_key}/{e_label}',
+                f'{dest_key}/{g_label}')
+            )
+        else:
+            saver = Saver(
+                dest_file.fpath,
+                (f'{dest_key}/geometry', f'{dest_key}/r_prov_ids',
+                f'{dest_key}/r_prov_specs')
+            )
+    
     # Begin sampling.
     Z, R, E, G, entity_ids_sampled, r_prov_specs = sample_structures(
         source_file, source_key, quantity, comp_labels, new_r_prov_ids,
@@ -786,7 +851,7 @@ def add_structures_to_group(
         center_structures=center_structures, sampling_updates=sampling_updates,
         copy_EG=copy_EG, E=E, G=G,
         energy_label_source=energy_labels[0], grad_label_source=grad_labels[0],
-        periodic_cell=periodic_cell
+        periodic_cell=periodic_cell, saver=saver
     )
 
     num_sampled = R.shape[0] - n_R_initial
@@ -836,7 +901,7 @@ def add_structures_to_group(
         dest_file.put(f'{dest_key}/r_centered', center_structures)
         dest_file.put(f'{dest_key}/comp_ids', comp_ids)
 
-        dest_file.update_md5(dest_key)
         dest_file.put(f'{dest_key}/reptar_version', reptar_version)
+        dest_file.update_md5(dest_key)
 
     return dest_file

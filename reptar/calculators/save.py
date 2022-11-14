@@ -42,7 +42,7 @@ class Saver:
         self.rfile_path = rfile_path
         self.data_keys = data_keys
     
-    def save(self, data):
+    def save(self, *data):
         """Put data to rfile.
 
         Returns

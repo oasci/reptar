@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- ``Saver`` with sampling.
 - ``with_md5_update`` option for putting data in reptar files.
 - ``File.copy()`` method to help copying data between groups.
 - ``driverOPT`` and ``psi4_opt`` worker.
