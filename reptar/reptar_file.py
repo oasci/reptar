@@ -277,7 +277,7 @@ class File:
             keys.extend(list(group.keys()))
         return keys
 
-    def get(self, key, as_memmap=False):
+    def get(self, key, as_memmap=False, missing_is_none=False):
         """Retrieve data.
 
         Parameters
@@ -286,6 +286,9 @@ class File:
             Key of the desired data. Nested keys should be separated by ``/``.
         as_memmap : :obj:`bool`, default: ``False``
             Keep NumPy memmap (from exdir files) instead of converting to arrays.
+        missing_is_none : :obj:`bool`, default: ``False``
+            Catch the ``RuntimeError`` and return ``None`` if the key does not
+            exits.
         
         Examples
         --------
@@ -295,10 +298,16 @@ class File:
         -12419.360138637763
         """
         key = self.clean_key(key)
-        if self.ftype == 'exdir':
-            data = self._get_from_exdir(key, as_memmap=as_memmap)
-        elif self.ftype == 'json' or self.ftype == 'npz':
-            data = self._get_from_dict(key)
+        try:
+            if self.ftype == 'exdir':
+                data = self._get_from_exdir(key, as_memmap=as_memmap)
+            elif self.ftype == 'json' or self.ftype == 'npz':
+                data = self._get_from_dict(key)
+        except RuntimeError as e:
+            if 'does not exist' in str(e) and missing_is_none:
+                data = None
+            else:
+                raise
         return data
     
     def _is_iter(self, data):
