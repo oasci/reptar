@@ -11,6 +11,7 @@ API
    File <file>
    Fragment <fragment/fragment>
    Parsers <parsers-api/parsers-module>
+   Periodic <periodic/periodic_module>
    Sampling <sampler/sampler>
    Utilities <utils/utils>
    Writers <writers/writers>
