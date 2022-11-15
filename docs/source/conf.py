@@ -53,7 +53,6 @@ root_doc = 'index'
 
 # Add mappings
 intersphinx_mapping = {
-    'urllib3': ('https://urllib3.readthedocs.io/en/latest/', None),
     'python': ('https://docs.python.org/3', None),
     'numpy': ('https://numpy.org/doc/stable/', None)
 }

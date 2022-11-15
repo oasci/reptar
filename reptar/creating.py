@@ -46,7 +46,7 @@ def identify_parser(out_path):
     
     Returns
     -------
-    :obj:`reptar.creator`
+    :obj:`reptar.Creator`
         One of the supported creator classes.
     """
     with open(out_path, 'r') as f:
@@ -81,7 +81,7 @@ def identify_trajectory(traj_path):
         # Do not have ase installed.
         pass
 
-class creator:
+class Creator:
     """Create groups from computational chemistry data.
     """
 

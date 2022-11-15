@@ -1,9 +1,9 @@
-``reptar.sampler``
-==================
+``reptar.sampling``
+===================
 
 .. toctree::
+    :maxdepth: 1
 
     entity_mask_gen
     r_from_entities
-    Sampler
     _generate_structure_samples

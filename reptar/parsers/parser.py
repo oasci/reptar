@@ -79,21 +79,19 @@ class parser(ABC):
     def parsed_info(self):
         """Information parsed from files. Contains the following keys.
 
-        .. glossary::
-
-            ``system_info``
-                Information specifying the system prior to any computation. Such
-                as the initial cartesian coordinates, total system charge and
-                multiplicity, etc.
-            
-            ``runtime_info``
-                Contains information about setting up the job/calculation or running
-                the job. Defining convergence criteria, parameters, etc.
-            
-            ``outputs``
-                Results, requested or not, of the job. For example, SCF
-                cycle values, optimized coordinates, trajectory, number of
-                electrons, generated structures, etc.
+        ``system_info``
+            Information specifying the system prior to any computation. Such
+            as the initial cartesian coordinates, total system charge and
+            multiplicity, etc.
+        
+        ``runtime_info``
+            Contains information about setting up the job/calculation or running
+            the job. Defining convergence criteria, parameters, etc.
+        
+        ``outputs``
+            Results, requested or not, of the job. For example, SCF
+            cycle values, optimized coordinates, trajectory, number of
+            electrons, generated structures, etc.
 
         :type: :obj:`dict`
         """

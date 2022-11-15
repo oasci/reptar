@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import creator, File
+from reptar import Creator, File
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
 import sys
@@ -54,12 +54,12 @@ def test_1h2o_57h2o_ase_exdir():
     comp_ids = gen_comp_ids('h2o', num_waters, entity_ids)
 
     group_key = 'nvt_run_0'
-    create = creator()
+    create = Creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     create.from_calc(group_key, traj_path=traj_path)
     create.ids(group_key, entity_ids, comp_ids)
     
-    create = creator()
+    create = Creator()
     create.load(
         exdir_path, mode='r'
     )

@@ -23,7 +23,7 @@ Reptar uses a driver/supervisor and worker workflow where the results are direct
 When running calculations, you first create a property (e.g., energy) array where all values are ``NaN``.
 Each ``NaN`` value represents a calculation that still needs to run.
 The driver then spawns workers with batches of calculations to run.
-Once a worker is finished, we use a :class:`~reptar.calculators.save.Saver` object to store the results in case the job terminates early.
+Once a worker is finished, we use a :class:`~reptar.Saver` object to store the results in case the job terminates early.
 
 .. mermaid::
 
@@ -74,8 +74,7 @@ Ideally we would have an even distribution of configurational space, so we first
         .. code-block:: python
 
             import os
-            from reptar import File
-            from reptar.sampler import add_structures_to_group
+            from reptar import File, Sampler
             from reptar.descriptors import Criteria, com_distance_sum
 
             rfile_path = './30h2o-gfn2-md.exdir'
@@ -90,7 +89,6 @@ Ideally we would have an even distribution of configurational space, so we first
 
             cutoff = None  # Value, list, or None. None accepts all structures.
             center_structures = True  # Translate center of mass to origin.
-            structure_idxs = None  # None means all structures are options.
 
             # Ensures we execute from script directory (for relative paths).
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -109,12 +107,11 @@ Ideally we would have an even distribution of configurational space, so we first
 
             criteria = Criteria(com_distance_sum, {}, cutoff=cutoff)
 
-            add_structures_to_group(
-                rfile, ref_key, rfile, dest_key, quantity,
-                sample_comp_ids, structure_idxs=structure_idxs,
-                center_structures=center_structures, criteria=criteria,
-                sampling_updates=True, copy_EG=False
+            sampler = Sampler(
+                rfile, ref_key, rfile, dest_key, criteria=criteria,
+                center_structures=center_structures
             )
+            sampler.sample(sample_comp_ids, quantity)
     
     .. tab-item:: Descriptor analysis
 
@@ -264,8 +261,7 @@ TODO: finish this section.
         .. code-block:: python
 
             import os
-            from reptar import File
-            from reptar.sampler import add_structures_to_group
+            from reptar import File, Sampler
             from reptar.descriptors import Criteria, com_distance_sum
 
             rfile_path = './30h2o-gfn2-md.exdir'
@@ -279,7 +275,6 @@ TODO: finish this section.
 
             cutoff = None  # Value, list, or None. None accepts all structures.
             center_structures = True  # Translate center of mass to origin.
-            structure_idxs = None  # None means all structures are options.
 
             # Ensures we execute from script directory (for relative paths).
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -296,14 +291,17 @@ TODO: finish this section.
                 else:
                     raise
 
-            criteria = Criteria(com_distance_sum, {}, cutoff=cutoff)
+            if cutoff is None:
+                criteria = None
+            else:
+                criteria = Criteria(com_distance_sum, {}, cutoff=cutoff)
 
-            add_structures_to_group(
-                rfile, ref_key, rfile, dest_key, quantity,
-                sample_comp_ids, structure_idxs=structure_idxs,
-                center_structures=center_structures, criteria=criteria,
-                sampling_updates=True, copy_EG=False
+            sampler = Sampler(
+                rfile, ref_key, rfile, dest_key, criteria=criteria,
+                center_structures=center_structures
             )
+            sampler.sample(sample_comp_ids, quantity)
+    
 
     .. tab-item:: Dimer descriptor analysis
 
@@ -316,8 +314,7 @@ TODO: finish this section.
         .. code-block:: python
 
             import os
-            from reptar import File
-            from reptar.sampler import add_structures_to_group
+            from reptar import File, Sampler
             from reptar.descriptors import Criteria, com_distance_sum
 
             rfile_path = './30h2o-gfn2-md.exdir'
@@ -351,12 +348,11 @@ TODO: finish this section.
 
             criteria = Criteria(com_distance_sum, {}, cutoff=cutoff)
 
-            add_structures_to_group(
-                rfile, ref_key, rfile, dest_key, quantity,
-                sample_comp_ids, structure_idxs=structure_idxs,
-                center_structures=center_structures, criteria=criteria,
-                sampling_updates=True, copy_EG=False
+            sampler = Sampler(
+                rfile, ref_key, rfile, dest_key,
+                center_structures=center_structures
             )
+            sampler.sample(sample_comp_ids, quantity)
 
 
 
@@ -401,10 +397,9 @@ TODO: Finish this section.
             import sys
             import numpy as np
             import os
-            from reptar import File
+            from reptar import File, Saver
             from reptar.calculators.drivers import driverENGRAD
             from reptar.calculators.psi4_workers import psi4_engrad
-            from reptar.calculators.save import Saver
             import time
 
             rfile_path = '../30h2o-gfn2-md.exdir'

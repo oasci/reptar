@@ -4,7 +4,7 @@ Sampling
 
 Reptar provides automated procedures for sampling structures from reptar files.
 For example, sampling water trimers from a molecular dynamics simulation.
-To sample structures and add to a group you can use the class :class:`~reptar.sampler.Sampler`.
+To sample structures and add to a group you can use the class :class:`~reptar.Sampler`.
 
 Examples
 ========
@@ -333,8 +333,7 @@ After running the MD simulation, we stored the data in :download:`this exdir fil
 .. code-block:: python
 
     import os
-    from reptar import File
-    from reptar.creator import creator
+    from reptar import File, Creator
     from reptar.utils import gen_entity_ids, gen_comp_ids
 
     rfile_path = './30h2o-gfn2-md.exdir'
@@ -359,7 +358,7 @@ After running the MD simulation, we stored the data in :download:`this exdir fil
     )
 
     rfile = File(rfile_path, mode='a', allow_remove=False)
-    create = creator(rfile=rfile)
+    create = Creator(rfile=rfile)
 
     create.from_calc(
         group_key, out_path=out_path, geom_path=geom_path, traj_path=traj_path
@@ -379,8 +378,7 @@ The following script will sample and store 5000 random trimers from the entire M
 .. code-block:: python
 
     import os
-    from reptar import File
-    from reptar.sampler import Sampler
+    from reptar import File, Sampler
 
     rfile_path = './30h2o-gfn2-md.exdir'
     group_key = '/30h2o'
@@ -417,8 +415,7 @@ We can use the :func:`~reptar.descriptors.com_distance_sum` descriptor and the :
 .. code-block:: python
 
     import os
-    from reptar import File
-    from reptar.sampler import add_structures_to_group
+    from reptar import File, Sampler
     from reptar.descriptors import Criteria, com_distance_sum
     from reptar.utils import get_entity_ids
 

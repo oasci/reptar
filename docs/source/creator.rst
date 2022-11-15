@@ -4,7 +4,7 @@ Creator
 
 Reproducibility of computational chemistry research is the driving force of reptar.
 Open data is a crucial for making this happen, but established solutions often cannot support evolving research interests.
-In order to make this as easy as possible, reptar provides a :class:`~reptar.creator` class that handles turning calculations into reproducible data.
+In order to make this as easy as possible, reptar provides a :class:`~reptar.Creator` class that handles turning calculations into reproducible data.
 By providing a customizable parser framework, reptar will automatically take care of storing the essential information while leaving the option for the user to easily parse their own data.
 
 Reptar supports the following packages and jobs with their respective tests.
@@ -34,21 +34,21 @@ Group creation
 ==============
 
 First, a :ref:`File<file>` object needs to be loaded into the creator.
-Reptar provides two ways to do this: by initializing a :class:`~reptar.creator` object with a :ref:`File<file>` object, or by using the :meth:`~reptar.creator.load` method.
+Reptar provides two ways to do this: by initializing a :class:`~reptar.Creator` object with a :ref:`File<file>` object, or by using the :meth:`~reptar.Creator.load` method.
 
-.. autoclass:: reptar.creator
+.. autoclass:: reptar.Creator
     :noindex:
 
-.. automethod:: reptar.creator.load
+.. automethod:: reptar.Creator.load
     :noindex:
 
 .. note::
 
-    This :ref:`File<file>` object is stored in the :attr:`~reptar.creator.rfile` attribute.
+    This :ref:`File<file>` object is stored in the :attr:`~reptar.Creator.rfile` attribute.
 
 Reptar can then parse information and create a group by specifying the paths to the relevant output files.
 
-.. automethod:: reptar.creator.from_calc
+.. automethod:: reptar.Creator.from_calc
     :noindex:
 
 Types of output files
@@ -84,7 +84,7 @@ Component and entity ids
 
 TODO:
 
-.. automethod:: reptar.creator.ids
+.. automethod:: reptar.Creator.ids
     :noindex:
 
 File definitions
@@ -92,5 +92,5 @@ File definitions
 
 TODO:
 
-.. automethod:: reptar.creator.definitions
+.. automethod:: reptar.Creator.definitions
     :noindex:

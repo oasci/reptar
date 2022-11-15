@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import creator, File
+from reptar import Creator, File
 
 import sys
 sys.path.append("..")
@@ -45,7 +45,7 @@ def test_crest_50h2o_nci_exdir_conformers():
     calc_path, out_path, conf_path, rot_path = get_crest_50h2o_nci_paths()
     exdir_path = os.path.join(crest_dir, '50h2o.exdir')
 
-    create = creator()
+    create = Creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     group_key = '/0-crest/conformers'
     rfile = create.from_calc(
@@ -70,7 +70,7 @@ def test_crest_50h2o_nci_exdir_rotamers():
     calc_path, out_path, conf_path, rot_path = get_crest_50h2o_nci_paths()
     exdir_path = os.path.join(crest_dir, '50h2o.exdir')
 
-    create = creator()
+    create = Creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     group_key = '/0-crest/rotamers'
     rfile = create.from_calc(

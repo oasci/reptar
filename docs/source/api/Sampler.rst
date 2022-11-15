@@ -1,5 +1,5 @@
 ``Sampler``
 ===========
 
-.. autoclass:: reptar.sampler.Sampler
+.. autoclass:: reptar.Sampler
     :members:
