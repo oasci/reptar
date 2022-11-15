@@ -23,7 +23,7 @@
 import itertools
 import numpy as np
 from random import randrange, choice
-from .calculators.save import Saver
+from . import Saver
 from .utils import center_structures as get_center_structures
 from .utils import get_md5, gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
@@ -370,11 +370,10 @@ class Sampler(object):
             Number of structures to initialize sampling arrays with when
             ``quantity`` is ``'all'``.
         use_ray : :obj:`bool`, default: ``False``
-            **Note implemented yet.**
-            Use ray to parallelize calculations. If ``False``, calculations are
-            done serially. ``False`` can be useful when running locally or only
-            a few calculations are needed. ``True`` is useful for tons of
-            calculations.
+            **Not implemented yet.**
+            Use ray to parallelize sampling. If ``False``, then sampling is
+            done serially in batches. ``True`` is useful if tons of sampling
+            on the order of thousands is desired.
         n_workers : :obj:`int`, default: ``2``
             Number of workers to use for sampling if ``use_ray`` is ``True``.
             Each worker will have one core.
@@ -585,7 +584,7 @@ class Sampler(object):
     
 
     def get_avail_entities(
-        self, comp_ids_source, comp_labels, specific_entities
+        self, comp_ids_source, comp_labels, specific_entities=None
     ):
         """Determines available ``entity_ids`` for each ``comp_id`` in
         requested sampling components..
@@ -600,11 +599,12 @@ class Sampler(object):
             each :obj:`tuple` element. Thus, the order of each label
             **does** matter.
         specific_entities : :obj:`tuple`, default: ``None``
-            Supersede entities determined from ``Sampler.avail_entities`` and
-            use these instead. This needs to specify the ``comp_label`` index
-            to supersede and the entities to use instead. For example, if you
-            wanted to always sample entity ``43`` or ``78`` for the second
-            ``comp_label`` then this would be ``((1, (43, 78)),)``
+            Supersede entities determined from
+            :meth:`reptar.Sampler.get_avail_entities` and use these instead. This
+            needs to specify the ``comp_label`` index to supersede and the
+            entities to use instead. For example, if you wanted to always sample
+            entity ``43`` or ``78`` for the second ``comp_label`` then this
+            would be ``((1, (43, 78)),)``
         
         Returns
         -------

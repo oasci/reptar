@@ -26,8 +26,8 @@ import pytest
 import os
 import shutil
 import numpy as np
-from reptar import creator
-from reptar.sampler import Sampler, r_from_entities
+from reptar import Creator, Sampler
+from reptar.sampling import r_from_entities
 import itertools
 
 import sys
@@ -51,11 +51,11 @@ def test_1h2o_120meoh_prod_sampler():
     source_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
     dest_path = f'{sampling_dir}/test_1h2o_120meoh_prod_sampling.exdir'
 
-    source = creator()
+    source = Creator()
     source.load(source_path, mode='r')
     source_key = '/prod_1'
 
-    dest = creator()
+    dest = Creator()
     dest.load(dest_path, mode='w', allow_remove=True)
     dest_key = '/wat.2met-pes'
     dest.rfile.create_group(dest_key)
@@ -139,7 +139,7 @@ def test_sampling_from_wat_2met_pes():
     """
     src_path = f'{sampling_dir}/test_1h2o_120meoh_prod_sampling.exdir'
 
-    source = creator()
+    source = Creator()
     source.load(src_path, mode='a')
     source_key = '/wat.2met-pes'
     dest_key = '/wat.met-pes'
@@ -180,4 +180,10 @@ def test_sampling_from_wat_2met_pes():
     assert np.array_equal(
         source.rfile.get(f'{source_key}/r_prov_specs')[0][:4],
         source.rfile.get(f'{dest_key}/r_prov_specs')[0]
+    )
+
+    # We also know the last structure is the last possible dimer.
+    assert np.array_equal(
+        source.rfile.get(f'{source_key}/r_prov_specs')[-1][np.array([0, 1, 2, 4])],
+        source.rfile.get(f'{dest_key}/r_prov_specs')[-1]
     )

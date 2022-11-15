@@ -125,7 +125,7 @@ class driverENERGY:
 
         Parameters
         ----------
-        saver : :obj:`reptar.calculators.save.Saver`, optional
+        saver : :obj:`reptar.Saver`, optional
             Save data after every worker finishes.
 
         Returns
@@ -284,7 +284,7 @@ class driverENGRAD:
 
         Parameters
         ----------
-        saver : :obj:`reptar.calculators.save.Saver`, optional
+        saver : :obj:`reptar.Saver`, optional
             Save data after every worker finishes.
 
         Returns
@@ -444,7 +444,7 @@ class driverOPT:
 
         Parameters
         ----------
-        saver : :obj:`reptar.calculators.save.Saver`, optional
+        saver : :obj:`reptar.Saver`, optional
             Save data after every worker finishes.
 
         Returns

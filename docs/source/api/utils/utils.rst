@@ -2,6 +2,7 @@
 ================
 
 .. toctree::
+    :maxdepth: 1
 
     atoms_by_element
     atoms_by_number

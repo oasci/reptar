@@ -108,25 +108,25 @@ Then, while in the repo root directory, you can run all of the tests with the ``
 .. code-block:: bash
 
     $ pytest
-    =========================== test session starts ============================
-    platform linux -- Python 3.8.10, pytest-7.1.2, pluggy-1.0.0
+    ======================== test session starts =========================
+    platform linux -- Python 3.10.4, pytest-7.1.2, pluggy-1.0.0
     rootdir: /home/alex/repos/reptar, configfile: pytest.ini
-    plugins: anyio-3.6.1, cov-3.0.0, order-1.0.1
-    collected 19 items                                                         
+    plugins: anyio-3.6.1, order-1.0.1
+    collected 19 items                                                   
 
-    tests/test_creator_ase.py .                                          [  5%]
-    tests/test_creator_crest.py ..                                       [ 15%]
-    tests/test_creator_orca.py ...                                       [ 31%]
-    tests/test_creator_xtb.py ....                                       [ 52%]
-    tests/test_descriptors.py ..                                         [ 63%]
-    tests/test_sampling.py ..                                            [ 73%]
-    tests/test_writer_ase_db.py .                                        [ 78%]
-    tests/test_writer_pdb.py .                                           [ 84%]
-    tests/test_writer_schnetpack_db.py .                                 [ 89%]
-    tests/test_writer_xyz.py .                                           [ 94%]
-    tests/test_writer_xyz_gap.py .                                       [100%]
+    tests/test_creator_ase.py .                                    [  5%]
+    tests/test_creator_crest.py ..                                 [ 15%]
+    tests/test_creator_orca.py ...                                 [ 31%]
+    tests/test_creator_xtb.py ....                                 [ 52%]
+    tests/test_descriptors.py ..                                   [ 63%]
+    tests/test_sampling.py ..                                      [ 73%]
+    tests/test_writer_ase_db.py .                                  [ 78%]
+    tests/test_writer_pdb.py .                                     [ 84%]
+    tests/test_writer_schnetpack_db.py .                           [ 89%]
+    tests/test_writer_xyz.py .                                     [ 94%]
+    tests/test_writer_xyz_gap.py .                                 [100%]
 
-    =========================== 19 passed in 20.02s ============================
+    ======================== 19 passed in 20.59s =========================
 
 .. hint::
 
@@ -147,33 +147,29 @@ You can easily build and view the documentation locally by running the ``docs/br
 .. code-block:: bash
 
     $ ./docs/branch-build-docs.sh 
-    Running Sphinx v5.1.1
+    Running Sphinx v5.3.0
     making output directory... done
-    loading intersphinx inventory from https://urllib3.readthedocs.io/en/latest/objects.inv...
     loading intersphinx inventory from https://docs.python.org/3/objects.inv...
     loading intersphinx inventory from https://numpy.org/doc/stable/objects.inv...
     building [mo]: targets for 0 po files that are out of date
-    building [html]: targets for 67 source files that are out of date
-    updating environment: [new config] 67 added, 0 changed, 0 removed
-    reading sources... [100%] writers                                                                                         
-    /home/alex/repos/reptar/docs/docstring of reptar.parsers.parser.parsed_info:4: WARNING: duplicate term description of system_info, other instance in api/parsers-api/parser
-    /home/alex/repos/reptar/docs/docstring of reptar.parsers.parser.parsed_info:9: WARNING: duplicate term description of runtime_info, other instance in api/parsers-api/parser
-    /home/alex/repos/reptar/docs/docstring of reptar.parsers.parser.parsed_info:13: WARNING: duplicate term description of outputs, other instance in api/parsers-api/parser
+    building [html]: targets for 72 source files that are out of date
+    updating environment: [new config] 72 added, 0 changed, 0 removed
+    reading sources... [100%] writers                                    
     looking for now-outdated files... none found
     pickling environment... done
     checking consistency... done
     preparing documents... done
-    writing output... [100%] writers                                                                                          
+    writing output... [100%] writers                                     
     generating indices... genindex done
-    highlighting module code... [100%] reptar.writers.xyz_gap                                                                 
+    highlighting module code... [100%] reptar.writers.xyz_gap            
     writing additional pages... search done
-    copying images... [100%] files/30h2o-md/30h2o.2h2o-com.sum-distribution-13457.png                                         
-    copying downloadable files... [100%] files/30h2o-md/30h2o-gfn2-md.exdir.zip                                               
+    copying images... [100%] files/30h2o-md/30h2o.2h2o-com.sum-distribution-13457.png
+    copying downloadable files... [100%] files/30h2o-md/30h2o-gfn2-md.exdir.zip
     copying static files... done
     copying extra files... done
     dumping search index in English (code: en)... done
     dumping object inventory... done
-    build succeeded, 3 warnings.
+    build succeeded.
 
     The HTML pages are in html.
 
@@ -188,7 +184,7 @@ Please follow the general format specified `here <https://keepachangelog.com/en/
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-branch
 
-9. Submit a pull request through the GitHub website.
+9. Submit a pull request through the `GitHub website <https://github.com/aalexmmaldonado/reptar>`__.
 
 
 

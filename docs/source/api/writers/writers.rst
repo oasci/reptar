@@ -2,6 +2,7 @@
 ==================
 
 .. toctree::
+    :maxdepth: 1
 
     string_xyz_arrays
     write_ase_db

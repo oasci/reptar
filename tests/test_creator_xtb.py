@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import creator, File
+from reptar import Creator, File
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
 import sys
@@ -64,7 +64,7 @@ def test_1h2o_120meoh_md_exdir():
         'MET', num_methanols, entity_ids, add_to=comp_ids
     )
 
-    create = creator()
+    create = Creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     create.definitions(definitions=['md', 'xtb', 'pes'])
     create.from_calc(
@@ -85,7 +85,7 @@ def test_1h2o_120meoh_md_exdir():
         'Constrains one water molecule to the origin solvated in methanol droplet.'
     )
     
-    create = creator()
+    create = Creator()
     create.load(
         exdir_path, mode='r'
     )
@@ -123,7 +123,7 @@ def test_1h2o_120meoh_md_json():
         'MET', num_methanols, entity_ids, add_to=comp_ids
     )
 
-    create = creator()
+    create = Creator()
     create.load(json_path, mode='w')
     create.from_calc(
         '/eq_1', out_path=out_path_eq,
@@ -151,7 +151,7 @@ def test_1h2o_120meoh_md_json():
 
     create.rfile.save(json_prettify=True)
 
-    create = creator()
+    create = Creator()
     create.load(json_path, mode='r')
 
     assert create.rfile.get('prod_1/geometry').shape == (1001, 723, 3)
@@ -170,7 +170,7 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
     npz_path = os.path.join(xtb_dir, '1h2o_120meoh_md-prod.npz')
 
-    create_exdir = creator()
+    create_exdir = Creator()
     create_exdir.load(exdir_path, mode='r')
     prod_dict = create_exdir.rfile.as_dict('prod_1')
     
@@ -192,7 +192,7 @@ def test_50h2o_opt_to_exdir():
     dir_path, _, out_path, traj_path = get_50h2o_opt_paths()
     exdir_path = os.path.join(xtb_dir, '50h2o-opt.exdir')
 
-    create_exdir = creator()
+    create_exdir = Creator()
     create_exdir.load(exdir_path, mode='w', allow_remove=True)
     group_key = '0-gfn2-opt'
     rfile = create_exdir.from_calc(

@@ -25,7 +25,7 @@
 import pytest
 import os
 import numpy as np
-from reptar import creator
+from reptar import Creator
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
 import sys
@@ -46,13 +46,13 @@ def test_6h2o_temelso_engrad_exdir():
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
     exdir_path = os.path.join(orca_dir, '6h2o_temelso_pr_engrad.exdir')
 
-    create = creator()
+    create = Creator()
     create.load(exdir_path, mode='w', allow_remove=True)
     create.definitions(definitions=['qc', 'pes', 'molprop'])
     create.from_calc('/engrad', out_path=out_path)
 
     # Reading tests.
-    create = creator()
+    create = Creator()
     create.load(exdir_path, mode='r')
     assert create.rfile.get('/engrad/energy_scf') == -456.40308701
     assert create.rfile.get('/engrad/energy_ele') == -457.961331933491
@@ -69,13 +69,13 @@ def test_6h2o_temelso_engrad_json():
     json_path = os.path.join(orca_dir, '6h2o_temelso_pr_engrad.json')
 
     # Writing tests.
-    create = creator()
+    create = Creator()
     create.load(json_path, mode='w')
     create.from_calc('/', out_path=out_path)
     create.rfile.save()
 
     # Reading tests.
-    create = creator()
+    create = Creator()
     create.load(json_path, mode='r')
     assert create.rfile.get('energy_scf') == -456.40308701
     assert create.rfile.get('energy_ele') == -457.961331933491
@@ -91,13 +91,13 @@ def test_6h2o_temelso_engrad_npz():
     dir_path, out_path = get_6h2o_temelso_pr_engrad()
     npz_path = os.path.join(orca_dir, '6h2o_temelso_pr_engrad.npz')
 
-    create = creator()
+    create = Creator()
     create.load(npz_path, mode='w')
     create.from_calc('/', out_path=out_path)
     create.rfile.save()
 
     # Reading tests.
-    create = creator()
+    create = Creator()
     create.load(npz_path, mode='r')
     assert create.rfile.get('energy_scf') == -456.40308701
     assert create.rfile.get('energy_ele') == -457.961331933491
