@@ -313,6 +313,9 @@ def sampler_worker(
                 G_source[sel_source_idx], entity_ids_source,
                 entity_ids_selection
             )
+        
+        # Successful sample.
+        keep_idxs[i_sel] = True
     
     R = R[keep_idxs]
     if E is not None:
@@ -873,7 +876,7 @@ class Sampler(object):
             chunk_size = quantity
         else:
             chunk_size = 500
-
+        
         if not self.use_ray:
             # Serial operation
             for selections in chunk_iterable(selection_gen, chunk_size):
