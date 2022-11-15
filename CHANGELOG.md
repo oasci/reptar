@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Condensed and cleaned sampling routines into ``Sampler`` class.
 - Use ``qcelemental.periodictable`` for atomic numbers, symbols, and masses instead of manual dictionaries.
 - All drivers have a ``use_ray`` parameter that defaults to ``False``.
 - Calculators now use keyword arguments.

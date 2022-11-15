@@ -12,7 +12,7 @@ API
    Fragment <fragment/fragment>
    Parsers <parsers-api/parsers-module>
    Periodic <periodic/periodic_module>
-   Sampling <sampler/sampler>
+   Sampling <sampler/sampler_module>
    Utilities <utils/utils>
    Writers <writers/writers>
    
