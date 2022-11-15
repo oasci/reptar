@@ -1,0 +1,129 @@
+identification:
+  md5:
+    description: >+
+      Unique string determined by all group data.
+    storage:
+      - attribute
+    type: str
+  md5_arrays:
+    description: >+
+      Unique string determined by all group arrays (i.e., data not stored in arrays are not included).
+      This MD5 hash will not change as much when non-array data is added or removed.
+    storage:
+      - attribute
+    type: str
+  md5_structures:
+    description: >+
+      Unique string determined by all group datasets (no attributes are included).
+      This MD5 is only dependent on ``atomic_numbers`` and ``geometry``.
+      Use this for breadcrumb purposes.
+    storage:
+      - attribute
+    type: str
+  readme:
+    description: >+
+      Provides any information about the group.
+    storage:
+      - attribute
+    type: str
+system_info:
+  atomic_numbers:
+    description: >+
+      Number of protons in the nucleus of each atom.
+    storage:
+      - dataset
+    type: int
+  charge:
+    description: >+
+      Number of protons in the nucleus of each atom.
+    storage:
+      - attribute
+    type: int
+  geometry:
+    description: >+
+      Numerical coordinates specifying the three-dimensional positions of each atom.
+    storage:
+      - dataset
+    type: float
+  comp_ids:
+    description: >+
+      Relates ``entity_id`` to a fragment label for chemical components or species.
+      Labels could be WAT or h2o for water, MeOH for methanol, bz for benzene, etc.
+      There are no standardized labels for species.
+      The index of the label is the respective ``entity_id``.
+      For example, a water and methanol molecule could be ``['h2o', 'meoh']``.
+    storage:
+      - dataset
+    type: str
+  comp_ids_num:
+    description: >+
+      Specifies the number of component IDs as an attribute.
+      For example, ``{'H2O': 1, 'MEOH': 120}``
+    storage:
+      - attribute
+    type: dict
+  entity_ids:
+    description: >+
+      A uniquely identifying integer specifying what atoms belong to which entities.
+      Entities can be a related set of atoms, molecules, or functional group.
+      For example, a water and methanol molecule could be ``[0, 0, 0, 1, 1, 1, 1, 1, 1]``.
+    storage:
+      - dataset
+    type: int
+  geometry:
+    description: >+
+      Numerical coordinates specifying the three-dimensional positions of each atom.
+    storage:
+      - dataset
+    type: float
+  mult:
+    description: >+
+      System multiplicity.
+    storage:
+      - attribute
+    type: int
+  n_ele:
+    description: >+
+      Total number of electrons in the system.
+    storage:
+      - attribute
+    type: int
+  periodic:
+    description: >+
+      If periodic boundary conditions are enforced in the x, y, or z direction, respectively.
+    storage:
+      - attribute
+    type: bool
+  periodic_cell:
+    description: >+
+      The three cell vectors defining the periodic cell.
+    storage:
+      - dataset
+    type: float
+runtime_info:
+  calc_driver:
+    description: >+
+      The purpose of the calculation such as calculate energies, frequencies, gradients, or perform optimizations.
+      Possible values include: ``energy``, ``frequency``, ``gradient``, ``optimization``, ``molecular_dynamics``.
+    storage:
+      - attribute
+    type: str
+  prov:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  prov_version:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  success:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: bool
+  

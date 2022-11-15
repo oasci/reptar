@@ -1,0 +1,7 @@
+runtime_info:
+  solv_implicit_name:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str

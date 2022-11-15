@@ -1,0 +1,218 @@
+runtime_info:
+  approx_cosx:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: bool
+  approx_rij:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: bool
+  approx_rijk:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: bool
+  basis_aux:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  basis_n_func:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  ele_frozen:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: int
+  hamiltonian:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  hf_type:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  scf_grid_level:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  scf_grid_level_final:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+  temp_thermochem:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: str
+outputs:
+  conv_targ_geo_energy:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  conv_targ_geo_grad:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  conv_targ_geo_grad_max:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  conv_val_geo_energy:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  conv_val_geo_grad:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  conv_val_geo_grad_max:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  correc_enthalpy:
+    description: >+
+      Enthalpic energy correction to the electronic energy.
+    storage:
+      - attribute
+      - dataset
+    type: float
+  correc_entropy:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  correc_thermal:
+    description: >+
+      Thermal energy correction to electronic energy.
+    storage:
+      - attribute
+      - dataset
+    type: float
+  correc_zpe:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  diag_t1:
+    description: >+
+      T1 diagnostic
+    storage:
+      - attribute
+      - dataset
+    type: float
+  dipole_moment:
+    description: >+
+      Dipole moment vector in Debyes.
+    storage:
+      - dataset
+    type: float
+  energy_ccsd:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_ccsd(t):
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_correl_mp2:
+    description: >+
+      Correlation energy from MP2.
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_ele:
+    description: >+
+      Total electronic energy.
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_mos:
+    description: >+
+      Energies of molecular orbitals.
+      The array is of length 1 for restricted calculations, but length 2 for unrestricted calculations.
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_nuc_repul:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_scf:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_scf_one_ele:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_scf_two_ele:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  energy_scf_xc:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+
+  

@@ -1,0 +1,76 @@
+runtime_info:
+  algo_shake:
+    description: >+
+      If the SHAKE algorithm is used for bond constrains.
+    storage:
+      - attribute
+    type: bool
+  md_duration:
+    description: >+
+      TODO in ps
+    storage:
+      - attribute
+    type: float
+  md_restarted:
+    description: >+
+      Whether this MD simulation was restarted from another.
+    storage:
+      - attribute
+    type: bool
+  t_step:
+    description: >+
+      TODO
+    storage:
+      - attribute
+    type: float
+  thermostat_temp:
+    description: >+
+      Thermostat temperature set point.
+    storage:
+      - attribute
+    type: float
+  thermostat_type:
+    description: >+
+      Type of thermostat used.
+    storage:
+      - attribute
+    type: string
+  md_steps_dump_traj:
+    description: >+
+      Steps between each trajectory dump in femtoseconds.
+    storage:
+      - attribute
+    type: int
+outputs:
+  avg_energy_tot:
+    description: >+
+      Average total energy during a MD simulation in Hartrees.
+    storage:
+      - attribute
+    type: float
+  avg_temp:
+    description: >+
+      Average temperature during a MD simulation.
+    storage:
+      - attribute
+    type: float
+  energy_ke:
+    description: >+
+      Kinetic energy of the system in Hartrees.
+    storage:
+      - attribute
+      - dataset
+    type: float
+  temp:
+    description: >+
+      Instantaneous temperature in Kelvin.
+    storage:
+      - dataset
+    type: float
+  velcs:
+    description: >+
+      Atomic velocities in Angstrom/fs.
+    storage:
+      - dataset
+    type: float
+

@@ -1,0 +1,33 @@
+outputs:
+  energy_pot:
+    description: >+
+      TODO
+    storage:
+      - attribute
+      - dataset
+    type: float
+  forces:
+    description: >+
+      Atomic forces.
+    storage:
+      - dataset
+    type: float
+  freq_vib:
+    description: >+
+      TODO
+    storage:
+      - dataset
+    type: float
+  grads:
+    description: >+
+      Atomic gradients.
+    storage:
+      - dataset
+    type: float
+  normal_modes:
+    description: >+
+      Normalized, mass-weighted normal modes, q.
+    storage:
+      - dataset
+    type: float
+  
