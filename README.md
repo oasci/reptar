@@ -11,6 +11,7 @@
     <a href="https://codecov.io/gh/aalexmmaldonado/reptar">
         <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD" alt="codecov">
     </a>
+<a href="https://app.fossa.com/projects/git%2Bgithub.com%2Faalexmmaldonado%2Freptar?ref=badge_shield" alt="FOSSA Status"><img src="https://app.fossa.com/api/projects/git%2Bgithub.com%2Faalexmmaldonado%2Freptar.svg?type=shield"/></a>
     <a href="https://github.com/aalexmmaldonado/reptar/releases">
         <img src="https://img.shields.io/github/v/release/aalexmmaldonado/reptar" alt="GitHub release (latest by date)">
     </a>
@@ -35,6 +36,9 @@
 </p>
 
 <p align="center"><b>Disclaimer:</b> reptar is under active development and is not suitable for production.</p>
+
+
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Faalexmmaldonado%2Freptar.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Faalexmmaldonado%2Freptar?ref=badge_large)
 
 # Motivation
 
