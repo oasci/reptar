@@ -51,6 +51,6 @@ class Saver:
             File after putting data.
         """
         rfile = File(self.rfile_path, mode='a', allow_remove=False)
-        for key,data in zip(self.data_keys, data):
-            rfile.put(key, data)
+        for key, d in zip(self.data_keys, data):
+            rfile.put(key, d)
         return rfile

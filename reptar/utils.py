@@ -419,3 +419,29 @@ def chunk_iterable(iterable, n):
     iterator = iter(iterable)
     for first in iterator:
         yield tuple(itertools.chain([first], itertools.islice(iterator, n - 1)))
+
+def exists_in_array(a_slice, array):
+    """Check if ``a_slice`` exists in an ``array``.
+
+    Parameters
+    ----------
+    a_slice : :obj:`numpy.ndarray`
+        An example slice of ``array``'s first dimension to check.
+    array : :obj:`numpy.ndarray`
+        Array to check.
+    
+    Returns
+    -------
+    :obj:`bool`
+        If ``row`` is present in ``array``.
+    """
+    ndim = int(array.ndim)
+    exists = (array==a_slice)
+    # For each additional dimension after 1 we check the last dimension
+    # if they are all true.
+    for _ in range(1, ndim):
+        exists = exists.all(axis=-1)
+    # At the very end, we will have a 1D array. If any are True, then a_slice
+    # exists in array
+    return exists.any()
+    

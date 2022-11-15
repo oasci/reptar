@@ -4,7 +4,7 @@ Sampling
 
 Reptar provides automated procedures for sampling structures from reptar files.
 For example, sampling water trimers from a molecular dynamics simulation.
-To directly add structures to a group you can use the driver function :func:`~reptar.sampler.add_structures_to_group`.
+To sample structures and add to a group you can use the class :class:`~reptar.sampler.Sampler`.
 
 Examples
 ========
@@ -380,7 +380,7 @@ The following script will sample and store 5000 random trimers from the entire M
 
     import os
     from reptar import File
-    from reptar.sampler import add_structures_to_group
+    from reptar.sampler import Sampler
 
     rfile_path = './30h2o-gfn2-md.exdir'
     group_key = '/30h2o'
@@ -388,7 +388,6 @@ The following script will sample and store 5000 random trimers from the entire M
     sample_comp_ids = ['h2o', 'h2o', 'h2o']  # Component IDs to sample (3 waters in this case).
     quantity = 5000  # Number of structures to sample.
     center_structures = True  # Translate center of mass to origin.
-    structure_idxs = None  # None means we can sample from all structures.
 
     # Ensures we execute from script directory (for relative paths).
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -400,12 +399,13 @@ The following script will sample and store 5000 random trimers from the entire M
     rfile.create_group(sample_key)
 
     # Sample structures and automatically create the group.
-    add_structures_to_group(
-        rfile, group_key, rfile, sample_key, quantity,
-        sample_comp_ids, structure_idxs=structure_idxs,
-        center_structures=center_structures, sampling_updates=True,
-        copy_EG=False, write=True
+    sampler = Sampler(
+        rfile, group_key, rfile, sample_key,
+        center_structures=center_structures
     )
+    sampler.sample(sample_comp_ids, quantity)
+
+
 
 Water dimers with criteria
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -420,6 +420,7 @@ We can use the :func:`~reptar.descriptors.com_distance_sum` descriptor and the :
     from reptar import File
     from reptar.sampler import add_structures_to_group
     from reptar.descriptors import Criteria, com_distance_sum
+    from reptar.utils import get_entity_ids
 
     rfile_path = './30h2o-gfn2-md.exdir'
     group_key = '/30h2o'
@@ -427,7 +428,6 @@ We can use the :func:`~reptar.descriptors.com_distance_sum` descriptor and the :
     sample_comp_ids = ['h2o', 'h2o']  # Component IDs to sample (3 waters in this case).
     quantity = 5000  # Number of structures to sample.
     center_structures = True  # Translate center of mass to origin.
-    structure_idxs = None  # None means we can sample from all structures.
 
     # Ensures we execute from script directory (for relative paths).
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -439,15 +439,15 @@ We can use the :func:`~reptar.descriptors.com_distance_sum` descriptor and the :
     rfile.create_group(sample_key)
 
     # Initialize criteria.
-    # Note that the com_distance_sum function requires entity ids.
-    # However, the add_structures_to_group and sample_structures functions
-    # automatically include the entity_ids.
+    # Note that the com_distance_sum function requires entity ids for the
+    # samples. However, the sampling method automatically includes
+    # destination entity_ids for criteria.
     criteria = Criteria(com_distance_sum, {}, 5.0)
 
     # Sample structures and automatically create the group.
-    add_structures_to_group(
-        rfile, group_key, rfile, sample_key, quantity,
-        sample_comp_ids, structure_idxs=structure_idxs, criteria=criteria,
-        center_structures=center_structures, sampling_updates=True,
-        copy_EG=False, write=True
+    sampler = Sampler(
+        rfile, group_key, rfile, sample_key, criteria=criteria,
+        center_structures=center_structures
     )
+    sampler.sample(sample_comp_ids, quantity)
+

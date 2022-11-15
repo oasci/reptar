@@ -25,7 +25,7 @@ import numpy as np
 from random import randrange, choice
 from .calculators.save import Saver
 from .utils import center_structures as get_center_structures
-from .utils import get_md5, gen_combs
+from .utils import get_md5, gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
 from . import __version__ as reptar_version
 
@@ -92,12 +92,6 @@ def r_from_entities(R, entity_ids, entities):
         Entity IDs of ``R``.
     entities : ``iterable``
         A collection of ``entity_ids`` that we will mask individually.
-    
-    Notes
-    -----
-    None of the sample routines here use this function. We instead continuously
-    update a single array instead of allocating a new one each time.
-    This is useful for importing into scripts.
     """
     r_sel = []
     for entity_mask in entity_mask_gen(entity_ids, entities):
@@ -133,105 +127,17 @@ def _add_structures_to_G(G, n_to_add, n_atoms):
         G = np.concatenate((G, G_to_add), axis=0)
     return G
 
-def _initialize_structure_sampling_arrays(
-    Z, R, E, G, r_prov_specs, quantity, comp_labels, R_source,
-    entity_ids_source, entity_ids_samples, copy_EG, all_size=50000
-):
-    """Creates or extends arrays for sampling structures.
-
-    Parameters
-    ----------
-    Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of destination if they already exist (``None`` if they
-        do not).
-    R : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian atomic coordinates of destination if they already exist
-        ``None`` if they do not).
-    E : :obj:`numpy.ndarray`, ndim: ``1``
-        Destination energies, if any, to append to. ``None`` if they do not
-        already exist.
-    G : :obj:`numpy.ndarray`, ndim: ``3``
-        Destination atomic gradients, if any, to append to. ``None`` if they do
-        not already exist.
-    r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2``
-        Structure prov specifications of destination. ``None`` if the array
-        does not already exist.
-    quantity : :obj:`str`
-        Number of structures to sample from the structure set. For example,
-        ``'100'``, ``'452'``, or even ``'all'``.
-    comp_labels : :obj:`tuple`, ndim: ``1``
-        The ``comp_id`` labels to include in sampled structures. ``entity_ids``
-        with the same ``comp_id`` labels are sampled for each :obj:`tuple`
-        element. Thus, the order of each label does matter.
-    R_source : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian atomic coordinates of the destination.
-    entity_ids_source : :obj:`numpy.ndarray`, ndim: ``1``
-        Entity IDs of the source group.
-    entity_ids_samples : :obj:`tuple` (:obj:`tuple`), ndim: ``2``
-        A nested tuple containing all possible entity selections for all desired
-        components of the sampled structure. Has length ``n``, where ``n`` is
-        the number of entities in the sampled structure. Each element is another
-        :obj:`tuple` containing all possible source ``entity_ids`` for that
-        destination ``entity_id``.
-    copy_EG : :obj:`bool`, default: ``True``
-        Creates datasets for energies and gradients (using ``energy_label`` and 
-        ``grad_label``) and attempts to copy data from the source if possible.
-        If no compatible data is available it will just store :obj:`numpy.NaN`.
-    all_size : :obj:`int`, default: ``50000``
-        Number of structures to initialize ``R`` array when sampling all.
-        Sampling routines will automatically resize this when necessary.
-    """
-    # Either creates new ones or concatenates to
-    # original destination data.
-    # Trial selection to get shapes for R and G
-    if quantity == 'all':
-        # Determine the maximum amount of structures we can sample from a single
-        # source structure.
-        combs_per_structure = sum(
-            1 for _ in _generate_structure_samples(quantity, [0], entity_ids_samples)
-        )
-        size_quantity = int(combs_per_structure*len(R_source))
-
-        # Sometimes we want to sample all with a criteria. Criteria should
-        # drastically reduce the number of sampled structures. So, we just
-        # initialize a large array with ``all_size``.
-        if size_quantity > all_size:
-            size_quantity = all_size
-        sampling_all = True
-    else:
-        size_quantity = int(quantity)
-        sampling_all = False
-    
-    # Determine number of atoms.
-    entity_id_for_size = (i[0] for i in entity_ids_samples)
-    number_of_atoms = 0
-    for entity_id in entity_id_for_size:
-        number_of_atoms += len(np.where(entity_ids_source==entity_id)[0])
-    
-    if Z is None:
-        Z = np.zeros((number_of_atoms,))
-    else:
-        assert len(Z) == number_of_atoms
-    
-    idx_sel, R = _add_structures_to_R(R, size_quantity, number_of_atoms)
-    
-    if copy_EG:
-        E = _add_structures_to_E(E, n_to_add)
-        G = _add_structures_to_G(G, n_to_add, n_atoms)
-    else:
-        E = None
-        G = None
-    
-    sampled_r_prov_specs_empty = np.empty((size_quantity, 2+len(comp_labels)))
-    sampled_r_prov_specs_empty[:] = np.nan
+def _add_structures_to_r_prov_specs(r_prov_specs, n_to_add, comp_labels):
+    r_prov_specs_to_add = np.empty(
+        (n_to_add, 2+len(comp_labels)), dtype=np.uint32
+    )
     if r_prov_specs is None:
-        r_prov_specs = sampled_r_prov_specs_empty
+        r_prov_specs = r_prov_specs_to_add
     else:
         r_prov_specs = np.concatenate(
-            (r_prov_specs, sampled_r_prov_specs_empty), axis=0
+            (r_prov_specs, r_prov_specs_to_add), axis=0
         )
-    
-    return (Z, R, E, G, r_prov_specs, sampling_all, idx_sel)
+    return r_prov_specs
 
 def _generate_structure_samples(
     quantity, structure_idxs, entity_ids_samples
@@ -292,616 +198,719 @@ def _generate_structure_samples(
                 selection = [R_selection_idx] + list(comb)
                 yield selection
 
-def sample_structures(
-    source_file, source_key, quantity, comp_labels, r_prov_ids, source_r_prov_specs,
-    Z=None, R=None, r_prov_specs=None, structure_idxs=None,
-    criteria=None, center_structures=False, sampling_updates=False,
-    copy_EG=False, E=None, G=None, energy_label_source='energy_ele',
-    grad_label_source='grads', periodic_cell=None, saver=None
+
+def sampler_worker(
+    selections, Z, entity_ids_dest, R_source, E_source, G_source,
+    entity_ids_source, r_prov_specs_source, r_prov_id_source, criteria,
+    periodic_cell
 ):
-    """Randomly samples structures from a source.
-
-    If previous data are already provided (i.e., ``Z``, ``R``, and
-    ``r_prov_specs`` are not ``None``) then the sampled structures are appended
-    to these arrays.
-
-    Parameters
-    ----------
-    source_file : :obj:`reptar.File`
-        A loaded reptar File to sample structures from.
-    source_key : :obj:`str`
-        Key to the desired source group. The group must contain
-        ``atomic_numbers``, ``geometry``, ``entity_ids``, and ``comp_ids`` keys.
-    quantity : :obj:`str`
-        Number of structures to sample from the structure set. For example,
-        ``'100'``, ``'452'``, or even ``'all'``.
-    comp_labels : :obj:`tuple`, ndim: ``1``
-        The ``comp_id`` labels to include in sampled structures. ``entity_ids``
-        with the same ``comp_id`` labels are sampled for each :obj:`tuple`
-        element. Thus, the order of each label does matter.
-    r_prov_ids : :obj:`dict` {:obj:`int`: :obj:`str`}
-        Structure ``prov_ids`` including any originally defined IDs and new
-        ones being added from the source.
-    source_r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2`` or ``None``
-        Structure provenance specifications of source structures if it was
-        created by sampling from other sources. If the ``source`` is original,
-        this should be ``None``.
-    Z : :obj:`numpy.ndarray`, ndim: ``1``, default: ``None``
-        Atomic numbers of destination if they already exist.
-    R : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
-        Cartesian atomic coordinates of destination if they already exist.
-    r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2``, default: ``None``
-        Structure prov specifications of destination.
-    structure_idxs : :obj:`tuple`, ndim: ``1``, default: ``None``
-        Possible structure indices in the source to sample from.
-        ``None`` means we can sample from any structure.
-    criteria : ``reptar.descriptor.criteria``, default: ``None``
-        Criteria object used to accept or reject a structure based on some
-        descriptor.
-    center_structures : :obj:`bool`, default: ``False``
-        Move the center of mass of each structure to the origin thereby 
-        centering each structure (and losing the original coordinates of
-        the structure).
-    sampling_updates : :obj:`bool`, default: ``False``
-        Will print for every 1000 successfully sampled structures.
-    copy_EG : :obj:`bool`, default: ``False``
-        Creates datasets for energies and gradients (using ``energy_label`` and 
-        ``grad_label``) and attempts to copy data from the source if possible.
-        If no compatible data is available it will just store :obj:`numpy.NaN`.
-    E : :obj:`numpy.ndarray`, ndim: ``1``, default: ``None``
-        Destination energies, if any, to append to.
-    G : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
-        Destination atomic gradients, if any, to append to.
-    energy_label_source : :obj:`str`, default: ``'energy_ele'``
-        Specifies source dataset name containing energies to copy.
-        If ``copy_EG`` is ``True`` with no valid energy datasets then an empty
-        array is created.
-    grad_label_source : :obj:`str`, default: ``'grads'``
-        Specifies source dataset name containing atomic gradients to copy.
-        If ``copy_EG`` is ``True`` with no valid gradient datasets then an empty
-        array is created.
-    periodic_cell : :obj:`reptar.periodic.Cell`, default: ``None``
-        If the source is under periodic boundary conditions. Will apply the
-        minimum image convention to sampled structures.
-    
-    Returns
-    -------
-    :obj:`numpy.ndarray`
-        Atomic numbers of sampled structures.
-    :obj:`numpy.ndarray`
-        Coordinates of sampled structures appended to any original destination
-        structures.
-    :obj:`numpy.ndarray` or ``None``
-        Energies of sampled structures appended to any original destination
-        structures. ``None`` if ``copy_EG`` is ``False``.
-    :obj:`numpy.ndarray` or ``None``
-        Atomic gradients of sampled structures appended to any original 
-        destination structures. ``None`` if ``copy_EG`` is ``False``.
-    :obj:`numpy.ndarray`
-        ``entity_ids`` of the structures.
-    :obj:`numpy.ndarray`
-        ``r_prov_specs`` of the structures.
-    
-    Notes
-    -----
-    The order of ``atomic_numbers`` must be the same for each entity.
-    For example, if a water molecule with label ``'h2o'`` has ``atomic_numbers``
-    of ``[8, 1, 1]`` then every other entity must have the same.
-
-    ``entity_ids`` are automatically included in ``criteria.accept()``.
+    """Given generated selections will slice and sample structures from source.
     """
-    # Get data from structure source.
-    Z_source = source_file.get(f'{source_key}/atomic_numbers')
-    R_source = source_file.get(f'{source_key}/geometry')
-    entity_ids_source = source_file.get(f'{source_key}/entity_ids')
-    comp_ids_source = source_file.get(f'{source_key}/comp_ids')
+    if not isinstance(selections, np.ndarray):
+        selections = np.array(selections)
+    assert selections.ndim == 2
 
-    # If source_r_prov_specs is None, then this is an original source.
-    # Which means there should only be one R_prov_id (we store this for later).
-    if source_r_prov_specs is None:
-        assert len(r_prov_ids) == 1
-        source_r_prov_id = tuple(r_prov_ids.keys())[0]
-
-    if copy_EG:
-        try:
-            E_source = source_file.get(f'{source_key}/{energy_label_source}')
-            G_source = source_file.get(f'{source_key}/{grad_label_source}')
-        except Exception:
-            E_source = None
-            G_source = None
-    else:
-        E_source = None
-        G_source = None
-
-    # TODO: Setup option to have one entity be the same all the time.
-
-    ###   Sampling setup   ###
-    # Determine what entity IDs we can sample from for each component.
-    comp_ids_source_array = np.array(comp_ids_source)
-    entity_ids_samples = tuple(
-        (
-            tuple(np.argwhere(comp_ids_source_array == comp_id)[:,0]) \
-            for comp_id in comp_labels
-        )
-    )
-    
-    # Check that all atomic numbers of each entity is consistent.
-    # Check that the z for these new samples match the destination.
-    # Also build the entity_ids of these structures.
-    Z_sample = []
-    entity_ids = []
-    entity_id = 0
-    for dest_entity in entity_ids_samples:
-        entity_ref = dest_entity[0]
-        Z_ref = Z_source[np.argwhere(entity_ids_source == entity_ref)[:,0]]
-        entity_ids.extend([entity_id for _ in range(len(Z_ref))])
-        entity_id += 1
-        Z_sample.extend(Z_ref)
-        if len(dest_entity) != 1:
-            for other_entity in dest_entity[1:]:
-                Z_other = Z_source[np.argwhere(entity_ids_source == other_entity)[:,0]]
-                try:
-                    assert np.array_equal(Z_ref, Z_other)
-                except AssertionError:
-                    e = f'Atomic numbers do not match for entity_id of {other_entity}'
-                    raise AssertionError(e)
-    entity_ids = np.array(entity_ids)  # Destination entity_ids
-    
-    Z_sample = np.array(Z_sample)
-    if Z is not None:
-        try:
-            assert np.array_equal(Z, Z_sample)
-        except AssertionError:
-            print(f'Destination atomic numbers: {Z}')
-            print(f'Sample atomic numbers: {Z_sample}')
-            e = 'Atomic numbers of samples do not match destination.'
-            raise AssertionError(e)
-    else:
-        Z = Z_sample
     n_Z = len(Z)
+    n_selections = selections.shape[0]
+    n_r_prov_spec_columns = int(len(selections[0]))+1
 
-    # Create a single selection array that we update with samples
-    r_sel = np.empty((n_Z, 3), dtype=np.float64)
-    if G_source is not None:
-        g_sel = np.empty((n_Z, 3), dtype=np.float64)
-
-    ###   Initialize all arrays   ###
-    Z, R, E, G, r_prov_specs, sampling_all, idx_sel = \
-        _initialize_structure_sampling_arrays(
-        Z, R, E, G, r_prov_specs, quantity, comp_labels, R_source,
-        entity_ids_source, entity_ids_samples, copy_EG
+    # Setup worker arrays
+    r_prov_specs = np.empty(
+        (n_selections, n_r_prov_spec_columns), dtype=np.uint32
     )
+    r_prov_specs_check = np.empty(
+        (n_selections, n_r_prov_spec_columns), dtype=np.uint32
+    )
+    r_prov_spec_selection = np.empty(
+        n_r_prov_spec_columns, dtype=np.uint32
+    )
+    R = np.empty(
+        (n_selections, n_Z, 3), dtype=np.float64
+    )
+    # If these are not None, then they were requested.
+    if E_source is not None:
+        E = np.empty(n_selections, dtype=np.float64)
+    else:
+        E = None
+    if G_source is not None:
+        G = np.empty((n_selections, n_Z, 3), dtype=np.float64)
+    else:
+        G = None
 
-    # This array is used to check if there any repeated structures.
-    # TODO: cannot think of a better way to do this.
-    r_prov_specs_check = np.copy(r_prov_specs)
+    # True or False to keep these selections based on uniqueness or criteria.
+    keep_idxs = np.empty(n_selections, dtype=np.bool8)
 
-    ###   Sampling counters   ###
-    # TODO: clean up progress printing (look into MDAnalysis rdf)
-    num_generated = 0  # Number of structures we generated (includes rejected).
-    num_accepted = 0  # Number of structures successfully sampled.
-    prev_num_accepted_print = 0  # Workaround to control printing.
-    do_save = False
+    i_sel = 0
+    for i_sel in range(len(selections)):
+        selection = selections[i_sel]
+        sel_source_idx = selection[0]
+        entity_ids_selection = selection[1:]  # Used to slice source
 
-    ###   Begin sampling structures   ###
-    if structure_idxs is None:
-        structure_idxs = tuple(range(0, len(R_source)))
-    for selection in _generate_structure_samples(
-        quantity, structure_idxs, entity_ids_samples
-    ):
-        num_generated += 1
-
-        ###   Sampling updates and Saver   ###
-        # Prints progress information every 1000 successful samples.            
-        if sampling_updates:
-            if not sampling_all:
-                if num_accepted%1000 == 0 \
-                and num_accepted != prev_num_accepted_print:
-                    prev_num_accepted_print = num_accepted
-                    print(f'Sampled {num_accepted} structures')
-                    do_save = True
-            else:
-                if (num_accepted+1)%1000 == 0:
-                    print(
-                        f'Sampled {num_accepted+1} structures'
-                    )
-                    do_save = True
-        
-        if saver is not None and do_save:
-            if center_structures:
-                R_to_save = get_center_structures(Z, R[:idx_sel])
-            else:
-                R_to_save = R[:idx_sel]
-            if copy_EG:
-                saver.save(
-                    R_to_save, r_prov_ids,
-                    r_prov_specs[:idx_sel].astype(np.int64), E, G
-                )
-            else:
-                saver.save(
-                    R_to_save, r_prov_ids,
-                    r_prov_specs[:idx_sel].astype(np.int64)
-                )
-            do_save = False
-
-        ###   Sampling maintenance   ###
-        # Ends sampling for number quantities.
-        if not sampling_all:
-            if num_accepted == int(quantity):
-                break
-        
         ###   Handle r_prov_specs   ###
         # Determines the correct prov specification based on the sample and source.
-        # We have already determined source_r_prov_id for an original source.
-        # Just need to retrieve the source_r_prov_id of a source that is
+        # We have already determined r_prov_id_source for an original source.
+        # Just need to retrieve the r_prov_id_source of a source that is
         # from sampled structures.
-        if source_r_prov_specs is not None:
-            orig_r_prov_specs = source_r_prov_specs[selection[0]]
+        if r_prov_specs_source is not None:
+            orig_r_prov_specs = r_prov_specs_source[sel_source_idx]
             source_r_prov_id = orig_r_prov_specs[0]
 
-            selection_r_prov_spec = np.empty(r_prov_specs[0].shape, dtype=np.float64)  # Converts to int64 later
             # Original r_prov_id and structure index
-            selection_r_prov_spec[:2] = orig_r_prov_specs[:2] 
+            r_prov_spec_selection[:2] = orig_r_prov_specs[:2] 
             # Original entity_ids
-            selection_r_prov_spec[2:] = orig_r_prov_specs[2:][selection[1:]]
-        
-        selection.insert(0, source_r_prov_id)
-
+            r_prov_spec_selection[2:] = orig_r_prov_specs[2:][selection[1:]]
+        else:
+            r_prov_spec_selection = np.array([r_prov_id_source, *selection])
 
         # Check if selection is already in the destination.
         # This is done by checking if the selection r_prov_spec is already included.
-        # If it is, we do not include this selection and sample again.
-        # We do this by adding the appropriately sorted selection_r_prov_spec to
+        # If it is, we do not include this selection.
+        # We do this by adding the appropriately sorted r_prov_spec_selection to
         # a test array (we only sort the entity_ids).
-        if source_r_prov_specs is not None:
-            r_prov_specs_check[idx_sel][:2] = selection_r_prov_spec[:2]
-            r_prov_specs_check[idx_sel][2:] = np.sort(
-                selection_r_prov_spec[2:], axis=0
-            )
-        else:
-            r_prov_specs_check[idx_sel][:2] = selection[:2]
-            r_prov_specs_check[idx_sel][2:] = np.sort(
-                selection[2:], axis=0
-            )
-        # This quickly checks if the sorted r_prov_spec is already included.
-        # NOTE that this is one of the main reason sampling gets slower with
-        # more structures (more to check).
-        if (r_prov_specs_check[:idx_sel]==r_prov_specs_check[idx_sel]).all(1).any():
+        r_prov_specs_check[i_sel][:2] = r_prov_spec_selection[:2]
+        r_prov_specs_check[i_sel][2:] = np.sort(
+            r_prov_spec_selection[2:], axis=0
+        )
+        
+        # Check if sample exists in this batch.
+        duplicate_spec = exists_in_array(
+            r_prov_specs_check[i_sel], r_prov_specs_check[:i_sel]
+        )
+        if duplicate_spec:
+            keep_idxs[i_sel] = False
             continue
-        
-        # Slices atoms to build sampled coordinates.
-        # Must be done to preserve same order as r_prov_specs
-        r_index_source = selection[1]
-        for entity_id_sel,entity_mask in \
-          enumerate(entity_mask_gen(entity_ids_source, selection[2:])):
-            r_sel[(entity_ids==entity_id_sel)] = R_source[r_index_source][entity_mask]
-        
+
+        # Slice r_sel
+        R[i_sel] = r_from_entities(
+            R_source[sel_source_idx], entity_ids_source,
+            entity_ids_selection
+        )
+
         # Enforce minimum image convention if periodic.
         if periodic_cell is not None:
-            r_sel_periodic = periodic_cell.r_mic(r_sel)
+            r_sel_periodic = periodic_cell.r_mic(R[i_sel])
             if r_sel_periodic is None:
                 continue
             else:
-                r_sel = r_sel_periodic
-
+                R[i_sel] = r_sel_periodic
+        
         # Checks any structural criteria.
         if criteria is not None:
-            accept_r, _ = criteria.accept(Z, r_sel)
+            accept_r, _ = criteria.accept(
+                Z, R[i_sel], {'entity_ids': entity_ids_dest}
+            )
             # If descriptor is not met, will not include sample.
             if not accept_r:
+                keep_idxs[i_sel] = False
                 continue
         
-        ###   SUCCESSFUL SAMPLE   ###
-        # Check R size
-        if idx_sel >= R.shape[0]:
-            idx_sel, R = _add_structures_to_R(R, 5000, n_Z)
-            E = _add_structures_to_E(E, 5000)
-            G = _add_structures_to_G(G, 5000, n_atoms)
-        R[idx_sel] = r_sel
+        r_prov_specs[i_sel] = r_prov_spec_selection
         
-        if source_r_prov_specs is not None:
-            r_prov_specs[idx_sel] = selection_r_prov_spec
-        else:
-            r_prov_specs[idx_sel] = selection
+        if E_source is not None:
+            E[i_sel] = E_source[sel_source_idx]
+        if G_source is not None:
+            G[i_sel] = r_from_entities(
+                G_source[sel_source_idx], entity_ids_source,
+                entity_ids_selection
+            )
+    
+    R = R[keep_idxs]
+    if E is not None:
+        E = E[keep_idxs]
+    if G is not None:
+        G = G[keep_idxs]
+    r_prov_specs = r_prov_specs[keep_idxs]
         
-        if copy_EG:
-            if E_source is not None:
-                E[idx_sel] = E_source[r_index_source]
-            if G_source is not None:
-                if G_source is not None:
-                    for entity_id_sel,entity_mask in \
-                    enumerate(entity_mask_gen(entity_ids_source, selection[2:])):
-                        g_sel[(entity_ids==entity_id_sel)] = G_source[r_index_source][entity_mask]
-                G[idx_sel] = g_sel
+    return R, E, G, r_prov_specs
         
-        num_accepted += 1
-        idx_sel += 1  # Index of selection
-    
-    if copy_EG:
-        E = E[:idx_sel]
-        G = G[:idx_sel]
 
-    # Center structures by moving the center of mass to the origin.
-    if center_structures:
-        R = get_center_structures(Z, R)
-    
-    return (
-        Z, R[:idx_sel], E, G, entity_ids, r_prov_specs[:idx_sel]
-    )
 
-def add_structures_to_group(
-    source_file, source_key, dest_file, dest_key, quantity, comp_labels,
-    structure_idxs=None, criteria=None, center_structures=False,
-    sampling_updates=False, copy_EG=False, energy_labels=('energy_ele',),
-    grad_labels=('grads',), write=True, saver=None
-):
-    """Adds randomly sampled structures to a group.
-
-    Parameters
-    ----------
-    source_file : :obj:`reptar.File`
-        A loaded reptar File to sample structures from.
-    source_key : :obj:`str`
-        Key to the desired source group. The group must contain
-        ``atomic_numbers``, ``geometry``, ``entity_ids``, and ``comp_ids`` keys.
-    dest_file : :obj:`reptar.File`
-        A reptar File to add sampled structures to.
-    dest_key : :obj:`str`
-        Key to the desired destination group. If it does not
-        exist then it will be created.
-    quantity : :obj:`str` or :obj:`int`
-        Number of structures to sample from the data. For example,
-        ``'100'``, ``452``, or ``'all'``.
-    comp_labels : :obj:`tuple`, ndim: ``1``
-        The ``comp_id`` labels to include in sampled structures. ``entity_ids``
-        with the same ``comp_id`` labels are sampled for each :obj:`tuple`
-        element. Thus, the order of each label does matter.
-    structure_idxs : :obj:`tuple`, ndim: ``1``, default: ``None``
-        Possible structure indices in the source to sample from.
-        ``None`` means we can sample from any structure.
-    criteria : ``reptar.descriptor.criteria``, default: ``None``
-        Criteria object used to accept or reject a structure based on some
-        descriptor.
-    center_structures : :obj:`bool`, default: ``False``
-        Move the center of mass of each structure to the origin thereby 
-        centering each structure (and losing the original coordinates).
-    sampling_updates : :obj:`bool`, default: ``False``
-        Will print for every 100 successfully sampled structures.
-    copy_EG : :obj:`bool`, default: ``True``
-        Creates datasets for energies and gradients (using ``energy_label`` and 
-        ``grad_label``) and attempts to copy data from the source if possible.
-        If no compatible data is available it will just store :obj:`numpy.NaN`.
-    energy_labels : :obj:`tuple` (:obj:`str`), ndim: ``1``, default: ``('energy_ele',)``
-        Specifies all energy keys in the destination group to extend with the
-        new sampling. The array from each key will have ``quantity`` amount of 
-        ``np.NaN`` values appended to it. The first value should be the desired
-        key from the source.
-    grad_labels : :obj:`tuple` (:obj:`str`), default: ``('grads',)``
-        Specifies all gradient keys in the destination group to extend with the
-        new sampling. The array 1from each key will have ``quantity`` amount of 
-        ``np.NaN`` values appended to it. The first value should be the desired
-        key from the source.
-    write : :obj:`bool`, default: ``True``
-        Write newly sampled to ``Group``.
-    
-    Notes
-    -----
-    Nothing is saved until all checks are passed to avoid irreversible changes
-    to already existing ``Group``.
-
-    ``entity_ids`` are automatically included in ``criteria.accept()``.
-
-    Both ``periodic_cell`` and ``periodic_mic_cutoff`` are required in source
-    for periodic sampling. These are automatically found in this routine.
+class Sampler(object):
+    """Randomly sample structures.
     """
-    # Grabs data from destination if exists.
-    try:
-        Z = dest_file.get(f'{dest_key}/atomic_numbers')
-    except Exception:
-        Z = None
-    
-    try:
-        R = dest_file.get(f'{dest_key}/geometry')
-    except Exception:
-        R = None
-    
-    # Get energies and gradients if available.
-    # TODO: perform check if we should copy energies and gradients based on if the
-    # sampled structure is the entire source structure.
-    if copy_EG:
-        E = dest_file.get(f'{dest_key}/{energy_labels[0]}')
-        G = dest_file.get(f'{dest_key}/{grad_labels[0]}')
-    else:
-        E = None
-        G = None
 
-    try:
-        r_prov_ids = dest_file.get(f'{dest_key}/r_prov_ids')
-        r_prov_specs = dest_file.get(f'{dest_key}/r_prov_specs')
-    except Exception as e:
-        r_prov_ids = None
-        r_prov_specs = None
-    
-    try:
-        entity_ids = dest_file.get(f'{dest_key}/entity_ids')
-        comp_ids = dest_file.get(f'{dest_key}/comp_ids')
-    except Exception:
-        entity_ids = None
-        comp_ids = None
-    
-    # Handle if source already has r_prov_ids
-    try:
-        source_r_prov_ids = source_file.get(f'{source_key}/r_prov_ids')
-        source_r_prov_specs = source_file.get(f'{source_key}/r_prov_specs')
-    except Exception as e:
-        # This source is an original (was not created from sampling).
-        source_r_prov_ids = None
-        source_r_prov_specs = None
-    
-    ###   Check component IDs   ###
-    if comp_ids is not None:
-        try:
-            assert np.array_equal(comp_ids, np.array(comp_labels))
-        except AssertionError:
-            e = f'Component IDs of destination ({comp_ids.tolist()}) do not match comp_labels ({comp_labels}).'
-            raise AssertionError(e)
-    else:
-        comp_ids = np.array(comp_labels)
-    
-    ###   Handle periodic structures   ###
-    try:
-        periodic_cell_vectors = source_file.get(f'{source_key}/periodic_cell')
-        periodic_mic_cutoff = source_file.get(f'{source_key}/periodic_mic_cutoff')
-        periodic_cell = Cell(periodic_cell_vectors, periodic_mic_cutoff)
-    except Exception as e:
-        periodic_cell = None
+    def __init__(
+        self, source_file, source_key, dest_file, dest_key,
+        criteria=None, center_structures=False, E_key=None, G_key=None,
+        dry_run=False, all_init_size=50000, use_ray=False, n_workers=2,
+        ray_address='auto'
+    ):
+        """
+        Parameters
+        ----------
+        source_file : :obj:`reptar.File`
+            A loaded reptar File to sample structures from.
+        source_key : :obj:`str`
+            Key to the desired source group. The group must contain
+            ``atomic_numbers``, ``geometry``, ``entity_ids``, and ``comp_ids``
+            keys.
+        dest_file : :obj:`reptar.File`
+            A reptar File to add sampled structures to.
+        dest_key : :obj:`str`
+            Key to the desired destination group. If it does not exist then it
+            will be created.
+        criteria : ``reptar.descriptor.criteria``, default: ``None``
+            Criteria object used to accept or reject a structure based on some
+            descriptor.
+        center_structures : :obj:`bool`, default: ``False``
+            Center each structure by translating the center of mass to the
+            origin.
+        E_key : :obj:`str`, default: ``None``
+            If not ``None``, this is the key to create and attempt to copy
+            energies to ``dest_key``. For example, ``energy_ele_mp2.def2tzvp``.
+        G_key : :obj:`str`, default: ``None``
+            If not ``None``, this is the key to create and attempt to copy
+            gradients to ``dest_key``. For example, ``grads_mp2.def2tzvp``.
+        dry_run : :obj:`bool`, default: ``False``
+            Sample but do not save structures.
+        all_init_size : :obj:`int`, default: ``50000``
+            Number of structures to initialize sampling arrays with when
+            ``quantity`` is ``'all'``.
+        use_ray : :obj:`bool`, default: ``False``
+            **Note implemented yet.**
+            Use ray to parallelize calculations. If ``False``, calculations are
+            done serially. ``False`` can be useful when running locally or only
+            a few calculations are needed. ``True`` is useful for tons of
+            calculations.
+        n_workers : :obj:`int`, default: ``2``
+            Number of workers to use for sampling if ``use_ray`` is ``True``.
+            Each worker will have one core.
+        ray_address : :obj:`str`, default: ``'auto'``
+            Ray cluster address to connect to.
+        """
+        self.source_file = source_file
+        self.source_key = source_key
+        self.dest_file = dest_file
+        self.dest_key = dest_key
+        self.criteria = criteria
+        self.center_structures = center_structures
+        self.E_key = E_key
+        self.G_key = G_key
+        self.dry_run = dry_run
+        self.all_init_size = all_init_size
 
+        self.use_ray = use_ray
+        self.n_workers = n_workers
+        if use_ray:
+            if not ray.is_initialized():
+                ray.init(address=ray_address)
+    
 
-    # Prepare source r_prov_ids and r_prov_specs.
-    # If source is an original, we just need to determine the next prov_id
-    # and prov_specs stays None.
-    # If the source was created with sampling, we need to adjust the
-    # prov_ids and prov_specs to not overlap with the destination.
-    # For example, change 0 from source to 1 if 0 is already taken in destination.
+    def _prepare_destination(self):
+        """Check for existing sampled structures in destinations and prepare.
+        """
+        dest_file = self.dest_file
+        dest_key = self.dest_key
 
-    # Original source (not from sampled)
-    if source_r_prov_ids is None:
-        try:
-            md5_source = source_file.get(f'{source_key}/md5_structures')
-        except Exception:
-            md5_source = get_md5(source_file, source_key, only_structures=True)
-            source_file.put(f'{source_key}/md5_structures', md5_source)
+        # Will be None if it does not exist.
+        self.Z = dest_file.get(f'{dest_key}/atomic_numbers', missing_is_none=True)
+        self.R = dest_file.get(f'{dest_key}/geometry', missing_is_none=True)
+        # Stores the index of the first newly sampled structure for checks.
+        if self.R is None:
+            self.n_R_initial = 0
+        else:
+            self.n_R_initial = self.R.shape[0]
         
-        # Create pseudo source_r_prov_ids.
-        source_r_prov_ids = {0: md5_source}
+        # Get energies and gradients if available and requested.
+        # TODO: perform check if we should copy energies and gradients based on if the
+        # sampled structure is the entire source structure.
+        if self.E_key is not None:
+            self.E = dest_file.get(
+                f'{dest_key}/{self.E_key}', missing_is_none=True
+            )
+        else:
+            self.E = None
+        if self.G_key is not None:
+            self.G = dest_file.get(
+                f'{dest_key}/{self.G_key}', missing_is_none=True
+            )
+        else:
+            self.G = None
 
-    # If is this not a new destination we cannot always reuse the source information.
-    # Need to check for overlap of ids and specifications.
-    # Just need to shift the new source IDs up by the maximum destination ID.
-    if r_prov_ids is not None:
+        self.r_prov_ids = dest_file.get(f'{dest_key}/r_prov_ids', missing_is_none=True)
+        self.r_prov_specs = dest_file.get(f'{dest_key}/r_prov_specs', missing_is_none=True)
+        
+        self.entity_ids = dest_file.get(f'{dest_key}/entity_ids', missing_is_none=True)
+        self.comp_ids = dest_file.get(f'{dest_key}/comp_ids', missing_is_none=True)
 
-        # Check and remove any IDs already in the destination.
-        present_ids = tuple(key for key in r_prov_ids.keys())
-        present_md5s = tuple(value for value in r_prov_ids.values())
-        remove_source_ids = []
-        for source_id,source_md5 in source_r_prov_ids.items():
-            if source_md5 in present_md5s:
-                update_id = present_ids[present_md5s.index(source_md5)]
-                if update_id != source_id:
+    
+    def _check_comp_ids(self, comp_labels):
+        """Check if desired component IDs to sample is the same as the
+        destination if they already exist.
+        """
+        if self.comp_ids is not None:
+            try:
+                assert np.array_equal(self.comp_ids, np.array(comp_labels))
+            except AssertionError:
+                e = f'Component IDs of destination ({comp_ids.tolist()}) do not match comp_labels ({comp_labels}).'
+                raise AssertionError(e)
+        else:
+            self.comp_ids = np.array(comp_labels)
+    
+
+    def _prepare_source(self, R_source_idxs):
+        """Check for data from source.
+        """
+        source_file = self.source_file
+        source_key = self.source_key
+
+        self.Z_source = source_file.get(f'{source_key}/atomic_numbers')
+        self.R_source = source_file.get(f'{source_key}/geometry')
+        self.entity_ids_source = source_file.get(f'{source_key}/entity_ids')
+        self.comp_ids_source = source_file.get(f'{source_key}/comp_ids')
+        
+        if self.E_key is not None:
+            self.E_source = source_file.get(f'{source_key}/{self.E_key}')
+        else:
+            self.E_source = None
+        if self.G_key is not None:
+            self.G_source = source_file.get(f'{source_key}/{self.G_key}')
+        else:
+            self.G_source = None
+        
+        if R_source_idxs is None:
+            self.R_source_idxs = tuple(range(0, len(self.R_source)))
+
+        # Handle if source already has r_prov_ids
+        # If these are None: This source is an original (was not created from sampling).
+        self.r_prov_ids_source = source_file.get(
+            f'{source_key}/r_prov_ids', missing_is_none=True
+        )
+        self.r_prov_specs_source = source_file.get(
+            f'{source_key}/r_prov_specs', missing_is_none=True
+        )
+        
+        # Handle periodic structures
+        try:
+            periodic_cell_vectors = source_file.get(f'{source_key}/periodic_cell')
+            periodic_mic_cutoff = source_file.get(f'{source_key}/periodic_mic_cutoff')
+            self.periodic_cell = Cell(periodic_cell_vectors, periodic_mic_cutoff)
+        except RuntimeError:
+            self.periodic_cell = None
+    
+
+    def _check_r_prov_ids(self):
+        """
+        """
+        # Prepare source r_prov_ids and r_prov_specs.
+        # If source is an original, we just need to determine the next prov_id
+        # and prov_specs stays None.
+        # If the source was created with sampling, we need to adjust the
+        # prov_ids and prov_specs to not overlap with the destination.
+        # For example, change 0 from source to 1 if 0 is already taken in destination.
+
+        r_prov_ids_source = self.r_prov_ids_source
+        source_file = self.source_file
+        source_key = self.source_key
+
+        r_prov_ids = self.r_prov_ids
+
+        # Original source (not from sampled)
+        if r_prov_ids_source is None:
+            try:
+                md5_source = source_file.get(
+                    f'{source_key}/md5_structures'
+                )
+            except RuntimeError:
+                source_file.update_md5()
+                md5_source = source_file.get(
+                    f'{source_key}/md5_structures'
+                )
+            
+            # Create pseudo r_prov_ids_source.
+            r_prov_ids_source = {0: md5_source}
+        
+        # If is this not a new destination we cannot always reuse the source information.
+        # Need to check for overlap of ids and specifications.
+        # Just need to shift the new source IDs up by the maximum destination ID.
+        if r_prov_ids is not None:
+
+            # Check and remove any IDs already in the destination.
+            present_ids = tuple(key for key in r_prov_ids.keys())
+            present_md5s = tuple(value for value in r_prov_ids.values())
+            remove_source_ids = []
+            for source_id,source_md5 in r_prov_ids_source.items():
+                if source_md5 in present_md5s:
+                    update_id = present_ids[present_md5s.index(source_md5)]
+                    if update_id != source_id:
+                        if source_r_prov_specs is not None:
+                            update_idx = np.argwhere(
+                                source_r_prov_specs[:,0] == source_id
+                            )[:,0]
+                            source_r_prov_specs[update_idx,0] = update_id
+                    remove_source_ids.append(source_id)
+            if len(remove_source_ids) > 0:
+                for source_id in remove_source_ids:
+                    del r_prov_ids_source[source_id]
+            
+            # Create any new source IDs that will be added to destination.
+            if len(r_prov_ids_source) > 0:
+                max_dest_prov_id = max(r_prov_ids.keys())
+                next_id = max_dest_prov_id + 1
+
+                for source_id in tuple(r_prov_ids_source.keys()):
+                    r_prov_ids_source[next_id] = r_prov_ids_source.pop(
+                        source_id
+                    )
                     if source_r_prov_specs is not None:
                         update_idx = np.argwhere(
                             source_r_prov_specs[:,0] == source_id
                         )[:,0]
-                        source_r_prov_specs[update_idx,0] = update_id
-                remove_source_ids.append(source_id)
-        if len(remove_source_ids) > 0:
-            for source_id in remove_source_ids:
-                del source_r_prov_ids[source_id]
+                        source_r_prov_specs[update_idx,0] = next_id
+                    next_id += 1
         
-        # Create any new source IDs that will be added to destination.
-        if len(source_r_prov_ids) > 0:
-            max_dest_prov_id = max(r_prov_ids.keys())
-            next_id = max_dest_prov_id + 1
+                # Merge the IDs
+                self.r_prov_ids = {**r_prov_ids, **r_prov_ids_source}
+            else:
+                self.r_prov_ids = r_prov_ids
+        else:
+            self.r_prov_ids = r_prov_ids_source
+    
 
-            for source_id in tuple(source_r_prov_ids.keys()):
-                source_r_prov_ids[next_id] = source_r_prov_ids.pop(
-                    source_id
+    def _prepare_saver(self):
+        dest_key = self.dest_key
+
+        saver_keys = [
+            f'{dest_key}/geometry', f'{dest_key}/r_prov_specs'
+        ]
+        if not self.dry_run:
+            if self.E_key is not None:
+                saver_keys.append(f'{dest_key}/{self.E_key}')
+            if self.G_key is not None:
+                saver_keys.append(f'{dest_key}/{self.G_key}')
+            self.saver = Saver(self.dest_file.fpath, saver_keys)
+    
+
+    def get_avail_entities(
+        self, comp_ids_source, comp_labels, specific_entities
+    ):
+        """Determines available ``entity_ids`` for each ``comp_id`` in
+        requested sampling components..
+
+        Parameters
+        ----------
+        comp_ids_source : :obj:`numpy.ndarray`, ndim: ``1``
+            Component IDs of the source.
+        comp_labels : :obj:`tuple`, ndim: ``1``
+            The ``comp_id`` labels to include in sampled structures.
+            ``entity_ids`` with the same ``comp_id`` labels are sampled for
+            each :obj:`tuple` element. Thus, the order of each label
+            **does** matter.
+        specific_entities : :obj:`tuple`, default: ``None``
+            Supersede entities determined from ``Sampler.avail_entities`` and
+            use these instead. This needs to specify the ``comp_label`` index
+            to supersede and the entities to use instead. For example, if you
+            wanted to always sample entity ``43`` or ``78`` for the second
+            ``comp_label`` then this would be ``((1, (43, 78)),)``
+        
+        Returns
+        -------
+        :obj:`list`
+            All possible entity_ids for each ``comp_id`` provided in
+            ``comp_labels``.
+        """
+        avail_entity_ids = []
+        for i in range(len(comp_labels)):
+            # Account for manually specified entity_ids
+            if specific_entities is not None:
+                for j in range(len(specific_entities)):
+                    if specific_entities[j][0] == i:
+                        avail_entity_ids.append(specific_entities[j][1])
+                        continue
+            # Find all possible entity_ids to sample from.
+            comp_id = comp_labels[i]
+            matching_entity_ids = np.where(
+                comp_ids_source == comp_id
+            )[0]
+            avail_entity_ids.append(matching_entity_ids)
+        return avail_entity_ids
+
+
+    def _prepare_dest_const_data(self):
+        """Take care of destination constant data like ``atomic_numbers`` and
+        ``entity_ids``, ``comp_ids``. Also puts the data to the destination.
+        """
+        # Check that all atomic numbers of each entity is consistent.
+        # Check that the z for these new samples match the destination.
+        # Also build the entity_ids of these structures.
+        Z_sample = []
+        entity_ids = []
+        entity_id = 0
+        for dest_entity in self.avail_entity_ids:
+            entity_ref = dest_entity[0]  # an example entity_id
+
+            Z_ref = self.Z_source[
+                np.argwhere(self.entity_ids_source == entity_ref)[:,0]
+            ]
+            entity_ids.extend([entity_id for _ in range(len(Z_ref))])
+
+            Z_sample.extend(Z_ref)
+
+            # Check that all other entities have the same atomic numbers.
+            if len(dest_entity) != 1:
+                for other_entity in dest_entity[1:]:
+                    Z_other = self.Z_source[
+                        np.argwhere(self.entity_ids_source == other_entity)[:,0]
+                    ]
+                    try:
+                        assert np.array_equal(Z_ref, Z_other)
+                    except AssertionError:
+                        raise AssertionError(
+                            f'Atomic numbers do not match for entity_id of {other_entity}'
+                        )
+            
+            entity_id += 1
+
+        Z_sample = np.array(Z_sample)
+
+        # Check that, if the destination already contains atomic_numbers, that
+        # they are the same as these structures to be sampled.
+        if self.Z is not None:
+            try:
+                assert np.array_equal(self.Z, Z_sample)
+                self.Z = np.array(Z_sample)
+            except AssertionError:
+                print(f'Destination atomic numbers: {Z}')
+                print(f'Sample atomic numbers: {Z_sample}')
+                e = 'Atomic numbers of samples do not match destination.'
+                raise AssertionError(e)
+        else:
+            self.Z = Z_sample
+        self.n_Z = len(self.Z)
+
+        self.entity_ids = np.array(entity_ids)  # Destination entity_ids
+
+        if not self.dry_run:
+            self.dest_file.put(f'{self.dest_key}/r_prov_ids', self.r_prov_ids)
+            self.dest_file.put(f'{self.dest_key}/atomic_numbers', self.Z)
+            self.dest_file.put(f'{self.dest_key}/entity_ids', self.entity_ids)
+            self.dest_file.put(f'{self.dest_key}/comp_ids', self.comp_ids)
+    
+
+    def _initialize_structure_sampling_arrays(
+        self, comp_labels, quantity
+    ):
+        """Creates or extends arrays for sampling structures.
+
+        Parameters
+        ----------
+        comp_labels : :obj:`tuple`, ndim: ``1``
+            The ``comp_id`` labels to include in sampled structures. ``entity_ids``
+            with the same ``comp_id`` labels are sampled for each :obj:`tuple`
+            element. Thus, the order of each label does matter.
+        quantity : :obj:`int` or :obj:`str`
+            Number of structures to sample from the source. This can be a
+            specific number (e.g., ``5739`` or ``'8'``) or ``'all'`` which
+            will sample every possible combination.
+        """
+        # Either creates new ones or concatenates to original destination data.
+        # Trial selection to get shapes for R and G
+        if quantity == 'all':
+            # Determine the maximum amount of structures we can sample from a single
+            # source structure.
+            combs_per_structure = sum(
+                1 for _ in _generate_structure_samples(
+                    quantity, [0], self.avail_entity_ids
                 )
-                if source_r_prov_specs is not None:
-                    update_idx = np.argwhere(
-                        source_r_prov_specs[:,0] == source_id
-                    )[:,0]
-                    source_r_prov_specs[update_idx,0] = next_id
-                next_id += 1
-    
-            # Merge the IDs
-            new_r_prov_ids = {**r_prov_ids, **source_r_prov_ids}
-        else:
-            new_r_prov_ids = r_prov_ids
-    else:
-        new_r_prov_ids = source_r_prov_ids
-    
-    # Stores the index of the first newly sampled structure for checks.
-    if R is None:
-        n_R_initial = 0
-    else:
-        n_R_initial = R.shape[0]
-    
-    # Saver
-    if write:
-        if copy_EG:
-            saver = Saver(
-                dest_file.fpath,
-                (f'{dest_key}/geometry', f'{dest_key}/r_prov_ids',
-                f'{dest_key}/r_prov_specs', f'{dest_key}/{e_label}',
-                f'{dest_key}/{g_label}')
             )
+            size_quantity = int(combs_per_structure*len(self.R_source))
+
+            # Sometimes we want to sample all with a criteria. Criteria should
+            # drastically reduce the number of sampled structures. So, we just
+            # initialize a large array with ``all_size``.
+            if size_quantity > self.all_init_size:
+                size_quantity = self.all_init_size
         else:
-            saver = Saver(
-                dest_file.fpath,
-                (f'{dest_key}/geometry', f'{dest_key}/r_prov_ids',
-                f'{dest_key}/r_prov_specs')
-            )
+            size_quantity = int(quantity)
+        idx_sel, R = _add_structures_to_R(self.R, size_quantity, self.n_Z)
+        
+        if self.E_key is not None:
+            E = _add_structures_to_E(self.E, size_quantity)
+        else:
+            E = None
+        
+        if self.G_key is not None:
+            G = _add_structures_to_G(self.G, size_quantity, self.n_Z)
+        else:
+            G = None
+        
+        r_prov_specs = _add_structures_to_r_prov_specs(
+            self.r_prov_specs, size_quantity, comp_labels
+        )
+        
+        return idx_sel, R, E, G, r_prov_specs
+
+    def _post_process(self):
+        # Put the final data.
+        self.dest_file.put(f'{self.dest_key}/r_centered', self.center_structures)
+        self.dest_file.put(f'{self.dest_key}/reptar_version', reptar_version)
+        self.dest_file.update_md5(self.dest_key)
     
-    # Begin sampling.
-    Z, R, E, G, entity_ids_sampled, r_prov_specs = sample_structures(
-        source_file, source_key, quantity, comp_labels, new_r_prov_ids,
-        source_r_prov_specs, Z=Z, R=R, r_prov_specs=r_prov_specs,
-        structure_idxs=structure_idxs, criteria=criteria,
-        center_structures=center_structures, sampling_updates=sampling_updates,
-        copy_EG=copy_EG, E=E, G=G,
-        energy_label_source=energy_labels[0], grad_label_source=grad_labels[0],
-        periodic_cell=periodic_cell, saver=saver
-    )
-
-    num_sampled = R.shape[0] - n_R_initial
-
-    # Check that entity_ids are the same.
-    if entity_ids is not None:
-        try:
-            assert np.array_equal(entity_ids, entity_ids_sampled)
-        except AssertionError:
-            e = f'Destination entity_ids ({entity_ids.tolist()}) do not '\
-                f'match sampled entity_ids ({entity_ids_sampled.tolist()}).'
-            raise AssertionError(e)
-    else:
-        entity_ids = entity_ids_sampled
+    def _cleanup(self):
+        """Remove attributes after sampling to free memory and avoid using
+        old data if new samples are taken.
+        """
+        # TODO: cleanup
+        # Clean up class attributes.
+        attrs = [
+            'Z', 'R', 'n_R_initial', 'E', 'G', 'r_prov_ids', 'r_prov_specs',
+            'entity_ids', 'comp_ids'
+        ]
+        for attr in attrs:
+            delattr(self, attr)
     
-    if write:
-        dest_file.put(f'{dest_key}/atomic_numbers', Z)
-        dest_file.put(f'{dest_key}/geometry', R)
-        if copy_EG:
-            dest_file.put(f'{dest_key}/{energy_labels[0]}', E)
-            dest_file.put(f'{dest_key}/{grad_labels[0]}', G)
-            if len(energy_labels) > 1:
-                for i in range(1, len(energy_labels)):
-                    e_label = energy_labels[i]
-                    e_data = dest_file.get(f'{dest_key}/{e_label}')
-                    e_data_shape = e_data.shape
-                    e_shape_new = (e_data_shape[0]+num_sampled,)
-                    e_data_new = np.empty(e_shape_new)
-                    e_data_new[:] = np.nan
-                    e_data_new[:e_data_shape[0]] = e_data
-                    dest_file.put(f'{dest_key}/{e_label}', e_data_new)
-                for i in range(1, len(grad_labels)):
-                    g_label = grad_labels[i]
-                    g_data = dest_file.get(f'{dest_key}/{g_label}')
-                    g_data_shape = g_data.shape
-                    g_shape_new = (
-                        g_data_shape[0]+num_sampled, g_data_shape[1],
-                        g_data_shape[2]
-                    )
-                    g_data_new = np.empty(g_shape_new)
-                    g_data_new[:] = np.nan
-                    g_data_new[:g_data_shape[0]] = g_data
-                    dest_file.put(f'{dest_key}/{g_label}', g_data_new)
-        dest_file.put(f'{dest_key}/entity_ids', entity_ids)
-        dest_file.put(f'{dest_key}/r_prov_ids', new_r_prov_ids)
-        dest_file.put(f'{dest_key}/r_prov_specs', r_prov_specs.astype(np.int64))
-        dest_file.put(f'{dest_key}/r_centered', center_structures)
-        dest_file.put(f'{dest_key}/comp_ids', comp_ids)
+    def _update_sampling_arrays(
+        self, quantity, i_start, R, E, G, r_prov_specs, R_selection,
+        E_selection, G_selection, r_prov_spec_selection
+    ):
+        do_break = False
+        n_sampled = R_selection.shape[0]
+        i_stop = i_start + n_sampled
 
-        dest_file.put(f'{dest_key}/reptar_version', reptar_version)
-        dest_file.update_md5(dest_key)
+        if i_stop > R.shape[0]:
+            if quantity == 'all':
+                # If we are sampling all, we need to resize the arrays
+                # an continue sampling.
+                extra_to_add = 5000
+                _, R = _add_structures_to_R(R, extra_to_add, self.n_Z)
+                r_prov_specs = _add_structures_to_r_prov_specs(
+                    r_prov_specs, extra_to_add, comp_labels
+                )
+                if self.E_key is not None:
+                    E = _add_structures_to_E(E, extra_to_add)
+                if self.G_key is not None:
+                    G = _add_structures_to_G(G, extra_to_add, self.n_Z)
+            else:
+                # If we are sampling a specific quantity, then we only
+                # keep a certain amount.
+                i_stop = R.shape[0]
+                n_keep = i_stop - i_start
+                R_selection = R_selection[:n_keep]
+                r_prov_spec_selection = r_prov_spec_selection[:n_keep]
+                if self.E_key is not None:
+                    E_selection = E_selection[:n_keep]
+                if self.G_key is not None:
+                    G_selection = G_selection[:n_keep]
+                do_break = True
+                
+        # Add batch to sample arrays.
+        R[i_start:i_stop] = R_selection
+        r_prov_specs[i_start:i_stop] = r_prov_spec_selection
+        if self.E_key is not None:
+            E[i_start:i_stop] = E_selection
+        if self.G_key is not None:
+            G[i_start:i_stop] = G_selection
 
-    return dest_file
+        return i_stop, do_break, R, E, G, r_prov_specs
+
+    def sample(
+        self, comp_labels, quantity, R_source_idxs=None, specific_entities=None
+    ):
+        """
+
+        Parameters
+        ----------
+        comp_labels : :obj:`tuple`, ndim: ``1``
+            The ``comp_id`` labels to include in sampled structures.
+            ``entity_ids`` with the same ``comp_id`` labels are sampled for
+            each :obj:`tuple` element. Thus, the order of each label
+            **does** matter.
+        quantity : :obj:`int` or :obj:`str`
+            Number of structures to sample from the source. This can be a
+            specific number (e.g., ``5739`` or ``'8'``) or ``'all'`` which
+            will sample every possible combination.
+        R_source_idxs : :obj:`int` or :obj:`list`, default: ``None``
+            Which structures (by index) we can sample from. If ``None``, then
+            all structures are available.
+        specific_entities : :obj:`tuple`, default: ``None``
+            Supersede entities determined from ``Sampler.avail_entities`` and
+            use these instead. This needs to specify the ``comp_label`` index
+            to supersede and the entities to use instead. For example, if you
+            wanted to always sample entity ``43`` or ``78`` for the second
+            ``comp_label`` then this would be ``((1, (43, 78)),)``
+        """
+        self._prepare_destination()
+        self._prepare_source(R_source_idxs)
+        self._check_comp_ids(comp_labels)
+        self._check_r_prov_ids()
+        self._prepare_saver()
+
+        # Determines what the r_prov_id will be for this sampling run.
+        # If source_r_prov_specs is None, then this is an original source.
+        # Which means there should only be one R_prov_id.
+        if self.r_prov_specs_source is None:
+            assert len(self.r_prov_ids) == 1
+            r_prov_id_source = tuple(self.r_prov_ids.keys())[0]
+        else:
+            r_prov_id_source = None
+        
+        self.avail_entity_ids = self.get_avail_entities(
+            self.comp_ids_source, comp_labels, specific_entities
+        )
+        self._prepare_dest_const_data()
+
+        # We initialize all arrays that will be used to store sampled structures.
+        i_start, R, E, G, r_prov_specs = self._initialize_structure_sampling_arrays(
+            comp_labels, quantity
+        )
+
+        selection_gen = _generate_structure_samples(
+            quantity, self.R_source_idxs, self.avail_entity_ids
+        )
+
+        # TODO: Print status
+        Z = self.Z
+        entity_ids = self.entity_ids
+        R_source = self.R_source
+        E_source = self.E_source
+        G_source = self.G_source
+        entity_ids_source = self.entity_ids_source
+        r_prov_specs_source = self.r_prov_specs_source
+        criteria = self.criteria
+        periodic_cell = self.periodic_cell
+
+        if quantity != 'all':
+            chunk_size = quantity
+        else:
+            chunk_size = 500
+
+        if not self.use_ray:
+            # Serial operation
+            for selections in chunk_iterable(selection_gen, chunk_size):
+                R_selection, E_selection, G_selection, r_prov_spec_selection = \
+                sampler_worker(
+                    selections, Z, entity_ids, R_source, E_source, G_source,
+                    entity_ids_source, r_prov_specs_source,
+                    r_prov_id_source, criteria, periodic_cell
+                )
+                
+                i_start, do_break, R, E, G, r_prov_specs = \
+                self._update_sampling_arrays(
+                    quantity, i_start, R, E, G, r_prov_specs, R_selection,
+                    E_selection, G_selection, r_prov_spec_selection
+                )
+
+
+                if self.center_structures:
+                    R[:i_start] = get_center_structures(Z, R[:i_start])
+                
+                if not self.dry_run:
+                    data_to_save = [R[:i_start], r_prov_specs[:i_start]]
+                    if self.E_key is not None:
+                        data_to_save.append(E[:i_start])
+                    if self.G_key is not None:
+                        data_to_save.append(G[:i_start])
+                    self.saver.save(*data_to_save)
+                
+                # Break sampling when quantity is reached.
+                # 'all' sampling will break with the loop.
+                if do_break:
+                    break
+        else:
+            # Parallel operation with ray
+            pass
+        
+        if not self.dry_run:
+            self._post_process()
+        self._cleanup()
+        

@@ -27,7 +27,7 @@ import os
 import shutil
 import numpy as np
 from reptar import creator
-from reptar.sampler import add_structures_to_group
+from reptar.sampler import Sampler, r_from_entities
 import itertools
 
 import sys
@@ -44,7 +44,8 @@ xtb_dir = './tmp/xtb'
 sampling_dir = './tmp/sampling/'
 os.makedirs(sampling_dir, exist_ok=True)
 
-def test_1h2o_120meoh_prod_sampling():
+
+def test_1h2o_120meoh_prod_sampler():
     """Sampling from xTB MD reptar file.
     """
     source_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
@@ -59,13 +60,20 @@ def test_1h2o_120meoh_prod_sampling():
     dest_key = '/wat.2met-pes'
     dest.rfile.create_group(dest_key)
 
-    quantity = 100
+    quantity = 20
     comp_labels = ('WAT', 'MET', 'MET')
 
-    add_structures_to_group(
-        source.rfile, source_key, dest.rfile, dest_key, quantity,
-        comp_labels, center_structures=False, copy_EG=False, write=True
+    sampler = Sampler(
+        source.rfile, source_key, dest.rfile, dest_key,
+        criteria=None, center_structures=False, E_key=None, G_key=None,
+        dry_run=False, all_init_size=50000, use_ray=False, n_workers=2,
+        ray_address='auto'
     )
+    sampler.sample(
+        comp_labels, quantity, R_source_idxs=None, specific_entities=None
+    )
+
+    
     assert np.array_equal(
         dest.rfile.get(f'{dest_key}/atomic_numbers'),
         np.array([8, 1, 1, 8, 1, 6, 1, 1, 1, 8, 1, 6, 1, 1, 1])
@@ -74,13 +82,14 @@ def test_1h2o_120meoh_prod_sampling():
         dest.rfile.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     )
-    assert dest.rfile.get(f'{dest_key}/geometry').shape == (100, 15, 3)
-    assert dest.rfile.get(f'{dest_key}/r_prov_specs').shape == (100, 5)
+    assert dest.rfile.get(f'{dest_key}/geometry').shape == (quantity, 15, 3)
+    assert dest.rfile.get(f'{dest_key}/r_prov_specs').shape == (quantity, 5)
     assert len(dest.rfile.get(f'{dest_key}/r_prov_ids')) == 1
     assert dest.rfile.get(f'{dest_key}/r_centered') == False
     assert np.array_equal(
         dest.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
+
 
     # Checks that the correct geometries are sampled and in the correct order.
     R_source = source.rfile.get(f'{source_key}/geometry')
@@ -89,7 +98,6 @@ def test_1h2o_120meoh_prod_sampling():
     R_sampled = dest.rfile.get(f'{dest_key}/geometry')
     r_prov_specs = dest.rfile.get(f'{dest_key}/r_prov_specs')
     
-
     for i in range(len(r_prov_specs)):
         r_sampled = R_sampled[i]
         r_prov_spec = r_prov_specs[i]
@@ -102,11 +110,12 @@ def test_1h2o_120meoh_prod_sampling():
             assert r_sampled[idx_atom_check][0] == r_source_frag[0][0]
             idx_atom_check += int(r_source_frag.shape[0])
 
+
     # Test additional sampling
-    add_structures_to_group(
-        source.rfile, source_key, dest.rfile, dest_key,
-        quantity, comp_labels, center_structures=True, copy_EG=False,
-        write=True
+    # Now we center structures to test.
+    sampler.center_structures = True
+    sampler.sample(
+        comp_labels, quantity, R_source_idxs=None, specific_entities=None
     )
     assert np.array_equal(
         dest.rfile.get(f'{dest_key}/atomic_numbers'),
@@ -116,8 +125,8 @@ def test_1h2o_120meoh_prod_sampling():
         dest.rfile.get(f'{dest_key}/entity_ids'),
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1, 2, 2, 2, 2, 2, 2])
     )
-    assert dest.rfile.get(f'{dest_key}/geometry').shape == (200, 15, 3)
-    assert dest.rfile.get(f'{dest_key}/r_prov_specs').shape == (200, 5)
+    assert dest.rfile.get(f'{dest_key}/geometry').shape == (quantity*2, 15, 3)
+    assert dest.rfile.get(f'{dest_key}/r_prov_specs').shape == (quantity*2, 5)
     assert len(dest.rfile.get(f'{dest_key}/r_prov_ids')) == 1
     assert dest.rfile.get(f'{dest_key}/r_centered') == True
     assert np.array_equal(
@@ -136,20 +145,39 @@ def test_sampling_from_wat_2met_pes():
     dest_key = '/wat.met-pes'
     source.rfile.create_group(dest_key)
 
-    quantity = 100
+    quantity = 'all'
     comp_labels = ('WAT', 'MET')
 
-    add_structures_to_group(
+    sampler = Sampler(
         source.rfile, source_key, source.rfile, dest_key,
-        quantity, comp_labels, center_structures=True, copy_EG=False
+        criteria=None, center_structures=False, E_key=None, G_key=None,
+        dry_run=False, all_init_size=50000, use_ray=False, n_workers=2,
+        ray_address='auto'
+    )
+    sampler.sample(
+        comp_labels, quantity, R_source_idxs=None, specific_entities=None
     )
 
+    entity_ids_source = source.rfile.get(f'{source_key}/entity_ids')
+    entity_ids_dest = source.rfile.get(f'{dest_key}/entity_ids')
     assert np.array_equal(
-        source.rfile.get(f'{dest_key}/entity_ids'),
+        entity_ids_dest,
         np.array([0, 0, 0, 1, 1, 1, 1, 1, 1])
     )
     assert len(source.rfile.get(f'{dest_key}/r_prov_ids')) == 1
-    assert source.rfile.get(f'{dest_key}/r_centered') == True
+    assert source.rfile.get(f'{dest_key}/r_centered') == False
     assert np.array_equal(
         source.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
+    )
+
+    # We know that the first structure in destination is the first possible
+    # dimer from the source. This is only because quantity is 'all'.
+    R_source = source.rfile.get(f'{source_key}/geometry')
+    R_dest = source.rfile.get(f'{dest_key}/geometry')
+    R_ref = r_from_entities(R_source[0], entity_ids_source, (0, 1))
+    assert np.allclose(R_ref, R_dest[0])
+    
+    assert np.array_equal(
+        source.rfile.get(f'{source_key}/r_prov_specs')[0][:4],
+        source.rfile.get(f'{dest_key}/r_prov_specs')[0]
     )
