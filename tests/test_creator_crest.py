@@ -38,6 +38,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 crest_dir = './tmp/crest/'
 os.makedirs(crest_dir, exist_ok=True)
 
+
 @pytest.mark.order(0)
 def test_crest_50h2o_nci_exdir_conformers():
     """
@@ -63,10 +64,11 @@ def test_crest_50h2o_nci_exdir_conformers():
     )
     assert rfile.get(f'{group_key}/geometry').shape == (15, 150, 3)
 
-@pytest.mark.order(0)
+
 def test_crest_50h2o_nci_exdir_rotamers():
     """
     """
+    assert False
     calc_path, out_path, conf_path, rot_path = get_crest_50h2o_nci_paths()
     exdir_path = os.path.join(crest_dir, '50h2o.exdir')
 

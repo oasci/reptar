@@ -44,11 +44,15 @@ xtb_dir = './tmp/xtb'
 writing_dir = './tmp/writing/'
 os.makedirs(writing_dir, exist_ok=True)
 
+@pytest.mark.dependency(
+    depends=['tests/test_creator_xtb.py::test_1h2o_120meoh_md_exdir'],
+    scope='session'
+)
 def test_ase_db_writer_1h2o_120meoh_prod():
     """Writing small ASE database"""
     try:
         import ase
-    except ImportError:
+    except (ModuleNotFoundError, ImportError):
         pytest.skip("ase package not installed")
     
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')

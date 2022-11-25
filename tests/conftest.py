@@ -21,10 +21,24 @@
 # SOFTWARE.
 
 import os
-import shutil
+import pytest
 
 def pytest_sessionstart(session):  # pytest_configure(config)
-    """Creates a tmp directory for writing files."""
-    path = './tests/tmp'
-    os.makedirs(path, exist_ok=True)
+    """Called after the Session object has been created and
+    before performing collection and entering the run test loop.
+    """
+    # Check that the reptar-data repo is cloned.
+    reptar_data_path = './examples/reptar-data'
+    reptar_data_exists = os.path.exists(reptar_data_path)
+    if not reptar_data_exists:
+        pytest.exit(
+            4, 
+            f'\nreptar-data repository not found at {reptar_data_path}'
+            '\nPlease clone https://github.com/aalexmmaldonado/reptar-data'
+            '\nin the reptar/examples/ directory'
+        )
+
+    # Creates a tmp directory for writing files.
+    test_tmp_path = './tests/tmp'
+    os.makedirs(test_tmp_path, exist_ok=True)
     

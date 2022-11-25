@@ -35,6 +35,7 @@ from .paths import *
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+
 def test_max_atom_pair_dist_3h2o():
     """Computing 2-body energy and gradient contributions.
     """

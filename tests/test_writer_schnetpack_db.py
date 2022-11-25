@@ -45,11 +45,15 @@ xtb_dir = './tmp/xtb'
 writing_dir = './tmp/writing/'
 os.makedirs(writing_dir, exist_ok=True)
 
+@pytest.mark.dependency(
+    depends=['tests/test_creator_xtb.py::test_1h2o_120meoh_md_exdir'],
+    scope='session'
+)
 def test_schnetpack_db_writer_1h2o_120meoh_prod():
     """Writing small schnetpack database"""
     try:
         import schnetpack
-    except ImportError:
+    except (ModuleNotFoundError, ImportError):
         pytest.skip("schnetpack package not installed")
     
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')

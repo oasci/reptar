@@ -39,6 +39,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 xtb_dir = './tmp/xtb/'
 os.makedirs(xtb_dir, exist_ok=True)
 
+@pytest.mark.dependency(scope='session')
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_exdir():
     """
@@ -98,7 +99,10 @@ def test_1h2o_120meoh_md_exdir():
     assert create.rfile.get('prod_1/energy_pot')[-1] == -991.818996146108
     assert create.rfile.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
-@pytest.mark.order(0)
+@pytest.mark.dependency(
+    depends=['test_1h2o_120meoh_md_exdir'],
+    scope='module'
+)
 def test_1h2o_120meoh_md_json():
     """
     """
@@ -162,7 +166,11 @@ def test_1h2o_120meoh_md_json():
     assert create.rfile.get('prod_1/energy_pot')[-1] == -991.818996146108
     assert create.rfile.get('prod_1/wall_potential')[0]['sphere_radius'] == 12.500003
 
-@pytest.mark.order(0)
+
+@pytest.mark.dependency(
+    depends=['test_1h2o_120meoh_md_exdir'],
+    scope='module'
+)
 def test_1h2o_120meoh_md_prod_exdir_to_npz():
     """
     """
@@ -185,7 +193,7 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
     assert npz_file.get('energy_pot')[-1] == -991.818996146108
     assert npz_file.get('wall_potential')[0]['sphere_radius'] == 12.500003
 
-@pytest.mark.order(0)
+
 def test_50h2o_opt_to_exdir():
     """
     """

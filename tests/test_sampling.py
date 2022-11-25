@@ -44,7 +44,10 @@ xtb_dir = './tmp/xtb'
 sampling_dir = './tmp/sampling/'
 os.makedirs(sampling_dir, exist_ok=True)
 
-
+@pytest.mark.dependency(
+    depends=['tests/test_zcreator_xtb.py::test_1h2o_120meoh_md_exdir'],
+    scope='session'
+)
 def test_1h2o_120meoh_prod_sampler():
     """Sampling from xTB MD reptar file.
     """
@@ -133,7 +136,7 @@ def test_1h2o_120meoh_prod_sampler():
         dest.rfile.get(f'{dest_key}/comp_ids'), np.array(comp_labels)
     )
 
-
+@pytest.mark.dependency(depends=['test_1h2o_120meoh_prod_sampler'])
 def test_sampling_from_wat_2met_pes():
     """Sampling from a sampled exdir group.
     """

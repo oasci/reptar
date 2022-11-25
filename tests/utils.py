@@ -26,8 +26,7 @@ import numpy as np
 import scipy as sp
 
 def _pdist(r, lat_and_inv=None):
-    """
-    Compute pairwise Euclidean distance matrix between all atoms.
+    """Compute pairwise Euclidean distance matrix between all atoms.
 
     Parameters
     ----------

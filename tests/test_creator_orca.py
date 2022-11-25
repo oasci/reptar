@@ -39,6 +39,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 orca_dir = './tmp/orca'
 os.makedirs(orca_dir, exist_ok=True)
 
+
 @pytest.mark.order(0)
 def test_6h2o_temelso_engrad_exdir():
     """
@@ -61,7 +62,7 @@ def test_6h2o_temelso_engrad_exdir():
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )
 
-@pytest.mark.order(0)
+
 def test_6h2o_temelso_engrad_json():
     """
     """
@@ -84,7 +85,7 @@ def test_6h2o_temelso_engrad_json():
         np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001])
     )
 
-@pytest.mark.order(0)
+
 def test_6h2o_temelso_engrad_npz():
     """
     """

@@ -42,6 +42,10 @@ xtb_dir = './tmp/xtb'
 writing_dir = './tmp/writing/'
 os.makedirs(writing_dir, exist_ok=True)
 
+@pytest.mark.dependency(
+    depends=['tests/test_creator_xtb.py::test_1h2o_120meoh_md_exdir'],
+    scope='session'
+)
 def test_xyz_gap_writer_1h2o_120meoh_prod():
     """Writing short XYZ file from exdir file"""
     exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
