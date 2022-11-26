@@ -68,7 +68,6 @@ def test_crest_50h2o_nci_exdir_conformers():
 def test_crest_50h2o_nci_exdir_rotamers():
     """
     """
-    assert False
     calc_path, out_path, conf_path, rot_path = get_crest_50h2o_nci_paths()
     exdir_path = os.path.join(crest_dir, '50h2o.exdir')
 
