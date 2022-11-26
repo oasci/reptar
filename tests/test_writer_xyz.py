@@ -36,25 +36,22 @@ from .paths import *
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Source paths
-xtb_dir = './tmp/xtb'
+data_dir = './data/'
 
 # Writing paths
 writing_dir = './tmp/writing/'
 os.makedirs(writing_dir, exist_ok=True)
 
-@pytest.mark.dependency(
-    depends=['tests/test_creator_xtb.py::test_1h2o_120meoh_md_exdir'],
-    scope='session'
-)
+
 def test_xyz_gap_writer_1h2o_120meoh_prod():
     """Writing short XYZ file from exdir file"""
-    exdir_path = os.path.join(xtb_dir, '1h2o_120meoh_md.exdir')
+    exdir_path = os.path.join(data_dir, '1h2o_120meoh_md.exdir')
     xyz_path = os.path.join(writing_dir, '1h2o_120meoh_md.xyz')
 
     rfile = File(exdir_path, mode='r')
 
-    Z = rfile.get('prod_1/atomic_numbers')
-    R = rfile.get('prod_1/geometry')[:5]
+    Z = rfile.get('eq_1/atomic_numbers')
+    R = rfile.get('eq_1/geometry')[:5]
     write_xyz(xyz_path, Z, R)
 
     # TODO: Write tests

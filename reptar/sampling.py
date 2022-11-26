@@ -393,9 +393,21 @@ class Sampler(object):
 
         self.use_ray = use_ray
         self.n_workers = n_workers
-        if use_ray:
+        if self.use_ray:
+            global ray
+            import ray
+
             if not ray.is_initialized():
                 ray.init(address=ray_address)
+            
+            # We put criteria in ray object store here.
+            self.criteria = ray.put(self.criteria)
+        
+        self.worker_chunk_size_for_all = 1000
+        """Chunk size used when ``quantity`` is ``'all'``.
+
+        :type: : :obj:`int`
+        """
     
 
     def _prepare_destination(self):
@@ -639,11 +651,16 @@ class Sampler(object):
         Z_sample = []
         entity_ids = []
         entity_id = 0
+
+        Z = self.Z
+        entity_ids_source = self.entity_ids_source
+        Z_source = self.Z_source
+
         for dest_entity in self.avail_entity_ids:
             entity_ref = dest_entity[0]  # an example entity_id
 
-            Z_ref = self.Z_source[
-                np.argwhere(self.entity_ids_source == entity_ref)[:,0]
+            Z_ref = Z_source[
+                np.argwhere(entity_ids_source == entity_ref)[:,0]
             ]
             entity_ids.extend([entity_id for _ in range(len(Z_ref))])
 
@@ -652,8 +669,8 @@ class Sampler(object):
             # Check that all other entities have the same atomic numbers.
             if len(dest_entity) != 1:
                 for other_entity in dest_entity[1:]:
-                    Z_other = self.Z_source[
-                        np.argwhere(self.entity_ids_source == other_entity)[:,0]
+                    Z_other = Z_source[
+                        np.argwhere(entity_ids_source == other_entity)[:,0]
                     ]
                     try:
                         assert np.array_equal(Z_ref, Z_other)
@@ -668,10 +685,10 @@ class Sampler(object):
 
         # Check that, if the destination already contains atomic_numbers, that
         # they are the same as these structures to be sampled.
-        if self.Z is not None:
+        if Z is not None:
             try:
-                assert np.array_equal(self.Z, Z_sample)
-                self.Z = np.array(Z_sample)
+                assert np.array_equal(Z, Z_sample)
+                Z = np.array(Z_sample)
             except AssertionError:
                 print(f'Destination atomic numbers: {Z}')
                 print(f'Sample atomic numbers: {Z_sample}')
@@ -838,6 +855,9 @@ class Sampler(object):
         self._check_r_prov_ids()
         self._prepare_saver()
 
+        # Explicitly loading data that we need to check and handle using ray.
+        Z = self.Z
+
         # Determines what the r_prov_id will be for this sampling run.
         # If source_r_prov_specs is None, then this is an original source.
         # Which means there should only be one R_prov_id.
@@ -861,33 +881,31 @@ class Sampler(object):
             quantity, self.R_source_idxs, self.avail_entity_ids
         )
 
-        # TODO: Print status
-        Z = self.Z
-        entity_ids = self.entity_ids
-        R_source = self.R_source
-        E_source = self.E_source
-        G_source = self.G_source
-        entity_ids_source = self.entity_ids_source
-        r_prov_specs_source = self.r_prov_specs_source
-        criteria = self.criteria
-        periodic_cell = self.periodic_cell
+        # TODO: Print status?
 
         if quantity != 'all':
             chunk_size = quantity
         else:
-            chunk_size = 500
+            chunk_size = self.worker_chunk_size_for_all
+
+        global sampler_worker
+        stop_sampling = False
         
         if not self.use_ray:
+            
             # Serial operation
             for selections in chunk_iterable(selection_gen, chunk_size):
+                # Sample selections with the worker.
+                # All selections are already checked and can be added.
                 R_selection, E_selection, G_selection, r_prov_spec_selection = \
                 sampler_worker(
-                    selections, Z, entity_ids, R_source, E_source, G_source,
-                    entity_ids_source, r_prov_specs_source,
-                    r_prov_id_source, criteria, periodic_cell
+                    selections, self.Z, self.entity_ids, self.R_source,
+                    self.E_source, self.G_source, self.entity_ids_source,
+                    self.r_prov_specs_source, r_prov_id_source, self.criteria,
+                    self.periodic_cell
                 )
                 
-                i_start, do_break, R, E, G, r_prov_specs = \
+                i_start, stop_sampling, R, E, G, r_prov_specs = \
                 self._update_sampling_arrays(
                     quantity, i_start, R, E, G, r_prov_specs, R_selection,
                     E_selection, G_selection, r_prov_spec_selection
@@ -895,7 +913,7 @@ class Sampler(object):
 
 
                 if self.center_structures:
-                    R[:i_start] = get_center_structures(Z, R[:i_start])
+                    R[:i_start] = get_center_structures(self.Z, R[:i_start])
                 
                 if not self.dry_run:
                     data_to_save = [R[:i_start], r_prov_specs[:i_start]]
@@ -907,11 +925,73 @@ class Sampler(object):
                 
                 # Break sampling when quantity is reached.
                 # 'all' sampling will break with the loop.
-                if do_break:
+                if stop_sampling:
                     break
         else:
             # Parallel operation with ray
-            pass
+            chunk_size = chunk_size/self.n_workers
+
+            sampler_worker_ray = ray.remote(sampler_worker)
+
+            # Put all data (other than criteria).
+            self.entity_ids = ray.put(self.entity_ids)
+            self.R_source = ray.put(self.R_source)
+            self.E_source = ray.put(self.E_source)
+            self.G_source = ray.put(self.G_source)
+            self.entity_ids_source = ray.put(self.entity_ids_source)
+            self.r_prov_specs_source = ray.put(self.r_prov_specs_source)
+            self.periodic_cell = ray.put(self.periodic_cell)
+
+            # Initialize ray workers
+            workers = []
+            selection_chunker = chunk_iterable(selection_gen, chunk_size)
+            def add_worker(workers, chunker):
+                try:
+                    selection = next(selection_chunker)
+                    workers.append(
+                        sampler_worker_ray.options(num_cpus=1).remote(
+                            selection, self.Z, self.entity_ids, self.R_source,
+                            self.E_source, self.G_source, self.entity_ids_source,
+                            self.r_prov_specs_source, r_prov_id_source,
+                            self.criteria, self.periodic_cell
+                        )
+                    )
+                except StopIteration:
+                    pass
+            
+            for _ in range(self.n_workers):
+                add_worker(workers, selection_chunker)
+            
+            # Start calculations
+            while not stop_sampling:
+                done_id, workers = ray.wait(workers)
+                
+                R_selection, E_selection, G_selection, r_prov_spec_selection = \
+                    ray.get(done_id)[0]
+
+                i_start, stop_sampling, R, E, G, r_prov_specs = \
+                self._update_sampling_arrays(
+                    quantity, i_start, R, E, G, r_prov_specs, R_selection,
+                    E_selection, G_selection, r_prov_spec_selection
+                )
+
+                if self.center_structures:
+                    R[:i_start] = get_center_structures(self.Z, R[:i_start])
+                
+                if not self.dry_run:
+                    data_to_save = [R[:i_start], r_prov_specs[:i_start]]
+                    if self.E_key is not None:
+                        data_to_save.append(E[:i_start])
+                    if self.G_key is not None:
+                        data_to_save.append(G[:i_start])
+                    self.saver.save(*data_to_save)  
+                
+                add_worker(workers, selection_chunker)
+
+                # Stop sampling if we have exhausted our chunker and we have
+                # no workers left.
+                if len(workers) == 0:
+                    stop_sampling = True
         
         if not self.dry_run:
             self._post_process()

@@ -41,4 +41,22 @@ def pytest_sessionstart(session):  # pytest_configure(config)
     # Creates a tmp directory for writing files.
     test_tmp_path = './tests/tmp'
     os.makedirs(test_tmp_path, exist_ok=True)
+
+    # Initializes ray if available.
+    try:
+        import ray
+    except (ModuleNotFoundError, ImportError):
+        pass
+    else:
+        if not ray.is_initialized():
+            ray.init()
+
+def pytest_sessionfinish(session, exitstatus):
+    # Shutdown ray if possible.
+    try:
+        import ray
+    except (ModuleNotFoundError, ImportError):
+        pass
+    else:
+        ray.shutdown()
     
