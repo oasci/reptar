@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,14 +21,15 @@
 # SOFTWARE.
 
 import numpy as np
+
 try:
     from xtb.interface import Calculator, Param
 except ImportError:
     pass
 
+
 def xtb_engrad(
-    idxs, Z, R, charge=0, mult=1, calc_acc=0.1, max_iterations=300,
-    params=None
+    idxs, Z, R, charge=0, mult=1, calc_acc=0.1, max_iterations=300, params=None
 ):
     r"""Ray remote function for computing total electronic energy and atomic
     gradients using xtb.
@@ -56,7 +57,7 @@ def xtb_engrad(
         is necessarily shown.
     params : default: ``None``
         xTB parameters. Defaults to ``xtb.interface.Param.GFN2xTB`` if ``None``.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`

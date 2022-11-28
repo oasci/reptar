@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,15 +22,12 @@
 
 from abc import ABC, abstractmethod
 
+
 class extractor(ABC):
-    """Base class for extracting information from files.
-    """
+    """Base class for extracting information from files."""
+
     def __init__(self):
-        self.parsed_info = {
-            'system_info': {},
-            'runtime_info': {},
-            'outputs': {}
-        }
+        self.parsed_info = {"system_info": {}, "runtime_info": {}, "outputs": {}}
 
     @property
     @abstractmethod
@@ -43,7 +40,7 @@ class extractor(ABC):
         :type: :obj:`tuple`
         """
         pass
-    
+
     @property
     def parsed_info(self):
         """Information parsed from files. Contains the following keys.
@@ -52,11 +49,11 @@ class extractor(ABC):
             Information specifying the system prior to any computation. Such
             as the initial cartesian coordinates, total system charge and
             multiplicity, etc.
-        
+
         ``runtime_info``
             Contains information about setting up the job/calculation or running
             the job. Defining convergence criteria, parameters, etc.
-        
+
         ``outputs``
             Results, requested or not, of the job. For example, SCF
             cycle values, optimized coordinates, trajectory, number of
@@ -65,7 +62,7 @@ class extractor(ABC):
         :type: :obj:`dict`
         """
         return self._parsed_info
-    
+
     @parsed_info.setter
     def parsed_info(self, value):
         self._parsed_info = value
@@ -73,7 +70,7 @@ class extractor(ABC):
     @parsed_info.deleter
     def parsed_info(self, value):
         del self._parsed_info
-    
+
     def skip_lines(self, f, n):
         """Skip a number of lines.
 
@@ -83,7 +80,7 @@ class extractor(ABC):
             Buffered text stream of the file.
         n : :obj:`int`
             Number of lines to skip
-        
+
         Returns
         -------
         :obj:`str`
@@ -92,4 +89,3 @@ class extractor(ABC):
         for i in range(n):
             line = next(f)
         return line
-    

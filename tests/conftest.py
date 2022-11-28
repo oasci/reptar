@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,23 +23,24 @@
 import os
 import pytest
 
+
 def pytest_sessionstart(session):  # pytest_configure(config)
     """Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
     # Check that the reptar-data repo is cloned.
-    reptar_data_path = './examples/reptar-data'
+    reptar_data_path = "./examples/reptar-data"
     reptar_data_exists = os.path.exists(reptar_data_path)
     if not reptar_data_exists:
         pytest.exit(
-            4, 
-            f'\nreptar-data repository not found at {reptar_data_path}'
-            '\nPlease clone https://github.com/aalexmmaldonado/reptar-data'
-            '\nin the reptar/examples/ directory'
+            4,
+            f"\nreptar-data repository not found at {reptar_data_path}"
+            "\nPlease clone https://github.com/aalexmmaldonado/reptar-data"
+            "\nin the reptar/examples/ directory",
         )
 
     # Creates a tmp directory for writing files.
-    test_tmp_path = './tests/tmp'
+    test_tmp_path = "./tests/tmp"
     os.makedirs(test_tmp_path, exist_ok=True)
 
     # Initializes ray if available.
@@ -51,6 +52,7 @@ def pytest_sessionstart(session):  # pytest_configure(config)
         if not ray.is_initialized():
             ray.init()
 
+
 def pytest_sessionfinish(session, exitstatus):
     # Shutdown ray if possible.
     try:
@@ -59,4 +61,3 @@ def pytest_sessionfinish(session, exitstatus):
         pass
     else:
         ray.shutdown()
-    

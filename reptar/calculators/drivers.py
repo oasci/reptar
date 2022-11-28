@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,19 +23,32 @@
 from ..utils import chunk_iterable
 import math
 import numpy as np
+
 try:
     import ray
 except ImportError:
     pass
+
 
 class driverENERGY:
     """Supervisor of energy+gradient workers.
 
     Creates and manages ray tasks using specified worker.
     """
+
     def __init__(
-        self, Z, R, E, worker, worker_kwargs, n_cpus, n_cpus_worker=1,
-        chunk_size=50, start_slice=None, end_slice=None, ray_address='auto'
+        self,
+        Z,
+        R,
+        E,
+        worker,
+        worker_kwargs,
+        n_cpus,
+        n_cpus_worker=1,
+        chunk_size=50,
+        start_slice=None,
+        end_slice=None,
+        ray_address="auto",
     ):
         """
         Parameters
@@ -96,30 +109,30 @@ class driverENERGY:
         self.n_cpus = n_cpus
         self.n_cpus_worker = n_cpus_worker
         self.chunk_size = chunk_size
-        self.n_workers = math.floor(n_cpus/n_cpus_worker)
+        self.n_workers = math.floor(n_cpus / n_cpus_worker)
 
         self.use_ray = use_ray
         if use_ray:
             if not ray.is_initialized():
                 ray.init(address=ray_address)
-            
+
             self.Z = ray.put(Z)
             self.R = ray.put(R)
-    
+
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
 
         Determines this by finding all ``NaN`` elements.
-        
+
         Returns
         -------
         :obj:`numpy.ndarray`
             Indices for ``R`` that are missing energie values.
         """
-        E = self.E[self.start_slice:self.end_slice]
-        idx_todo = np.argwhere(np.isnan(E))[:,0]
+        E = self.E[self.start_slice : self.end_slice]
+        idx_todo = np.argwhere(np.isnan(E))[:, 0]
         return idx_todo
-    
+
     def run(self, saver=None):
         """Run the calculations.
 
@@ -139,9 +152,7 @@ class driverENERGY:
 
         if not self.use_ray:
             for idx in idxs_todo:
-                _, E_done = worker(
-                    [idx], self.Z, self.R, **self.worker_kwargs
-                )
+                _, E_done = worker([idx], self.Z, self.R, **self.worker_kwargs)
                 self.E[idx] = E_done
 
                 if saver is not None:
@@ -150,6 +161,7 @@ class driverENERGY:
             worker = ray.remote(worker)
             # Initialize ray workers
             workers = []
+
             def add_worker(workers, chunker):
                 try:
                     chunk = list(next(chunker))
@@ -160,21 +172,22 @@ class driverENERGY:
                     )
                 except StopIteration:
                     pass
+
             for _ in range(self.n_workers):
                 add_worker(workers, chunker)
-            
+
             # Start calculations
             while len(workers) != 0:
                 done_id, workers = ray.wait(workers)
-                
+
                 idx_done, E_done = ray.get(done_id)[0]
                 self.E[idx_done] = E_done
 
                 if saver is not None:
                     saver.save((self.E))
-                
+
                 add_worker(workers, chunker)
-        
+
         return self.E
 
 
@@ -183,10 +196,22 @@ class driverENGRAD:
 
     Creates and manages ray tasks using specified worker.
     """
+
     def __init__(
-        self, Z, R, E, G, worker, worker_kwargs, use_ray=False, n_cpus=1,
-        n_cpus_worker=1, chunk_size=50, start_slice=None, end_slice=None,
-        ray_address='auto'
+        self,
+        Z,
+        R,
+        E,
+        G,
+        worker,
+        worker_kwargs,
+        use_ray=False,
+        n_cpus=1,
+        n_cpus_worker=1,
+        chunk_size=50,
+        start_slice=None,
+        end_slice=None,
+        ray_address="auto",
     ):
         """
         Parameters
@@ -255,30 +280,30 @@ class driverENGRAD:
         self.n_cpus = n_cpus
         self.n_cpus_worker = n_cpus_worker
         self.chunk_size = chunk_size
-        self.n_workers = math.floor(n_cpus/n_cpus_worker)
+        self.n_workers = math.floor(n_cpus / n_cpus_worker)
 
         self.use_ray = use_ray
         if use_ray:
             if not ray.is_initialized():
                 ray.init(address=ray_address)
-            
+
             self.Z = ray.put(Z)
             self.R = ray.put(R)
-    
+
     def _idx_todo(self):
         """Indices of missing energies (calculations to do).
 
         Determines this by finding all ``NaN`` elements.
-        
+
         Returns
         -------
         :obj:`numpy.ndarray`
             Indices for ``R`` that are missing energie values.
         """
-        E = self.E[self.start_slice:self.end_slice]
-        idx_todo = np.argwhere(np.isnan(E))[:,0]
+        E = self.E[self.start_slice : self.end_slice]
+        idx_todo = np.argwhere(np.isnan(E))[:, 0]
         return idx_todo
-    
+
     def run(self, saver=None):
         """Run the calculations.
 
@@ -300,9 +325,7 @@ class driverENGRAD:
 
         if not self.use_ray:
             for idx in idxs_todo:
-                _, E_done, G_done = worker(
-                    [idx], self.Z, self.R, **self.worker_kwargs
-                )
+                _, E_done, G_done = worker([idx], self.Z, self.R, **self.worker_kwargs)
                 self.E[idx] = E_done
                 self.G[idx] = G_done
 
@@ -312,6 +335,7 @@ class driverENGRAD:
             worker = ray.remote(worker)
             # Initialize ray workers
             workers = []
+
             def add_worker(workers, chunker):
                 try:
                     chunk = list(next(chunker))
@@ -322,33 +346,48 @@ class driverENGRAD:
                     )
                 except StopIteration:
                     pass
+
             for _ in range(self.n_workers):
                 add_worker(workers, chunker)
-            
+
             # Start calculations
             while len(workers) != 0:
                 done_id, workers = ray.wait(workers)
-                
+
                 idx_done, E_done, G_done = ray.get(done_id)[0]
                 self.E[idx_done] = E_done
                 self.G[idx_done] = G_done
 
                 if saver is not None:
                     saver.save((self.E, self.G))
-                
+
                 add_worker(workers, chunker)
-        
+
         return self.E, self.G
+
 
 class driverOPT:
     """Supervisor of optimization workers.
 
     Creates and manages ray tasks using specified worker.
     """
+
     def __init__(
-        self, Z, R, R_opt, E, G, worker, worker_kwargs, use_ray=False, n_cpus=1,
-        n_cpus_worker=1, chunk_size=1, start_slice=None, end_slice=None,
-        ray_address='auto'
+        self,
+        Z,
+        R,
+        R_opt,
+        E,
+        G,
+        worker,
+        worker_kwargs,
+        use_ray=False,
+        n_cpus=1,
+        n_cpus_worker=1,
+        chunk_size=1,
+        start_slice=None,
+        end_slice=None,
+        ray_address="auto",
     ):
         """
         Parameters
@@ -407,7 +446,7 @@ class driverOPT:
         self.Z = Z
         self.R = R
         self.R_opt = R_opt
-        self.opt_conv = ~np.isnan(self.R_opt[:,0,0])
+        self.opt_conv = ~np.isnan(self.R_opt[:, 0, 0])
         self.E = E
         self.G = G
         self.worker = worker
@@ -418,27 +457,26 @@ class driverOPT:
         self.n_cpus = n_cpus
         self.n_cpus_worker = n_cpus_worker
         self.chunk_size = chunk_size
-        self.n_workers = math.floor(n_cpus/n_cpus_worker)
+        self.n_workers = math.floor(n_cpus / n_cpus_worker)
 
         self.use_ray = use_ray
         if use_ray:
             if not ray.is_initialized():
                 ray.init(address=ray_address)
-            
+
             self.Z = ray.put(Z)
             self.R = ray.put(R)
 
-    
     def _idx_todo(self):
         """Indices of NaN geometries (calculations to do).
-        
+
         Returns
         -------
         :obj:`numpy.ndarray`
             Indices for ``R`` that are missing energie values.
         """
-        return np.where(~self.opt_conv[self.start_slice:self.end_slice])[0]
-    
+        return np.where(~self.opt_conv[self.start_slice : self.end_slice])[0]
+
     def run(self, saver=None):
         """Run the calculations.
 
@@ -457,7 +495,7 @@ class driverOPT:
         worker = self.worker
         idxs_todo = self._idx_todo()
         chunker = chunk_iterable(idxs_todo, self.chunk_size)
-        
+
         if not self.use_ray:
             for idx in idxs_todo:
                 _, opt_conv_done, R_opt_done, E_done, G_done = worker(
@@ -474,6 +512,7 @@ class driverOPT:
             worker = ray.remote(worker)
             # Initialize ray workers
             workers = []
+
             def add_worker(workers, chunker):
                 try:
                     chunk = list(next(chunker))
@@ -484,14 +523,17 @@ class driverOPT:
                     )
                 except StopIteration:
                     pass
+
             for _ in range(self.n_workers):
                 add_worker(workers, chunker)
-            
+
             # Start calculations
             while len(workers) != 0:
                 done_id, workers = ray.wait(workers)
-                
-                idxs_done, opt_conv_done, R_opt_done, E_done, G_done = ray.get(done_id)[0]
+
+                idxs_done, opt_conv_done, R_opt_done, E_done, G_done = ray.get(done_id)[
+                    0
+                ]
                 self.opt_conv[idxs_done] = opt_conv_done
                 self.R_opt[idxs_done] = R_opt_done
                 self.E[idxs_done] = E_done
@@ -499,7 +541,7 @@ class driverOPT:
 
                 if saver is not None:
                     saver.save((self.opt_conv, self.R_opt, self.E, self.G))
-                
+
                 add_worker(workers, chunker)
-        
+
         return self.opt_conv, self.R_opt, self.E, self.G

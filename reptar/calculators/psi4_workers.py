@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,14 +21,15 @@
 # SOFTWARE.
 
 import numpy as np
+
 try:
     import psi4
 except ImportError:
     pass
 
+
 def psi4_energy(
-    idxs, Z, R, charge=0, mult=1, method='mp2', options=None, threads=1,
-    mem='1 GB'
+    idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
 ):
     r"""Worker function for computing total electronic energy using Psi4.
 
@@ -61,7 +62,7 @@ def psi4_energy(
     mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
         The amount of memory available. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api/psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`
@@ -69,7 +70,7 @@ def psi4_energy(
     :obj:`numpy.ndarray`
         Total electronic energy of computed structures in the same order as
         ``idxs``. Units of Hartree.
-    
+
     Notes
     -----
     Psi4 uses QCElemental to build molecules from arrays.
@@ -85,15 +86,19 @@ def psi4_energy(
     G = np.zeros(R.shape)
     for i in range(len(R)):
         mol = psi4.core.Molecule.from_arrays(
-            geom=R[i], elez=Z, molecular_charge=charge,
-            molecular_multiplicity=mult, fix_com=True, fix_orientation=True
+            geom=R[i],
+            elez=Z,
+            molecular_charge=charge,
+            molecular_multiplicity=mult,
+            fix_com=True,
+            fix_orientation=True,
         )
         E[i] = psi4.energy(method, molecule=mol, return_wfn=False)
     return idxs, E
 
+
 def psi4_engrad(
-    idxs, Z, R, charge=0, mult=1, method='mp2', options=None, threads=1,
-    mem='1 GB'
+    idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
 ):
     r"""Worker function for computing total electronic energy and atomic
     gradients using Psi4.
@@ -127,7 +132,7 @@ def psi4_engrad(
     mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
         The amount of memory available. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api/psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`
@@ -138,7 +143,7 @@ def psi4_engrad(
     :obj:`numpy.ndarray`
         Atomic gradients of computed structures in the same order as ``idxs``.
         Units of Hartree/Angstrom.
-    
+
     Notes
     -----
     Psi4 uses QCElemental to build molecules from arrays.
@@ -155,8 +160,12 @@ def psi4_engrad(
     E = np.zeros(R.shape[0])
     for i in range(len(R)):
         mol = psi4.core.Molecule.from_arrays(
-            geom=R[i], elez=Z, molecular_charge=charge,
-            molecular_multiplicity=mult, fix_com=True, fix_orientation=True
+            geom=R[i],
+            elez=Z,
+            molecular_charge=charge,
+            molecular_multiplicity=mult,
+            fix_com=True,
+            fix_orientation=True,
         )
         g, wfn_mp2 = psi4.gradient(method, molecule=mol, return_wfn=True)
         g = g.to_array()
@@ -165,9 +174,9 @@ def psi4_engrad(
         E[i] = wfn_mp2.energy()
     return idxs, E, G
 
+
 def psi4_opt(
-    idxs, Z, R, charge=0, mult=1, method='mp2', options=None, threads=1,
-    mem='1 GB'
+    idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
 ):
     r"""Worker function for optimizations using Psi4.
 
@@ -200,7 +209,7 @@ def psi4_opt(
     mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
         The amount of memory available. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api/psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`
@@ -213,7 +222,7 @@ def psi4_opt(
         Total electronic energies of optimized structures. Units of Hartree.
     :obj:`numpy.ndarray`
         Atomic gradients of optimized structures. Units of Hartree/Angstrom.
-    
+
     Notes
     -----
     Psi4 uses QCElemental to build molecules from arrays.
@@ -232,8 +241,12 @@ def psi4_opt(
     E = np.full(R.shape[0], np.nan, dtype=np.float64)
     for i in range(len(R)):
         mol = psi4.core.Molecule.from_arrays(
-            geom=R[i], elez=Z, molecular_charge=charge,
-            molecular_multiplicity=mult, fix_com=True, fix_orientation=True
+            geom=R[i],
+            elez=Z,
+            molecular_charge=charge,
+            molecular_multiplicity=mult,
+            fix_com=True,
+            fix_orientation=True,
         )
         try:
             e, wfn = psi4.opt(method, molecule=mol, return_wfn=True)
@@ -253,5 +266,5 @@ def psi4_opt(
             R_opt[i] = r_opt
             E[i] = e
             G[i] = g
-            
+
     return idxs, opt_conv, R_opt, E, G

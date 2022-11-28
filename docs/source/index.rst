@@ -1,5 +1,5 @@
 ======
-Reptar
+reptar
 ======
 
 A tool for storing and analyzing manuscript-scale computational chemistry data.
@@ -22,6 +22,9 @@ A tool for storing and analyzing manuscript-scale computational chemistry data.
 
 .. image:: https://img.shields.io/github/license/aalexmmaldonado/reptar
     :target: https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE
+
+.. image:: https://img.shields.io/badge/code%20style-black-000000.svg
+   :target: https://github.com/psf/black
 
 **Disclaimer:** reptar is under active development and is not suitable for production.
 

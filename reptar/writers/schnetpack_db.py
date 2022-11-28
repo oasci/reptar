@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,9 +22,16 @@
 
 import numpy as np
 
+
 def write_schnetpack_db(
-    db_path, Z, R, energy=None, forces=None, e_units=1.0, f_units=1.0,
-    centering_function=None
+    db_path,
+    Z,
+    R,
+    energy=None,
+    forces=None,
+    e_units=1.0,
+    f_units=1.0,
+    centering_function=None,
 ):
     """Create a schnetpack database.
 
@@ -57,14 +64,14 @@ def write_schnetpack_db(
     -------
     ``schnetpack.data.atoms.AtomsData``
         Schnetpack database.
-    
+
     Notes
     -----
     When using ``db.get_properties(idx)`` to query the database, the
     ``ase.atoms`` object has the exact same positions as it was originally
     written. The ``_properties`` key in the dictionary could be centered
     (if ``centering_function`` is not ``None``) and has some precision issues.
-    
+
     For example, if ``R[0][0][0] = -0.93996473515199`` is written to the
     database, ``db``, then we can get the positions using
     ``row_atom, row_prop = db.get_properties(0)``.
@@ -75,23 +82,26 @@ def write_schnetpack_db(
     from ase import Atoms
     from schnetpack import AtomsData
     from schnetpack.data.atoms import get_center_of_mass
+
     if centering_function is None:
         centering_function = get_center_of_mass
 
     avail_props = []
     unit_list = []
     if energy is not None:
-        avail_props.append('energy')
+        avail_props.append("energy")
         unit_list.append(e_units)
     if forces is not None:
-        avail_props.append('forces')
+        avail_props.append("forces")
         unit_list.append(f_units)
-    
+
     db = AtomsData(
-        db_path, available_properties=avail_props, units=unit_list,
-        centering_function=centering_function
+        db_path,
+        available_properties=avail_props,
+        units=unit_list,
+        centering_function=centering_function,
     )
-    
+
     all_atoms = []
     all_properties = []
     for i in range(len(R)):
@@ -99,9 +109,9 @@ def write_schnetpack_db(
 
         props = {}
         if energy is not None:
-            props['energy'] = np.array([energy[i]])
+            props["energy"] = np.array([energy[i]])
         if forces is not None:
-            props['forces'] = forces[i]
+            props["forces"] = forces[i]
         all_properties.append(props)
     db.add_systems(all_atoms, all_properties)
     return db

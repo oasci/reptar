@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from . import File
+
 
 class Saver:
     """Saves data to File.
@@ -42,7 +43,7 @@ class Saver:
         """
         self.rfile_path = rfile_path
         self.data_keys = data_keys
-    
+
     def save(self, *data):
         """Put data to rfile.
 
@@ -55,7 +56,7 @@ class Saver:
         -------
         :obj:`reptar.File`
             File after putting data.
-        
+
         Examples
         --------
         Suppose you have a script that calculates electronic energies of water
@@ -77,17 +78,16 @@ class Saver:
 
         .. note::
 
-            Note we use the ``*`` operator to unpack the data; however, 
+            Note we use the ``*`` operator to unpack the data; however,
             it is fine if you forget it.
         """
-        rfile = File(self.rfile_path, mode='a', allow_remove=False)
+        rfile = File(self.rfile_path, mode="a", allow_remove=False)
 
         # Handles data where * is dropped.
         if isinstance(data, tuple):
             if len(data) == 1 and isinstance(data[0], tuple):
                 data = data[0]
-        
+
         for key, d in zip(self.data_keys, data):
             rfile.put(key, d)
         return rfile
-

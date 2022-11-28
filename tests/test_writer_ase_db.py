@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ from reptar import File
 from reptar.writers import write_ase_db
 
 import sys
+
 sys.path.append("..")
 from .paths import *
 
@@ -38,10 +39,10 @@ hartree2ev = 27.21138602  # Psi4 v1.5
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Source paths
-data_dir = './data/'
+data_dir = "./data/"
 
 # Writing paths
-writing_dir = './tmp/writing/'
+writing_dir = "./tmp/writing/"
 os.makedirs(writing_dir, exist_ok=True)
 
 
@@ -51,25 +52,25 @@ def test_ase_db_writer_1h2o_120meoh_prod():
         import ase
     except (ModuleNotFoundError, ImportError):
         pytest.skip("ase package not installed")
-    
-    exdir_path = os.path.join(data_dir, '1h2o_120meoh_md.exdir')
-    db_path = os.path.join(writing_dir, '1h2o_120meoh_md_ase.db')
+
+    exdir_path = os.path.join(data_dir, "1h2o_120meoh_md.exdir")
+    db_path = os.path.join(writing_dir, "1h2o_120meoh_md_ase.db")
 
     if os.path.exists(db_path):
         os.remove(db_path)
 
     i_test = 3
 
-    rfile = File(exdir_path, mode='r')
-    Z = rfile.get('eq_1/atomic_numbers')
-    R = rfile.get('eq_1/geometry')[:10]
-    E = rfile.get('eq_1/energy_pot')[:10]  # Hartree
+    rfile = File(exdir_path, mode="r")
+    Z = rfile.get("eq_1/atomic_numbers")
+    R = rfile.get("eq_1/geometry")[:10]
+    E = rfile.get("eq_1/energy_pot")[:10]  # Hartree
     E *= hartree2ev  # eV
 
     db = write_ase_db(db_path, Z, R, energy=E)
-    row = db.get(i_test+1)
+    row = db.get(i_test + 1)
 
-    assert np.array_equal(Z, row['numbers'])
-    assert np.array_equal(R[i_test], row['positions'])
-    assert E[i_test] == row['energy']
-    assert np.array_equal(np.array([False, False, False]), row['pbc'])
+    assert np.array_equal(Z, row["numbers"])
+    assert np.array_equal(R[i_test], row["positions"])
+    assert E[i_test] == row["energy"]
+    assert np.array_equal(np.array([False, False, False]), row["pbc"])

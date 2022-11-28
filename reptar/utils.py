@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -27,13 +27,14 @@ import numpy as np
 import os
 from qcelemental import periodictable as ptable
 
+
 def get_files(path, expression, recursive=True):
     """Returns paths to all files in a given directory that matches a provided
     expression in the file name.
-    
+
     Commonly used to find all files of a certain type, e.g., output or xyz
     files.
-    
+
     Parameters
     ----------
     path : :obj:`str`
@@ -42,21 +43,21 @@ def get_files(path, expression, recursive=True):
         Expression to be tested against all file names in ``path``.
     recursive : :obj:`bool`, default: ``True``
         Recursively find all files in all subdirectories.
-    
+
     Returns
     -------
     :obj:`list` [:obj:`str`]
         All absolute paths to files matching the provided expression.
     """
-    if path[-1] != '/':
-        path += '/'
+    if path[-1] != "/":
+        path += "/"
     if recursive:
         all_files = []
         for (dirpath, _, filenames) in os.walk(path):
             index = 0
             while index < len(filenames):
-                if dirpath[-1] != '/':
-                    dirpath += '/'
+                if dirpath[-1] != "/":
+                    dirpath += "/"
                 filenames[index] = dirpath + filenames[index]
                 index += 1
             all_files.extend(filenames)
@@ -72,15 +73,16 @@ def get_files(path, expression, recursive=True):
                 files.append(path + f)
     return files
 
+
 def atoms_by_element(atom_list):
     """Converts a list of atoms identified by their atomic number to their
     elemental symbol in the same order.
-    
+
     Parameters
     ----------
     atom_list : :obj:`list` [:obj:`int`]
         Atomic numbers of atoms within a structure.
-    
+
     Returns
     -------
     :obj:`list` [:obj:`str`]
@@ -88,21 +90,23 @@ def atoms_by_element(atom_list):
     """
     return [ptable.to_symbol(z) for z in atom_list]
 
+
 def atoms_by_number(atom_list):
     """Converts a list of atoms identified by their elemental symbol to their
     atomic number.
-    
+
     Parameters
     ----------
     atom_list : :obj:`list` [:obj:`str`]
         Element symbols of atoms within a structure.
-    
+
     Returns
     -------
     :obj:`list` [:obj:`int`]
         Atomic numbers of atoms within a structure.
     """
     return [ptable.to_atomic_number(symbol) for symbol in atom_list]
+
 
 def parse_stringfile(stringfile_path):
     """Parses data from string file.
@@ -111,12 +115,12 @@ def parse_stringfile(stringfile_path):
     three Cartesian coordinates for each atom, three atomic force vector
     components, or both coordinates and atomic forces in one line (referred to
     as extended xyz).
-    
+
     Parameters
     ----------
     stringfile_path : :obj:`str`
         Path to string file.
-    
+
     Returns
     -------
     :obj:`tuple` [:obj:`list`]
@@ -124,7 +128,7 @@ def parse_stringfile(stringfile_path):
         :obj:`float` from string file.
     """
     Z, comments, data = [], [], []
-    with open(stringfile_path, 'r') as f:
+    with open(stringfile_path, "r") as f:
         for _, line in enumerate(f):
             line = line.strip()
             if not line:
@@ -132,8 +136,10 @@ def parse_stringfile(stringfile_path):
                 pass
             else:
                 line_split = line.split()
-                if len(line_split) == 1 \
-                    and float(line_split[0]) % int(line_split[0]) == 0.0:
+                if (
+                    len(line_split) == 1
+                    and float(line_split[0]) % int(line_split[0]) == 0.0
+                ):
                     # Skips number of atoms line, adds comment line, and
                     # prepares next z and data item.
                     comment_line = next(f)
@@ -145,6 +151,7 @@ def parse_stringfile(stringfile_path):
                     Z[-1].append(line_split[0])
                     data[-1].append([float(i) for i in line_split[1:]])
     return Z, comments, data
+
 
 def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
     """Creates MD5 hash for a group.
@@ -163,7 +170,7 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
         Generate the MD5 has with only ``atomic_numbers`` and ``geometry``
         if possible). This is more static than ``only_arrays`` and should be
         used to track sampling (i.e., ``r_prov_ids``).
-    
+
     Returns
     -------
     :obj:`str`
@@ -174,13 +181,13 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
 
     if only_structures:
         try:
-            Z = rfile.get(f'{group_key}/atomic_numbers')
+            Z = rfile.get(f"{group_key}/atomic_numbers")
             Z = Z.ravel()
             md5_hash.update(hashlib.md5(Z).digest())
         except Exception:
             pass
         try:
-            R = rfile.get(f'{group_key}/geometry')
+            R = rfile.get(f"{group_key}/geometry")
             R = R.ravel()
             md5_hash.update(hashlib.md5(R).digest())
         except Exception:
@@ -188,9 +195,9 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
     else:
         keys = rfile.get_keys(group_key)
         for key in keys:
-            if 'md5' in key:
+            if "md5" in key:
                 continue
-            d = rfile.get(f'{group_key}/{key}')
+            d = rfile.get(f"{group_key}/{key}")
             if isinstance(d, np.ndarray):
                 d = d.ravel()
                 md5_hash.update(hashlib.md5(d).digest())
@@ -199,12 +206,11 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
                     continue
                 else:
                     md5_hash.update(repr(d).encode())
-    
+
     return md5_hash.hexdigest()
 
-def gen_entity_ids(
-    atoms_per_mol, num_mol, starting_idx=0, add_to=None
-):
+
+def gen_entity_ids(atoms_per_mol, num_mol, starting_idx=0, add_to=None):
     """Generates entity ids for a single species.
 
     Note that all of the atoms in each molecule must occur in the same order and
@@ -220,22 +226,23 @@ def gen_entity_ids(
         Number to start entity_id labels.
     add_to : :obj:`list`
         Entity ids to append new ids to.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`
         Entity ids for a structure.
     """
     entity_ids = []
-    for i in range(starting_idx, num_mol+starting_idx):
+    for i in range(starting_idx, num_mol + starting_idx):
         entity_ids.extend([i for _ in range(0, atoms_per_mol)])
-    
+
     if add_to is not None:
         if isinstance(add_to, np.ndarray):
             add_to = add_to.tolist()
         return np.array(add_to + entity_ids)
     else:
         return np.array(entity_ids)
+
 
 def gen_comp_ids(label, num_mol, entity_ids, add_to=None):
     """Prepares the list of component ids for a system with only one species.
@@ -264,6 +271,7 @@ def gen_comp_ids(label, num_mol, entity_ids, add_to=None):
     else:
         return np.array(comp_ids)
 
+
 def center_structures(Z, R):
     """Centers each structure's center of mass to the origin.
 
@@ -275,7 +283,7 @@ def center_structures(Z, R):
         Atomic numbers of the atoms in every structure.
     R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian atomic coordinates of data set structures.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`
@@ -284,25 +292,26 @@ def center_structures(Z, R):
     # Masses of each atom in the same shape of R.
     if R.ndim == 2:
         R = np.array([R])
-    
+
     masses = np.empty(R[0].shape)
-    
+
     for i in range(len(masses)):
-        masses[i,:] = ptable.to_mass(Z[i])
-    
+        masses[i, :] = ptable.to_mass(Z[i])
+
     for i in range(len(R)):
         r = R[i]
         cm_r = np.average(r, axis=0, weights=masses)
         R[i] = r - cm_r
-    
+
     if R.shape[0] == 1:
         return R[0]
     else:
         return R
 
+
 def combine_dicts(dict1, dict2):
     """Combine two dictionaries.
-    
+
     Parameters
     ----------
     dict1 : :obj:`dict`
@@ -319,34 +328,35 @@ def combine_dicts(dict1, dict2):
             dict1[k] = v
     return dict1
 
+
 def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
     """Find the structure indices of a parent r_prov_specs using a subset of
     the specifications.
 
     Useful for identifying structure indices when ``r_prov_specs_subset`` is in
     a different order.
-    
+
     Parameters
     ----------
     r_prov_specs : :obj:`numpy.ndarray`, ndim: ``2``
         Structure provenance specifications.
     r_prov_specs_subset : :obj:`numpy.ndarray`, ndim: ``2``
         Specifications in no particular order.
-    
+
     Returns
     -------
     :obj:`numpy.ndarray`, ndim: ``1``
         Structure indices of ``r_prov_specs_subset`` with respect to
         ``r_prov_specs``. Specifications that cannot be found will have
         ``NaN`` as their element.
-    
+
     Example
     -------
     >>> r_prov_specs = np.array([[0, 0, 1], [0, 0, 2], [1, 1, 1]])
     >>> r_prov_specs_subset = np.array([[0, 0, 1], [1, 1, 1]])
     >>> find_parent_r_idxs(r_prov_specs, r_prov_specs_subset)
     [0, 2]
-    
+
     """
     r_idxs = np.empty(r_prov_specs_subset.shape[0])
     r_idxs[:] = np.NaN
@@ -355,7 +365,8 @@ def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
         r_idx = np.where((r_prov_spec == r_prov_specs).all(1))[0]
         if len(r_idx) == 1:
             r_idxs[i] = r_idx[0]
-    return r_idxs.astype('int')
+    return r_idxs.astype("int")
+
 
 def gen_combs(sets, replacement=False):
     """Generate combinations from multiple sets.
@@ -368,28 +379,26 @@ def gen_combs(sets, replacement=False):
         Allows repeated combinations in different order. If ``False``,
         ``(0, 1)`` and ``(1, 0)`` could be possible if there is overlap
         in the sets.
-    
+
     Yields
     ------
     :obj:`tuple`
         Combination of one element per set in ``sets``.
-    
+
     Examples
     --------
     >>> sets = ((0,) (1, 2), (1, 2, 3))
     >>> combs = gen_combs(sets)
     >>> for comb in combs:
     ...     print(comb)
-    ... 
+    ...
     (0, 1, 2)
     (0, 1, 3)
     (0, 2, 3)
     """
     combs = itertools.product(*sets)
     # Excludes combinations that have repeats (e.g., (0, 0) and (1, 1. 2)).
-    combs = itertools.filterfalse(
-        lambda x: len(set(x)) <  len(x), combs
-    )
+    combs = itertools.filterfalse(lambda x: len(set(x)) < len(x), combs)
     # At this point, there are still duplicates in this iterator.
     # For example, (0, 1) and (1, 0) are still included.
     for comb in combs:
@@ -401,6 +410,7 @@ def gen_combs(sets, replacement=False):
                 continue
         yield comb
 
+
 def chunk_iterable(iterable, n):
     """Chunk an iterable into ``n`` objects.
 
@@ -410,7 +420,7 @@ def chunk_iterable(iterable, n):
         Iterable to chunk.
     n : :obj:`int`
         Size of each chunk.
-    
+
     Yields
     ------
     :obj:`tuple`
@@ -419,6 +429,7 @@ def chunk_iterable(iterable, n):
     iterator = iter(iterable)
     for first in iterator:
         yield tuple(itertools.chain([first], itertools.islice(iterator, n - 1)))
+
 
 def exists_in_array(a_slice, array):
     """Check if ``a_slice`` exists in an ``array``.
@@ -429,14 +440,14 @@ def exists_in_array(a_slice, array):
         An example slice of ``array``'s first dimension to check.
     array : :obj:`numpy.ndarray`
         Array to check.
-    
+
     Returns
     -------
     :obj:`bool`
         If ``row`` is present in ``array``.
     """
     ndim = int(array.ndim)
-    exists = (array==a_slice)
+    exists = array == a_slice
     # For each additional dimension after 1 we check the last dimension
     # if they are all true.
     for _ in range(1, ndim):
@@ -444,4 +455,3 @@ def exists_in_array(a_slice, array):
     # At the very end, we will have a 1D array. If any are True, then a_slice
     # exists in array
     return exists.any()
-    

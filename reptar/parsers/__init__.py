@@ -4,6 +4,4 @@ from .xtb_parser import parserXTB
 from .ase_parser import parserASE
 from .crest_parser import parserCREST
 
-__all__ = [
-    'parser', 'parserORCA', 'parserXTB', 'parserASE', 'parserCREST'
-]
+__all__ = ["parser", "parserORCA", "parserXTB", "parserASE", "parserCREST"]

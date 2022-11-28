@@ -6,6 +6,10 @@ from .xyz_gap import write_xyz_gap
 from .xyz import write_xyz
 
 __all__ = [
-    'write_pdb', 'write_ase_db', 'write_schnetpack_db', 'string_xyz_arrays',
-    'write_xyz_gap', 'write_xyz'
+    "write_pdb",
+    "write_ase_db",
+    "write_schnetpack_db",
+    "string_xyz_arrays",
+    "write_xyz_gap",
+    "write_xyz",
 ]

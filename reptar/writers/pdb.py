@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,10 +23,9 @@
 import numpy as np
 import os
 from ..utils import atoms_by_element
-    
-def write_pdb(
-    pdb_path, Z, R, entity_ids, comp_ids, atom_type='HETATM'
-):
+
+
+def write_pdb(pdb_path, Z, R, entity_ids, comp_ids, atom_type="HETATM"):
     """Write PDB file containing a single structure or trajectory.
 
     Parameters
@@ -51,7 +50,7 @@ def write_pdb(
         be ``['h2o', 'meoh']``.
     atom_type : :obj:`str`, default: ``'HETATM'``
         The PDB atom type to be used. Should almost always be ``HETATM``.
-    """ 
+    """
     num_structures = len(R)
     num_atoms = len(Z)
 
@@ -66,19 +65,20 @@ def write_pdb(
                 np.intersect1d(
                     np.arange(i_atom), np.argwhere(entity_ids == entity_id).T[0]
                 )
-            ] == Z[i_atom]
+            ]
+            == Z[i_atom]
         )
-        atom_names.append(element_symbol + str(atom_type_count+1))
+        atom_names.append(element_symbol + str(atom_type_count + 1))
 
     file_name = os.path.splitext(os.path.basename(pdb_path))[0]
     # Trims component ids to the first three letters
     comp_ids = np.array([comp_id[:3] for comp_id in comp_ids])
-    with open(pdb_path, 'w') as f:
-        f.write(file_name+'\n')
-        f.write(f'{num_atoms}\n')  
+    with open(pdb_path, "w") as f:
+        f.write(file_name + "\n")
+        f.write(f"{num_atoms}\n")
         for i_structure in range(num_structures):
             if i_structure != 0:
-                f.write('MODEL\n')
+                f.write("MODEL\n")
             for i_atom in range(num_atoms):
                 entity_id = entity_ids[i_atom]
                 comp_id = comp_ids[entity_id]
@@ -88,12 +88,23 @@ def write_pdb(
                 coords = R[i_structure][i_atom]
 
                 f.write(
-                    '{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n'.format(
-                        str(atom_type), i_atom+1, str(atom_name), '',
-                        str(comp_id), 'A', entity_id+1, '',
-                        coords[0], coords[1], coords[2],
-                        1.00, '', str(element_symbol), ''
+                    "{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n".format(
+                        str(atom_type),
+                        i_atom + 1,
+                        str(atom_name),
+                        "",
+                        str(comp_id),
+                        "A",
+                        entity_id + 1,
+                        "",
+                        coords[0],
+                        coords[1],
+                        coords[2],
+                        1.00,
+                        "",
+                        str(element_symbol),
+                        "",
                     )
                 )
             if num_structures > 1:
-                f.write('ENDMDL\n')
+                f.write("ENDMDL\n")

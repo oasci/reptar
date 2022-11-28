@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -24,6 +24,7 @@
 
 import numpy as np
 import scipy as sp
+
 
 def _pdist(r, lat_and_inv=None):
     """Compute pairwise Euclidean distance matrix between all atoms.
@@ -46,7 +47,7 @@ def _pdist(r, lat_and_inv=None):
     n_atoms = r.shape[0]
 
     if lat_and_inv is None:
-        pdist = sp.spatial.distance.pdist(r, 'euclidean')
+        pdist = sp.spatial.distance.pdist(r, "euclidean")
     else:
         pdist = sp.spatial.distance.pdist(
             r, lambda u, v: np.linalg.norm(_pbc_diff(u - v, lat_and_inv))

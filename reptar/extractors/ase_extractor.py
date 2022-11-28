@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -25,27 +25,33 @@ from math import sqrt
 import numpy as np
 import qcelemental as qcel
 
+
 class extractorASE(extractor):
-    """ASE extractor for the Atoms object.
-    """
+    """ASE extractor for the Atoms object."""
+
     def __init__(self):
         super().__init__()
         global ase, PropertyNotImplementedError
         import ase
         from ase.calculators.calculator import PropertyNotImplementedError
-        self._e_conv = qcel.constants.conversion_factor('eV', 'hartree')
-        self._velcs_conv = 1e-15*1e10*sqrt(
-            qcel.constants.elementary_charge/qcel.constants.unified_atomic_mass_unit
+
+        self._e_conv = qcel.constants.conversion_factor("eV", "hartree")
+        self._velcs_conv = (
+            1e-15
+            * 1e10
+            * sqrt(
+                qcel.constants.elementary_charge
+                / qcel.constants.unified_atomic_mass_unit
+            )
         )
-        self._kB = qcel.constants.kb*qcel.constants.conversion_factor('joule', 'eV')
-    
+        self._kB = qcel.constants.kb * qcel.constants.conversion_factor("joule", "eV")
+
     @property
     def triggers(self):
-        """Activates for every Atoms object.
-        """
-        trig = ((lambda line: True, 'atoms'),)
+        """Activates for every Atoms object."""
+        trig = ((lambda line: True, "atoms"),)
         return trig
-    
+
     def atoms(self, traj, atoms):
         """Parse properties from Atoms object.
 
@@ -56,9 +62,9 @@ class extractorASE(extractor):
         atoms : ``ase.Atoms``
             ASE Atoms object with at least atomic numbers and positions.
         """
-        if 'prov_version' not in self.parsed_info['runtime_info'].keys():
-            self.parsed_info['runtime_info']['prov_version'] = traj.ase_version
-        
+        if "prov_version" not in self.parsed_info["runtime_info"].keys():
+            self.parsed_info["runtime_info"]["prov_version"] = traj.ase_version
+
         self._atomic_numbers(atoms)
         self._geometry(atoms)
         self._periodic(atoms)
@@ -66,7 +72,7 @@ class extractorASE(extractor):
         self._energy_ke(atoms)
         self._forces(atoms)
         self._velcs(atoms)
-    
+
     def _atomic_numbers(self, atoms):
         """Parse atomic numbers using ``get_atomic_numbers()``.
 
@@ -78,15 +84,13 @@ class extractorASE(extractor):
         atomic_numbers = atoms.get_atomic_numbers()
         if atomic_numbers.shape == (0,):
             return
-        if 'atomic_numbers' in self.parsed_info['system_info'].keys():
+        if "atomic_numbers" in self.parsed_info["system_info"].keys():
             assert np.all(
-                self.parsed_info['system_info']['atomic_numbers'] \
-                    == atomic_numbers
+                self.parsed_info["system_info"]["atomic_numbers"] == atomic_numbers
             )
         else:
-            self.parsed_info['system_info']['atomic_numbers'] \
-                = atomic_numbers
-    
+            self.parsed_info["system_info"]["atomic_numbers"] = atomic_numbers
+
     def _geometry(self, atoms):
         """Parse geometry using ``get_positions()``.
 
@@ -98,12 +102,11 @@ class extractorASE(extractor):
         geometry = atoms.get_positions()
         if geometry.shape == (0, 3):
             return
-        if 'geometry' in self.parsed_info['system_info'].keys():
-            self.parsed_info['system_info']['geometry'].append(geometry)
+        if "geometry" in self.parsed_info["system_info"].keys():
+            self.parsed_info["system_info"]["geometry"].append(geometry)
         else:
-            self.parsed_info['system_info']['geometry'] = [geometry]
+            self.parsed_info["system_info"]["geometry"] = [geometry]
 
-    
     def _periodic(self, atoms):
         """Parse periodic cell information using ``pbc`` and ``get_cell()``.
 
@@ -115,17 +118,14 @@ class extractorASE(extractor):
         periodic = atoms.pbc
         if np.any(periodic):
             periodic_cell = atoms.get_cell()[:]
-            if 'periodic' in self.parsed_info['system_info'].keys():
+            if "periodic" in self.parsed_info["system_info"].keys():
+                assert np.all(self.parsed_info["system_info"]["periodic"] == periodic)
                 assert np.all(
-                    self.parsed_info['system_info']['periodic'] == periodic
-                )
-                assert np.all(
-                    self.parsed_info['system_info']['periodic_cell'] \
-                        == periodic_cell
+                    self.parsed_info["system_info"]["periodic_cell"] == periodic_cell
                 )
             else:
-                self.parsed_info['system_info']['periodic'] = periodic
-                self.parsed_info['system_info']['periodic_cell'] = periodic_cell
+                self.parsed_info["system_info"]["periodic"] = periodic
+                self.parsed_info["system_info"]["periodic_cell"] = periodic_cell
 
     def _energy_pot(self, atoms):
         """Parse total potential energy using ``get_potential_energy()``.
@@ -138,15 +138,15 @@ class extractorASE(extractor):
         try:
             energy_pot = atoms.get_potential_energy()  # eV
             energy_pot *= self._e_conv  # Eh
-            if 'energy_pot' in self.parsed_info['outputs'].keys():
-                self.parsed_info['outputs']['energy_pot'].append(energy_pot)
+            if "energy_pot" in self.parsed_info["outputs"].keys():
+                self.parsed_info["outputs"]["energy_pot"].append(energy_pot)
             else:
-                self.parsed_info['outputs']['energy_pot'] = [energy_pot]
+                self.parsed_info["outputs"]["energy_pot"] = [energy_pot]
         except PropertyNotImplementedError:
             pass
         except RuntimeError:
             pass
-    
+
     def _energy_ke(self, atoms):
         """Parse total kinetic energy using ``get_kinetic_energy()``.
 
@@ -164,18 +164,18 @@ class extractorASE(extractor):
             return
 
         # Get temperature before converting.
-        n_atoms = len(self.parsed_info['system_info']['atomic_numbers'])
+        n_atoms = len(self.parsed_info["system_info"]["atomic_numbers"])
         energy_ke_per_atom = energy_ke / n_atoms
         temp = energy_ke_per_atom / (1.5 * self._kB)
 
         energy_ke *= self._e_conv  # Eh
-        if 'energy_ke' in self.parsed_info['outputs'].keys():
-            self.parsed_info['outputs']['energy_ke'].append(energy_ke)
-            self.parsed_info['outputs']['temp'].append(temp)
+        if "energy_ke" in self.parsed_info["outputs"].keys():
+            self.parsed_info["outputs"]["energy_ke"].append(energy_ke)
+            self.parsed_info["outputs"]["temp"].append(temp)
         else:
-            self.parsed_info['outputs']['energy_ke'] = [energy_ke]
-            self.parsed_info['outputs']['temp'] = [temp]
-    
+            self.parsed_info["outputs"]["energy_ke"] = [energy_ke]
+            self.parsed_info["outputs"]["temp"] = [temp]
+
     def _forces(self, atoms):
         """Parse atomic forces using ``get_forces()``.
 
@@ -187,15 +187,15 @@ class extractorASE(extractor):
         try:
             forces = atoms.get_forces()  # eV/Ang
             forces *= self._e_conv  # Eh/Ang
-            if 'forces' in self.parsed_info['outputs'].keys():
-                self.parsed_info['outputs']['forces'].append(forces)
+            if "forces" in self.parsed_info["outputs"].keys():
+                self.parsed_info["outputs"]["forces"].append(forces)
             else:
-                self.parsed_info['outputs']['forces'] = [forces]
+                self.parsed_info["outputs"]["forces"] = [forces]
         except PropertyNotImplementedError:
             pass
         except RuntimeError:
             pass
-    
+
     def _velcs(self, atoms):
         """Parse velocities using ``get_velocities()``.
 
@@ -208,7 +208,7 @@ class extractorASE(extractor):
         if velcs.shape == (0, 3):
             return
         velcs *= self._velcs_conv  # Ang / fs
-        if 'velcs' in self.parsed_info['outputs'].keys():
-            self.parsed_info['outputs']['velcs'].append(velcs)
+        if "velcs" in self.parsed_info["outputs"].keys():
+            self.parsed_info["outputs"]["velcs"].append(velcs)
         else:
-            self.parsed_info['outputs']['velcs'] = [velcs]
+            self.parsed_info["outputs"]["velcs"] = [velcs]

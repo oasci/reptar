@@ -5,5 +5,9 @@ from .ase_extractor import extractorASE
 from .crest_extractor import extractorCREST
 
 __all__ = [
-    'extractor', 'extractorORCA', 'extractorXTB', 'extractorASE', 'extractorCREST'
+    "extractor",
+    "extractorORCA",
+    "extractorXTB",
+    "extractorASE",
+    "extractorCREST",
 ]

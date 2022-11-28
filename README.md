@@ -23,6 +23,9 @@
     <a href="https://github.com/aalexmmaldonado/reptar/" target="_blank">
         <img src="https://img.shields.io/github/repo-size/aalexmmaldonado/reptar" alt="GitHub repo size">
     </a>
+    <a href="https://github.com/psf/black" target="_blank">
+        <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Black style">
+    </a>
 </p>
 
 <p align="center">

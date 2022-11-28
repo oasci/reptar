@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,11 +29,11 @@ from pkg_resources import resource_stream
 import yaml
 
 from reptar import _version
-__version__ = _version.get_versions()['version']
 
-defs_reserved = [
-    'base', 'md', 'molprop', 'pes', 'qc', 'sampl', 'solv', 'xtb'
-]
+__version__ = _version.get_versions()["version"]
+
+defs_reserved = ["base", "md", "molprop", "pes", "qc", "sampl", "solv", "xtb"]
+
 
 def identify_parser(out_path):
     """Identifies the correct parser depending on some trigger.
@@ -43,13 +43,13 @@ def identify_parser(out_path):
     ----------
     out_path : :obj:`str`
         Path to output file.
-    
+
     Returns
     -------
     :obj:`reptar.Creator`
         One of the supported creator classes.
     """
-    with open(out_path, 'r') as f:
+    with open(out_path, "r") as f:
         for line in f:
             for parser, phrases, do_break in triggers:
                 if all([line.lower().find(p.lower()) >= 0 for p in phrases]):
@@ -57,20 +57,22 @@ def identify_parser(out_path):
                     if do_break:
                         return filetype
 
+
 # Triggers to identify output files.
 triggers = [
-    (parserORCA, ['O   R   C   A'], True),
-    (parserXTB, ['x T B'], True),
-    (parserCREST, ['C R E S T'], True),
+    (parserORCA, ["O   R   C   A"], True),
+    (parserXTB, ["x T B"], True),
+    (parserCREST, ["C R E S T"], True),
 ]
 
+
 def identify_trajectory(traj_path):
-    """Identifies the type of trajectory depending on a series of tests.
-    """
+    """Identifies the type of trajectory depending on a series of tests."""
     # ASE trajectory
     try:
         import ase
         from ase.io.ulm import InvalidULMFileError
+
         try:
             traj = ase.io.trajectory.Trajectory(traj_path)
             return parserASE
@@ -81,9 +83,9 @@ def identify_trajectory(traj_path):
         # Do not have ase installed.
         pass
 
+
 class Creator:
-    """Create groups from computational chemistry data.
-    """
+    """Create groups from computational chemistry data."""
 
     def __init__(self, rfile=None):
         """
@@ -94,10 +96,8 @@ class Creator:
         """
         if rfile is not None:
             self.rfile = rfile
-    
-    def load(
-        self, file_path, mode='r', allow_remove=False, plugins=None
-    ):
+
+    def load(self, file_path, mode="r", allow_remove=False, plugins=None):
         """Load a reptar file for creating/adding information.
 
         Parameters
@@ -115,7 +115,7 @@ class Creator:
         self.rfile = File(
             file_path, mode=mode, allow_remove=allow_remove, plugins=plugins
         )
-    
+
     @property
     def rfile(self):
         """The reptar file to manage.
@@ -123,7 +123,7 @@ class Creator:
         :obj:`reptar.File`
         """
         return self._rfile
-    
+
     @rfile.setter
     def rfile(self, value):
         self._rfile = value
@@ -133,8 +133,7 @@ class Creator:
         del self._rfile
 
     def parse_output(
-        self, out_path, geom_path=None, traj_path=None, extractors=None,
-        **kwargs
+        self, out_path, geom_path=None, traj_path=None, extractors=None, **kwargs
     ):
         r"""Parse output file using cclib and custom parser.
 
@@ -165,11 +164,14 @@ class Creator:
         # Identify and run the parser.
         packageParser = identify_parser(self.out_path)
         self.parser = packageParser(
-            self.out_path, geom_path=geom_path, traj_path=traj_path,
-            extractors=extractors, **kwargs
+            self.out_path,
+            geom_path=geom_path,
+            traj_path=traj_path,
+            extractors=extractors,
+            **kwargs,
         )
         self.parsed_info = self.parser.parse()
-    
+
     def parse_traj(self, traj_path, extractors=None):
         """Parse a trajectory file.
 
@@ -184,11 +186,10 @@ class Creator:
         self.traj_path = os.path.abspath(traj_path)
         packageParser = identify_trajectory(self.traj_path)
         self.parser = packageParser(
-            out_path=None, geom_path=None, traj_path=traj_path,
-            extractors=extractors
+            out_path=None, geom_path=None, traj_path=traj_path, extractors=extractors
         )
         self.parsed_info = self.parser.parse()
-    
+
     def _create_extras_xtb(self, group_key):
         """Extra actions for groups created from xtb calculations.
 
@@ -199,30 +200,31 @@ class Creator:
         """
         out_dir = os.path.dirname(self.out_path)
         group = self.rfile.get(group_key)
-        
-        if self.rfile.ftype == 'exdir':
+
+        if self.rfile.ftype == "exdir":
             # Copy MD and xTB restart files if possible.
-            md_restart_path = f'{out_dir}/mdrestart'
+            md_restart_path = f"{out_dir}/mdrestart"
             if os.path.exists(md_restart_path):
-                raw = group.require_raw('restart_files')
+                raw = group.require_raw("restart_files")
                 raw_path = os.path.join(raw.root_directory, raw.relative_path)
-                shutil.copy(
-                    md_restart_path, os.path.join(raw_path, 'mdrestart')
-                )
-            xtb_restart_path = f'{out_dir}/xtbrestart'
+                shutil.copy(md_restart_path, os.path.join(raw_path, "mdrestart"))
+            xtb_restart_path = f"{out_dir}/xtbrestart"
             if os.path.exists(xtb_restart_path):
-                raw = group.require_raw('restart_files')
+                raw = group.require_raw("restart_files")
                 raw_path = os.path.join(raw.root_directory, raw.relative_path)
-                shutil.copy(
-                    xtb_restart_path, os.path.join(raw_path, 'xtbrestart')
-                )
-    
+                shutil.copy(xtb_restart_path, os.path.join(raw_path, "xtbrestart"))
+
     def from_calc(
-        self, group_key, out_path=None, geom_path=None, traj_path=None,
-        extractors=None, **kwargs
+        self,
+        group_key,
+        out_path=None,
+        geom_path=None,
+        traj_path=None,
+        extractors=None,
+        **kwargs,
     ):
         """Create a group from a supported calculation.
-        
+
         Parameters
         ----------
         group_key : :obj:`str`
@@ -239,56 +241,57 @@ class Creator:
         **kwargs
             Additional paths to output files. Passed into
             ``creator.parse_output()``.
-        
+
         Returns
         -------
         :obj:`reptar.File`
             The entire reptar file after creating the new group.
-        
+
         Notes
         -----
         If both ``geom_path`` and ``traj_path`` are provided, it is assumed that
         ``geom_path`` provides an initial geometry not included in
         ``traj_path``.
         """
-        assert hasattr(self, 'rfile')
+        assert hasattr(self, "rfile")
 
-        if self.rfile.ftype == 'exdir':
+        if self.rfile.ftype == "exdir":
             self.rfile.create_group(group_key)
-        
+
         # Parsable calculations using an output file.
         if out_path is not None:
             self.parse_output(
-                out_path, geom_path=geom_path, traj_path=traj_path,
-                extractors=extractors, **kwargs
+                out_path,
+                geom_path=geom_path,
+                traj_path=traj_path,
+                extractors=extractors,
+                **kwargs,
             )
             parsed_info = self.parsed_info
 
         # Only a trajectory is provided. Likely coordinates or package-specific
         # trajectory file like ASE.
         elif out_path is None and traj_path is not None:
-            self.parse_traj(
-                traj_path, extractors=extractors
-            )
+            self.parse_traj(traj_path, extractors=extractors)
             parsed_info = self.parsed_info
         else:
             return None
-        
+
         # Add all data to group.
         self.rfile.put_all(group_key, parsed_info, nested=True)
-        
+
         # Extra stuff to do depending on package.
-        if self.parser.package == 'xtb':
+        if self.parser.package == "xtb":
             self._create_extras_xtb(group_key)
-        
+
         # MD5 stuff
         self.rfile.update_md5(group_key)
-        
+
         # Adding version
-        self.rfile.put(f'{group_key}/reptar_version', __version__)
+        self.rfile.put(f"{group_key}/reptar_version", __version__)
 
         return self.rfile
-    
+
     def ids(self, group_key, entity_ids, comp_ids):
         """Add ``entity_ids`` and ``comp_ids`` to a group.
 
@@ -306,7 +309,7 @@ class Creator:
             for methanol, ``bz`` for benzene, etc. There are no standardized
             labels for species. The index of the label is the respective
             ``entity_id``.
-        
+
         Returns
         -------
         ``obj``
@@ -314,18 +317,18 @@ class Creator:
         """
         if isinstance(comp_ids, list):
             comp_ids = np.array(comp_ids)
-        
-        self.rfile.put(f'{group_key}/entity_ids', entity_ids)
-        self.rfile.put(f'{group_key}/comp_ids', comp_ids)
+
+        self.rfile.put(f"{group_key}/entity_ids", entity_ids)
+        self.rfile.put(f"{group_key}/comp_ids", comp_ids)
 
         comp_ids_num = {}
         unique_comp_ids, comp_ids_freq = np.unique(comp_ids, return_counts=True)
         for comp_id, num in zip(unique_comp_ids, comp_ids_freq):
             comp_ids_num[str(comp_id)] = int(num)
-        
-        self.rfile.put(f'{group_key}/comp_ids_num', comp_ids_num)
+
+        self.rfile.put(f"{group_key}/comp_ids_num", comp_ids_num)
         return self.rfile.get(group_key)
-    
+
     # TODO: Update ways we get data here.
     def definitions(self, definitions=None):
         """Add definitions of data to the file.
@@ -339,28 +342,26 @@ class Creator:
         definitions : :obj:`list` [:obj:`str`], default: ``None``
             Paths to data definition YAML files to congregate. Only the name
             (not a path) is required for ones provided by reptar.
-        
+
         Notes
         -----
         Reserved definition YAML files: ``base``, ``md``, ``molprop``, ``pes``,
         ``qc``, ``sampl``, ``solv``, ``xtb``.
-        """        
+        """
         defs = {}
 
         if definitions is None:
-            definitions = ['base']
+            definitions = ["base"]
         else:
-            definitions.insert(0, 'base')
-        
+            definitions.insert(0, "base")
+
         for def_path in definitions:
             if def_path in defs_reserved:
-                stream = resource_stream(
-                    'reptar.definitions', f'{def_path}.yaml'
-                )
+                stream = resource_stream("reptar.definitions", f"{def_path}.yaml")
             else:
                 stream = open(def_path)
             def_add = yaml.safe_load(stream)
-            
+
             # Add all definitions.
             for key_cat in def_add.keys():
                 if key_cat not in defs.keys():
@@ -370,5 +371,5 @@ class Creator:
                         defs[key_cat][key_def] = def_add[key_cat][key_def]
                     else:
                         pass
-        
-        self.rfile.put('definitions', defs)
+
+        self.rfile.put("definitions", defs)

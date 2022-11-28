@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,8 +23,10 @@
 import numpy as np
 from .extractor import extractor
 
+
 class extractorCREST(extractor):
     """CREST extractor"""
+
     def __init__(self, xyz_type):
         """
         Parameters
@@ -35,15 +37,20 @@ class extractorCREST(extractor):
         """
         super().__init__()
         self.xyz_type = xyz_type
-    
+
     @property
     def triggers(self):
         trig = (
-            (lambda line: True if ('   Version ' in line) else False, 'crest_version'),
-            (lambda line: True if ('total number unique points considered further :' in line) else False, 'ensemble_info'),
+            (lambda line: True if ("   Version " in line) else False, "crest_version"),
+            (
+                lambda line: True
+                if ("total number unique points considered further :" in line)
+                else False,
+                "ensemble_info",
+            ),
         )
         return trig
-    
+
     def crest_version(self, f, line):
         """Version of CREST.
 
@@ -53,7 +60,7 @@ class extractorCREST(extractor):
             Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
-        
+
         Notes
         -----
         Example trigger text for this extractor.
@@ -64,9 +71,9 @@ class extractorCREST(extractor):
         """
         line_split = line.split()
         version = line_split[1][:-1]
-        self.parsed_info['runtime_info']['prov_version'] = version
+        self.parsed_info["runtime_info"]["prov_version"] = version
         next(f)
-    
+
     def ensemble_info(self, f, line):
         """Ensemble information for conformers and rotamers.
 
@@ -76,7 +83,7 @@ class extractorCREST(extractor):
             Buffered text stream of the file.
         line : :obj:`str`
             Parsed line from ``f``.
-        
+
         Notes
         -----
         Example trigger text for this extractor.
@@ -89,21 +96,21 @@ class extractorCREST(extractor):
                    2   0.007  -254.47459    0.26473    0.52938       2       2     mtd3
                    3   0.007  -254.47459    0.26465                                mtd6
                    4   0.893  -254.47318    0.05942    0.05942       3       1     mtd1
-                   
+
                    ...
         """
-        if self.xyz_type == 'conformer':
+        if self.xyz_type == "conformer":
             # The ensemble weight is not printed in xyz, so we parse it here.
             line = self.skip_lines(f, 2)
             ensemble_weights = []
-            while 'T /K  ' not in line:
+            while "T /K  " not in line:
                 line_split = line.split()
                 if len(line_split) == 8:
                     ensemble_weights.append(float(line_split[-4]))
                 line = next(f)
-            self.parsed_info['outputs']['crest_ensemble_weights'] = np.array(
+            self.parsed_info["outputs"]["crest_ensemble_weights"] = np.array(
                 ensemble_weights, dtype=np.float64
             )
-        elif self.xyz_type == 'rotamer':
+        elif self.xyz_type == "rotamer":
             # The ensemble weight is printed in xyz with more precision.
             next(f)

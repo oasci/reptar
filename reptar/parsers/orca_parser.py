@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -23,13 +23,11 @@
 from .parser import parser
 from ..extractors import extractorORCA
 
-class parserORCA(parser):
-    """Custom parser for ORCA output files.
-    """
 
-    def __init__(
-        self, out_path=None, geom_path=None, traj_path=None, extractors=None
-    ):
+class parserORCA(parser):
+    """Custom parser for ORCA output files."""
+
+    def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
         """
         Parameters
         ----------
@@ -43,19 +41,19 @@ class parserORCA(parser):
         extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
         """
-        self.package = 'orca'
+        self.package = "orca"
         if extractors is None:
             extractors = []
         extractors.insert(0, extractorORCA())
         super().__init__(out_path, extractors)
         # TODO: Handle geom and traj paths
-    
+
     def parse(self):
-        """Parses output file and extracts information.
-        """
+        """Parses output file and extracts information."""
         # cclib parsed information.
         try:
             import cclib
+
             self.cclib_data = cclib.io.ccread(self.out_path)
             self.map_cclib_data()
         except Exception as e:
@@ -71,12 +69,11 @@ class parserORCA(parser):
         return self.parsed_info
 
     def after_parse(self):
-        """Checks to perform after parsing output file.
-        """
-        if 'scf_grid_level_final' not in self.parsed_info['runtime_info'].keys():
-            self.parsed_info['runtime_info']['scf_grid_level_final'] = \
-                self.parsed_info['runtime_info']['scf_grid_level']
-        
-        if 'conv_val_geo_energy' in self.parsed_info['runtime_info'].keys():
-            self.parsed_info['runtime_info']['conv_val_geo_energy'].insert(0, 0.0)
-    
+        """Checks to perform after parsing output file."""
+        if "scf_grid_level_final" not in self.parsed_info["runtime_info"].keys():
+            self.parsed_info["runtime_info"]["scf_grid_level_final"] = self.parsed_info[
+                "runtime_info"
+            ]["scf_grid_level"]
+
+        if "conv_val_geo_energy" in self.parsed_info["runtime_info"].keys():
+            self.parsed_info["runtime_info"]["conv_val_geo_energy"].insert(0, 0.0)

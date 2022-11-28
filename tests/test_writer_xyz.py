@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ from reptar import File
 from reptar.writers import write_xyz
 
 import sys
+
 sys.path.append("..")
 from .paths import *
 
@@ -36,22 +37,22 @@ from .paths import *
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Source paths
-data_dir = './data/'
+data_dir = "./data/"
 
 # Writing paths
-writing_dir = './tmp/writing/'
+writing_dir = "./tmp/writing/"
 os.makedirs(writing_dir, exist_ok=True)
 
 
 def test_xyz_gap_writer_1h2o_120meoh_prod():
     """Writing short XYZ file from exdir file"""
-    exdir_path = os.path.join(data_dir, '1h2o_120meoh_md.exdir')
-    xyz_path = os.path.join(writing_dir, '1h2o_120meoh_md.xyz')
+    exdir_path = os.path.join(data_dir, "1h2o_120meoh_md.exdir")
+    xyz_path = os.path.join(writing_dir, "1h2o_120meoh_md.xyz")
 
-    rfile = File(exdir_path, mode='r')
+    rfile = File(exdir_path, mode="r")
 
-    Z = rfile.get('eq_1/atomic_numbers')
-    R = rfile.get('eq_1/geometry')[:5]
+    Z = rfile.get("eq_1/atomic_numbers")
+    R = rfile.get("eq_1/geometry")[:5]
     write_xyz(xyz_path, Z, R)
 
     # TODO: Write tests

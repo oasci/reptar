@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -26,12 +26,12 @@ import numpy as np
 import os
 from .utils import combine_dicts, get_md5
 
-class File:
-    """Create, store, and access data from a variety of formats.
-    """
 
-    def __init__(self, file_path, mode='r', allow_remove=False,
-        plugins=None, from_dict=None
+class File:
+    """Create, store, and access data from a variety of formats."""
+
+    def __init__(
+        self, file_path, mode="r", allow_remove=False, plugins=None, from_dict=None
     ):
         """
         Parameters
@@ -49,17 +49,11 @@ class File:
             Load data from a dictionary.
         """
         if from_dict is None:
-            self._from_path(
-                file_path, mode, allow_remove, plugins
-            )
+            self._from_path(file_path, mode, allow_remove, plugins)
         else:
-            self._from_dict(
-                file_path, from_dict, mode, allow_remove, plugins
-            )
-    
-    def _from_path(
-        self, file_path, mode, allow_remove, plugins
-    ):
+            self._from_dict(file_path, from_dict, mode, allow_remove, plugins)
+
+    def _from_path(self, file_path, mode, allow_remove, plugins):
         """Populates the File object from a file path.
 
         Parameters
@@ -77,37 +71,33 @@ class File:
         exists = os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
 
-        if f_ext == '.exdir':
-            File_ = exdir.File(
-                file_path, mode, allow_remove, plugins
-            )
-        elif f_ext == '.json':
+        if f_ext == ".exdir":
+            File_ = exdir.File(file_path, mode, allow_remove, plugins)
+        elif f_ext == ".json":
             if exists:
-                with open(file_path, 'r') as f:
+                with open(file_path, "r") as f:
                     File_ = json.load(f)
             else:
                 File_ = {}
-        elif f_ext == '.npz':
+        elif f_ext == ".npz":
             if exists:
                 File_ = dict(np.load(file_path, allow_pickle=True))
                 # Since everything is stored in arrays, we clean up array data.
-                for k,v in File_.items():
+                for k, v in File_.items():
                     if self._is_iter(v):
-                        v = self.simplify_iter_data(v, k.split('/')[-1])
+                        v = self.simplify_iter_data(v, k.split("/")[-1])
                         File_[k] = v
             else:
                 File_ = {}
         else:
-            raise TypeError(f'{f_ext} is not supported.')
-        
+            raise TypeError(f"{f_ext} is not supported.")
+
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
         self.File_ = File_
-    
-    def _from_dict(
-        self, file_path, group_dict, mode, allow_remove, plugins
-    ):
+
+    def _from_dict(self, file_path, group_dict, mode, allow_remove, plugins):
         """Populates the File object from a dictionary.
 
         Parameters
@@ -125,41 +115,39 @@ class File:
             A list of instantiated exdir plugins.
         """
         _, f_ext = os.path.splitext(file_path)
-        
-        if f_ext == '.exdir':
-            self.File_ = exdir.File(
-                file_path, mode, allow_remove, plugins
-            )
-        elif f_ext == '.json' or f_ext == '.npz':
+
+        if f_ext == ".exdir":
+            self.File_ = exdir.File(file_path, mode, allow_remove, plugins)
+        elif f_ext == ".json" or f_ext == ".npz":
             self.File_ = {}
         self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
 
         for pair in self._iter_dict(group_dict):
-            key = '/'.join(pair[:-1])
+            key = "/".join(pair[:-1])
             data = pair[-1]
             self.put(key, data)
-    
+
     def clean_key(self, key):
         """Clean key and remove any common mistakes.
 
         Currently this only corrects instances of ``//``.
-        
+
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data.
-        
+
         Returns
         -------
         :obj:`str`
             Cleaned key.
         """
-        if '//' in key:
-            key = key.replace('//', '/')
+        if "//" in key:
+            key = key.replace("//", "/")
         return key
-    
+
     def split_key(self, key):
         """Split the key into a parent and data key.
 
@@ -167,7 +155,7 @@ class File:
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
-        
+
         Returns
         -------
         :obj:`str`
@@ -175,58 +163,58 @@ class File:
         :obj:`str`
             Data key.
         """
-        if key[0] != '/':
-            key = '/' + key
-        key_split = key.rsplit('/', 1)
-        if key_split[0] == '':
-            key_split[0] = '/'
+        if key[0] != "/":
+            key = "/" + key
+        key_split = key.rsplit("/", 1)
+        if key_split[0] == "":
+            key_split[0] = "/"
         return key_split
-    
+
     def _get_from_dict(self, key):
         """Get data from dictionary-like file (e.g., json, npz).
-        
+
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
-        
+
         Returns
         -------
         Requested data from a dictionary source.
         """
-        if key == '/':
+        if key == "/":
             return self.File_
-        
-        keys = key.split('/')
-        if keys[0] == '':
+
+        keys = key.split("/")
+        if keys[0] == "":
             del keys[0]
-        
+
         data = self.File_[keys[0]]
         for k in keys[1:]:
             data = data[k]
         if isinstance(data, list):
             data_array = np.array(data)
-            if data_array.dtype != 'O':
+            if data_array.dtype != "O":
                 data = data_array
         return data
-    
+
     def _get_from_exdir(self, key, as_memmap=False):
         """Get data from exdir file.
-        
+
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data. Nested keys should be separated by ``/``.
         as_memmap : :obj:`bool`, default: ``False``
             Keep NumPy memmap instead of converting to arrays.
-        
+
         Returns
         -------
         Requested data from a exdir source.
         """
-        if key == '/':
+        if key == "/":
             return self.File_
-        
+
         key_parent, key_data = self.split_key(key)
         parent = self.File_[key_parent]
         if key_data in list(parent):
@@ -240,22 +228,22 @@ class File:
             data = parent.attrs[key_data]
             if isinstance(data, exdir.core.attribute.Attribute):
                 data = dict(data)
-        
-        if 'data' not in locals():
-            raise RuntimeError(f'{key} does not exist')
-        
+
+        if "data" not in locals():
+            raise RuntimeError(f"{key} does not exist")
+
         return data
-    
+
     def get_keys(self, group_key):
         """A list of keys in a group.
 
         Does not include keys of nested groups.
-        
+
         Parameters
         ----------
         group_key : :obj:`str`
             Key specifying which group to get the data keys from.
-        
+
         Returns
         -------
         :obj:`list`
@@ -265,15 +253,18 @@ class File:
         group = self.get(group_key)
 
         keys = []
-        if self.ftype == 'exdir':
+        if self.ftype == "exdir":
             keys.extend(list(sorted(group.attrs.keys())))
             keys.extend(
-                list(sorted(
-                    key for key in group.keys() if not \
-                    isinstance(group[key], exdir.core.raw.Raw)
-                ))
+                list(
+                    sorted(
+                        key
+                        for key in group.keys()
+                        if not isinstance(group[key], exdir.core.raw.Raw)
+                    )
+                )
             )
-        elif self.ftype == 'json' or self.ftype == 'npz':
+        elif self.ftype == "json" or self.ftype == "npz":
             keys.extend(list(group.keys()))
         return keys
 
@@ -289,7 +280,7 @@ class File:
         missing_is_none : :obj:`bool`, default: ``False``
             Catch the ``RuntimeError`` and return ``None`` if the key does not
             exits.
-        
+
         Examples
         --------
         >>> rfile.get('/prod_1/charge')
@@ -299,30 +290,34 @@ class File:
         """
         key = self.clean_key(key)
         try:
-            if self.ftype == 'exdir':
+            if self.ftype == "exdir":
                 data = self._get_from_exdir(key, as_memmap=as_memmap)
-            elif self.ftype == 'json' or self.ftype == 'npz':
+            elif self.ftype == "json" or self.ftype == "npz":
                 data = self._get_from_dict(key)
         except RuntimeError as e:
-            if 'does not exist' in str(e) and missing_is_none:
+            if "does not exist" in str(e) and missing_is_none:
                 data = None
             else:
                 raise
         return data
-    
+
     def _is_iter(self, data):
         """If data is iterative (i.e., array, list, or tuple).
-        
+
         Returns
         -------
         :obj:`bool`
             If the data is iterative.
         """
-        if isinstance(data, np.ndarray) or isinstance(data, list) or isinstance(data, tuple):
+        if (
+            isinstance(data, np.ndarray)
+            or isinstance(data, list)
+            or isinstance(data, tuple)
+        ):
             return True
         else:
             return False
-    
+
     def simplify_iter_data(self, data, data_key):
         """Simplify iterative data if possible.
 
@@ -338,12 +333,12 @@ class File:
         parsing, there is a possibility we could have one or more of the same
         property. We instead assume there will be multiple. Then as a
         postprocessing step we simplify cases where only one value was parsed.
-        
+
         Parameters
         ----------
         data : :obj:`numpy.ndarray`, :obj:`list`, :obj:`tuple`
             An iterative data object.
-        
+
         Returns
         -------
         ``obj``
@@ -356,7 +351,7 @@ class File:
             # just store it as an attribute. However, we have
             # to be careful when the single item is an array.
             if len(data) == 1:
-                if data_key in ['atomic_numbers', 'entity_ids', 'comp_ids']:
+                if data_key in ["atomic_numbers", "entity_ids", "comp_ids"]:
                     return data
                 data = data[0]
             # If all the items are not all strings then we make
@@ -366,10 +361,10 @@ class File:
                 # Sometimes we have a list of objects that cannot be easily
                 # converted to numpy data types. Numpy will use an object
                 # dtype, so we only convert to array if its not an 'O' dtype.
-                if data_array.dtype != 'O':
+                if data_array.dtype != "O":
                     data = data_array
             # At this point only data that contains all strings
-            # should be left. We put these as attributes (i.e., 
+            # should be left. We put these as attributes (i.e.,
             # comp_ids)
             else:
                 pass
@@ -377,12 +372,12 @@ class File:
         else:
             # If only one item we store it as a value.
             if data.shape == (1,):
-                if data_key in ['atomic_numbers', 'entity_ids', 'comp_ids']:
+                if data_key in ["atomic_numbers", "entity_ids", "comp_ids"]:
                     return data
                 data = data[0].item()
-        
+
         return data
-    
+
     def _put_to_dict(self, key, data):
         """Add data to dictionary-like file.
 
@@ -394,13 +389,13 @@ class File:
             Data to add to file.
         """
         if isinstance(data, np.ndarray):
-            if 'U' in str(data.dtype):
+            if "U" in str(data.dtype):
                 data = data.tolist()
 
-        keys = key.split('/')
-        if keys[0] == '':
+        keys = key.split("/")
+        if keys[0] == "":
             del keys[0]
-        
+
         is_iter = self._is_iter(data)
         if is_iter:
             data = self.simplify_iter_data(data, keys[-1])
@@ -410,7 +405,7 @@ class File:
             add_dic = {key: add_dic}
 
         self.File_ = combine_dicts(self.File_, add_dic)
-    
+
     def _put_to_exdir(self, key, data):
         """Add data to an exdir group.
 
@@ -423,19 +418,18 @@ class File:
         """
         parent_key, data_key = self.split_key(key)
         group = self.get(parent_key)
-        assert isinstance(group, exdir.core.exdir_file.File) \
-            or isinstance(group, exdir.core.group.Group)
-        
+        assert isinstance(group, exdir.core.exdir_file.File) or isinstance(
+            group, exdir.core.group.Group
+        )
+
         # Custom handling of parsed data to ensure logical behavior.
-        ndarray_to_list_keys = [
-            'dipole_moment', 'periodic', 'periodic_cell'
-        ]
+        ndarray_to_list_keys = ["dipole_moment", "periodic", "periodic_cell"]
         if data_key in ndarray_to_list_keys:
             if isinstance(data, np.ndarray):
                 data = data.tolist()
             group.attrs[data_key] = data
             return None
-        elif data_key == 'wall_potential':
+        elif data_key == "wall_potential":
             group.attrs[data_key] = data
             return None
 
@@ -446,16 +440,16 @@ class File:
         if is_iter:
             data = self.simplify_iter_data(data, data_key)
             if isinstance(data, np.ndarray):
-                store_as = 'dset'
+                store_as = "dset"
             else:
-                store_as = 'attr'
-        # Handles all non iterable data. 
+                store_as = "attr"
+        # Handles all non iterable data.
         else:
-            store_as = 'attr'
-        
-        if store_as == 'attr':
+            store_as = "attr"
+
+        if store_as == "attr":
             group.attrs[data_key] = data
-        elif store_as == 'dset':
+        elif store_as == "dset":
             try:
                 group.create_dataset(data_key, data=data)
             except RuntimeError:
@@ -481,16 +475,16 @@ class File:
             Update MD5 hashes after putting data.
         """
         key = self.clean_key(key)
-        if self.ftype == 'exdir':
+        if self.ftype == "exdir":
             self._put_to_exdir(key, data)
-        elif self.ftype == 'json' or self.ftype == 'npz':
+        elif self.ftype == "json" or self.ftype == "npz":
             self._put_to_dict(key, data)
-        
+
         # Update MD5 of group
         if with_md5_update:
             group_key, _ = self.split_key(key)
             self.update_md5(group_key)
-    
+
     def put_all(self, group_key, data, nested=False):
         """Adds all data from :obj:`dict` to group.
 
@@ -506,7 +500,7 @@ class File:
         nested : :obj:`bool`, default: ``True``
             If``data`` contains one level of nested dictionaries. This is the
             case for ``parsed_info``.
-        
+
         Returns
         -------
         """
@@ -514,14 +508,14 @@ class File:
             for cat_key in data.keys():
                 for data_key in data[cat_key].keys():
                     value = data[cat_key][data_key]
-                    self.put(f'{group_key}/{data_key}', value)
+                    self.put(f"{group_key}/{data_key}", value)
         else:
             for data_key in data.keys():
                 value = data[data_key]
-                self.put(f'{group_key}/{data_key}', value)
-        
+                self.put(f"{group_key}/{data_key}", value)
+
         return self.File_
-    
+
     def copy(self, source_key, dest_key, with_md5_update=False):
         """Copy data from a source to a destination.
 
@@ -533,7 +527,7 @@ class File:
             Where to copy the data do.
         """
         self.put(dest_key, self.get(source_key), with_md5_update)
-    
+
     def _iter_dict(self, dic):
         """Iterate over nested dictionary.
 
@@ -541,7 +535,7 @@ class File:
         ----------
         dic : :obj:`dict`
             An arbitrarily nested dictionary.
-        
+
         Yields
         ------
         A :obj:`tuple` of keys where the last element is the value.
@@ -554,7 +548,7 @@ class File:
             else:
                 # If value is not dict type then yield the value
                 yield (k, v)
-    
+
     def create_group(self, key):
         """Initialize/create an exdir group with the specified key.
 
@@ -565,7 +559,7 @@ class File:
             separated by ``/``.
         """
         return self.File_.create_group(key)
-    
+
     def as_dict(self, group_key):
         """Get a group as a dictionary.
 
@@ -573,23 +567,23 @@ class File:
         ----------
         group_key : :obj:`str`
             Desired group.
-        
+
         Returns
         -------
         :obj:`dict`
             The desired group as a dictionary.
         """
         group = self.get(group_key)
-        if self.ftype == 'json' or self.ftype == 'npz':
+        if self.ftype == "json" or self.ftype == "npz":
             return group
-        elif self.ftype == 'exdir':
+        elif self.ftype == "exdir":
             group_dict = {}
             data_keys = self.get_keys(group_key)
-            get_keys = [f'{group_key}/{d_key}' for d_key in data_keys]
-            for d_key,g_key in zip(data_keys, get_keys):
+            get_keys = [f"{group_key}/{d_key}" for d_key in data_keys]
+            for d_key, g_key in zip(data_keys, get_keys):
                 group_dict[d_key] = self.get(g_key)
             return group_dict
-    
+
     def update_md5(self, group_key):
         """Update all possible MD5 hashes of a specific group.
 
@@ -599,25 +593,22 @@ class File:
             Desired group.
         """
         md5 = get_md5(self, group_key)
-        self.put(f'{group_key}/md5', md5, with_md5_update=False)
-        
+        self.put(f"{group_key}/md5", md5, with_md5_update=False)
+
         try:
             md5_arrays = get_md5(self, group_key, only_arrays=True)
-            self.put(
-                f'{group_key}/md5_arrays', md5_arrays, with_md5_update=False
-            )
+            self.put(f"{group_key}/md5_arrays", md5_arrays, with_md5_update=False)
         except Exception:
             pass
 
         try:
             md5_structures = get_md5(self, group_key, only_structures=True)
             self.put(
-                f'{group_key}/md5_structures', md5_structures,
-                with_md5_update=False
+                f"{group_key}/md5_structures", md5_structures, with_md5_update=False
             )
         except Exception:
             pass
-    
+
     def save(self, json_prettify=True):
         """Saves non-exdir files.
 
@@ -627,23 +618,22 @@ class File:
             Indents JSON objects if True. If false the JSON file is only one
             line.
         """
-        assert self.fmode == 'w'
+        assert self.fmode == "w"
         from cclib.io.cjsonwriter import JSONIndentEncoder, NumpyAwareJSONEncoder
-        if self.ftype == 'json':
+
+        if self.ftype == "json":
             json_dict = self.File_
 
             if json_prettify:
                 json_string = json.dumps(
-                    json_dict, cls=JSONIndentEncoder,
-                    sort_keys=True, indent=4
+                    json_dict, cls=JSONIndentEncoder, sort_keys=True, indent=4
                 )
             else:
                 json_string = json.dumps(
-                    json_dict, cls=NumpyAwareJSONEncoder,
-                    sort_keys=True
+                    json_dict, cls=NumpyAwareJSONEncoder, sort_keys=True
                 )
-            with open(self.fpath, 'w') as f:
+            with open(self.fpath, "w") as f:
                 f.write(json_string)
-        elif self.ftype == 'npz':
+        elif self.ftype == "npz":
             npz_dict = self.File_
             np.savez_compressed(self.fpath, **npz_dict)

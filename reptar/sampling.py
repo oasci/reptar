@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -29,6 +29,7 @@ from .utils import get_md5, gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
 from . import __version__ as reptar_version
 
+
 def entity_mask_gen(entity_ids, entities):
     """Generate an atom mask for a single entity.
 
@@ -38,12 +39,12 @@ def entity_mask_gen(entity_ids, entities):
         ``entity_ids`` for the data you are going to mask.
     entities : ``iterable``
         A collection of ``entity_ids`` that we will mask individually.
-    
+
     Yields
     ------
     :obj:`numpy.ndarray`
         Atom mask for some data such as ``Z``, ``R``, ``E``, ``G``, etc.
-    
+
     Examples
     --------
     Suppose we want to slice each entity's structures from an array ``r``.
@@ -73,12 +74,13 @@ def entity_mask_gen(entity_ids, entities):
     try:
         len(entities)
     except TypeError as e:
-        if 'has no len()' in str(e):
+        if "has no len()" in str(e):
             entities = [entities]
         else:
             raise
     for entity_id in entities:
         yield (entity_ids == entity_id)
+
 
 def r_from_entities(R, entity_ids, entities):
     """Slice a geometries containing each entity in the same order as
@@ -98,6 +100,7 @@ def r_from_entities(R, entity_ids, entities):
         r_sel.extend(R[entity_mask])
     return np.array(r_sel)
 
+
 def _add_structures_to_R(R, n_to_add, n_atoms):
     R_to_add = np.empty((n_to_add, n_atoms, 3))
     R_to_add[:] = np.nan
@@ -109,6 +112,7 @@ def _add_structures_to_R(R, n_to_add, n_atoms):
         R = np.concatenate((R, R_to_add), axis=0)
     return idx_sel, R
 
+
 def _add_structures_to_E(E, n_to_add):
     E_to_add = np.empty(n_to_add)
     E_to_add[:] = np.nan
@@ -117,6 +121,7 @@ def _add_structures_to_E(E, n_to_add):
     else:
         E = np.concatenate((E, E_to_add))
     return E
+
 
 def _add_structures_to_G(G, n_to_add, n_atoms):
     G_to_add = np.empty((n_to_add, n_atoms, 3))
@@ -127,21 +132,17 @@ def _add_structures_to_G(G, n_to_add, n_atoms):
         G = np.concatenate((G, G_to_add), axis=0)
     return G
 
+
 def _add_structures_to_r_prov_specs(r_prov_specs, n_to_add, comp_labels):
-    r_prov_specs_to_add = np.empty(
-        (n_to_add, 2+len(comp_labels)), dtype=np.uint32
-    )
+    r_prov_specs_to_add = np.empty((n_to_add, 2 + len(comp_labels)), dtype=np.uint32)
     if r_prov_specs is None:
         r_prov_specs = r_prov_specs_to_add
     else:
-        r_prov_specs = np.concatenate(
-            (r_prov_specs, r_prov_specs_to_add), axis=0
-        )
+        r_prov_specs = np.concatenate((r_prov_specs, r_prov_specs_to_add), axis=0)
     return r_prov_specs
 
-def _generate_structure_samples(
-    quantity, structure_idxs, entity_ids_samples
-):
+
+def _generate_structure_samples(quantity, structure_idxs, entity_ids_samples):
     """Randomly generates structure and entity selections.
 
     The prov ID for the structure is not included here and must be
@@ -181,15 +182,15 @@ def _generate_structure_samples(
                 entity_selection[i] = choice(
                     tuple(
                         filter(
-                            lambda x: x not in entity_selection[:i+1],
-                            entity_ids_samples[i]
+                            lambda x: x not in entity_selection[: i + 1],
+                            entity_ids_samples[i],
                         )
                     )
                 )
             selection = [R_selection_idx] + entity_selection
             yield selection
     # Sampling all possible structures.
-    elif quantity == 'all':
+    elif quantity == "all":
         for R_selection_idx in structure_idxs:
             combs = gen_combs(entity_ids_samples, replacement=False)
             for comb in combs:
@@ -200,33 +201,34 @@ def _generate_structure_samples(
 
 
 def sampler_worker(
-    selections, Z, entity_ids_dest, R_source, E_source, G_source,
-    entity_ids_source, r_prov_specs_source, r_prov_id_source, criteria,
-    periodic_cell
+    selections,
+    Z,
+    entity_ids_dest,
+    R_source,
+    E_source,
+    G_source,
+    entity_ids_source,
+    r_prov_specs_source,
+    r_prov_id_source,
+    criteria,
+    periodic_cell,
 ):
-    """Given generated selections will slice and sample structures from source.
-    """
+    """Given generated selections will slice and sample structures from source."""
     if not isinstance(selections, np.ndarray):
         selections = np.array(selections)
     assert selections.ndim == 2
 
     n_Z = len(Z)
     n_selections = selections.shape[0]
-    n_r_prov_spec_columns = int(len(selections[0]))+1
+    n_r_prov_spec_columns = int(len(selections[0])) + 1
 
     # Setup worker arrays
-    r_prov_specs = np.empty(
-        (n_selections, n_r_prov_spec_columns), dtype=np.uint32
-    )
+    r_prov_specs = np.empty((n_selections, n_r_prov_spec_columns), dtype=np.uint32)
     r_prov_specs_check = np.empty(
         (n_selections, n_r_prov_spec_columns), dtype=np.uint32
     )
-    r_prov_spec_selection = np.empty(
-        n_r_prov_spec_columns, dtype=np.uint32
-    )
-    R = np.empty(
-        (n_selections, n_Z, 3), dtype=np.float64
-    )
+    r_prov_spec_selection = np.empty(n_r_prov_spec_columns, dtype=np.uint32)
+    R = np.empty((n_selections, n_Z, 3), dtype=np.float64)
     # If these are not None, then they were requested.
     if E_source is not None:
         E = np.empty(n_selections, dtype=np.float64)
@@ -256,7 +258,7 @@ def sampler_worker(
             source_r_prov_id = orig_r_prov_specs[0]
 
             # Original r_prov_id and structure index
-            r_prov_spec_selection[:2] = orig_r_prov_specs[:2] 
+            r_prov_spec_selection[:2] = orig_r_prov_specs[:2]
             # Original entity_ids
             r_prov_spec_selection[2:] = orig_r_prov_specs[2:][selection[1:]]
         else:
@@ -268,10 +270,8 @@ def sampler_worker(
         # We do this by adding the appropriately sorted r_prov_spec_selection to
         # a test array (we only sort the entity_ids).
         r_prov_specs_check[i_sel][:2] = r_prov_spec_selection[:2]
-        r_prov_specs_check[i_sel][2:] = np.sort(
-            r_prov_spec_selection[2:], axis=0
-        )
-        
+        r_prov_specs_check[i_sel][2:] = np.sort(r_prov_spec_selection[2:], axis=0)
+
         # Check if sample exists in this batch.
         duplicate_spec = exists_in_array(
             r_prov_specs_check[i_sel], r_prov_specs_check[:i_sel]
@@ -282,8 +282,7 @@ def sampler_worker(
 
         # Slice r_sel
         R[i_sel] = r_from_entities(
-            R_source[sel_source_idx], entity_ids_source,
-            entity_ids_selection
+            R_source[sel_source_idx], entity_ids_source, entity_ids_selection
         )
 
         # Enforce minimum image convention if periodic.
@@ -293,50 +292,55 @@ def sampler_worker(
                 continue
             else:
                 R[i_sel] = r_sel_periodic
-        
+
         # Checks any structural criteria.
         if criteria is not None:
-            accept_r, _ = criteria.accept(
-                Z, R[i_sel], {'entity_ids': entity_ids_dest}
-            )
+            accept_r, _ = criteria.accept(Z, R[i_sel], {"entity_ids": entity_ids_dest})
             # If descriptor is not met, will not include sample.
             if not accept_r:
                 keep_idxs[i_sel] = False
                 continue
-        
+
         r_prov_specs[i_sel] = r_prov_spec_selection
-        
+
         if E_source is not None:
             E[i_sel] = E_source[sel_source_idx]
         if G_source is not None:
             G[i_sel] = r_from_entities(
-                G_source[sel_source_idx], entity_ids_source,
-                entity_ids_selection
+                G_source[sel_source_idx], entity_ids_source, entity_ids_selection
             )
-        
+
         # Successful sample.
         keep_idxs[i_sel] = True
-    
+
     R = R[keep_idxs]
     if E is not None:
         E = E[keep_idxs]
     if G is not None:
         G = G[keep_idxs]
     r_prov_specs = r_prov_specs[keep_idxs]
-        
+
     return R, E, G, r_prov_specs
-        
 
 
 class Sampler(object):
-    """Randomly sample structures.
-    """
+    """Randomly sample structures."""
 
     def __init__(
-        self, source_file, source_key, dest_file, dest_key,
-        criteria=None, center_structures=False, E_key=None, G_key=None,
-        dry_run=False, all_init_size=50000, use_ray=False, n_workers=2,
-        ray_address='auto'
+        self,
+        source_file,
+        source_key,
+        dest_file,
+        dest_key,
+        criteria=None,
+        center_structures=False,
+        E_key=None,
+        G_key=None,
+        dry_run=False,
+        all_init_size=50000,
+        use_ray=False,
+        n_workers=2,
+        ray_address="auto",
     ):
         """
         Parameters
@@ -399,55 +403,50 @@ class Sampler(object):
 
             if not ray.is_initialized():
                 ray.init(address=ray_address)
-            
+
             # We put criteria in ray object store here.
             self.criteria = ray.put(self.criteria)
-        
+
         self.worker_chunk_size_for_all = 1000
         """Chunk size used when ``quantity`` is ``'all'``.
 
         :type: : :obj:`int`
         """
-    
 
     def _prepare_destination(self):
-        """Check for existing sampled structures in destinations and prepare.
-        """
+        """Check for existing sampled structures in destinations and prepare."""
         dest_file = self.dest_file
         dest_key = self.dest_key
 
         # Will be None if it does not exist.
-        self.Z = dest_file.get(f'{dest_key}/atomic_numbers', missing_is_none=True)
-        self.R = dest_file.get(f'{dest_key}/geometry', missing_is_none=True)
+        self.Z = dest_file.get(f"{dest_key}/atomic_numbers", missing_is_none=True)
+        self.R = dest_file.get(f"{dest_key}/geometry", missing_is_none=True)
         # Stores the index of the first newly sampled structure for checks.
         if self.R is None:
             self.n_R_initial = 0
         else:
             self.n_R_initial = self.R.shape[0]
-        
+
         # Get energies and gradients if available and requested.
         # TODO: perform check if we should copy energies and gradients based on if the
         # sampled structure is the entire source structure.
         if self.E_key is not None:
-            self.E = dest_file.get(
-                f'{dest_key}/{self.E_key}', missing_is_none=True
-            )
+            self.E = dest_file.get(f"{dest_key}/{self.E_key}", missing_is_none=True)
         else:
             self.E = None
         if self.G_key is not None:
-            self.G = dest_file.get(
-                f'{dest_key}/{self.G_key}', missing_is_none=True
-            )
+            self.G = dest_file.get(f"{dest_key}/{self.G_key}", missing_is_none=True)
         else:
             self.G = None
 
-        self.r_prov_ids = dest_file.get(f'{dest_key}/r_prov_ids', missing_is_none=True)
-        self.r_prov_specs = dest_file.get(f'{dest_key}/r_prov_specs', missing_is_none=True)
-        
-        self.entity_ids = dest_file.get(f'{dest_key}/entity_ids', missing_is_none=True)
-        self.comp_ids = dest_file.get(f'{dest_key}/comp_ids', missing_is_none=True)
+        self.r_prov_ids = dest_file.get(f"{dest_key}/r_prov_ids", missing_is_none=True)
+        self.r_prov_specs = dest_file.get(
+            f"{dest_key}/r_prov_specs", missing_is_none=True
+        )
 
-    
+        self.entity_ids = dest_file.get(f"{dest_key}/entity_ids", missing_is_none=True)
+        self.comp_ids = dest_file.get(f"{dest_key}/comp_ids", missing_is_none=True)
+
     def _check_comp_ids(self, comp_labels):
         """Check if desired component IDs to sample is the same as the
         destination if they already exist.
@@ -456,56 +455,52 @@ class Sampler(object):
             try:
                 assert np.array_equal(self.comp_ids, np.array(comp_labels))
             except AssertionError:
-                e = f'Component IDs of destination ({comp_ids.tolist()}) do not match comp_labels ({comp_labels}).'
+                e = f"Component IDs of destination ({comp_ids.tolist()}) do not match comp_labels ({comp_labels})."
                 raise AssertionError(e)
         else:
             self.comp_ids = np.array(comp_labels)
-    
 
     def _prepare_source(self, R_source_idxs):
-        """Check for data from source.
-        """
+        """Check for data from source."""
         source_file = self.source_file
         source_key = self.source_key
 
-        self.Z_source = source_file.get(f'{source_key}/atomic_numbers')
-        self.R_source = source_file.get(f'{source_key}/geometry')
-        self.entity_ids_source = source_file.get(f'{source_key}/entity_ids')
-        self.comp_ids_source = source_file.get(f'{source_key}/comp_ids')
-        
+        self.Z_source = source_file.get(f"{source_key}/atomic_numbers")
+        self.R_source = source_file.get(f"{source_key}/geometry")
+        self.entity_ids_source = source_file.get(f"{source_key}/entity_ids")
+        self.comp_ids_source = source_file.get(f"{source_key}/comp_ids")
+
         if self.E_key is not None:
-            self.E_source = source_file.get(f'{source_key}/{self.E_key}')
+            self.E_source = source_file.get(f"{source_key}/{self.E_key}")
         else:
             self.E_source = None
         if self.G_key is not None:
-            self.G_source = source_file.get(f'{source_key}/{self.G_key}')
+            self.G_source = source_file.get(f"{source_key}/{self.G_key}")
         else:
             self.G_source = None
-        
+
         if R_source_idxs is None:
             self.R_source_idxs = tuple(range(0, len(self.R_source)))
 
         # Handle if source already has r_prov_ids
         # If these are None: This source is an original (was not created from sampling).
         self.r_prov_ids_source = source_file.get(
-            f'{source_key}/r_prov_ids', missing_is_none=True
+            f"{source_key}/r_prov_ids", missing_is_none=True
         )
         self.r_prov_specs_source = source_file.get(
-            f'{source_key}/r_prov_specs', missing_is_none=True
+            f"{source_key}/r_prov_specs", missing_is_none=True
         )
-        
+
         # Handle periodic structures
         try:
-            periodic_cell_vectors = source_file.get(f'{source_key}/periodic_cell')
-            periodic_mic_cutoff = source_file.get(f'{source_key}/periodic_mic_cutoff')
+            periodic_cell_vectors = source_file.get(f"{source_key}/periodic_cell")
+            periodic_mic_cutoff = source_file.get(f"{source_key}/periodic_mic_cutoff")
             self.periodic_cell = Cell(periodic_cell_vectors, periodic_mic_cutoff)
         except RuntimeError:
             self.periodic_cell = None
-    
 
     def _check_r_prov_ids(self):
-        """
-        """
+        """ """
         # Prepare source r_prov_ids and r_prov_specs.
         # If source is an original, we just need to determine the next prov_id
         # and prov_specs stays None.
@@ -522,18 +517,14 @@ class Sampler(object):
         # Original source (not from sampled)
         if r_prov_ids_source is None:
             try:
-                md5_source = source_file.get(
-                    f'{source_key}/md5_structures'
-                )
+                md5_source = source_file.get(f"{source_key}/md5_structures")
             except RuntimeError:
                 source_file.update_md5()
-                md5_source = source_file.get(
-                    f'{source_key}/md5_structures'
-                )
-            
+                md5_source = source_file.get(f"{source_key}/md5_structures")
+
             # Create pseudo r_prov_ids_source.
             r_prov_ids_source = {0: md5_source}
-        
+
         # If is this not a new destination we cannot always reuse the source information.
         # Need to check for overlap of ids and specifications.
         # Just need to shift the new source IDs up by the maximum destination ID.
@@ -543,61 +534,53 @@ class Sampler(object):
             present_ids = tuple(key for key in r_prov_ids.keys())
             present_md5s = tuple(value for value in r_prov_ids.values())
             remove_source_ids = []
-            for source_id,source_md5 in r_prov_ids_source.items():
+            for source_id, source_md5 in r_prov_ids_source.items():
                 if source_md5 in present_md5s:
                     update_id = present_ids[present_md5s.index(source_md5)]
                     if update_id != source_id:
                         if source_r_prov_specs is not None:
                             update_idx = np.argwhere(
-                                source_r_prov_specs[:,0] == source_id
-                            )[:,0]
-                            source_r_prov_specs[update_idx,0] = update_id
+                                source_r_prov_specs[:, 0] == source_id
+                            )[:, 0]
+                            source_r_prov_specs[update_idx, 0] = update_id
                     remove_source_ids.append(source_id)
             if len(remove_source_ids) > 0:
                 for source_id in remove_source_ids:
                     del r_prov_ids_source[source_id]
-            
+
             # Create any new source IDs that will be added to destination.
             if len(r_prov_ids_source) > 0:
                 max_dest_prov_id = max(r_prov_ids.keys())
                 next_id = max_dest_prov_id + 1
 
                 for source_id in tuple(r_prov_ids_source.keys()):
-                    r_prov_ids_source[next_id] = r_prov_ids_source.pop(
-                        source_id
-                    )
+                    r_prov_ids_source[next_id] = r_prov_ids_source.pop(source_id)
                     if source_r_prov_specs is not None:
                         update_idx = np.argwhere(
-                            source_r_prov_specs[:,0] == source_id
-                        )[:,0]
-                        source_r_prov_specs[update_idx,0] = next_id
+                            source_r_prov_specs[:, 0] == source_id
+                        )[:, 0]
+                        source_r_prov_specs[update_idx, 0] = next_id
                     next_id += 1
-        
+
                 # Merge the IDs
                 self.r_prov_ids = {**r_prov_ids, **r_prov_ids_source}
             else:
                 self.r_prov_ids = r_prov_ids
         else:
             self.r_prov_ids = r_prov_ids_source
-    
 
     def _prepare_saver(self):
         dest_key = self.dest_key
 
-        saver_keys = [
-            f'{dest_key}/geometry', f'{dest_key}/r_prov_specs'
-        ]
+        saver_keys = [f"{dest_key}/geometry", f"{dest_key}/r_prov_specs"]
         if not self.dry_run:
             if self.E_key is not None:
-                saver_keys.append(f'{dest_key}/{self.E_key}')
+                saver_keys.append(f"{dest_key}/{self.E_key}")
             if self.G_key is not None:
-                saver_keys.append(f'{dest_key}/{self.G_key}')
+                saver_keys.append(f"{dest_key}/{self.G_key}")
             self.saver = Saver(self.dest_file.fpath, saver_keys)
-    
 
-    def get_avail_entities(
-        self, comp_ids_source, comp_labels, specific_entities=None
-    ):
+    def get_avail_entities(self, comp_ids_source, comp_labels, specific_entities=None):
         """Determines available ``entity_ids`` for each ``comp_id`` in
         requested sampling components..
 
@@ -617,7 +600,7 @@ class Sampler(object):
             entities to use instead. For example, if you wanted to always sample
             entity ``43`` or ``78`` for the second ``comp_label`` then this
             would be ``((1, (43, 78)),)``
-        
+
         Returns
         -------
         :obj:`list`
@@ -634,12 +617,9 @@ class Sampler(object):
                         continue
             # Find all possible entity_ids to sample from.
             comp_id = comp_labels[i]
-            matching_entity_ids = np.where(
-                comp_ids_source == comp_id
-            )[0]
+            matching_entity_ids = np.where(comp_ids_source == comp_id)[0]
             avail_entity_ids.append(matching_entity_ids)
         return avail_entity_ids
-
 
     def _prepare_dest_const_data(self):
         """Take care of destination constant data like ``atomic_numbers`` and
@@ -659,9 +639,7 @@ class Sampler(object):
         for dest_entity in self.avail_entity_ids:
             entity_ref = dest_entity[0]  # an example entity_id
 
-            Z_ref = Z_source[
-                np.argwhere(entity_ids_source == entity_ref)[:,0]
-            ]
+            Z_ref = Z_source[np.argwhere(entity_ids_source == entity_ref)[:, 0]]
             entity_ids.extend([entity_id for _ in range(len(Z_ref))])
 
             Z_sample.extend(Z_ref)
@@ -670,15 +648,15 @@ class Sampler(object):
             if len(dest_entity) != 1:
                 for other_entity in dest_entity[1:]:
                     Z_other = Z_source[
-                        np.argwhere(entity_ids_source == other_entity)[:,0]
+                        np.argwhere(entity_ids_source == other_entity)[:, 0]
                     ]
                     try:
                         assert np.array_equal(Z_ref, Z_other)
                     except AssertionError:
                         raise AssertionError(
-                            f'Atomic numbers do not match for entity_id of {other_entity}'
+                            f"Atomic numbers do not match for entity_id of {other_entity}"
                         )
-            
+
             entity_id += 1
 
         Z_sample = np.array(Z_sample)
@@ -690,9 +668,9 @@ class Sampler(object):
                 assert np.array_equal(Z, Z_sample)
                 Z = np.array(Z_sample)
             except AssertionError:
-                print(f'Destination atomic numbers: {Z}')
-                print(f'Sample atomic numbers: {Z_sample}')
-                e = 'Atomic numbers of samples do not match destination.'
+                print(f"Destination atomic numbers: {Z}")
+                print(f"Sample atomic numbers: {Z_sample}")
+                e = "Atomic numbers of samples do not match destination."
                 raise AssertionError(e)
         else:
             self.Z = Z_sample
@@ -701,15 +679,12 @@ class Sampler(object):
         self.entity_ids = np.array(entity_ids)  # Destination entity_ids
 
         if not self.dry_run:
-            self.dest_file.put(f'{self.dest_key}/r_prov_ids', self.r_prov_ids)
-            self.dest_file.put(f'{self.dest_key}/atomic_numbers', self.Z)
-            self.dest_file.put(f'{self.dest_key}/entity_ids', self.entity_ids)
-            self.dest_file.put(f'{self.dest_key}/comp_ids', self.comp_ids)
-    
+            self.dest_file.put(f"{self.dest_key}/r_prov_ids", self.r_prov_ids)
+            self.dest_file.put(f"{self.dest_key}/atomic_numbers", self.Z)
+            self.dest_file.put(f"{self.dest_key}/entity_ids", self.entity_ids)
+            self.dest_file.put(f"{self.dest_key}/comp_ids", self.comp_ids)
 
-    def _initialize_structure_sampling_arrays(
-        self, comp_labels, quantity
-    ):
+    def _initialize_structure_sampling_arrays(self, comp_labels, quantity):
         """Creates or extends arrays for sampling structures.
 
         Parameters
@@ -725,15 +700,16 @@ class Sampler(object):
         """
         # Either creates new ones or concatenates to original destination data.
         # Trial selection to get shapes for R and G
-        if quantity == 'all':
+        if quantity == "all":
             # Determine the maximum amount of structures we can sample from a single
             # source structure.
             combs_per_structure = sum(
-                1 for _ in _generate_structure_samples(
+                1
+                for _ in _generate_structure_samples(
                     quantity, [0], self.avail_entity_ids
                 )
             )
-            size_quantity = int(combs_per_structure*len(self.R_source))
+            size_quantity = int(combs_per_structure * len(self.R_source))
 
             # Sometimes we want to sample all with a criteria. Criteria should
             # drastically reduce the number of sampled structures. So, we just
@@ -743,29 +719,29 @@ class Sampler(object):
         else:
             size_quantity = int(quantity)
         idx_sel, R = _add_structures_to_R(self.R, size_quantity, self.n_Z)
-        
+
         if self.E_key is not None:
             E = _add_structures_to_E(self.E, size_quantity)
         else:
             E = None
-        
+
         if self.G_key is not None:
             G = _add_structures_to_G(self.G, size_quantity, self.n_Z)
         else:
             G = None
-        
+
         r_prov_specs = _add_structures_to_r_prov_specs(
             self.r_prov_specs, size_quantity, comp_labels
         )
-        
+
         return idx_sel, R, E, G, r_prov_specs
 
     def _post_process(self):
         # Put the final data.
-        self.dest_file.put(f'{self.dest_key}/r_centered', self.center_structures)
-        self.dest_file.put(f'{self.dest_key}/reptar_version', reptar_version)
+        self.dest_file.put(f"{self.dest_key}/r_centered", self.center_structures)
+        self.dest_file.put(f"{self.dest_key}/reptar_version", reptar_version)
         self.dest_file.update_md5(self.dest_key)
-    
+
     def _cleanup(self):
         """Remove attributes after sampling to free memory and avoid using
         old data if new samples are taken.
@@ -773,22 +749,38 @@ class Sampler(object):
         # TODO: cleanup
         # Clean up class attributes.
         attrs = [
-            'Z', 'R', 'n_R_initial', 'E', 'G', 'r_prov_ids', 'r_prov_specs',
-            'entity_ids', 'comp_ids'
+            "Z",
+            "R",
+            "n_R_initial",
+            "E",
+            "G",
+            "r_prov_ids",
+            "r_prov_specs",
+            "entity_ids",
+            "comp_ids",
         ]
         for attr in attrs:
             delattr(self, attr)
-    
+
     def _update_sampling_arrays(
-        self, quantity, i_start, R, E, G, r_prov_specs, R_selection,
-        E_selection, G_selection, r_prov_spec_selection
+        self,
+        quantity,
+        i_start,
+        R,
+        E,
+        G,
+        r_prov_specs,
+        R_selection,
+        E_selection,
+        G_selection,
+        r_prov_spec_selection,
     ):
         do_break = False
         n_sampled = R_selection.shape[0]
         i_stop = i_start + n_sampled
 
         if i_stop > R.shape[0]:
-            if quantity == 'all':
+            if quantity == "all":
                 # If we are sampling all, we need to resize the arrays
                 # an continue sampling.
                 extra_to_add = 5000
@@ -812,7 +804,7 @@ class Sampler(object):
                 if self.G_key is not None:
                     G_selection = G_selection[:n_keep]
                 do_break = True
-                
+
         # Add batch to sample arrays.
         R[i_start:i_stop] = R_selection
         r_prov_specs[i_start:i_stop] = r_prov_spec_selection
@@ -823,9 +815,7 @@ class Sampler(object):
 
         return i_stop, do_break, R, E, G, r_prov_specs
 
-    def sample(
-        self, comp_labels, quantity, R_source_idxs=None, specific_entities=None
-    ):
+    def sample(self, comp_labels, quantity, R_source_idxs=None, specific_entities=None):
         """
 
         Parameters
@@ -866,7 +856,7 @@ class Sampler(object):
             r_prov_id_source = tuple(self.r_prov_ids.keys())[0]
         else:
             r_prov_id_source = None
-        
+
         self.avail_entity_ids = self.get_avail_entities(
             self.comp_ids_source, comp_labels, specific_entities
         )
@@ -883,38 +873,62 @@ class Sampler(object):
 
         # TODO: Print status?
 
-        if quantity != 'all':
+        if quantity != "all":
             chunk_size = quantity
         else:
             chunk_size = self.worker_chunk_size_for_all
 
         global sampler_worker
         stop_sampling = False
-        
+
         if not self.use_ray:
-            
+
             # Serial operation
             for selections in chunk_iterable(selection_gen, chunk_size):
                 # Sample selections with the worker.
                 # All selections are already checked and can be added.
-                R_selection, E_selection, G_selection, r_prov_spec_selection = \
-                sampler_worker(
-                    selections, self.Z, self.entity_ids, self.R_source,
-                    self.E_source, self.G_source, self.entity_ids_source,
-                    self.r_prov_specs_source, r_prov_id_source, self.criteria,
-                    self.periodic_cell
-                )
-                
-                i_start, stop_sampling, R, E, G, r_prov_specs = \
-                self._update_sampling_arrays(
-                    quantity, i_start, R, E, G, r_prov_specs, R_selection,
-                    E_selection, G_selection, r_prov_spec_selection
+                (
+                    R_selection,
+                    E_selection,
+                    G_selection,
+                    r_prov_spec_selection,
+                ) = sampler_worker(
+                    selections,
+                    self.Z,
+                    self.entity_ids,
+                    self.R_source,
+                    self.E_source,
+                    self.G_source,
+                    self.entity_ids_source,
+                    self.r_prov_specs_source,
+                    r_prov_id_source,
+                    self.criteria,
+                    self.periodic_cell,
                 )
 
+                (
+                    i_start,
+                    stop_sampling,
+                    R,
+                    E,
+                    G,
+                    r_prov_specs,
+                ) = self._update_sampling_arrays(
+                    quantity,
+                    i_start,
+                    R,
+                    E,
+                    G,
+                    r_prov_specs,
+                    R_selection,
+                    E_selection,
+                    G_selection,
+                    r_prov_spec_selection,
+                )
 
                 if self.center_structures:
                     R[:i_start] = get_center_structures(self.Z, R[:i_start])
-                
+
                 if not self.dry_run:
                     data_to_save = [R[:i_start], r_prov_specs[:i_start]]
                     if self.E_key is not None:
@@ -922,14 +936,14 @@ class Sampler(object):
                     if self.G_key is not None:
                         data_to_save.append(G[:i_start])
                     self.saver.save(*data_to_save)
-                
+
                 # Break sampling when quantity is reached.
                 # 'all' sampling will break with the loop.
                 if stop_sampling:
                     break
         else:
             # Parallel operation with ray
-            chunk_size = chunk_size/self.n_workers
+            chunk_size = chunk_size / self.n_workers
 
             sampler_worker_ray = ray.remote(sampler_worker)
 
@@ -945,55 +959,77 @@ class Sampler(object):
             # Initialize ray workers
             workers = []
             selection_chunker = chunk_iterable(selection_gen, chunk_size)
+
             def add_worker(workers, chunker):
                 try:
                     selection = next(selection_chunker)
                     workers.append(
                         sampler_worker_ray.options(num_cpus=1).remote(
-                            selection, self.Z, self.entity_ids, self.R_source,
-                            self.E_source, self.G_source, self.entity_ids_source,
-                            self.r_prov_specs_source, r_prov_id_source,
-                            self.criteria, self.periodic_cell
+                            selection,
+                            self.Z,
+                            self.entity_ids,
+                            self.R_source,
+                            self.E_source,
+                            self.G_source,
+                            self.entity_ids_source,
+                            self.r_prov_specs_source,
+                            r_prov_id_source,
+                            self.criteria,
+                            self.periodic_cell,
                         )
                     )
                 except StopIteration:
                     pass
-            
+
             for _ in range(self.n_workers):
                 add_worker(workers, selection_chunker)
-            
+
             # Start calculations
             while not stop_sampling:
                 done_id, workers = ray.wait(workers)
-                
-                R_selection, E_selection, G_selection, r_prov_spec_selection = \
-                    ray.get(done_id)[0]
 
-                i_start, stop_sampling, R, E, G, r_prov_specs = \
-                self._update_sampling_arrays(
-                    quantity, i_start, R, E, G, r_prov_specs, R_selection,
-                    E_selection, G_selection, r_prov_spec_selection
+                R_selection, E_selection, G_selection, r_prov_spec_selection = ray.get(
+                    done_id
+                )[0]
+
+                (
+                    i_start,
+                    stop_sampling,
+                    R,
+                    E,
+                    G,
+                    r_prov_specs,
+                ) = self._update_sampling_arrays(
+                    quantity,
+                    i_start,
+                    R,
+                    E,
+                    G,
+                    r_prov_specs,
+                    R_selection,
+                    E_selection,
+                    G_selection,
+                    r_prov_spec_selection,
                 )
 
                 if self.center_structures:
                     R[:i_start] = get_center_structures(self.Z, R[:i_start])
-                
+
                 if not self.dry_run:
                     data_to_save = [R[:i_start], r_prov_specs[:i_start]]
                     if self.E_key is not None:
                         data_to_save.append(E[:i_start])
                     if self.G_key is not None:
                         data_to_save.append(G[:i_start])
-                    self.saver.save(*data_to_save)  
-                
+                    self.saver.save(*data_to_save)
+
                 add_worker(workers, selection_chunker)
 
                 # Stop sampling if we have exhausted our chunker and we have
                 # no workers left.
                 if len(workers) == 0:
                     stop_sampling = True
-        
+
         if not self.dry_run:
             self._post_process()
         self._cleanup()
-        

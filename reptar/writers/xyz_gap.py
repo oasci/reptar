@@ -1,7 +1,7 @@
 # MIT License
-# 
+#
 # Copyright (c) 2022, Alex M. Maldonado
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a copy
 # of this software and associated documentation files (the "Software"), to deal
 # in the Software without restriction, including without limitation the rights
@@ -11,7 +11,7 @@
 #
 # The above copyright notice and this permission notice shall be included in all
 # copies or substantial portions of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 # IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 # FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -22,12 +22,13 @@
 
 import numpy as np
 from .writing_utils import string_xyz_arrays
-    
+
+
 def write_xyz_gap(
     xyz_path, lattice, Z, R, E, F=None, lattice_precision=3, data_precision=10
 ):
     """Write an extended XYZ file in the GAP format.
-    
+
     Parameters
     ----------
     xyz_path : :obj:`str`
@@ -35,7 +36,7 @@ def write_xyz_gap(
     lattice : :obj:`numpy.ndarray`, ndim: ``2``
         The three cartesian lattice vectors describing the periodic cell (in
         Angstroms).
-        
+
         All structures need a this lattice even structures are not supposed to
         be periodic. Just use a lattice vector that is larger than twice the
         cutoff of any potential you plan to create or use.
@@ -55,27 +56,25 @@ def write_xyz_gap(
     """
     lat_str = np.array2string(
         lattice.flatten(),
-        formatter={'float_kind':lambda x: f'%.{lattice_precision}f' % x}
+        formatter={"float_kind": lambda x: f"%.{lattice_precision}f" % x},
     )
     # TODO: is pbc always T T T?
     lat_str = 'pbc="T T T" Lattice="' + lat_str[1:-1] + '"'
 
-    prop_line = 'Properties=species:S:1:pos:R:3'
+    prop_line = "Properties=species:S:1:pos:R:3"
     if F is not None:
-        prop_line += ':forces:R:3'
-    
-    e_formatter = lambda x: f'%.{data_precision}f' % x
-    
+        prop_line += ":forces:R:3"
+
+    e_formatter = lambda x: f"%.{data_precision}f" % x
+
     n_atoms = len(Z)
     F_arr = None
-    with open(xyz_path, 'w') as f:
+    with open(xyz_path, "w") as f:
         for i in range(len(R)):
-            f.write(f'{n_atoms}\n')
+            f.write(f"{n_atoms}\n")
             f.write(
-                ' '.join([f'energy={e_formatter(E[i])}', prop_line, lat_str]) + '\n'
+                " ".join([f"energy={e_formatter(E[i])}", prop_line, lat_str]) + "\n"
             )
             if F is not None:
                 F_arr = F[i]
-            f.write(
-                string_xyz_arrays(Z, R[i], F_arr, precision=data_precision)
-            )
+            f.write(string_xyz_arrays(Z, R[i], F_arr, precision=data_precision))
