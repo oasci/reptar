@@ -41,10 +41,12 @@ jobs:
       - name: Lint Code Base
         uses: github/super-linter@v4
         env:
-          VALIDATE_ALL_CODEBASE: true
+          VALIDATE_ALL_CODEBASE: false
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VALIDATE_PYTHON_BLACK: true
+          VALIDATE_PYTHON_PYLINT: true
           # Linter config files are stored in repository root to make local
           # usage easier.
-          LINTER_RULES_PATH: ./
+          LINTER_RULES_PATH: ''
           PYTHON_PYLINT_CONFIG_FILE: .pylintrc
