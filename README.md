@@ -57,7 +57,8 @@ The result is a user-specified file streamlined for analysis in Python and archi
 
 # Installation
 
-You can install reptar using ``pip install reptar`` or install the latest version directly from the [GitHub repository](https://github.com/aalexmmaldonado/reptar).
+You can install reptar from [PyPI](https://pypi.org/project/reptar/) by using `pip install reptar`.
+Or, the latest development version can be installed directly from the [GitHub repository](https://github.com/aalexmmaldonado/reptar) or from [TestPyPI](https://test.pypi.org/project/reptar/).
 
 ```bash
 git clone https://github.com/aalexmmaldonado/reptar

@@ -877,7 +877,7 @@ class Sampler(object):
             chunk_size = quantity
         else:
             chunk_size = self.worker_chunk_size_for_all
-        
+
         stop_sampling = False
 
         if not self.use_ray:
