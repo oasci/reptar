@@ -1,4 +1,4 @@
-<h1 align="center">Reptar</h1>
+<h1 align="center">reptar</h1>
 
 <h4 align="center">A tool for storing and analyzing manuscript-scale computational chemistry data</h4>
 

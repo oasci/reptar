@@ -62,6 +62,20 @@ Discussions
 If you have any questions, comments, concerns, or criticisms please start a `discussion <https://github.com/aalexmmaldonado/reptar/discussions>`__ so we can improve reptar!
 
 
+*Black* style
+=============
+
+We use the `Black style <https://black.readthedocs.io/en/stable/index.html>`__ in reptar.
+This lets you focus on writing code and hand over formatting control to *Black*.
+You should periodically run *Black* when changing any Python code in reptar.
+Installing *Black* can be done with ``pip install black`` and then ran with the following command while in the repository root directory.
+
+.. code-block:: bash
+
+    $ black ./
+    All done! ✨ 🍰 ✨
+    52 files left unchanged.
+
 
 Get Started!
 ============
