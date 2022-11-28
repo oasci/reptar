@@ -44,4 +44,7 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHON_PYLINT_CONFIG_FILE: /home/runner/work/reptar/reptar/.pylintrc
+          # Linter config files are stored in repository root to make local
+          # usage easier.
+          LINTER_RULES_PATH: ${{ GITHUB_WORKSPACE }}
+          PYTHON_PYLINT_CONFIG_FILE: .pylintrc
