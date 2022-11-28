@@ -46,5 +46,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           # Linter config files are stored in repository root to make local
           # usage easier.
-          LINTER_RULES_PATH: ${{ GITHUB_WORKSPACE }}
+          LINTER_RULES_PATH: ${GITHUB_WORKSPACE}
           PYTHON_PYLINT_CONFIG_FILE: .pylintrc
