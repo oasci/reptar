@@ -877,8 +877,7 @@ class Sampler(object):
             chunk_size = quantity
         else:
             chunk_size = self.worker_chunk_size_for_all
-
-        global sampler_worker
+        
         stop_sampling = False
 
         if not self.use_ray:
@@ -943,7 +942,7 @@ class Sampler(object):
                     break
         else:
             # Parallel operation with ray
-            chunk_size = chunk_size / self.n_workers
+            chunk_size = int(chunk_size / self.n_workers)
 
             sampler_worker_ray = ray.remote(sampler_worker)
 
