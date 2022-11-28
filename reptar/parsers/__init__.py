@@ -1,7 +1,9 @@
-from .parser import parser
-from .orca_parser import parserORCA
-from .xtb_parser import parserXTB
-from .ase_parser import parserASE
-from .crest_parser import parserCREST
+# pylint: disable=no-name-in-module
 
-__all__ = ["parser", "parserORCA", "parserXTB", "parserASE", "parserCREST"]
+from .parser import Parser
+from .orca_parser import ParserORCA
+from .xtb_parser import ParserXTB
+from .ase_parser import ParserASE
+from .crest_parser import ParserCREST
+
+__all__ = ["Parser", "ParserORCA", "ParserXTB", "ParserASE", "ParserCREST"]

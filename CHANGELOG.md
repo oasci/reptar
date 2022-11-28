@@ -29,6 +29,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Pylint and Black formatting; thus, lots of naming changes were made.
 - Renamed ``creator`` class to ``Creator`` to avoid namespace conflicts.
 - Moved ``reptar.calculators.save.Saver`` to ``reptar.Saver``.
 - Condensed and cleaned sampling routines into ``Sampler`` class.

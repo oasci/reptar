@@ -22,39 +22,40 @@
 
 """Tests writing atomic simulation environment (ASE) databases"""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
+import sys
 import os
+import pytest
 import numpy as np
 from reptar import File
 from reptar.writers import write_ase_db
 
-import sys
-
 sys.path.append("..")
-from .paths import *
 
-hartree2ev = 27.21138602  # Psi4 v1.5
+HARTREE_TO_EV = 27.21138602  # Psi4 v1.5
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Source paths
-data_dir = "./data/"
+DATA_DIR = "./data/"
 
 # Writing paths
-writing_dir = "./tmp/writing/"
-os.makedirs(writing_dir, exist_ok=True)
+WRITING_DIR = "./tmp/writing/"
+os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_ase_db_writer_1h2o_120meoh_prod():
     """Writing small ASE database"""
     try:
         import ase
-    except (ModuleNotFoundError, ImportError):
+    except ImportError:
         pytest.skip("ase package not installed")
 
-    exdir_path = os.path.join(data_dir, "1h2o_120meoh_md.exdir")
-    db_path = os.path.join(writing_dir, "1h2o_120meoh_md_ase.db")
+    exdir_path = os.path.join(DATA_DIR, "1h2o_120meoh_md.exdir")
+    db_path = os.path.join(WRITING_DIR, "1h2o_120meoh_md_ase.db")
 
     if os.path.exists(db_path):
         os.remove(db_path)
@@ -65,7 +66,7 @@ def test_ase_db_writer_1h2o_120meoh_prod():
     Z = rfile.get("eq_1/atomic_numbers")
     R = rfile.get("eq_1/geometry")[:10]
     E = rfile.get("eq_1/energy_pot")[:10]  # Hartree
-    E *= hartree2ev  # eV
+    E *= HARTREE_TO_EV  # eV
 
     db = write_ase_db(db_path, Z, R, energy=E)
     row = db.get(i_test + 1)

@@ -71,7 +71,7 @@ There are currently three basic types of output files used.
     
     If both ``geom_path`` and ``traj_path`` are provided, the structure defined in ``geom_path`` is considered the initial structure.
 
-Some package parsers (e.g., :class:`reptar.parsers.parserCREST`) require other output files.
+Some package parsers (e.g., :class:`reptar.parsers.ParserCREST`) require other output files.
 
 Additional data
 ===============

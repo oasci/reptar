@@ -26,6 +26,9 @@ A tool for storing and analyzing manuscript-scale computational chemistry data.
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
 
+.. image:: https://img.shields.io/badge/linting-pylint-yellowgreen
+    :target: https://github.com/PyCQA/pylint
+
 **Disclaimer:** reptar is under active development and is not suitable for production.
 
 Motivation

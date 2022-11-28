@@ -20,13 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ..extractors import extractorXTB
 import numpy as np
-from .parser import parser
+from ..extractors import ExtractorXTB  # pylint: disable=no-name-in-module
+from .parser import Parser  # pylint: disable=no-name-in-module
 from ..utils import atoms_by_number, parse_stringfile
 
 
-class parserXTB(parser):
+class ParserXTB(Parser):
     """Custom parser for xtb output files."""
 
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
@@ -46,7 +46,7 @@ class parserXTB(parser):
         self.package = "xtb"
         if extractors is None:
             extractors = []
-        extractors.insert(0, extractorXTB())
+        extractors.insert(0, ExtractorXTB())
         super().__init__(out_path, extractors)
 
         self.geom_path = geom_path
@@ -66,10 +66,12 @@ class parserXTB(parser):
         comments = []
         R = []
         if self.geom_path is not None:
+            # pylint: disable-next=invalid-name
             Z_geom, _, R_geom = parse_stringfile(self.geom_path)
             Z.extend(Z_geom)
             R.extend(R_geom)
         if self.traj_path is not None:
+            # pylint: disable-next=invalid-name
             Z_traj, comments, R_traj = parse_stringfile(self.traj_path)
             Z.extend(Z_traj)
             R.extend(R_traj)

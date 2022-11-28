@@ -1,13 +1,17 @@
-from .extractor import extractor
-from .orca_extractor import extractorORCA
-from .xtb_extractor import extractorXTB
-from .ase_extractor import extractorASE
-from .crest_extractor import extractorCREST
+"""Extract information from files"""
+
+# pylint: disable=no-name-in-module
+
+from .extractor import Extractor
+from .orca_extractor import ExtractorORCA
+from .xtb_extractor import ExtractorXTB
+from .ase_extractor import ExtractorASE
+from .crest_extractor import ExtractorCREST
 
 __all__ = [
-    "extractor",
-    "extractorORCA",
-    "extractorXTB",
-    "extractorASE",
-    "extractorCREST",
+    "Extractor",
+    "ExtractorORCA",
+    "ExtractorXTB",
+    "ExtractorASE",
+    "ExtractorCREST",
 ]

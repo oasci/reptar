@@ -1,5 +1,5 @@
 ``extractor``
 =============
 
-.. autoclass:: reptar.extractors.extractor
+.. autoclass:: reptar.extractors.Extractor
     :members:

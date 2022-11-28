@@ -4,9 +4,9 @@
 .. toctree::
     :maxdepth: 1
 
-    driverENERGY
-    driverENGRAD
-    driverOPT
+    DriverEnergy
+    DriverEnGrad
+    DriverOpt
     psi4_energy
     psi4_engrad
     psi4_opt

@@ -20,137 +20,116 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .extractor import extractor
+from .extractor import Extractor  # pylint: disable=no-name-in-module
 
 
-class extractorORCA(extractor):
-    """ORCA extractor"""
-
-    def __init__(self):
-        super().__init__()
+class ExtractorORCA(Extractor):
+    r"""ORCA extractor"""
+    # We always pass the file object into methods here.
+    # pylint: disable=unused-argument
 
     @property
     def triggers(self):
         trig = (
             (
-                lambda line: True
-                if ("Your calculation utilizes the auxiliary basis: " in line.strip())
-                else False,
+                lambda line: bool(
+                    "Your calculation utilizes the auxiliary basis: " in line.strip()
+                ),
                 "aux_basis",
             ),
             (
-                lambda line: True
-                if (
+                lambda line: bool(
                     "DFT GRID GENERATION" == line.strip()
                     or "Setting up the final grid:" == line.strip()
-                )
-                else False,
+                ),
                 "grid_info",
             ),
             (
-                lambda line: True
-                if ("CPCM SOLVATION MODEL" == line.strip())
-                else False,
+                lambda line: bool("CPCM SOLVATION MODEL" == line.strip()),
                 "implicit_solvent",
             ),
             (
-                lambda line: True if ("TOTAL SCF ENERGY" == line.strip()) else False,
+                lambda line: bool("TOTAL SCF ENERGY" == line.strip()),
                 "scf_energies",
             ),
             (
-                lambda line: True
-                if ("UHF SPIN CONTAMINATION" == line.strip())
-                else False,
+                lambda line: bool("UHF SPIN CONTAMINATION" == line.strip()),
                 "uhf_spin_contamination",
             ),
             (
-                lambda line: True if ("ORCA  MP2" == line.strip()) else False,
+                lambda line: bool("ORCA  MP2" == line.strip()),
                 "mp_properties",
             ),
             (
-                lambda line: True if ("Wavefunction type" == line.strip()) else False,
+                lambda line: bool("Wavefunction type" == line.strip()),
                 "cc_method",
             ),
             (
-                lambda line: True
-                if (
+                lambda line: bool(
                     "HF COUPLED CLUSTER ITERATIONS" == line.strip()[1:]
                     or "OPEN-SHELL COUPLED CLUSTER ITERATIONS" == line.strip()
-                )
-                else False,
+                ),
                 "cc_properties",
             ),
             (
-                lambda line: True if ("SCF SETTINGS" == line.strip()) else False,
+                lambda line: bool("SCF SETTINGS" == line.strip()),
                 "scf_info",
             ),
             (
-                lambda line: True
-                if ("MULLIKEN ATOMIC CHARGES" == line.strip())
-                else False,
+                lambda line: bool("MULLIKEN ATOMIC CHARGES" == line.strip()),
                 "mulliken_charges",
             ),
             (
-                lambda line: True
-                if ("LOEWDIN ATOMIC CHARGES" == line.strip())
-                else False,
+                lambda line: bool("LOEWDIN ATOMIC CHARGES" == line.strip()),
                 "loewdin_charges",
             ),
             (
-                lambda line: True if ("DIPOLE MOMENT" == line.strip()) else False,
+                lambda line: bool("DIPOLE MOMENT" == line.strip()),
                 "dipole",
             ),
             (
-                lambda line: True if ("FINAL SINGLE POINT ENERGY" in line) else False,
+                lambda line: bool("FINAL SINGLE POINT ENERGY" in line),
                 "final_energy_ele",
             ),
             (
-                lambda line: True
-                if ("Geometry convergence" in line and "----------------------" in line)
-                else False,
+                lambda line: bool(
+                    "Geometry convergence" in line and "----------------------" in line
+                ),
                 "geo_conv",
             ),
             (
-                lambda line: True
-                if ("VIBRATIONAL FREQUENCIES" == line[:23])
-                else False,
+                lambda line: bool("VIBRATIONAL FREQUENCIES" == line[:23]),
                 "frequencies",
             ),
             (
-                lambda line: True if ("NORMAL MODES" == line[:12]) else False,
+                lambda line: bool("NORMAL MODES" == line[:12]),
                 "normal_modes",
             ),
             (
-                lambda line: True if ("Temperature         ..." in line) else False,
+                lambda line: bool("Temperature         ..." in line),
                 "thermo_temp",
             ),
             (
-                lambda line: True
-                if ("Zero point energy                ..." in line)
-                else False,
+                lambda line: bool("Zero point energy                ..." in line),
                 "zpve",
             ),
             (
-                lambda line: True if ("Total thermal correction" in line) else False,
+                lambda line: bool("Total thermal correction" in line),
                 "thermal_corrections",
             ),
             (
-                lambda line: True
-                if ("Thermal Enthalpy correction       ..." in line)
-                else False,
+                lambda line: bool("Thermal Enthalpy correction       ..." in line),
                 "enthalpic_corr",
             ),
             (
-                lambda line: True
-                if ("Final entropy term                ..." in line)
-                else False,
+                lambda line: bool("Final entropy term                ..." in line),
                 "entropic_corr",
             ),
         )
         return trig
 
     def aux_basis(self, f, line):
-        """Information about auxiliary basis sets used in the calculation.
+        r"""Information about auxiliary basis sets used in the calculation.
 
         Parameters
         ----------
@@ -172,10 +151,10 @@ class extractorORCA(extractor):
         self.parsed_info["runtime_info"]["basis_aux"] = line_split[-1].strip()
 
     def grid_info(self, f, line):
-        """DFT integration grid information.
+        r"""DFT integration grid information.
 
         All DFT calculations are performed with numerical integration, which
-        means a integration grid must be specified. This is typically handeled
+        means a integration grid must be specified. This is typically handled
         with the Grid keyword. Furthermore, ORCA defaults to a multigrid
         approach where one grid is used for the SCF cycle, and a different
         (typically larger) grid is used for the final energy evaluation.
@@ -244,7 +223,7 @@ class extractorORCA(extractor):
             ]
 
     def implicit_solvent(self, f, line):
-        """Implicit solvent properties.
+        r"""Implicit solvent properties.
 
         Parameters
         ----------
@@ -271,7 +250,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def scf_energies(self, f, line):
-        """The nuclear repulsion, one- and two-electron energy, and
+        r"""The nuclear repulsion, one- and two-electron energy, and
         exchange-correlation energy after a SCF cycle.
 
         This is called directly after the ``'TOTAL SCF ENERGY'`` trigger, and
@@ -301,7 +280,7 @@ class extractorORCA(extractor):
         while "SCF CONVERGENCE" != line.strip():
             # Nuclear Repulsion  :  135.87324654 Eh    3697.29901 eV
             if "Nuclear Repulsion  :" in line:
-                if "energy_nuc_repul" not in self.parsed_info["outputs"].keys():
+                if "energy_nuc_repul" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_nuc_repul"] = []
                 self.parsed_info["outputs"]["energy_nuc_repul"].append(
                     float(line.split()[3])
@@ -309,7 +288,7 @@ class extractorORCA(extractor):
 
             # One Electron Energy: -674.26034691 Eh  -18347.55681 eV
             if "One Electron Energy:" in line:
-                if "energy_scf_one_ele" not in self.parsed_info["outputs"].keys():
+                if "energy_scf_one_ele" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_scf_one_ele"] = []
                 self.parsed_info["outputs"]["energy_scf_one_ele"].append(
                     float(line.split()[3])
@@ -317,7 +296,7 @@ class extractorORCA(extractor):
 
             # Two Electron Energy:  245.90403408 Eh    6691.38895 eV
             if "Two Electron Energy:" in line:
-                if "energy_scf_two_ele" not in self.parsed_info["outputs"].keys():
+                if "energy_scf_two_ele" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_scf_two_ele"] = []
                 self.parsed_info["outputs"]["energy_scf_two_ele"].append(
                     float(line.split()[3])
@@ -325,7 +304,7 @@ class extractorORCA(extractor):
 
             # E(XC)              :      -26.170411238000 Eh
             if "E(XC) " in line:
-                if "energy_scf_xc" not in self.parsed_info["outputs"].keys():
+                if "energy_scf_xc" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_scf_xc"] = []
                 self.parsed_info["outputs"]["energy_scf_xc"].append(
                     float(line.split()[2])
@@ -334,7 +313,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def uhf_spin_contamination(self, f, line):
-        """Spin contamination from unrestricted Hartree-Fock calculations.
+        r"""Spin contamination from unrestricted Hartree-Fock calculations.
 
         Parameters
         ----------
@@ -367,9 +346,9 @@ class extractorORCA(extractor):
             for _ in range(0, 4):
                 line = next(f)
 
-        if "spin_sqrd_uhf_ideal" not in self.parsed_info["outputs"].keys():
+        if "spin_sqrd_uhf_ideal" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["spin_sqrd_uhf_ideal"] = []
-        if "spin_sqrd_uhf_calc" not in self.parsed_info["outputs"].keys():
+        if "spin_sqrd_uhf_calc" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["spin_sqrd_uhf_calc"] = []
 
         # Expectation value of <S**2>     :     0.750016
@@ -381,7 +360,7 @@ class extractorORCA(extractor):
         )
 
     def mp_properties(self, f, line):
-        """Moller-Plesset calculation properties.
+        r"""Moller-Plesset calculation properties.
 
         This is called directly after the ``'ORCA  MP2 '`` trigger, and
         will terminate once the ``'ORCA property calculations'`` trigger is reached.
@@ -414,14 +393,14 @@ class extractorORCA(extractor):
         while "-     ORCA property calculations      *" != line.strip():
             # Freezing NCore=10 chemical core electrons
             if "Freezing NCore=" == line.strip()[:15]:
-                # if 'ele_frozen' not in self.rfile['keywords'].keys():
+                # if 'ele_frozen' not in self.rfile['keywords']:
                 #     self.rfile['outputs']['ele_frozen'] = []
                 ele_frozen = int(line.split()[1][6:])
                 self.parsed_info["outputs"]["ele_frozen"] = ele_frozen
 
             #  MP2 CORRELATION ENERGY   :     -3.132364939 Eh
             if "MP2 CORRELATION ENERGY" in line:
-                if "energy_correl_mp2" not in self.parsed_info["outputs"].keys():
+                if "energy_correl_mp2" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_correl_mp2"] = []
                 if "RI-MP2" in line:
                     index = 3
@@ -435,7 +414,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def cc_method(self, f, line):
-        """Coupled cluster method information.
+        r"""Coupled cluster method information.
 
         Parameters
         ----------
@@ -475,7 +454,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def cc_properties(self, f, line):
-        """Coupled cluster properties.
+        r"""Coupled cluster properties.
 
         This is called directly after the ``'COUPLED CLUSTER ITERATIONS'``
         trigger, and will terminate once the ``'ORCA POPULATION ANALYSIS'``
@@ -514,6 +493,7 @@ class extractorORCA(extractor):
             "ORCA POPULATION ANALYSIS" != line.strip()
             and "*     ORCA property calculations      *" != line.strip()
         ):
+            # pylint: disable=line-too-long
             # Iter       E(tot)           E(Corr)          Delta-E          Residual     Time      <S|S>**1/2
             #  0     -7.469294707     -0.036553055      0.000000000      0.027013328    0.05      0.000000001
             #
@@ -521,15 +501,16 @@ class extractorORCA(extractor):
             #
             # Iter       E(tot)           E(Corr)          Delta-E          Residual     Time
             #   0     -2.897443580     -0.035772194      0.000000000      0.027217829    0.00
+            # pylint: enable=line-too-long
             if (
                 line.strip()[:79]
                 == "Iter       E(tot)           E(Corr)          Delta-E          Residual     Time"
             ):
                 # Extracts MP2 energies under the initial line.
                 line = next(f)
-                if "energy_correl_mp2" not in self.parsed_info["outputs"].keys():
+                if "energy_correl_mp2" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_correl_mp2"] = []
-                if "mp2_total_energy" not in self.parsed_info["outputs"].keys():
+                if "mp2_total_energy" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["mp2_total_energy"] = []
 
                 self.parsed_info["outputs"]["energy_correl_mp2"].append(
@@ -542,7 +523,7 @@ class extractorORCA(extractor):
             # E(TOT)                                     ...     -7.473852176
             if line.strip()[:6] == "E(TOT)":
                 # Extracts total CCSD energy.
-                if "energy_ccsd" not in self.parsed_info["outputs"].keys():
+                if "energy_ccsd" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_ccsd"] = []
 
                 self.parsed_info["outputs"]["energy_ccsd"].append(
@@ -552,7 +533,7 @@ class extractorORCA(extractor):
             # T1 diagnostic                              ...      0.001316573
             if line.strip()[:13] == "T1 diagnostic":
                 # Extracts T1 diagnostic.
-                if "diag_t1" not in self.parsed_info["outputs"].keys():
+                if "diag_t1" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["diag_t1"] = []
 
                 self.parsed_info["outputs"]["diag_t1"].append(float(line.split()[3]))
@@ -560,7 +541,7 @@ class extractorORCA(extractor):
             # E(CCSD(T))                                 ...     -7.473882409
             if line.strip()[:10] == "E(CCSD(T))":
                 # Extracts total CCSD(T) energy..
-                if "energy_ccsd(t)" not in self.parsed_info["outputs"].keys():
+                if "energy_ccsd(t)" not in self.parsed_info["outputs"]:
                     self.parsed_info["outputs"]["energy_ccsd(t)"] = []
 
                 self.parsed_info["outputs"]["energy_ccsd(t)"].append(
@@ -570,7 +551,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def scf_info(self, f, line):
-        """Other scf information.
+        r"""Other scf information.
 
         This will be placed under the ``'keyword'`` JSON property.
 
@@ -604,12 +585,14 @@ class extractorORCA(extractor):
             ------------
         """
         while "Total time needed     " not in line.strip():
+            # pylint: disable=line-too-long
             # Hamiltonian:
             #  Ab initio Hamiltonian  Method          .... Hartree-Fock(GTOs)
 
             # General Settings:
             #  Integral files         IntName         .... al.chrg0.mult2-orca.sp.esp-ccsdt.anopvqz.vtightscf.sym-lambda0
             #  Hartree-Fock type      HFTyp           .... UHF
+            # pylint: enable=line-too-long
             if "Ab initio Hamiltonian" == line.strip()[:21]:
                 # We only include the HF type in the keywords.
                 for _ in range(0, 5):
@@ -619,7 +602,7 @@ class extractorORCA(extractor):
 
             #  Number of Electrons    NEL             ....    3
             if "Number of Electrons" == line.strip()[:19]:
-                if "n_ele" not in self.parsed_info["runtime_info"].keys():
+                if "n_ele" not in self.parsed_info["runtime_info"]:
                     self.parsed_info["runtime_info"]["n_ele"] = []
                 n_electrons = int(line.split()[5])
                 self.parsed_info["runtime_info"]["n_ele"].append(n_electrons)
@@ -638,7 +621,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def mulliken_charges(self, f, line):
-        """Mulliken atomic charges in same order as atomic coordinates.
+        r"""Mulliken atomic charges in same order as atomic coordinates.
 
         Parameters
         ----------
@@ -660,23 +643,21 @@ class extractorORCA(extractor):
         line = self.skip_lines(f, 2)
 
         # Creates initial mulliken_charges property.
-        if "mulliken_charges" not in self.parsed_info["outputs"].keys():
+        if "mulliken_charges" not in self.parsed_info["outputs"]:
             # self.parsed_info['outputs']['mulliken_charges'] = []
             pass
 
         # Appends Mulliken charges to a new item for every structure.
         # self.parsed_info['outputs']['mulliken_charges'].append([])
         while "Sum of atomic charges" not in line:
-            """
-            line_split = line.split(':')
-            self.parsed_info['outputs']['mulliken_charges'][-1].append(
-                float(line_split[-1])
-            )
-            """
+            # line_split = line.split(':')
+            # self.parsed_info['outputs']['mulliken_charges'][-1].append(
+            #     float(line_split[-1])
+            # )
             line = next(f)
 
     def loewdin_charges(self, f, line):
-        """Loewdin atomic charges in same order as atomic coordinates.
+        r"""Loewdin atomic charges in same order as atomic coordinates.
 
         Parameters
         ----------
@@ -698,23 +679,21 @@ class extractorORCA(extractor):
         line = self.skip_lines(f, 2)
 
         # Creates initial loewdin_charges property.
-        if "loewdin_charges" not in self.parsed_info["outputs"].keys():
+        if "loewdin_charges" not in self.parsed_info["outputs"]:
             # self.parsed_info['outputs']['loewdin_charges'] = []
             pass
 
         # Appends Loewdin charges to a new item for every structure.
         # self.parsed_info['outputs']['loewdin_charges'].append([])
         while "" != line.strip():
-            """
-            line_split = line.split(':')
-            self.parsed_info['outputs']['loewdin_charges'][-1].append(
-                float(line_split[-1])
-            )
-            """
+            # line_split = line.split(':')
+            # self.parsed_info['outputs']['loewdin_charges'][-1].append(
+            #     float(line_split[-1])
+            # )
             line = next(f)
 
     def final_energy_ele(self, f, line):
-        """Final electronic energy with all requested contributions.
+        r"""Final electronic energy with all requested contributions.
 
         Parameters
         ----------
@@ -733,13 +712,13 @@ class extractorORCA(extractor):
             FINAL SINGLE POINT ENERGY      -457.961331933491
             -------------------------   --------------------
         """
-        if "energy_ele" not in self.parsed_info["outputs"].keys():
+        if "energy_ele" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["energy_ele"] = []
         energy_ele = line.split()[-1]
         self.parsed_info["outputs"]["energy_ele"].append(float(energy_ele))
 
     def dipole(self, f, line):
-        """The X, Y, and Z dipole components.
+        r"""The X, Y, and Z dipole components.
 
         Parameters
         ----------
@@ -758,18 +737,18 @@ class extractorORCA(extractor):
             DIPOLE MOMENT
             -------------
         """
-        if "dipole_moment" not in self.parsed_info["outputs"].keys():
+        if "dipole_moment" not in self.parsed_info["outputs"]:
             # self.parsed_info['outputs']['dipole_moment'] = []
             pass
 
         while "Total Dipole Moment    :" not in line:
             line = next(f)
-        line_split = line.split()
+        # line_split = line.split()
         # dipole = [float(line_split[4]), float(line_split[5]), float(line_split[6])]
         # self.parsed_info['outputs']['dipole_moment'].append(dipole)
 
     def _add_geo_conv(self, info_label, line):
-        """Parse and add geometric convergence info to data.
+        r"""Parse and add geometric convergence info to data.
 
         Parameters
         ----------
@@ -781,7 +760,7 @@ class extractorORCA(extractor):
         split_line = line.split()
         value = float(split_line[2])
         target = float(split_line[3])
-        if f"geo_{info_label}_target" not in self.parsed_info["runtime_info"].keys():
+        if f"geo_{info_label}_target" not in self.parsed_info["runtime_info"]:
             self.parsed_info["runtime_info"][f"geo_{info_label}_target"] = target
         try:
             self.parsed_info["runtime_info"][f"geo_{info_label}_value"].append(value)
@@ -789,7 +768,7 @@ class extractorORCA(extractor):
             self.parsed_info["runtime_info"][f"geo_{info_label}_value"] = [value]
 
     def geo_conv(self, f, line):
-        """Extract geometric convergence values and tolerance.
+        r"""Extract geometric convergence values and tolerance.
 
         Parameters
         ----------
@@ -823,7 +802,7 @@ class extractorORCA(extractor):
             line = next(f)
 
     def frequencies(self, f, line):
-        """Extract vibrational frequencies, freq_vibs. Includes 0.00 frequencies.
+        r"""Extract vibrational frequencies, freq_vibs. Includes 0.00 frequencies.
 
         Based on https://github.com/MolSSI/QCSchema/pull/50#issuecomment-499155251.
 
@@ -853,7 +832,7 @@ class extractorORCA(extractor):
         line = self.skip_lines(f, 5)
 
         # Sets up data.
-        if "freq_vib" not in self.parsed_info["outputs"].keys():
+        if "freq_vib" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["freq_vib"] = []
 
         vibfreqs = []
@@ -866,7 +845,7 @@ class extractorORCA(extractor):
         self.parsed_info["outputs"]["freq_vib"].append(vibfreqs)
 
     def normal_modes(self, f, line):
-        """Extract normalized, mass-weighted normal modes, q.
+        r"""Extract normalized, mass-weighted normal modes, q.
 
         Based on https://github.com/MolSSI/QCSchema/pull/50#issuecomment-499155251.
 
@@ -890,7 +869,7 @@ class extractorORCA(extractor):
         line = self.skip_lines(f, 8)
 
         # Sets up data.
-        if "q" not in self.parsed_info["outputs"].keys():
+        if "q" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["normal_modes"] = []
 
         q = []
@@ -912,7 +891,7 @@ class extractorORCA(extractor):
         self.parsed_info["outputs"]["normal_modes"].append(q)
 
     def thermo_temp(self, f, line):
-        """Extracts temperature used for thermochemistry.
+        r"""Extracts temperature used for thermochemistry.
 
         Parameters
         ----------
@@ -930,14 +909,14 @@ class extractorORCA(extractor):
             Temperature         ... 298.15 K
         """
         # Sets up data.
-        if "temp_thermochem" not in self.parsed_info["outputs"].keys():
+        if "temp_thermochem" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["temp_thermochem"] = []
         temp = float(line.split()[2])
         self.parsed_info["outputs"]["temp_thermochem"].append(temp)
         next(f)
 
     def zpve(self, f, line):
-        """Extract zero-point vibrational energy correction.
+        r"""Extract zero-point vibrational energy correction.
 
         Parameters
         ----------
@@ -954,7 +933,7 @@ class extractorORCA(extractor):
 
             Zero point energy                ...      0.06455884 Eh      40.51 kcal/mol
         """
-        if "correc_zpe" not in self.parsed_info["outputs"].keys():
+        if "correc_zpe" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["correc_zpe"] = []
         zpve = float(line.split()[4])
         self.parsed_info["outputs"]["correc_zpe"].append(zpve)
@@ -962,7 +941,7 @@ class extractorORCA(extractor):
         line = next(f)
 
     def thermal_corrections(self, f, line):
-        """Extracts thermal vibrational, rotational, and translational
+        r"""Extracts thermal vibrational, rotational, and translational
         corrections.
 
         Parameters
@@ -980,14 +959,14 @@ class extractorORCA(extractor):
 
             Total thermal correction                  0.00868494 Eh       5.45 kcal/mol
         """
-        if "correc_thermal" not in self.parsed_info["outputs"].keys():
+        if "correc_thermal" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["correc_thermal"] = []
         thermal = float(line.split()[3])
         self.parsed_info["outputs"]["correc_thermal"].append(thermal)
         next(f)
 
     def enthalpic_corr(self, f, line):
-        """Extract enthalpic corrections; the difference between H_298 and
+        r"""Extract enthalpic corrections; the difference between H_298 and
         E_298.
 
         Parameters
@@ -1005,14 +984,14 @@ class extractorORCA(extractor):
 
             Thermal Enthalpy correction       ...      0.00094421 Eh       0.59 kcal/mol
         """
-        if "correc_enthalpy" not in self.parsed_info["outputs"].keys():
+        if "correc_enthalpy" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["correc_enthalpy"] = []
         enthalpy = float(line.split()[4])
         self.parsed_info["outputs"]["correc_enthalpy"].append(enthalpy)
         next(f)
 
     def entropic_corr(self, f, line):
-        """Extract translational, rotational, and vibrational entropic
+        r"""Extract translational, rotational, and vibrational entropic
         corrections to enthalpy for Gibbs free energy (i.e., T*S_298).
 
         Parameters
@@ -1030,7 +1009,7 @@ class extractorORCA(extractor):
 
             Final entropy term                ...      0.04136711
         """
-        if "correc_entropy" not in self.parsed_info["outputs"].keys():
+        if "correc_entropy" not in self.parsed_info["outputs"]:
             self.parsed_info["outputs"]["correc_entropy"] = []
         entropy = float(line.split()[4])
         self.parsed_info["outputs"]["correc_entropy"].append(entropy)

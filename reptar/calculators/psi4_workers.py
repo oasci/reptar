@@ -27,7 +27,7 @@ try:
 except ImportError:
     pass
 
-
+# pylint: disable=invalid-name
 def psi4_energy(
     idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
 ):
@@ -49,19 +49,23 @@ def psi4_energy(
         Total molecular multiplicity.
     method : :obj:`str`, default: ``'b3lyp-d3bj'``
         Specifies the Psi4 method used for the gradient. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
+        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
+        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
         for your specific version.
     options : :obj:`dict`
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html#job-control-keywords>`__
+        `Psi4 control keywords <https://psicode.org/psi4manual/master/
+        psithoninput.html#job-control-keywords>`__
         using the PsiAPI format. Some common ones are ``basis``,
         ``e_convergence``, ``d_convergence``, and ``reference``.
     threads : :obj:`int`, default: ``1``
         Number of threads for Psi4. This is almost always the number of cores
         being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
     mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
         The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
 
     Returns
     -------
@@ -74,7 +78,9 @@ def psi4_energy(
     Notes
     -----
     Psi4 uses QCElemental to build molecules from arrays.
-    There is some postprocessing in the `from_arrays routine <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.molparse.from_arrays.html#from-arrays>`__.
+    There is some postprocessing in the `from_arrays routine
+    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
+    qcelemental.molparse.from_arrays.html#from-arrays>`__.
     QCElemental will translate and rotate molecules which affects computed gradients.
     Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
     """
@@ -83,10 +89,10 @@ def psi4_energy(
     if options is not None:
         psi4.set_options(options)
     R = R[idxs]
-    G = np.zeros(R.shape)
-    for i in range(len(R)):
+    E = np.empty(R.shape)
+    for i, r in enumerate(R):
         mol = psi4.core.Molecule.from_arrays(
-            geom=R[i],
+            geom=r,
             elez=Z,
             molecular_charge=charge,
             molecular_multiplicity=mult,
@@ -119,19 +125,23 @@ def psi4_engrad(
         Total molecular multiplicity.
     method : :obj:`str`, default: ``'b3lyp-d3bj'``
         Specifies the Psi4 method used for the gradient. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
+        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
+        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
         for your specific version.
     options : :obj:`dict`
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html#job-control-keywords>`__
+        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html
+        #job-control-keywords>`__
         using the PsiAPI format. Some common ones are ``basis``,
         ``e_convergence``, ``d_convergence``, and ``reference``.
     threads : :obj:`int`, default: ``1``
         Number of threads for Psi4. This is almost always the number of cores
         being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
     mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
         The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
 
     Returns
     -------
@@ -147,7 +157,9 @@ def psi4_engrad(
     Notes
     -----
     Psi4 uses QCElemental to build molecules from arrays.
-    There is some postprocessing in the `from_arrays routine <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.molparse.from_arrays.html#from-arrays>`__.
+    There is some postprocessing in the `from_arrays routine
+    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
+    qcelemental.molparse.from_arrays.html#from-arrays>`__.
     QCElemental will translate and rotate molecules which affects computed gradients.
     Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
     """
@@ -158,9 +170,9 @@ def psi4_engrad(
     R = R[idxs]
     G = np.zeros(R.shape)
     E = np.zeros(R.shape[0])
-    for i in range(len(R)):
+    for i, r in enumerate(R):
         mol = psi4.core.Molecule.from_arrays(
-            geom=R[i],
+            geom=r,
             elez=Z,
             molecular_charge=charge,
             molecular_multiplicity=mult,
@@ -196,19 +208,23 @@ def psi4_opt(
         Total molecular multiplicity.
     method : :obj:`str`, default: ``'b3lyp-d3bj'``
         Specifies the Psi4 method used for the gradient. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
+        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
+        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
         for your specific version.
     options : :obj:`dict`
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html#job-control-keywords>`__
+        `Psi4 control keywords <https://psicode.org/psi4manual/master/
+        psithoninput.html#job-control-keywords>`__
         using the PsiAPI format. Some common ones are ``basis``,
         ``e_convergence``, ``d_convergence``, and ``reference``.
     threads : :obj:`int`, default: ``1``
         Number of threads for Psi4. This is almost always the number of cores
         being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
     mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
         The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
 
     Returns
     -------
@@ -226,7 +242,9 @@ def psi4_opt(
     Notes
     -----
     Psi4 uses QCElemental to build molecules from arrays.
-    There is some postprocessing in the `from_arrays routine <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/qcelemental.molparse.from_arrays.html#from-arrays>`__.
+    There is some postprocessing in the `from_arrays routine
+    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
+    qcelemental.molparse.from_arrays.html#from-arrays>`__.
     QCElemental will translate and rotate molecules which affects computed gradients.
     Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
     """
@@ -239,9 +257,9 @@ def psi4_opt(
     R_opt = np.empty(R.shape, dtype=np.float64)
     G = np.full(R.shape, np.nan, dtype=np.float64)
     E = np.full(R.shape[0], np.nan, dtype=np.float64)
-    for i in range(len(R)):
+    for i, r in enumerate(R):
         mol = psi4.core.Molecule.from_arrays(
-            geom=R[i],
+            geom=r,
             elez=Z,
             molecular_charge=charge,
             molecular_multiplicity=mult,
@@ -262,9 +280,9 @@ def psi4_opt(
             r_opt *= psi4.constants.bohr2angstroms
             g /= psi4.constants.bohr2angstroms
 
-            opt_conv[i] = r_opt_conv
+            opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
             R_opt[i] = r_opt
-            E[i] = e
+            E[i] = e  # pylint: disable=used-before-assignment
             G[i] = g
 
     return idxs, opt_conv, R_opt, E, G

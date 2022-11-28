@@ -2,24 +2,24 @@
 Parsers and Extractors
 ======================
 
-Parsers and extractors work together to retrieve data from supported files and store it in :attr:`~reptar.parsers.parser.parsed_info`.
+Parsers and extractors work together to retrieve data from supported files and store it in :attr:`~reptar.parsers.Parser.parsed_info`.
 
 Parsers
 =======
 
 A parser a package-specific driver for iterating through each line of output files and storing data.
-Each package has its own parser that inherits the base :class:`~reptar.parsers.parser.parser` class which provides common attributes and methods.
+Each package has its own parser that inherits the base :class:`~reptar.parsers.Parser` class which provides common attributes and methods.
 For example, we have an xTB parser class:
 
-.. autoclass:: reptar.parsers.parserXTB
+.. autoclass:: reptar.parsers.ParserXTB
     :noindex:
 
 ``parse``
 ---------
-After initializing a parser object with the relevant paths, you can then call the :meth:`~reptar.parsers.parser.parse` method.
-Each package parser class must define its own :meth:`~reptar.parsers.parser.parse` method.
+After initializing a parser object with the relevant paths, you can then call the :meth:`~reptar.parsers.Parser.parse` method.
+Each package parser class must define its own :meth:`~reptar.parsers.Parser.parse` method.
 
-.. automethod:: reptar.parsers.parser.parse
+.. automethod:: reptar.parsers.Parser.parse
     :noindex:
 
 ``parsed_info``
@@ -27,7 +27,7 @@ Each package parser class must define its own :meth:`~reptar.parsers.parser.pars
 
 Used to store any and all information that can be added to a :ref:`File <file>` object.
 
-.. autoattribute:: reptar.parsers.parser.parsed_info
+.. autoattribute:: reptar.parsers.Parser.parsed_info
     :noindex:
 
 
@@ -35,7 +35,7 @@ Extractors
 ==========
 
 As previously mentioned, the parser drives the extraction of information from files.
-Each extractor is a :class:`~reptar.extractors.extractor.extractor` child class that must have two things.
+Each extractor is a :class:`~reptar.extractors.Extractor` child class that must have two things.
 
 Triggers
 --------
@@ -43,7 +43,7 @@ Triggers
 Reptar has to know when to start extracting information while reading the output files.
 This is accomplished with a tuple of triggers.
 
-.. autoattribute:: reptar.extractors.extractor.triggers
+.. autoattribute:: reptar.extractors.Extractor.triggers
     :noindex:
 
 Each element is a tuple of length two with a lambda function and corresponding extractor method name as a string.
@@ -54,10 +54,10 @@ For example, our ``triggers`` attribute could be something like this:
 .. code-block:: python
 
     triggers = (
-        (lambda line: True if ('* xtb version' in line) else False, 'xtb_version'),
-        (lambda line: True if (':                      SETUP                      :' == line.strip()) else False, 'gfn_setup'),
-        (lambda line: True if ('::                     SUMMARY                     ::' in line.strip()) else False, 'summary_energies'),
-        (lambda line: True if ('normal termination of xtb' == line.strip()) else False, 'success'),
+        (lambda line: bool('* xtb version' in line), 'xtb_version'),
+        (lambda line: bool(':                      SETUP                      :' == line.strip()), 'gfn_setup'),
+        (lambda line: bool('::                     SUMMARY                     ::' in line.strip()), 'summary_energies'),
+        (lambda line: bool('normal termination of xtb' == line.strip()), 'success'),
     )
 
 When reptar is reading the output file, it evaluates the lambda function and if ``True`` it calls the extractor method.
@@ -101,7 +101,7 @@ For example, xTB will print energy summaries like the one below.
     :: atomisation energy       153.792759436621 Eh    ::
     :::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-Once reptar encounters the ``SUMMARY`` line, it activates the :meth:`~reptar.extractors.extractorXTB.summary_energies` method.
+Once reptar encounters the ``SUMMARY`` line, it activates the :meth:`~reptar.extractors.ExtractorXTB.summary_energies` method.
 Reptar then extracts information such as the total, SCC, and nuclear repulsion energy from this block of text.
 
 Custom extractors
@@ -113,5 +113,5 @@ However, this is not always conducive to a fast-paced research environment.
 We would love for you to add functionality to reptar, but sometimes you just need to get your information and move on.
 
 Reptar was designed to be easily accommodate custom extractors for a supported parser.
-You can write your own :class:`~reptar.extractors.extractor.extractor` child class that implements its own triggers and extractor methods.
+You can write your own :class:`~reptar.extractors.Extractor` child class that implements its own triggers and extractor methods.
 

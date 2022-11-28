@@ -22,29 +22,31 @@
 
 """Tests and example builders for conformer and rotamer search with crest."""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
 import os
+import sys
+import pytest
 import numpy as np
 from reptar import Creator, File
 
-import sys
-
 sys.path.append("..")
+# pylint: disable-next=wrong-import-position
 from .paths import get_crest_50h2o_nci_paths
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Writing paths
-crest_dir = "./tmp/crest/"
-os.makedirs(crest_dir, exist_ok=True)
+CREST_DIR = "./tmp/crest/"
+os.makedirs(CREST_DIR, exist_ok=True)
 
 
 @pytest.mark.order(0)
 def test_crest_50h2o_nci_exdir_conformers():
-    """ """
-    calc_path, out_path, conf_path, rot_path = get_crest_50h2o_nci_paths()
-    exdir_path = os.path.join(crest_dir, "50h2o.exdir")
+    _, out_path, conf_path, _ = get_crest_50h2o_nci_paths()
+    exdir_path = os.path.join(CREST_DIR, "50h2o.exdir")
 
     create = Creator()
     create.load(exdir_path, mode="w", allow_remove=True)
@@ -83,9 +85,8 @@ def test_crest_50h2o_nci_exdir_conformers():
 
 
 def test_crest_50h2o_nci_exdir_rotamers():
-    """ """
-    calc_path, out_path, conf_path, rot_path = get_crest_50h2o_nci_paths()
-    exdir_path = os.path.join(crest_dir, "50h2o.exdir")
+    _, out_path, _, rot_path = get_crest_50h2o_nci_paths()
+    exdir_path = os.path.join(CREST_DIR, "50h2o.exdir")
 
     create = Creator()
     create.load(exdir_path, mode="w", allow_remove=True)

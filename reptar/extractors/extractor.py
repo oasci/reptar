@@ -23,7 +23,7 @@
 from abc import ABC, abstractmethod
 
 
-class extractor(ABC):
+class Extractor(ABC):
     """Base class for extracting information from files."""
 
     def __init__(self):
@@ -39,7 +39,6 @@ class extractor(ABC):
 
         :type: :obj:`tuple`
         """
-        pass
 
     @property
     def parsed_info(self):
@@ -68,7 +67,7 @@ class extractor(ABC):
         self._parsed_info = value
 
     @parsed_info.deleter
-    def parsed_info(self, value):
+    def parsed_info(self):
         del self._parsed_info
 
     def skip_lines(self, f, n):
@@ -86,6 +85,6 @@ class extractor(ABC):
         :obj:`str`
             Line of file.
         """
-        for i in range(n):
+        for _ in range(n):
             line = next(f)
         return line

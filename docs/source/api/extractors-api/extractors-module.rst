@@ -4,9 +4,9 @@
 .. toctree::
     :maxdepth: 1
 
-    extractor
-    extractorASE
-    extractorCREST
-    extractorORCA
-    extractorXTB
+    Extractor
+    ExtractorASE
+    ExtractorCREST
+    ExtractorORCA
+    ExtractorXTB
 

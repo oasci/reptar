@@ -20,13 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ..extractors import extractorASE
-import numpy as np
-from .parser import parser
+from ase.io.trajectory import Trajectory
+from ..extractors import ExtractorASE  # pylint: disable=no-name-in-module
+from .parser import Parser  # pylint: disable=no-name-in-module
 
 
-class parserASE(parser):
+class ParserASE(Parser):
     """Custom parser for ASE trajectory files."""
+
+    # We always pass certain paths into methods here.
+    # pylint: disable=unused-argument
 
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
         """
@@ -38,13 +41,11 @@ class parserASE(parser):
         extractors : :obj:`list`, default: ``None``
             Additional extractors for the parser to use.
         """
-        global Trajectory
-        from ase.io.trajectory import Trajectory
 
         self.package = "ase"
         if extractors is None:
             extractors = []
-        extractors.insert(0, extractorASE())
+        extractors.insert(0, ExtractorASE())
         super().__init__(traj_path, extractors)
 
         self.traj_path = traj_path

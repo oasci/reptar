@@ -4,8 +4,8 @@
 .. toctree::
     :maxdepth: 1
 
-    parser
-    parserASE
-    parserCREST
-    parserORCA
-    parserXTB
+    Parser
+    ParserASE
+    ParserCREST
+    ParserORCA
+    ParserXTB

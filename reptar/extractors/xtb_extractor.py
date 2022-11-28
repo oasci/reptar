@@ -20,94 +20,74 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .extractor import extractor
+from .extractor import Extractor  # pylint: disable=no-name-in-module
 
 
-class extractorXTB(extractor):
+class ExtractorXTB(Extractor):
     """xTB extractor"""
 
-    def __init__(self):
-        super().__init__()
+    # We always pass the file object into methods here.
+    # pylint: disable=unused-argument
 
     @property
     def triggers(self):
         trig = (
-            (lambda line: True if ("* xtb version" in line) else False, "xtb_version"),
+            (lambda line: bool("* xtb version" in line), "xtb_version"),
             (
-                lambda line: True
-                if ("program call               :" in line.strip())
-                else False,
+                lambda line: bool("program call               :" in line.strip()),
                 "run_type",
             ),
             (
-                lambda line: True
-                if ("number of electrons        :" in line.strip())
-                else False,
+                lambda line: bool("number of electrons        :" in line.strip()),
                 "n_electrons",
             ),
             (
-                lambda line: True
-                if ("charge                     :" in line.strip())
-                else False,
+                lambda line: bool("charge                     :" in line.strip()),
                 "charge",
             ),
             (
-                lambda line: True
-                if ("spin                       :" in line.strip())
-                else False,
+                lambda line: bool("spin                       :" in line.strip()),
                 "multiplicity",
             ),
-            (lambda line: True if ("> wall" == line.strip()) else False, "wall_pot"),
+            (lambda line: bool("> wall" == line.strip()), "wall_pot"),
             (
-                lambda line: True
-                if (
+                lambda line: (
                     ":                      SETUP                      :"
                     == line.strip()
-                )
-                else False,
+                ),
                 "gfn_setup",
             ),
             (
-                lambda line: True
-                if (
+                lambda line: bool(
                     "::                     SUMMARY                     ::"
                     in line.strip()
-                )
-                else False,
+                ),
                 "summary_energies",
             ),
             (
-                lambda line: True
-                if (
+                lambda line: bool(
                     "|               Molecular Dynamics                |"
                     in line.strip()
-                )
-                else False,
+                ),
                 "md_setup",
             ),
             (
-                lambda line: True
-                if (
+                lambda line: bool(
                     "A N C O P T" == line.strip("| \n")
                     or "L-ANC optimizer" == line.strip("| \n")
-                )
-                else False,
+                ),
                 "opt_data",
             ),
             (
-                lambda line: True if ("average properties" == line.strip()) else False,
+                lambda line: bool("average properties" == line.strip()),
                 "md_avg_props",
             ),
             (
-                lambda line: True
-                if ("thermostating problem" == line.strip())
-                else False,
+                lambda line: bool("thermostating problem" == line.strip()),
                 "thermostat_prob",
             ),
             (
-                lambda line: True
-                if ("normal termination of xtb" == line.strip())
-                else False,
+                lambda line: bool("normal termination of xtb" == line.strip()),
                 "success",
             ),
         )
@@ -253,7 +233,7 @@ class extractorXTB(extractor):
             --> 1: 23.62158
             --> 2: all
         """
-        if "wall_potential" in self.parsed_info.keys():
+        if "wall_potential" in self.parsed_info:
             pots = self.parsed_info["runtime_info"]["wall_potential"]
         else:
             pots = []
@@ -372,10 +352,10 @@ class extractorXTB(extractor):
             :::::::::::::::::::::::::::::::::::::::::::::::::::::
         """
         if self.parsed_info["runtime_info"]["calc_driver"] != "molecular_dynamics":
-            if "energy_scf" not in self.parsed_info["outputs"].keys():
+            if "energy_scf" not in self.parsed_info["outputs"]:
                 self.parsed_info["outputs"]["energy_scf"] = []
 
-            if "energy_nuc_repul" not in self.parsed_info["outputs"].keys():
+            if "energy_nuc_repul" not in self.parsed_info["outputs"]:
                 self.parsed_info["outputs"]["energy_nuc_repul"] = []
 
             while "" != line.strip():
@@ -393,7 +373,7 @@ class extractorXTB(extractor):
             self.parsed_info["outputs"]["energy_nuc_repul"].append(energy_nuc_repul)
         # For MD simulations.
         else:
-            if "energy_pot" not in self.parsed_info["outputs"].keys():
+            if "energy_pot" not in self.parsed_info["outputs"]:
                 self.parsed_info["outputs"]["energy_pot"] = []
 
             while "" != line.strip():
@@ -473,7 +453,7 @@ class extractorXTB(extractor):
 
             line = next(f)
 
-        if "md_restarted" not in self.parsed_info["runtime_info"].keys():
+        if "md_restarted" not in self.parsed_info["runtime_info"]:
             self.parsed_info["runtime_info"]["md_restarted"] = False
 
     def opt_data(self, f, line):
@@ -587,5 +567,5 @@ class extractorXTB(extractor):
 
             normal termination of xtb
         """
-        if "success" not in self.parsed_info["runtime_info"].keys():
+        if "success" not in self.parsed_info["runtime_info"]:
             self.parsed_info["runtime_info"]["success"] = True

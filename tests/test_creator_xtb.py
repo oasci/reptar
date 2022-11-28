@@ -22,15 +22,18 @@
 
 """Tests and example builders for molecular dynamics with xtb."""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
+import sys
 import os
+import pytest
 import numpy as np
 from reptar import Creator, File
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
-import sys
-
 sys.path.append("..")
+# pylint: disable-next=wrong-import-position
 from .paths import (
     get_1h2o_120meoh_eq_paths,
     get_1h2o_120meoh_prod_paths,
@@ -41,17 +44,16 @@ from .paths import (
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Writing paths
-xtb_dir = "./tmp/xtb/"
-os.makedirs(xtb_dir, exist_ok=True)
+XTB_DIR = "./tmp/xtb/"
+os.makedirs(XTB_DIR, exist_ok=True)
 
 
 @pytest.mark.dependency(scope="session")
 @pytest.mark.order(0)
 def test_1h2o_120meoh_md_exdir():
-    """ """
-    dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
+    _, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
     _, _, out_path_prod, geom_path_prod, traj_path_prod = get_1h2o_120meoh_prod_paths()
-    exdir_path = os.path.join(xtb_dir, "1h2o_120meoh_md.exdir")
+    exdir_path = os.path.join(XTB_DIR, "1h2o_120meoh_md.exdir")
 
     num_waters = 1
     atoms_per_water = 3
@@ -107,10 +109,9 @@ def test_1h2o_120meoh_md_exdir():
 
 @pytest.mark.dependency(depends=["test_1h2o_120meoh_md_exdir"], scope="module")
 def test_1h2o_120meoh_md_json():
-    """ """
-    dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
+    _, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
     _, _, out_path_prod, geom_path_prod, traj_path_prod = get_1h2o_120meoh_prod_paths()
-    json_path = os.path.join(xtb_dir, "1h2o_120meoh_md.json")
+    json_path = os.path.join(XTB_DIR, "1h2o_120meoh_md.json")
 
     num_waters = 1
     atoms_per_water = 3
@@ -173,10 +174,8 @@ def test_1h2o_120meoh_md_json():
 
 @pytest.mark.dependency(depends=["test_1h2o_120meoh_md_exdir"], scope="module")
 def test_1h2o_120meoh_md_prod_exdir_to_npz():
-    """ """
-    dir_path, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
-    exdir_path = os.path.join(xtb_dir, "1h2o_120meoh_md.exdir")
-    npz_path = os.path.join(xtb_dir, "1h2o_120meoh_md-prod.npz")
+    exdir_path = os.path.join(XTB_DIR, "1h2o_120meoh_md.exdir")
+    npz_path = os.path.join(XTB_DIR, "1h2o_120meoh_md-prod.npz")
 
     create_exdir = Creator()
     create_exdir.load(exdir_path, mode="r")
@@ -195,9 +194,8 @@ def test_1h2o_120meoh_md_prod_exdir_to_npz():
 
 
 def test_50h2o_opt_to_exdir():
-    """ """
-    dir_path, _, out_path, traj_path = get_50h2o_opt_paths()
-    exdir_path = os.path.join(xtb_dir, "50h2o-opt.exdir")
+    _, _, out_path, traj_path = get_50h2o_opt_paths()
+    exdir_path = os.path.join(XTB_DIR, "50h2o-opt.exdir")
 
     create_exdir = Creator()
     create_exdir.load(exdir_path, mode="w", allow_remove=True)

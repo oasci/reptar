@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .parser import parser
-from ..extractors import extractorORCA
+from .parser import Parser  # pylint: disable=no-name-in-module
+from ..extractors import ExtractorORCA  # pylint: disable=no-name-in-module
 
 
-class parserORCA(parser):
+class ParserORCA(Parser):
     """Custom parser for ORCA output files."""
 
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
@@ -44,7 +44,7 @@ class parserORCA(parser):
         self.package = "orca"
         if extractors is None:
             extractors = []
-        extractors.insert(0, extractorORCA())
+        extractors.insert(0, ExtractorORCA())
         super().__init__(out_path, extractors)
         # TODO: Handle geom and traj paths
 
@@ -52,7 +52,7 @@ class parserORCA(parser):
         """Parses output file and extracts information."""
         # cclib parsed information.
         try:
-            import cclib
+            import cclib  # pylint: disable=import-outside-toplevel
 
             self.cclib_data = cclib.io.ccread(self.out_path)
             self.map_cclib_data()

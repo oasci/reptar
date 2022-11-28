@@ -22,13 +22,16 @@
 
 import os
 import shutil
+import ase
+from ase.io.ulm import InvalidULMFileError
 import numpy as np
-from .parsers import parserORCA, parserXTB, parserASE, parserCREST
-from .reptar_file import File
 from pkg_resources import resource_stream
 import yaml
+from . import _version
+from .reptar_file import File
 
-from reptar import _version
+# pylint: disable=no-name-in-module
+from .parsers import ParserORCA, ParserXTB, ParserASE, ParserCREST
 
 __version__ = _version.get_versions()["version"]
 
@@ -56,13 +59,14 @@ def identify_parser(out_path):
                     filetype = parser
                     if do_break:
                         return filetype
+    return None
 
 
 # Triggers to identify output files.
 triggers = [
-    (parserORCA, ["O   R   C   A"], True),
-    (parserXTB, ["x T B"], True),
-    (parserCREST, ["C R E S T"], True),
+    (ParserORCA, ["O   R   C   A"], True),
+    (ParserXTB, ["x T B"], True),
+    (ParserCREST, ["C R E S T"], True),
 ]
 
 
@@ -70,22 +74,18 @@ def identify_trajectory(traj_path):
     """Identifies the type of trajectory depending on a series of tests."""
     # ASE trajectory
     try:
-        import ase
-        from ase.io.ulm import InvalidULMFileError
-
-        try:
-            traj = ase.io.trajectory.Trajectory(traj_path)
-            return parserASE
-        except InvalidULMFileError:
-            # Does have ase installed but is not a trajectory file.
-            pass
-    except ImportError:
-        # Do not have ase installed.
+        ase.io.trajectory.Trajectory(traj_path)
+        return ParserASE
+    except InvalidULMFileError:
+        # Does have ase installed but is not a trajectory file.
         pass
+    return None
 
 
 class Creator:
     """Create groups from computational chemistry data."""
+
+    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, rfile=None):
         """
@@ -129,7 +129,7 @@ class Creator:
         self._rfile = value
 
     @rfile.deleter
-    def rfile(self, value):
+    def rfile(self):
         del self._rfile
 
     def parse_output(
@@ -162,8 +162,8 @@ class Creator:
             self.traj_path = os.path.abspath(traj_path)
 
         # Identify and run the parser.
-        packageParser = identify_parser(self.out_path)
-        self.parser = packageParser(
+        package_parser = identify_parser(self.out_path)
+        self.parser = package_parser(
             self.out_path,
             geom_path=geom_path,
             traj_path=traj_path,
@@ -184,8 +184,8 @@ class Creator:
             Additional extractors for the parser to use.
         """
         self.traj_path = os.path.abspath(traj_path)
-        packageParser = identify_trajectory(self.traj_path)
-        self.parser = packageParser(
+        package_parser = identify_trajectory(self.traj_path)
+        self.parser = package_parser(
             out_path=None, geom_path=None, traj_path=traj_path, extractors=extractors
         )
         self.parsed_info = self.parser.parse()
@@ -364,7 +364,7 @@ class Creator:
 
             # Add all definitions.
             for key_cat in def_add.keys():
-                if key_cat not in defs.keys():
+                if key_cat not in defs:
                     defs[key_cat] = {}
                 for key_def in def_add[key_cat].keys():
                     if key_def not in defs[key_cat].keys():

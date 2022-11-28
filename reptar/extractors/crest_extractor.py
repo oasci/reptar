@@ -21,14 +21,16 @@
 # SOFTWARE.
 
 import numpy as np
-from .extractor import extractor
+from .extractor import Extractor  # pylint: disable=no-name-in-module
 
 
-class extractorCREST(extractor):
-    """CREST extractor"""
+class ExtractorCREST(Extractor):
+    r"""CREST extractor"""
+    # We always pass the file object into methods here.
+    # pylint: disable=unused-argument
 
     def __init__(self, xyz_type):
-        """
+        r"""
         Parameters
         ----------
         xyz_type : :obj:`str`
@@ -41,18 +43,18 @@ class extractorCREST(extractor):
     @property
     def triggers(self):
         trig = (
-            (lambda line: True if ("   Version " in line) else False, "crest_version"),
+            (lambda line: bool("   Version " in line), "crest_version"),
             (
-                lambda line: True
-                if ("total number unique points considered further :" in line)
-                else False,
+                lambda line: bool(
+                    "total number unique points considered further :" in line
+                ),
                 "ensemble_info",
             ),
         )
         return trig
 
     def crest_version(self, f, line):
-        """Version of CREST.
+        r"""Version of CREST.
 
         Parameters
         ----------
@@ -75,7 +77,7 @@ class extractorCREST(extractor):
         next(f)
 
     def ensemble_info(self, f, line):
-        """Ensemble information for conformers and rotamers.
+        r"""Ensemble information for conformers and rotamers.
 
         Parameters
         ----------

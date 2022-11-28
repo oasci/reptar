@@ -398,7 +398,7 @@ TODO: Finish this section.
             import numpy as np
             import os
             from reptar import File, Saver
-            from reptar.calculators.drivers import driverENGRAD
+            from reptar.calculators.drivers import DriverEnGrad
             from reptar.calculators.psi4_workers import psi4_engrad
             import time
 
@@ -471,7 +471,7 @@ TODO: Finish this section.
             saver = Saver(rfile_path, (E_key, G_key))
 
             # Setup and run energy and gradient calculations.
-            driver = driverENGRAD(
+            driver = DriverEnGrad(
                 Z, R, E, G, worker, worker_kwargs, **driver_kwargs
             )
             t_start = time.time()

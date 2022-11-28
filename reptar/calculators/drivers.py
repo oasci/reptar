@@ -20,9 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from ..utils import chunk_iterable
 import math
 import numpy as np
+from ..utils import chunk_iterable
 
 try:
     import ray
@@ -30,8 +30,8 @@ except ImportError:
     pass
 
 
-class driverENERGY:
-    """Supervisor of energy+gradient workers.
+class DriverEnergy:
+    r"""Supervisor of energy+gradient workers.
 
     Creates and manages ray tasks using specified worker.
     """
@@ -43,14 +43,15 @@ class driverENERGY:
         E,
         worker,
         worker_kwargs,
-        n_cpus,
+        use_ray=False,
+        n_cpus=1,
         n_cpus_worker=1,
         chunk_size=50,
         start_slice=None,
         end_slice=None,
         ray_address="auto",
     ):
-        """
+        r"""
         Parameters
         ----------
         Z : :obj:`numpy.ndarray`, ndim: ``1``
@@ -120,7 +121,7 @@ class driverENERGY:
             self.R = ray.put(R)
 
     def _idx_todo(self):
-        """Indices of missing energies (calculations to do).
+        r"""Indices of missing energies (calculations to do).
 
         Determines this by finding all ``NaN`` elements.
 
@@ -134,7 +135,7 @@ class driverENERGY:
         return idx_todo
 
     def run(self, saver=None):
-        """Run the calculations.
+        r"""Run the calculations.
 
         Parameters
         ----------
@@ -152,6 +153,7 @@ class driverENERGY:
 
         if not self.use_ray:
             for idx in idxs_todo:
+                # pylint: disable-next=invalid-name
                 _, E_done = worker([idx], self.Z, self.R, **self.worker_kwargs)
                 self.E[idx] = E_done
 
@@ -180,7 +182,7 @@ class driverENERGY:
             while len(workers) != 0:
                 done_id, workers = ray.wait(workers)
 
-                idx_done, E_done = ray.get(done_id)[0]
+                idx_done, E_done = ray.get(done_id)[0]  # pylint: disable=invalid-name
                 self.E[idx_done] = E_done
 
                 if saver is not None:
@@ -191,8 +193,8 @@ class driverENERGY:
         return self.E
 
 
-class driverENGRAD:
-    """Supervisor of energy+gradient workers.
+class DriverEnGrad:
+    r"""Supervisor of energy+gradient workers.
 
     Creates and manages ray tasks using specified worker.
     """
@@ -213,7 +215,7 @@ class driverENGRAD:
         end_slice=None,
         ray_address="auto",
     ):
-        """
+        r"""
         Parameters
         ----------
         Z : :obj:`numpy.ndarray`, ndim: ``1``
@@ -291,7 +293,7 @@ class driverENGRAD:
             self.R = ray.put(R)
 
     def _idx_todo(self):
-        """Indices of missing energies (calculations to do).
+        r"""Indices of missing energies (calculations to do).
 
         Determines this by finding all ``NaN`` elements.
 
@@ -300,12 +302,13 @@ class driverENGRAD:
         :obj:`numpy.ndarray`
             Indices for ``R`` that are missing energie values.
         """
+        # pylint: disable-next=invalid-name
         E = self.E[self.start_slice : self.end_slice]
         idx_todo = np.argwhere(np.isnan(E))[:, 0]
         return idx_todo
 
     def run(self, saver=None):
-        """Run the calculations.
+        r"""Run the calculations.
 
         Parameters
         ----------
@@ -325,6 +328,7 @@ class driverENGRAD:
 
         if not self.use_ray:
             for idx in idxs_todo:
+                # pylint: disable-next=invalid-name
                 _, E_done, G_done = worker([idx], self.Z, self.R, **self.worker_kwargs)
                 self.E[idx] = E_done
                 self.G[idx] = G_done
@@ -354,6 +358,7 @@ class driverENGRAD:
             while len(workers) != 0:
                 done_id, workers = ray.wait(workers)
 
+                # pylint: disable-next=invalid-name
                 idx_done, E_done, G_done = ray.get(done_id)[0]
                 self.E[idx_done] = E_done
                 self.G[idx_done] = G_done
@@ -366,8 +371,8 @@ class driverENGRAD:
         return self.E, self.G
 
 
-class driverOPT:
-    """Supervisor of optimization workers.
+class DriverOpt:
+    r"""Supervisor of optimization workers.
 
     Creates and manages ray tasks using specified worker.
     """
@@ -376,7 +381,7 @@ class driverOPT:
         self,
         Z,
         R,
-        R_opt,
+        R_opt,  # pylint: disable=invalid-name
         E,
         G,
         worker,
@@ -389,7 +394,7 @@ class driverOPT:
         end_slice=None,
         ray_address="auto",
     ):
-        """
+        r"""
         Parameters
         ----------
         Z : :obj:`numpy.ndarray`, ndim: ``1``
@@ -445,7 +450,7 @@ class driverOPT:
         # Storing arrays and other information
         self.Z = Z
         self.R = R
-        self.R_opt = R_opt
+        self.R_opt = R_opt  # pylint: disable=invalid-name
         self.opt_conv = ~np.isnan(self.R_opt[:, 0, 0])
         self.E = E
         self.G = G
@@ -468,7 +473,7 @@ class driverOPT:
             self.R = ray.put(R)
 
     def _idx_todo(self):
-        """Indices of NaN geometries (calculations to do).
+        r"""Indices of NaN geometries (calculations to do).
 
         Returns
         -------
@@ -478,7 +483,7 @@ class driverOPT:
         return np.where(~self.opt_conv[self.start_slice : self.end_slice])[0]
 
     def run(self, saver=None):
-        """Run the calculations.
+        r"""Run the calculations.
 
         Parameters
         ----------
@@ -498,6 +503,7 @@ class driverOPT:
 
         if not self.use_ray:
             for idx in idxs_todo:
+                # pylint: disable-next=invalid-name
                 _, opt_conv_done, R_opt_done, E_done, G_done = worker(
                     [idx], self.Z, self.R, **self.worker_kwargs
                 )
@@ -531,6 +537,7 @@ class driverOPT:
             while len(workers) != 0:
                 done_id, workers = ray.wait(workers)
 
+                # pylint: disable-next=invalid-name
                 idxs_done, opt_conv_done, R_opt_done, E_done, G_done = ray.get(done_id)[
                     0
                 ]

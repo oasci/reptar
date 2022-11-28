@@ -22,32 +22,33 @@
 
 """Tests writing PDB files from group"""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
+import sys
 import os
+import pytest
 import numpy as np
 from reptar import File
 from reptar.writers import write_pdb
 
-import sys
-
 sys.path.append("..")
-from .paths import *
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Source paths
-data_dir = "./data/"
+DATA_DIR = "./data/"
 
 # Writing paths
-writing_dir = "./tmp/writing/"
-os.makedirs(writing_dir, exist_ok=True)
+WRITING_DIR = "./tmp/writing/"
+os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_pdb_writer_1h2o_120meoh_prod():
     """Writing short PDB file from exdir file"""
-    exdir_path = os.path.join(data_dir, "1h2o_120meoh_md.exdir")
-    pdb_path = os.path.join(writing_dir, "1h2o_120meoh_md_eq_1.pdb")
+    exdir_path = os.path.join(DATA_DIR, "1h2o_120meoh_md.exdir")
+    pdb_path = os.path.join(WRITING_DIR, "1h2o_120meoh_md_eq_1.pdb")
 
     rfile = File(exdir_path, mode="r")
 

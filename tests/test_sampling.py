@@ -22,34 +22,35 @@
 
 """Tests sampling structures from exdir Groups"""
 
-import pytest
-import os
-import shutil
-import numpy as np
-from reptar import Creator, Sampler
-from reptar.sampling import r_from_entities
-import itertools
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
 
 import sys
+import os
+import shutil
+import itertools
+import numpy as np
+import pytest
+from reptar import Creator, Sampler
+from reptar.sampling import r_from_entities
 
 sys.path.append("..")
-from .paths import *
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Source paths
-data_dir = "./data/"
+DATA_DIR = "./data/"
 
 # Writing paths
-sampling_dir = "./tmp/sampling/"
-os.makedirs(sampling_dir, exist_ok=True)
+SAMPLING_DIR = "./tmp/sampling/"
+os.makedirs(SAMPLING_DIR, exist_ok=True)
 
 
 def test_1h2o_120meoh_prod_sampler():
     """Sampling from xTB MD reptar file."""
-    source_path = os.path.join(data_dir, "1h2o_120meoh_md.exdir")
-    dest_path = f"{sampling_dir}/test_1h2o_120meoh_prod_sampling.exdir"
+    source_path = os.path.join(DATA_DIR, "1h2o_120meoh_md.exdir")
+    dest_path = f"{SAMPLING_DIR}/test_1h2o_120meoh_prod_sampling.exdir"
 
     source = Creator()
     source.load(source_path, mode="r")
@@ -91,19 +92,20 @@ def test_1h2o_120meoh_prod_sampler():
     assert dest.rfile.get(f"{dest_key}/geometry").shape == (quantity, 15, 3)
     assert dest.rfile.get(f"{dest_key}/r_prov_specs").shape == (quantity, 5)
     assert len(dest.rfile.get(f"{dest_key}/r_prov_ids")) == 1
-    assert dest.rfile.get(f"{dest_key}/r_centered") == False
+    assert dest.rfile.get(f"{dest_key}/r_centered") is False
     assert np.array_equal(dest.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels))
 
     # Checks that the correct geometries are sampled and in the correct order.
+    # pylint: disable-next=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     entity_ids_source = source.rfile.get(f"{source_key}/entity_ids")
 
+    # pylint: disable-next=invalid-name
     R_sampled = dest.rfile.get(f"{dest_key}/geometry")
     r_prov_specs = dest.rfile.get(f"{dest_key}/r_prov_specs")
 
-    for i in range(len(r_prov_specs)):
+    for i, r_prov_spec in enumerate(r_prov_specs):
         r_sampled = R_sampled[i]
-        r_prov_spec = r_prov_specs[i]
         source_idx = r_prov_spec[1]
 
         idx_atom_check = 0
@@ -128,7 +130,7 @@ def test_1h2o_120meoh_prod_sampler():
     assert dest.rfile.get(f"{dest_key}/geometry").shape == (quantity * 2, 15, 3)
     assert dest.rfile.get(f"{dest_key}/r_prov_specs").shape == (quantity * 2, 5)
     assert len(dest.rfile.get(f"{dest_key}/r_prov_ids")) == 1
-    assert dest.rfile.get(f"{dest_key}/r_centered") == True
+    assert dest.rfile.get(f"{dest_key}/r_centered") is True
     assert np.array_equal(dest.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels))
 
 
@@ -136,11 +138,11 @@ def test_ray_1h2o_120meoh_prod_sampler():
     """Sampling from xTB MD reptar file with ray."""
     try:
         import ray
-    except (ModuleNotFoundError, ImportError):
+    except ImportError:
         pytest.skip("ray package not installed")
 
-    source_path = os.path.join(data_dir, "1h2o_120meoh_md.exdir")
-    dest_path = f"{sampling_dir}/test_1h2o_120meoh_prod_sampling_ray.exdir"
+    source_path = os.path.join(DATA_DIR, "1h2o_120meoh_md.exdir")
+    dest_path = f"{SAMPLING_DIR}/test_1h2o_120meoh_prod_sampling_ray.exdir"
 
     source = Creator()
     source.load(source_path, mode="r")
@@ -182,19 +184,20 @@ def test_ray_1h2o_120meoh_prod_sampler():
     assert dest.rfile.get(f"{dest_key}/geometry").shape == (quantity, 15, 3)
     assert dest.rfile.get(f"{dest_key}/r_prov_specs").shape == (quantity, 5)
     assert len(dest.rfile.get(f"{dest_key}/r_prov_ids")) == 1
-    assert dest.rfile.get(f"{dest_key}/r_centered") == False
+    assert dest.rfile.get(f"{dest_key}/r_centered") is False
     assert np.array_equal(dest.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels))
 
     # Checks that the correct geometries are sampled and in the correct order.
+    # pylint: disable-next=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     entity_ids_source = source.rfile.get(f"{source_key}/entity_ids")
 
+    # pylint: disable-next=invalid-name
     R_sampled = dest.rfile.get(f"{dest_key}/geometry")
     r_prov_specs = dest.rfile.get(f"{dest_key}/r_prov_specs")
 
-    for i in range(len(r_prov_specs)):
+    for i, r_prov_spec in enumerate(r_prov_specs):
         r_sampled = R_sampled[i]
-        r_prov_spec = r_prov_specs[i]
         source_idx = r_prov_spec[1]
 
         idx_atom_check = 0
@@ -219,13 +222,13 @@ def test_ray_1h2o_120meoh_prod_sampler():
     assert dest.rfile.get(f"{dest_key}/geometry").shape == (quantity * 2, 15, 3)
     assert dest.rfile.get(f"{dest_key}/r_prov_specs").shape == (quantity * 2, 5)
     assert len(dest.rfile.get(f"{dest_key}/r_prov_ids")) == 1
-    assert dest.rfile.get(f"{dest_key}/r_centered") == True
+    assert dest.rfile.get(f"{dest_key}/r_centered") is True
     assert np.array_equal(dest.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels))
 
 
 def test_sampling_from_wat_2met_pes():
     """Sampling from a sampled exdir group."""
-    src_path = f"{sampling_dir}/test_1h2o_120meoh_prod_sampling.exdir"
+    src_path = f"{SAMPLING_DIR}/test_1h2o_120meoh_prod_sampling.exdir"
 
     source = Creator()
     source.load(src_path, mode="a")
@@ -257,16 +260,18 @@ def test_sampling_from_wat_2met_pes():
     entity_ids_dest = source.rfile.get(f"{dest_key}/entity_ids")
     assert np.array_equal(entity_ids_dest, np.array([0, 0, 0, 1, 1, 1, 1, 1, 1]))
     assert len(source.rfile.get(f"{dest_key}/r_prov_ids")) == 1
-    assert source.rfile.get(f"{dest_key}/r_centered") == False
+    assert source.rfile.get(f"{dest_key}/r_centered") is False
     assert np.array_equal(
         source.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels)
     )
 
     # We know that the first structure in destination is the first possible
     # dimer from the source. This is only because quantity is 'all'.
+    # pylint: disable=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     R_dest = source.rfile.get(f"{dest_key}/geometry")
     R_ref = r_from_entities(R_source[0], entity_ids_source, (0, 1))
+    # pylint: enable=invalid-name
     assert np.allclose(R_ref, R_dest[0])
 
     assert np.array_equal(
@@ -285,10 +290,10 @@ def test_ray_sampling_from_wat_2met_pes():
     """Sampling from a sampled exdir group with ray."""
     try:
         import ray
-    except (ModuleNotFoundError, ImportError):
+    except ImportError:
         pytest.skip("ray package not installed")
 
-    src_path = f"{sampling_dir}/test_1h2o_120meoh_prod_sampling_ray.exdir"
+    src_path = f"{SAMPLING_DIR}/test_1h2o_120meoh_prod_sampling_ray.exdir"
 
     source = Creator()
     source.load(src_path, mode="a")
@@ -320,16 +325,18 @@ def test_ray_sampling_from_wat_2met_pes():
     entity_ids_dest = source.rfile.get(f"{dest_key}/entity_ids")
     assert np.array_equal(entity_ids_dest, np.array([0, 0, 0, 1, 1, 1, 1, 1, 1]))
     assert len(source.rfile.get(f"{dest_key}/r_prov_ids")) == 1
-    assert source.rfile.get(f"{dest_key}/r_centered") == False
+    assert source.rfile.get(f"{dest_key}/r_centered") is False
     assert np.array_equal(
         source.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels)
     )
 
     # We know that the first structure in destination is the first possible
     # dimer from the source. This is only because quantity is 'all'.
+    # pylint: disable=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     R_dest = source.rfile.get(f"{dest_key}/geometry")
     R_ref = r_from_entities(R_source[0], entity_ids_source, (0, 1))
+    # pylint: enable=invalid-name
     assert np.allclose(R_ref, R_dest[0])
 
     assert np.array_equal(

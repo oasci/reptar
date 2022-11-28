@@ -23,7 +23,7 @@
 from abc import ABC, abstractmethod
 
 
-class parser(ABC):
+class Parser(ABC):
     """Base class for parsing output files.
 
     Attributes
@@ -56,18 +56,23 @@ class parser(ABC):
 
         :**Preprocessing**:
             Anything that is done before reptar does its parsing.
-            Reptar does not have extractors for all information, so sometimes `cclib <https://cclib.github.io/>`__ is used to extract additional information.
+            Reptar does not have extractors for all information, so sometimes
+            `cclib <https://cclib.github.io/>`__ is used to extract additional
+            information.
 
         :**Extracting**:
-            Iterates through all lines in :term:`out_path` using all extractors with :meth:`~reptar.parsers.parser.extract_data_out`.
-            Each extractor has its own ``parsed_info`` that needs to be added to :attr:`~reptar.parsers.parser.parsed_info`.
+            Iterates through all lines in :term:`out_path` using all extractors with
+            :meth:`~reptar.parsers.Parser.extract_data_out`.
+            Each extractor has its own ``parsed_info`` that needs to be added to
+            :attr:`~reptar.parsers.Parser.parsed_info`.
 
-            .. automethod:: reptar.parsers.parser.extract_data_out
+            .. automethod:: reptar.parsers.Parser.extract_data_out
                 :noindex:
 
         :**Postprocessing**:
             Any additional tasks to complete parsing.
-            There is usually a ``after_parse`` method that adds or changes data based on the final :attr:`~reptar.parsers.parser.parsed_info` attribute.
+            There is usually a ``after_parse`` method that adds or changes data
+            based on the final :attr:`~reptar.parsers.Parser.parsed_info` attribute.
             Handling of other files such as :term:`geom_path` and :term:`traj_path`.
         """
         return NotImplemented
@@ -99,12 +104,11 @@ class parser(ABC):
         self._parsed_info = value
 
     @parsed_info.deleter
-    def parsed_info(self, value):
+    def parsed_info(self):
         del self._parsed_info
 
     def after_parse(self):
         """Replace if desired"""
-        pass
 
     def extract_data_out(self):
         """Extract data from ``out_path`` using all extractors"""
@@ -138,7 +142,7 @@ class parser(ABC):
     def map_cclib_data(self):
         """Assign cclib-parsed data to our ``parsed_info`` dictionary."""
         parsed_info = self.parsed_info
-        cclib_data = self.cclib_data
+        cclib_data = self.cclib_data  # pylint: disable=no-member
 
         # Loop through every attribute in cclib_data and adds data to parsed data.
         for attr in dir(cclib_data):

@@ -40,7 +40,7 @@ def xtb_engrad(
         Indices of the structures from ``R`` to compute energies and gradients
         for.
     Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with repsect to ``R``.
+        Atomic numbers of the atoms with respect to ``R``.
     R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
@@ -50,7 +50,8 @@ def xtb_engrad(
         Total multiplicity.
     calc_acc : :obj:`int`, default: ``0.1``
         Numerical accuracy for calculation. For more information, visit the
-        `documentation <https://xtb-python.readthedocs.io/en/latest/general-api.html#xtb.interface.Calculator.set_accuracy>`__.
+        `documentation <https://xtb-python.readthedocs.io/en/latest/
+        general-api.html#xtb.interface.Calculator.set_accuracy>`__.
     max_iterations : :obj:`int`, default: ``300``
         Maximum number of iterations for self-consistent charge methods. If the
         calculations fails to converge in a given number of cycles, no error
@@ -75,8 +76,8 @@ def xtb_engrad(
     E = np.zeros(R.shape[0])
     if params is None:
         params = Param.GFN2xTB
-    for i in range(len(R)):
-        calc = Calculator(params, Z, R[i], charge, n_upair_ele)
+    for i, r in enumerate(R):
+        calc = Calculator(params, Z, r, charge, n_upair_ele)
         calc.set_accuracy(calc_acc)
         calc.set_max_iterations(max_iterations)
         res = calc.singlepoint()

@@ -22,30 +22,32 @@
 
 """Tests and example builders for ORCA calculations."""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
+import sys
 import os
+import pytest
 import numpy as np
 from reptar import Creator
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
-import sys
-
 sys.path.append("..")
-from .paths import *
+# pylint: disable-next=wrong-import-position
+from .paths import get_6h2o_temelso_pr_engrad
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Writing paths
-orca_dir = "./tmp/orca"
-os.makedirs(orca_dir, exist_ok=True)
+ORCA_DIR = "./tmp/orca"
+os.makedirs(ORCA_DIR, exist_ok=True)
 
 
 @pytest.mark.order(0)
 def test_6h2o_temelso_engrad_exdir():
-    """ """
-    dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    exdir_path = os.path.join(orca_dir, "6h2o_temelso_pr_engrad.exdir")
+    _, out_path = get_6h2o_temelso_pr_engrad()
+    exdir_path = os.path.join(ORCA_DIR, "6h2o_temelso_pr_engrad.exdir")
 
     create = Creator()
     create.load(exdir_path, mode="w", allow_remove=True)
@@ -64,9 +66,8 @@ def test_6h2o_temelso_engrad_exdir():
 
 
 def test_6h2o_temelso_engrad_json():
-    """ """
-    dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    json_path = os.path.join(orca_dir, "6h2o_temelso_pr_engrad.json")
+    _, out_path = get_6h2o_temelso_pr_engrad()
+    json_path = os.path.join(ORCA_DIR, "6h2o_temelso_pr_engrad.json")
 
     # Writing tests.
     create = Creator()
@@ -86,9 +87,8 @@ def test_6h2o_temelso_engrad_json():
 
 
 def test_6h2o_temelso_engrad_npz():
-    """ """
-    dir_path, out_path = get_6h2o_temelso_pr_engrad()
-    npz_path = os.path.join(orca_dir, "6h2o_temelso_pr_engrad.npz")
+    _, out_path = get_6h2o_temelso_pr_engrad()
+    npz_path = os.path.join(ORCA_DIR, "6h2o_temelso_pr_engrad.npz")
 
     create = Creator()
     create.load(npz_path, mode="w")

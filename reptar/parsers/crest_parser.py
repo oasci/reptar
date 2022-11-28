@@ -21,12 +21,12 @@
 # SOFTWARE.
 
 import numpy as np
-from ..extractors import extractorCREST
-from .parser import parser
+from ..extractors import ExtractorCREST  # pylint: disable=no-name-in-module
+from .parser import Parser  # pylint: disable=no-name-in-module
 from ..utils import atoms_by_number, parse_stringfile
 
 
-class parserCREST(parser):
+class ParserCREST(Parser):
     """Custom parser for CREST calculations."""
 
     def __init__(
@@ -68,7 +68,8 @@ class parserCREST(parser):
         # ensemble ratio.
         if (conformer_path is not None) and (rotamer_path is not None):
             raise ValueError("conformer_path and rotamer_path cannot both be provided")
-        elif rotamer_path is not None:
+
+        if rotamer_path is not None:
             self.xyz_type = "rotamer"
             self.xyz_path = rotamer_path
         elif conformer_path is not None:
@@ -77,7 +78,7 @@ class parserCREST(parser):
 
         if extractors is None:
             extractors = []
-        extractors.insert(0, extractorCREST(self.xyz_type))
+        extractors.insert(0, ExtractorCREST(self.xyz_type))
         super().__init__(out_path, extractors)
 
         self.parsed_info["runtime_info"]["prov"] = "crest"
@@ -122,4 +123,3 @@ class parserCREST(parser):
 
     def after_parse(self):
         """Checks to perform after parsing output file."""
-        pass

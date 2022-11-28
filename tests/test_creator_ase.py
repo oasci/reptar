@@ -22,30 +22,32 @@
 
 """Tests and example builders for molecular dynamics with ASE."""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
 import os
+import sys
+import pytest
 import numpy as np
 from reptar import Creator, File
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
-import sys
-
 sys.path.append("..")
+# pylint: disable-next=wrong-import-position
 from .paths import get_1h2o_57h2o_pm_periodic_paths
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 # Writing paths
-ase_dir = "./tmp/ase/"
-os.makedirs(ase_dir, exist_ok=True)
+ASE_DIR = "./tmp/ase/"
+os.makedirs(ASE_DIR, exist_ok=True)
 
 
 @pytest.mark.order(0)
 def test_1h2o_57h2o_ase_exdir():
-    """ """
-    dir_path, traj_path = get_1h2o_57h2o_pm_periodic_paths()
-    exdir_path = os.path.join(ase_dir, "1h2o_57h2o_ase.exdir")
+    _, traj_path = get_1h2o_57h2o_pm_periodic_paths()
+    exdir_path = os.path.join(ASE_DIR, "1h2o_57h2o_ase.exdir")
 
     num_waters = 58
     atoms_per_water = 3

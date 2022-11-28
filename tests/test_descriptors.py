@@ -22,16 +22,19 @@
 
 """Tests computing structural descriptors"""
 
-import pytest
+# Stuff for PyTest features like skip.
+# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+
+import sys
 import os
+import pytest
 import numpy as np
 from reptar import File
 from reptar import descriptors
 
-import sys
-
 sys.path.append("..")
-from .paths import *
+# pylint: disable-next=wrong-import-position
+from .paths import get_140h2o_samples_path
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
@@ -51,7 +54,7 @@ def test_max_atom_pair_dist_3h2o():
     criteria = descriptors.Criteria(descriptors.max_atom_pair_dist, {}, 9.0)
     accept, v_desc = criteria.accept(Z, R)
 
-    assert accept[i_test] == True
+    assert bool(accept[i_test]) is True
     assert v_desc[i_test] == 8.96801858001878
 
 
@@ -72,5 +75,5 @@ def test_com_distance_sum_3h2o():
     )
     accept, v_desc = criteria.accept(Z, R)
 
-    assert accept[i_test] == False
+    assert bool(accept[i_test]) is False
     assert v_desc[i_test] == 9.020819657050316
