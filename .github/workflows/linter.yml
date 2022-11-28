@@ -44,4 +44,4 @@ jobs:
           VALIDATE_ALL_CODEBASE: true
           DEFAULT_BRANCH: main
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PYTHON_PYLINT_CONFIG_FILE: ${GITHUB_WORKSPACE}/.pylintrc
+          PYTHON_PYLINT_CONFIG_FILE: /home/runner/work/reptar/reptar/.pylintrc
