@@ -54,7 +54,7 @@ def test_1h2o_57h2o_ase_exdir():
 
     # For water molecules.
     entity_ids = gen_entity_ids(atoms_per_water, num_waters)
-    comp_ids = gen_comp_ids("h2o", num_waters, entity_ids)
+    comp_ids = gen_comp_ids("h2o", num_waters)
 
     group_key = "nvt_run_0"
     create = Creator()

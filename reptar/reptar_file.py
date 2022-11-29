@@ -75,7 +75,7 @@ class File:
             File_ = exdir.File(file_path, mode, allow_remove, plugins)
         elif f_ext == ".json":
             if exists:
-                with open(file_path, "r") as f:
+                with open(file_path, "r", encoding="utf-8") as f:
                     File_ = json.load(f)
             else:
                 File_ = {}
@@ -632,7 +632,7 @@ class File:
                 json_string = json.dumps(
                     json_dict, cls=NumpyAwareJSONEncoder, sort_keys=True
                 )
-            with open(self.fpath, "w") as f:
+            with open(self.fpath, "w", encoding="utf-8") as f:
                 f.write(json_string)
         elif self.ftype == "npz":
             npz_dict = self.File_

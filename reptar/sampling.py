@@ -20,14 +20,20 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import itertools
+from random import choice, randrange
 import numpy as np
-from random import randrange, choice
 from . import Saver
 from .utils import center_structures as get_center_structures
-from .utils import get_md5, gen_combs, exists_in_array, chunk_iterable
+from .utils import gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
 from . import __version__ as reptar_version
+
+try:
+    import ray
+except ImportError:
+    _HAS_RAY = False
+else:
+    _HAS_RAY = True
 
 
 def entity_mask_gen(entity_ids, entities):
@@ -79,7 +85,7 @@ def entity_mask_gen(entity_ids, entities):
         else:
             raise
     for entity_id in entities:
-        yield (entity_ids == entity_id)
+        yield entity_ids == entity_id
 
 
 def r_from_entities(R, entity_ids, entities):
@@ -101,8 +107,9 @@ def r_from_entities(R, entity_ids, entities):
     return np.array(r_sel)
 
 
+# pylint: disable-next=invalid-name
 def _add_structures_to_R(R, n_to_add, n_atoms):
-    R_to_add = np.empty((n_to_add, n_atoms, 3))
+    R_to_add = np.empty((n_to_add, n_atoms, 3))  # pylint: disable=invalid-name
     R_to_add[:] = np.nan
     if R is None:
         idx_sel = 0  # Starting index of the newly sampled structures.
@@ -113,8 +120,9 @@ def _add_structures_to_R(R, n_to_add, n_atoms):
     return idx_sel, R
 
 
+# pylint: disable-next=invalid-name
 def _add_structures_to_E(E, n_to_add):
-    E_to_add = np.empty(n_to_add)
+    E_to_add = np.empty(n_to_add)  # pylint: disable=invalid-name
     E_to_add[:] = np.nan
     if E is None:
         E = E_to_add
@@ -123,8 +131,9 @@ def _add_structures_to_E(E, n_to_add):
     return E
 
 
+# pylint: disable-next=invalid-name
 def _add_structures_to_G(G, n_to_add, n_atoms):
-    G_to_add = np.empty((n_to_add, n_atoms, 3))
+    G_to_add = np.empty((n_to_add, n_atoms, 3))  # pylint: disable=invalid-name
     G_to_add[:] = np.nan
     if G is None:
         G = G_to_add
@@ -178,12 +187,13 @@ def _generate_structure_samples(quantity, structure_idxs, entity_ids_samples):
         while True:
             R_selection_idx = randrange(len(structure_idxs))
             entity_selection = [None for entity_ids in entity_ids_samples]
-            for i in range(len(entity_selection)):
+            for i, entity_ids_to_sample in enumerate(entity_ids_samples):
                 entity_selection[i] = choice(
                     tuple(
                         filter(
+                            # pylint: disable-next=cell-var-from-loop
                             lambda x: x not in entity_selection[: i + 1],
-                            entity_ids_samples[i],
+                            entity_ids_to_sample,
                         )
                     )
                 )
@@ -191,6 +201,7 @@ def _generate_structure_samples(quantity, structure_idxs, entity_ids_samples):
             yield selection
     # Sampling all possible structures.
     elif quantity == "all":
+        # pylint: disable=invalid-name
         for R_selection_idx in structure_idxs:
             combs = gen_combs(entity_ids_samples, replacement=False)
             for comb in combs:
@@ -200,13 +211,14 @@ def _generate_structure_samples(quantity, structure_idxs, entity_ids_samples):
                 yield selection
 
 
+# pylint: disable-next=too-many-branches, too-many-statements
 def sampler_worker(
     selections,
     Z,
     entity_ids_dest,
-    R_source,
-    E_source,
-    G_source,
+    R_source,  # pylint: disable=invalid-name
+    E_source,  # pylint: disable=invalid-name
+    G_source,  # pylint: disable=invalid-name
     entity_ids_source,
     r_prov_specs_source,
     r_prov_id_source,
@@ -218,7 +230,7 @@ def sampler_worker(
         selections = np.array(selections)
     assert selections.ndim == 2
 
-    n_Z = len(Z)
+    n_Z = len(Z)  # pylint: disable=invalid-name
     n_selections = selections.shape[0]
     n_r_prov_spec_columns = int(len(selections[0])) + 1
 
@@ -243,8 +255,7 @@ def sampler_worker(
     keep_idxs = np.empty(n_selections, dtype=np.bool8)
 
     i_sel = 0
-    for i_sel in range(len(selections)):
-        selection = selections[i_sel]
+    for i_sel, selection in enumerate(selections):
         sel_source_idx = selection[0]
         entity_ids_selection = selection[1:]  # Used to slice source
 
@@ -255,7 +266,6 @@ def sampler_worker(
         # from sampled structures.
         if r_prov_specs_source is not None:
             orig_r_prov_specs = r_prov_specs_source[sel_source_idx]
-            source_r_prov_id = orig_r_prov_specs[0]
 
             # Original r_prov_id and structure index
             r_prov_spec_selection[:2] = orig_r_prov_specs[:2]
@@ -288,10 +298,10 @@ def sampler_worker(
         # Enforce minimum image convention if periodic.
         if periodic_cell is not None:
             r_sel_periodic = periodic_cell.r_mic(R[i_sel])
-            if r_sel_periodic is None:
-                continue
-            else:
+            if r_sel_periodic is not None:
                 R[i_sel] = r_sel_periodic
+            else:
+                continue
 
         # Checks any structural criteria.
         if criteria is not None:
@@ -323,7 +333,7 @@ def sampler_worker(
     return R, E, G, r_prov_specs
 
 
-class Sampler(object):
+class Sampler:
     """Randomly sample structures."""
 
     def __init__(
@@ -334,8 +344,8 @@ class Sampler(object):
         dest_key,
         criteria=None,
         center_structures=False,
-        E_key=None,
-        G_key=None,
+        E_key=None,  # pylint: disable=invalid-name
+        G_key=None,  # pylint: disable=invalid-name
         dry_run=False,
         all_init_size=50000,
         use_ray=False,
@@ -390,16 +400,15 @@ class Sampler(object):
         self.dest_key = dest_key
         self.criteria = criteria
         self.center_structures = center_structures
-        self.E_key = E_key
-        self.G_key = G_key
+        self.E_key = E_key  # pylint: disable=invalid-name
+        self.G_key = G_key  # pylint: disable=invalid-name
         self.dry_run = dry_run
         self.all_init_size = all_init_size
 
         self.use_ray = use_ray
         self.n_workers = n_workers
         if self.use_ray:
-            global ray
-            import ray
+            assert _HAS_RAY
 
             if not ray.is_initialized():
                 ray.init(address=ray_address)
@@ -423,7 +432,7 @@ class Sampler(object):
         self.R = dest_file.get(f"{dest_key}/geometry", missing_is_none=True)
         # Stores the index of the first newly sampled structure for checks.
         if self.R is None:
-            self.n_R_initial = 0
+            self.n_R_initial = 0  # pylint: disable=invalid-name
         else:
             self.n_R_initial = self.R.shape[0]
 
@@ -454,9 +463,12 @@ class Sampler(object):
         if self.comp_ids is not None:
             try:
                 assert np.array_equal(self.comp_ids, np.array(comp_labels))
-            except AssertionError:
-                e = f"Component IDs of destination ({comp_ids.tolist()}) do not match comp_labels ({comp_labels})."
-                raise AssertionError(e)
+            except AssertionError as e:
+                e_2 = (
+                    f"Component IDs of destination ({self.comp_ids.tolist()}) do "
+                    "not match comp_labels ({comp_labels})."
+                )
+                raise AssertionError(e_2) from e
         else:
             self.comp_ids = np.array(comp_labels)
 
@@ -499,6 +511,7 @@ class Sampler(object):
         except RuntimeError:
             self.periodic_cell = None
 
+    # pylint: disable-next=too-many-branches
     def _check_r_prov_ids(self):
         """ """
         # Prepare source r_prov_ids and r_prov_specs.
@@ -509,6 +522,7 @@ class Sampler(object):
         # For example, change 0 from source to 1 if 0 is already taken in destination.
 
         r_prov_ids_source = self.r_prov_ids_source
+        r_prov_specs_source = self.r_prov_specs_source
         source_file = self.source_file
         source_key = self.source_key
 
@@ -538,11 +552,11 @@ class Sampler(object):
                 if source_md5 in present_md5s:
                     update_id = present_ids[present_md5s.index(source_md5)]
                     if update_id != source_id:
-                        if source_r_prov_specs is not None:
+                        if r_prov_specs_source is not None:
                             update_idx = np.argwhere(
-                                source_r_prov_specs[:, 0] == source_id
+                                r_prov_specs_source[:, 0] == source_id
                             )[:, 0]
-                            source_r_prov_specs[update_idx, 0] = update_id
+                            r_prov_specs_source[update_idx, 0] = update_id
                     remove_source_ids.append(source_id)
             if len(remove_source_ids) > 0:
                 for source_id in remove_source_ids:
@@ -555,11 +569,11 @@ class Sampler(object):
 
                 for source_id in tuple(r_prov_ids_source.keys()):
                     r_prov_ids_source[next_id] = r_prov_ids_source.pop(source_id)
-                    if source_r_prov_specs is not None:
+                    if r_prov_specs_source is not None:
                         update_idx = np.argwhere(
-                            source_r_prov_specs[:, 0] == source_id
+                            r_prov_specs_source[:, 0] == source_id
                         )[:, 0]
-                        source_r_prov_specs[update_idx, 0] = next_id
+                        r_prov_specs_source[update_idx, 0] = next_id
                     next_id += 1
 
                 # Merge the IDs
@@ -608,15 +622,14 @@ class Sampler(object):
             ``comp_labels``.
         """
         avail_entity_ids = []
-        for i in range(len(comp_labels)):
+        for i, comp_id in enumerate(comp_labels):
             # Account for manually specified entity_ids
             if specific_entities is not None:
-                for j in range(len(specific_entities)):
-                    if specific_entities[j][0] == i:
-                        avail_entity_ids.append(specific_entities[j][1])
+                for specific_entity in specific_entities:
+                    if specific_entity[0] == i:
+                        avail_entity_ids.append(specific_entity[1])
                         continue
             # Find all possible entity_ids to sample from.
-            comp_id = comp_labels[i]
             matching_entity_ids = np.where(comp_ids_source == comp_id)[0]
             avail_entity_ids.append(matching_entity_ids)
         return avail_entity_ids
@@ -639,6 +652,7 @@ class Sampler(object):
         for dest_entity in self.avail_entity_ids:
             entity_ref = dest_entity[0]  # an example entity_id
 
+            # pylint: disable-next=invalid-name
             Z_ref = Z_source[np.argwhere(entity_ids_source == entity_ref)[:, 0]]
             entity_ids.extend([entity_id for _ in range(len(Z_ref))])
 
@@ -647,15 +661,16 @@ class Sampler(object):
             # Check that all other entities have the same atomic numbers.
             if len(dest_entity) != 1:
                 for other_entity in dest_entity[1:]:
+                    # pylint: disable-next=invalid-name
                     Z_other = Z_source[
                         np.argwhere(entity_ids_source == other_entity)[:, 0]
                     ]
                     try:
                         assert np.array_equal(Z_ref, Z_other)
-                    except AssertionError:
+                    except AssertionError as e:
                         raise AssertionError(
                             f"Atomic numbers do not match for entity_id of {other_entity}"
-                        )
+                        ) from e
 
             entity_id += 1
 
@@ -667,11 +682,11 @@ class Sampler(object):
             try:
                 assert np.array_equal(Z, Z_sample)
                 Z = np.array(Z_sample)
-            except AssertionError:
+            except AssertionError as e:
                 print(f"Destination atomic numbers: {Z}")
                 print(f"Sample atomic numbers: {Z_sample}")
-                e = "Atomic numbers of samples do not match destination."
-                raise AssertionError(e)
+                e_2 = "Atomic numbers of samples do not match destination."
+                raise AssertionError(e_2) from e
         else:
             self.Z = Z_sample
         self.n_Z = len(self.Z)
@@ -764,6 +779,7 @@ class Sampler(object):
 
     def _update_sampling_arrays(
         self,
+        comp_labels,
         quantity,
         i_start,
         R,
@@ -815,6 +831,7 @@ class Sampler(object):
 
         return i_stop, do_break, R, E, G, r_prov_specs
 
+    # pylint: disable-next=too-many-branches, too-many-statements
     def sample(self, comp_labels, quantity, R_source_idxs=None, specific_entities=None):
         """
 
@@ -844,9 +861,6 @@ class Sampler(object):
         self._check_comp_ids(comp_labels)
         self._check_r_prov_ids()
         self._prepare_saver()
-
-        # Explicitly loading data that we need to check and handle using ray.
-        Z = self.Z
 
         # Determines what the r_prov_id will be for this sampling run.
         # If source_r_prov_specs is None, then this is an original source.
@@ -913,6 +927,7 @@ class Sampler(object):
                     G,
                     r_prov_specs,
                 ) = self._update_sampling_arrays(
+                    comp_labels,
                     quantity,
                     i_start,
                     R,
@@ -961,7 +976,7 @@ class Sampler(object):
 
             def add_worker(workers, chunker):
                 try:
-                    selection = next(selection_chunker)
+                    selection = next(chunker)
                     workers.append(
                         sampler_worker_ray.options(num_cpus=1).remote(
                             selection,
@@ -999,6 +1014,7 @@ class Sampler(object):
                     G,
                     r_prov_specs,
                 ) = self._update_sampling_arrays(
+                    comp_labels,
                     quantity,
                     i_start,
                     R,

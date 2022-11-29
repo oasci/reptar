@@ -112,9 +112,10 @@ class Parser(ABC):
 
     def extract_data_out(self):
         """Extract data from ``out_path`` using all extractors"""
-        with open(self.out_path, mode="r") as f:
+        with open(self.out_path, mode="r", encoding="utf-8") as f:
             for line in f:
                 for extractor in self.extractors:
+                    # pylint: disable-next=consider-using-enumerate
                     for i in range(len(extractor.triggers)):
                         if extractor.triggers[i][0](line):
                             getattr(extractor, extractor.triggers[i][1])(f, line)
@@ -141,6 +142,7 @@ class Parser(ABC):
 
     def map_cclib_data(self):
         """Assign cclib-parsed data to our ``parsed_info`` dictionary."""
+        # pylint: disable=too-many-branches
         parsed_info = self.parsed_info
         cclib_data = self.cclib_data  # pylint: disable=no-member
 

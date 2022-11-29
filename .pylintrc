@@ -42,7 +42,8 @@ fail-under=10
 #from-stdin=
 
 # Files or directories to be skipped. They should be base names, not paths.
-ignore=CVS
+ignore=CVS,
+       _version.py
 
 # Add files or directories matching the regular expressions patterns to the
 # ignore-list. The regex matches against paths and can be in Posix or Windows
@@ -193,7 +194,25 @@ good-names=i,
            n,
            db,
            Q,
-           q
+           q,
+           d,
+           v,
+           Z_source,
+           R_source,
+           E_source,
+           G_source,
+           Z_sample,
+           R_sample,
+           E_sample,
+           G_sample,
+           R_selection,
+           E_selection,
+           G_selection,
+           R_source_idxs,
+           R_selection_idx,
+           n_Z,
+           n_R,
+           R_masses
 
 # Good variable names regexes, separated by a comma. If names match any regex,
 # they will always be accepted
@@ -437,7 +456,9 @@ disable=raw-checker-failed,
         fixme,
         too-many-instance-attributes,
         too-few-public-methods,
-        too-many-locals
+        too-many-locals,
+        attribute-defined-outside-init,
+        broad-except
 
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option

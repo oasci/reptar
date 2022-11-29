@@ -350,12 +350,8 @@ After running the MD simulation, we stored the data in :download:`this exdir fil
     atoms_per_molecule = 3
     num_molecules = 30
     comp_id = 'h2o'
-    entity_ids = gen_entity_ids(
-        atoms_per_molecule, num_molecules
-    )
-    comp_ids = gen_comp_ids(
-        label=comp_id, num_mol=num_molecules, entity_ids=entity_ids
-    )
+    entity_ids = gen_entity_ids(atoms_per_molecule, num_molecules)
+    comp_ids = gen_comp_ids(label=comp_id, num_mol=num_molecules)
 
     rfile = File(rfile_path, mode='a', allow_remove=False)
     create = Creator(rfile=rfile)

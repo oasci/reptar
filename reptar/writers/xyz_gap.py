@@ -69,7 +69,7 @@ def write_xyz_gap(
 
     n_atoms = len(Z)
     F_arr = None
-    with open(xyz_path, "w") as f:
+    with open(xyz_path, "w", encoding="utf-8") as f:
         for i in range(len(R)):
             f.write(f"{n_atoms}\n")
             f.write(

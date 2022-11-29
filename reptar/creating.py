@@ -52,10 +52,10 @@ def identify_parser(out_path):
     :obj:`reptar.Creator`
         One of the supported creator classes.
     """
-    with open(out_path, "r") as f:
+    with open(out_path, "r", encoding="utf-8") as f:
         for line in f:
             for parser, phrases, do_break in triggers:
-                if all([line.lower().find(p.lower()) >= 0 for p in phrases]):
+                if all(line.lower().find(p.lower()) >= 0 for p in phrases):
                     filetype = parser
                     if do_break:
                         return filetype
@@ -84,8 +84,6 @@ def identify_trajectory(traj_path):
 
 class Creator:
     """Create groups from computational chemistry data."""
-
-    # pylint: disable=attribute-defined-outside-init
 
     def __init__(self, rfile=None):
         """
@@ -359,7 +357,8 @@ class Creator:
             if def_path in defs_reserved:
                 stream = resource_stream("reptar.definitions", f"{def_path}.yaml")
             else:
-                stream = open(def_path)
+                # pylint: disable-next=consider-using-with
+                stream = open(def_path, encoding="utf-8")
             def_add = yaml.safe_load(stream)
 
             # Add all definitions.

@@ -27,13 +27,13 @@ import numpy as np
 from qcelemental import periodictable as ptable
 
 
-class Criteria(object):
+class Criteria:
     """Descriptor criteria for accepting a structure based on a descriptor
     and cutoff.
     """
 
     def __init__(self, desc, desc_kwargs, cutoff, bound="upper"):
-        """
+        r"""
         Parameters
         ----------
         desc : ``callable``
@@ -55,14 +55,14 @@ class Criteria(object):
         self.desc = desc
         self.desc_kwargs = desc_kwargs
         self.cutoff = cutoff
-        if isinstance(self.cutoff, tuple) or isinstance(self.cutoff, list):
+        if isinstance(self.cutoff, (tuple, list)):
             self.cutoff = sorted(self.cutoff)  # Will always be a list.
         bound = bound.lower()
         assert bound in ["upper", "lower"]
         self.bound = bound
 
         self.attr_precedence = False
-        """Specifies if ``Criteria.desc_kwargs`` has precedence over ``kwargs``
+        r"""Specifies if ``Criteria.desc_kwargs`` has precedence over ``kwargs``
         passed directly into :meth:`~reptar.descriptors.Criteria.accept()`.
 
         If ``False``, then duplicate keys passed into
@@ -75,7 +75,7 @@ class Criteria(object):
         """
 
     def accept(self, Z, R, **kwargs):
-        """Determine if we accept the structure.
+        r"""Determine if we accept the structure.
 
         If duplicate keys are provided in ``kwargs`` and ``self.desc_kwargs``,
         ``kwargs`` passed here have preference.
@@ -99,7 +99,7 @@ class Criteria(object):
         if R.ndim == 2:
             R = R[None, ...]
         n_R = R.shape[0]
-        if self.cutoff is None:
+        if self.cutoff is None:  # pylint: disable=no-else-return
             accept_r = np.full(n_R, True)
             return accept_r, None
         else:
@@ -131,7 +131,7 @@ class Criteria(object):
 
 
 def get_center_of_mass(Z, R):
-    """Compute the center of mass.
+    r"""Compute the center of mass.
 
     Parameters
     ----------
@@ -156,7 +156,7 @@ def get_center_of_mass(Z, R):
 
 
 def max_atom_pair_dist(Z, R):
-    """The largest atomic pairwise distance.
+    r"""The largest atomic pairwise distance.
 
     Parameters
     ----------
@@ -184,7 +184,7 @@ def max_atom_pair_dist(Z, R):
 
 
 def com_distance_sum(Z, R, entity_ids):
-    """The sum of pairwise distances from each entity's center of mass to
+    r"""The sum of pairwise distances from each entity's center of mass to
     the total structure center of mass.
 
     This descriptor, :math:`L`, is defined as

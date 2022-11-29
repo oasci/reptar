@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy as np
 import os
+import numpy as np
 from ..utils import atoms_by_element
 
 
@@ -73,7 +73,7 @@ def write_pdb(pdb_path, Z, R, entity_ids, comp_ids, atom_type="HETATM"):
     file_name = os.path.splitext(os.path.basename(pdb_path))[0]
     # Trims component ids to the first three letters
     comp_ids = np.array([comp_id[:3] for comp_id in comp_ids])
-    with open(pdb_path, "w") as f:
+    with open(pdb_path, "w", encoding="utf-8") as f:
         f.write(file_name + "\n")
         f.write(f"{num_atoms}\n")
         for i_structure in range(num_structures):
@@ -88,6 +88,7 @@ def write_pdb(pdb_path, Z, R, entity_ids, comp_ids, atom_type="HETATM"):
                 coords = R[i_structure][i_atom]
 
                 f.write(
+                    # pylint: disable-next=line-too-long, consider-using-f-string
                     "{:6s}{:5d} {:^4s}{:1s}{:3s} {:1s}{:4d}{:1s}   {:8.3f}{:8.3f}{:8.3f}{:6.2f}{:6.2s}          {:>2s}{:2s}\n".format(
                         str(atom_type),
                         i_atom + 1,

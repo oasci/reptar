@@ -23,8 +23,8 @@
 import collections.abc
 import itertools
 import hashlib
-import numpy as np
 import os
+import numpy as np
 from qcelemental import periodictable as ptable
 
 
@@ -128,7 +128,7 @@ def parse_stringfile(stringfile_path):
         :obj:`float` from string file.
     """
     Z, comments, data = [], [], []
-    with open(stringfile_path, "r") as f:
+    with open(stringfile_path, "r", encoding="utf-8") as f:
         for _, line in enumerate(f):
             line = line.strip()
             if not line:
@@ -202,9 +202,7 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
                 d = d.ravel()
                 md5_hash.update(hashlib.md5(d).digest())
             else:
-                if only_arrays:
-                    continue
-                else:
+                if not only_arrays:
                     md5_hash.update(repr(d).encode())
 
     return md5_hash.hexdigest()
@@ -240,11 +238,11 @@ def gen_entity_ids(atoms_per_mol, num_mol, starting_idx=0, add_to=None):
         if isinstance(add_to, np.ndarray):
             add_to = add_to.tolist()
         return np.array(add_to + entity_ids)
-    else:
-        return np.array(entity_ids)
+
+    return np.array(entity_ids)
 
 
-def gen_comp_ids(label, num_mol, entity_ids, add_to=None):
+def gen_comp_ids(label, num_mol, add_to=None):
     """Prepares the list of component ids for a system with only one species.
 
     Parameters
@@ -253,8 +251,6 @@ def gen_comp_ids(label, num_mol, entity_ids, add_to=None):
         Species label.
     num_mol : :obj:`int`
         Number of molecules of this type in the system.
-    entity_ids : :obj:`int`
-        Entity ids for these species.
     add_to : :obj:`list`
         Component ids to append new ids to.
 
@@ -268,8 +264,7 @@ def gen_comp_ids(label, num_mol, entity_ids, add_to=None):
         if isinstance(add_to, np.ndarray):
             add_to = add_to.tolist()
         return np.array(add_to + comp_ids)
-    else:
-        return np.array(comp_ids)
+    return np.array(comp_ids)
 
 
 def center_structures(Z, R):
@@ -298,15 +293,14 @@ def center_structures(Z, R):
     for i in range(len(masses)):
         masses[i, :] = ptable.to_mass(Z[i])
 
-    for i in range(len(R)):
-        r = R[i]
+    for i, r in enumerate(R):
         cm_r = np.average(r, axis=0, weights=masses)
         R[i] = r - cm_r
 
     if R.shape[0] == 1:
         return R[0]
-    else:
-        return R
+
+    return R
 
 
 def combine_dicts(dict1, dict2):
@@ -360,6 +354,7 @@ def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
     """
     r_idxs = np.empty(r_prov_specs_subset.shape[0])
     r_idxs[:] = np.NaN
+    # pylint: disable=consider-using-enumerate
     for i in range(len(r_idxs)):
         r_prov_spec = r_prov_specs_subset[i]
         r_idx = np.where((r_prov_spec == r_prov_specs).all(1))[0]

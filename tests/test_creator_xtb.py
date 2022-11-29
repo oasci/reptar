@@ -62,7 +62,7 @@ def test_1h2o_120meoh_md_exdir():
 
     # For water molecules.
     entity_ids = gen_entity_ids(atoms_per_water, num_waters)
-    comp_ids = gen_comp_ids("WAT", num_waters, entity_ids)
+    comp_ids = gen_comp_ids("WAT", num_waters)
     # For methanol molecules.
     entity_ids = gen_entity_ids(
         atoms_per_methanol,
@@ -70,7 +70,7 @@ def test_1h2o_120meoh_md_exdir():
         starting_idx=np.max(entity_ids) + 1,
         add_to=entity_ids,
     )
-    comp_ids = gen_comp_ids("MET", num_methanols, entity_ids, add_to=comp_ids)
+    comp_ids = gen_comp_ids("MET", num_methanols, add_to=comp_ids)
 
     create = Creator()
     create.load(exdir_path, mode="w", allow_remove=True)
@@ -120,7 +120,7 @@ def test_1h2o_120meoh_md_json():
 
     # For water molecules.
     entity_ids = gen_entity_ids(atoms_per_water, num_waters)
-    comp_ids = gen_comp_ids("WAT", num_waters, entity_ids)
+    comp_ids = gen_comp_ids("WAT", num_waters)
     # For methanol molecules.
     entity_ids = gen_entity_ids(
         atoms_per_methanol,
@@ -128,7 +128,7 @@ def test_1h2o_120meoh_md_json():
         starting_idx=np.max(entity_ids) + 1,
         add_to=entity_ids,
     )
-    comp_ids = gen_comp_ids("MET", num_methanols, entity_ids, add_to=comp_ids)
+    comp_ids = gen_comp_ids("MET", num_methanols, add_to=comp_ids)
 
     create = Creator()
     create.load(json_path, mode="w")

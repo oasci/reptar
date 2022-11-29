@@ -42,8 +42,8 @@ def write_xyz(xyz_path, Z, R, comments=None, data_precision=10):
 
     """
     n_atoms = len(Z)
-    with open(xyz_path, "w") as f:
-        for i in range(len(R)):
+    with open(xyz_path, "w", encoding="utf-8") as f:
+        for i, r in enumerate(R):
             f.write(f"{n_atoms}\n")
             if comments is not None:
                 comment = comments[i]
@@ -52,4 +52,4 @@ def write_xyz(xyz_path, Z, R, comments=None, data_precision=10):
             else:
                 comment = "\n"
             f.write(comment)
-            f.write(string_xyz_arrays(Z, R[i], precision=data_precision))
+            f.write(string_xyz_arrays(Z, r, precision=data_precision))
