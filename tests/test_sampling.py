@@ -283,12 +283,12 @@ def test_sampling_from_wat_2met_pes():
     # We also know the last structure is the last possible dimer.
     # However, if the dimer is already repeated, we check the second-to-last dimer
     # and verify the last one already exists.
-    last_dimer_spec = source.rfile.get(
-        f"{source_key}/r_prov_specs"
-    )[-1][np.array([0, 1, 2, 4])]
-    second_last_dimer_spec = source.rfile.get(
-        f"{source_key}/r_prov_specs"
-    )[-1][np.array([0, 1, 2, 3])]
+    last_dimer_spec = source.rfile.get(f"{source_key}/r_prov_specs")[-1][
+        np.array([0, 1, 2, 4])
+    ]
+    second_last_dimer_spec = source.rfile.get(f"{source_key}/r_prov_specs")[-1][
+        np.array([0, 1, 2, 3])
+    ]
     r_prov_specs_dest = source.rfile.get(f"{dest_key}/r_prov_specs")
     try:
         assert np.array_equal(last_dimer_spec, r_prov_specs_dest[-1])
@@ -361,12 +361,12 @@ def test_ray_sampling_from_wat_2met_pes():
     # We also know the last structure is the last possible dimer.
     # However, if the dimer is already repeated, we check the second-to-last dimer
     # and verify the last one already exists.
-    last_dimer_spec = source.rfile.get(
-        f"{source_key}/r_prov_specs"
-    )[-1][np.array([0, 1, 2, 4])]
-    second_last_dimer_spec = source.rfile.get(
-        f"{source_key}/r_prov_specs"
-    )[-1][np.array([0, 1, 2, 3])]
+    last_dimer_spec = source.rfile.get(f"{source_key}/r_prov_specs")[-1][
+        np.array([0, 1, 2, 4])
+    ]
+    second_last_dimer_spec = source.rfile.get(f"{source_key}/r_prov_specs")[-1][
+        np.array([0, 1, 2, 3])
+    ]
     r_prov_specs_dest = source.rfile.get(f"{dest_key}/r_prov_specs")
     try:
         assert np.array_equal(last_dimer_spec, r_prov_specs_dest[-1])
