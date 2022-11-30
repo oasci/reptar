@@ -51,10 +51,10 @@ Examples
 ========
 
 
-Water 3-body energies with Psi4
+Water trimers with Psi4
 -------------------------------
 
-The following example walks through how to compute water 1-, 2- and 3-body energies and gradients.
+The following example walks through how to compute energies and gradients of water trimers.
 We will be using the same :download:`exdir file containing a 30h2o MD simulation<./files/30h2o-md/30h2o-gfn2-md.exdir.zip>` from :ref:`this sampling tutorial <30h2o sampling tutorial>`.
 
 
@@ -244,125 +244,11 @@ Now, we have a data set of 4500 trimers with the desired size distribution.
 
 
 
-Sampling lower order structures
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-In order to compute 3-body energies and gradients we also need all unique monomers and dimers.
-TODO: finish this section.
-
-.. note::
-
-    There is no monomer descriptor analysis because :func:`~reptar.descriptors.com_distance_sum` is only valid for structures with more than one entity.
-
-.. tab-set::
-
-    .. tab-item:: All dimer sampling
-
-        .. code-block:: python
-
-            import os
-            from reptar import File, Sampler
-            from reptar.descriptors import Criteria, com_distance_sum
-
-            rfile_path = './30h2o-gfn2-md.exdir'
-
-            group_key = '/30h2o'  # The parent group.
-            ref_key = f'{group_key}/samples_3h2o'  # Group to sample from.
-            dest_key = f'{group_key}/samples_2h2o'  # Where to store samples.
-
-            sample_comp_ids = ['h2o', 'h2o']
-            quantity = 'all'  # Number of trimers to sample.
-
-            cutoff = None  # Value, list, or None. None accepts all structures.
-            center_structures = True  # Translate center of mass to origin.
-
-            # Ensures we execute from script directory (for relative paths).
-            os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
-            rfile = File(rfile_path, mode='a', allow_remove=False)
-
-            # Create the destination group if it does not exist.
-            try:
-                rfile.create_group(dest_key)
-            except RuntimeError as e:
-                if 'A directory with name' in str(e):
-                    print(f'{dest_key} already exists')
-                    print('Will add samples to this group')
-                else:
-                    raise
-
-            if cutoff is None:
-                criteria = None
-            else:
-                criteria = Criteria(com_distance_sum, {}, cutoff=cutoff)
-
-            sampler = Sampler(
-                rfile, ref_key, rfile, dest_key, criteria=criteria,
-                center_structures=center_structures
-            )
-            sampler.sample(sample_comp_ids, quantity)
-    
-
-    .. tab-item:: Dimer descriptor analysis
-
-        .. image:: ./files/30h2o-md/30h2o.2h2o-com.sum-distribution-13457.png
-            :width: 400px
-            :align: center
-    
-    .. tab-item:: All monomer sampling
-
-        .. code-block:: python
-
-            import os
-            from reptar import File, Sampler
-            from reptar.descriptors import Criteria, com_distance_sum
-
-            rfile_path = './30h2o-gfn2-md.exdir'
-
-            group_key = '/30h2o'  # The parent group.
-            ref_key = f'{group_key}/samples_3h2o'  # Group to sample from.
-            dest_key = f'{group_key}/samples_1h2o'  # Where to store samples.
-
-
-            sample_comp_ids = ['h2o']
-            quantity = 'all'  # Number of trimers to sample.
-
-            cutoff = None  # Value, list, or None. None accepts all structures.
-            center_structures = True  # Translate center of mass to origin.
-            structure_idxs = None  # None means all structures are options.
-
-            # Ensures we execute from script directory (for relative paths).
-            os.chdir(os.path.dirname(os.path.realpath(__file__)))
-
-            rfile = File(rfile_path, mode='a', allow_remove=False)
-
-            # Create the destination group if it does not exist.
-            try:
-                rfile.create_group(dest_key)
-            except RuntimeError as e:
-                if 'A directory with name' in str(e):
-                    print(f'{dest_key} already exists')
-                    print('Will add samples to this group')
-                else:
-                    raise
-
-            criteria = Criteria(com_distance_sum, {}, cutoff=cutoff)
-
-            sampler = Sampler(
-                rfile, ref_key, rfile, dest_key,
-                center_structures=center_structures
-            )
-            sampler.sample(sample_comp_ids, quantity)
-
-
-
-
 
 Running Psi4 calculations
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 with reptar.
-TODO: Finish this section.
 
 .. caution::
 
@@ -375,15 +261,7 @@ TODO: Finish this section.
     .
     └── 30h2o-sample-calculations
         ├── 30h2o-gfn2-md.exdir
-        │   ├── samples_1h2o
-        │   ├── samples_2h2o
         │   └── samples_3h2o
-        ├── psi4-samples-1h2o
-        │   ├── compute-psi4-engrads-1h2o.py
-        │   └── submit-psi4.slurm
-        ├── psi4-samples-2h2o
-        │   ├── compute-psi4-engrads-2h2o.py
-        │   └── submit-psi4.slurm
         ├── psi4-samples-3h2o
         │   ├── compute-psi4-engrads-3h2o.py
         │   └── submit-psi4.slurm
