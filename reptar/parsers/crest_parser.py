@@ -27,7 +27,7 @@ from ..utils import atoms_by_number, parse_xyz
 
 
 class ParserCREST(Parser):
-    """Custom parser for CREST calculations."""
+    r"""Custom parser for CREST calculations."""
 
     def __init__(
         self,
@@ -84,7 +84,7 @@ class ParserCREST(Parser):
         self.parsed_info["runtime_info"]["prov"] = "crest"
 
     def parse(self):
-        """Parses trajectory file and extracts information."""
+        r"""Parses trajectory file and extracts information."""
         # Extract information from output file.
         self.extract_data_out()
 
@@ -123,4 +123,4 @@ class ParserCREST(Parser):
         return self.parsed_info
 
     def after_parse(self):
-        """Checks to perform after parsing output file."""
+        r"""Checks to perform after parsing output file."""

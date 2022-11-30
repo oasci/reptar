@@ -20,9 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from ase import Atoms
+from ase.db import connect
+from ase.calculators.singlepoint import SinglePointCalculator
+
 
 def write_ase_db(db_path, Z, R, energy=None, forces=None):
-    """Create an atomic simulation environment database.
+    r"""Create an atomic simulation environment database.
 
     Will add rows if the database already exists.
 
@@ -44,12 +48,8 @@ def write_ase_db(db_path, Z, R, energy=None, forces=None):
     ``ase.db.sqlite.SQLite3Database``
         Atomic simulation environment database.
     """
-    from ase import Atoms
-    from ase.db import connect
-    from ase.calculators.singlepoint import SinglePointCalculator
-
     db = connect(db_path)
-    for i in range(len(R)):
+    for i, r in enumerate(R):
         if energy is not None:
             e = energy[i]
         else:
@@ -59,7 +59,7 @@ def write_ase_db(db_path, Z, R, energy=None, forces=None):
         else:
             f = None
         # TODO: Other way to add energies and forces? This is just a workaround.
-        spe = SinglePointCalculator(Atoms(Z, R[i]), **{"energy": e, "forces": f})
+        spe = SinglePointCalculator(Atoms(Z, r), **{"energy": e, "forces": f})
         atom = spe.get_atoms()
         db.write(atom)
     return db

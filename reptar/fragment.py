@@ -27,7 +27,7 @@ from scipy.spatial.distance import cdist
 
 
 def pairwise_distance(R, cutoff=1.5, num_frags=None):
-    """Group atoms together into fragments based on some cutoff distance.
+    r"""Group atoms together into fragments based on some cutoff distance.
 
     This is not very dependable.
 

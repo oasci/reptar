@@ -48,7 +48,7 @@ os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_ase_db_writer_1h2o_120meoh_prod():
-    """Writing small ASE database"""
+    r"""Writing small ASE database"""
     try:
         import ase
     except ImportError:

@@ -46,7 +46,7 @@ os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_xyz_gap_writer_1h2o_120meoh_prod():
-    """Writing short XYZ file from exdir file"""
+    r"""Writing short XYZ file from exdir file"""
     exdir_path = os.path.join(DATA_DIR, "1h2o_120meoh_md.exdir")
     xyz_path = os.path.join(WRITING_DIR, "1h2o_120meoh_md.xyz")
 

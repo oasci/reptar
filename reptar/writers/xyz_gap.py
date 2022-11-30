@@ -27,7 +27,7 @@ from .writing_utils import string_xyz_arrays
 def write_xyz_gap(
     xyz_path, lattice, Z, R, E, F=None, lattice_precision=3, data_precision=10
 ):
-    """Write an extended XYZ file in the GAP format.
+    r"""Write an extended XYZ file in the GAP format.
 
     Parameters
     ----------
@@ -65,16 +65,17 @@ def write_xyz_gap(
     if F is not None:
         prop_line += ":forces:R:3"
 
-    e_formatter = lambda x: f"%.{data_precision}f" % x
+    def e_formatter(i):
+        return f"%.{data_precision}f" % i
 
     n_atoms = len(Z)
-    F_arr = None
+    F_arr = None  # pylint: disable=invalid-name
     with open(xyz_path, "w", encoding="utf-8") as f:
-        for i in range(len(R)):
+        for i, r in enumerate(R):
             f.write(f"{n_atoms}\n")
             f.write(
                 " ".join([f"energy={e_formatter(E[i])}", prop_line, lat_str]) + "\n"
             )
             if F is not None:
-                F_arr = F[i]
-            f.write(string_xyz_arrays(Z, R[i], F_arr, precision=data_precision))
+                F_arr = F[i]  # pylint: disable=invalid-name
+            f.write(string_xyz_arrays(Z, r, F_arr, precision=data_precision))

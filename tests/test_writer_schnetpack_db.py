@@ -50,7 +50,7 @@ os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_schnetpack_db_writer_1h2o_120meoh_prod():
-    """Writing small schnetpack database"""
+    r"""Writing small schnetpack database"""
     try:
         import schnetpack
     except ImportError:

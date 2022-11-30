@@ -26,7 +26,7 @@ from ..utils import atoms_by_element
 
 
 def write_pdb(pdb_path, Z, R, entity_ids, comp_ids, atom_type="HETATM"):
-    """Write PDB file containing a single structure or trajectory.
+    r"""Write PDB file containing a single structure or trajectory.
 
     Parameters
     ----------

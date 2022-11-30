@@ -26,16 +26,14 @@ import numpy as np
 import scipy as sp
 
 
-def _pdist(r, lat_and_inv=None):
-    """Compute pairwise Euclidean distance matrix between all atoms.
+def _pdist(r):
+    r"""Compute pairwise Euclidean distance matrix between all atoms.
 
     Parameters
     ----------
     r : :obj:`numpy.ndarray`
         Array of size 3N containing the Cartesian coordinates of
         each atom.
-    lat_and_inv : :obj:`tuple` of :obj:`numpy.ndarray`, optional
-        Tuple of 3x3 matrix containing lattice vectors as columns and its inverse.
 
     Returns
     -------
@@ -46,12 +44,6 @@ def _pdist(r, lat_and_inv=None):
     r = r.reshape(-1, 3)
     n_atoms = r.shape[0]
 
-    if lat_and_inv is None:
-        pdist = sp.spatial.distance.pdist(r, "euclidean")
-    else:
-        pdist = sp.spatial.distance.pdist(
-            r, lambda u, v: np.linalg.norm(_pbc_diff(u - v, lat_and_inv))
-        )
-
+    pdist = sp.spatial.distance.pdist(r, "euclidean")
     tril_idxs = np.tril_indices(n_atoms, k=-1)
     return sp.spatial.distance.squareform(pdist, checks=False)[tril_idxs]

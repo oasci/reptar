@@ -49,7 +49,7 @@ os.makedirs(SAMPLING_DIR, exist_ok=True)
 
 
 def test_1h2o_120meoh_prod_sampler():
-    """Sampling from xTB MD reptar file."""
+    r"""Sampling from xTB MD reptar file."""
     source_path = os.path.join(DATA_DIR, "1h2o_120meoh_md.exdir")
     dest_path = f"{SAMPLING_DIR}/test_1h2o_120meoh_prod_sampling.exdir"
 
@@ -136,7 +136,7 @@ def test_1h2o_120meoh_prod_sampler():
 
 
 def test_ray_1h2o_120meoh_prod_sampler():
-    """Sampling from xTB MD reptar file with ray."""
+    r"""Sampling from xTB MD reptar file with ray."""
     try:
         import ray
     except ImportError:
@@ -228,7 +228,7 @@ def test_ray_1h2o_120meoh_prod_sampler():
 
 
 def test_sampling_from_wat_2met_pes():
-    """Sampling from a sampled exdir group."""
+    r"""Sampling from a sampled exdir group."""
     src_path = f"{SAMPLING_DIR}/test_1h2o_120meoh_prod_sampling.exdir"
 
     source = Creator()
@@ -301,7 +301,7 @@ def test_sampling_from_wat_2met_pes():
 
 
 def test_ray_sampling_from_wat_2met_pes():
-    """Sampling from a sampled exdir group with ray."""
+    r"""Sampling from a sampled exdir group with ray."""
     try:
         import ray
     except ImportError:

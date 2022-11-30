@@ -28,7 +28,7 @@ import pytest
 
 # pylint: disable-next=unused-argument
 def pytest_sessionstart(session):  # pytest_configure(config)
-    """Called after the Session object has been created and
+    r"""Called after the Session object has been created and
     before performing collection and entering the run test loop.
     """
     # Check that the reptar-data repo is cloned.

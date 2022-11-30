@@ -25,11 +25,11 @@ from ..extractors import ExtractorORCA
 
 
 class ParserORCA(Parser):
-    """Custom parser for ORCA output files."""
+    r"""Custom parser for ORCA output files."""
 
     # pylint: disable-next=unused-argument
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
-        """
+        r"""
         Parameters
         ----------
         out_path : :obj:`str`
@@ -50,7 +50,7 @@ class ParserORCA(Parser):
         # TODO: Handle geom and traj paths
 
     def parse(self):
-        """Parses output file and extracts information."""
+        r"""Parses output file and extracts information."""
         # cclib parsed information.
         try:
             import cclib  # pylint: disable=import-outside-toplevel
@@ -70,7 +70,7 @@ class ParserORCA(Parser):
         return self.parsed_info
 
     def after_parse(self):
-        """Checks to perform after parsing output file."""
+        r"""Checks to perform after parsing output file."""
         if "scf_grid_level_final" not in self.parsed_info["runtime_info"].keys():
             self.parsed_info["runtime_info"]["scf_grid_level_final"] = self.parsed_info[
                 "runtime_info"

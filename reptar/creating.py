@@ -39,7 +39,7 @@ defs_reserved = ["base", "md", "molprop", "pes", "qc", "sampl", "solv", "xtb"]
 
 
 def identify_parser(out_path):
-    """Identifies the correct parser depending on some trigger.
+    r"""Identifies the correct parser depending on some trigger.
     Only supported packaged should be included in ``triggers``.
 
     Parameters
@@ -71,7 +71,7 @@ triggers = [
 
 
 def identify_trajectory(traj_path):
-    """Identifies the type of trajectory depending on a series of tests."""
+    r"""Identifies the type of trajectory depending on a series of tests."""
     # ASE trajectory
     try:
         ase.io.trajectory.Trajectory(traj_path)
@@ -83,10 +83,10 @@ def identify_trajectory(traj_path):
 
 
 class Creator:
-    """Create groups from computational chemistry data."""
+    r"""Create groups from computational chemistry data."""
 
     def __init__(self, rfile=None):
-        """
+        r"""
         Parameters
         ----------
         rfile : :obj:`reptar.File`, default: ``None``
@@ -96,7 +96,7 @@ class Creator:
             self.rfile = rfile
 
     def load(self, file_path, mode="r", allow_remove=False, plugins=None):
-        """Load a reptar file for creating/adding information.
+        r"""Load a reptar file for creating/adding information.
 
         Parameters
         ----------
@@ -116,7 +116,7 @@ class Creator:
 
     @property
     def rfile(self):
-        """The reptar file to manage.
+        r"""The reptar file to manage.
 
         :obj:`reptar.File`
         """
@@ -171,7 +171,7 @@ class Creator:
         self.parsed_info = self.parser.parse()
 
     def parse_traj(self, traj_path, extractors=None):
-        """Parse a trajectory file.
+        r"""Parse a trajectory file.
 
         Parameters
         ----------
@@ -189,7 +189,7 @@ class Creator:
         self.parsed_info = self.parser.parse()
 
     def _create_extras_xtb(self, group_key):
-        """Extra actions for groups created from xtb calculations.
+        r"""Extra actions for groups created from xtb calculations.
 
         Parameters
         ----------
@@ -221,7 +221,7 @@ class Creator:
         extractors=None,
         **kwargs,
     ):
-        """Create a group from a supported calculation.
+        r"""Create a group from a supported calculation.
 
         Parameters
         ----------
@@ -291,7 +291,7 @@ class Creator:
         return self.rfile
 
     def ids(self, group_key, entity_ids, comp_ids):
-        """Add ``entity_ids`` and ``comp_ids`` to a group.
+        r"""Add ``entity_ids`` and ``comp_ids`` to a group.
 
         Parameters
         ----------
@@ -329,7 +329,7 @@ class Creator:
 
     # TODO: Update ways we get data here.
     def definitions(self, definitions=None):
-        """Add definitions of data to the file.
+        r"""Add definitions of data to the file.
 
         The base definitions are included by default. There should be no overlap
         of any definitions. If there is, precedence is given in order of

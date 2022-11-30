@@ -20,11 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from . import File
+from .reptar_file import File
 
 
 class Saver:
-    """Saves data to File.
+    r"""Saves data to File.
 
     Useful for drivers that should save current data periodically. For example,
     when running quantum chemistry calculations or sampling. This uses the
@@ -45,7 +45,7 @@ class Saver:
         self.data_keys = data_keys
 
     def save(self, *data):
-        """Put data to rfile.
+        r"""Put data to rfile.
 
         Parameters
         ----------

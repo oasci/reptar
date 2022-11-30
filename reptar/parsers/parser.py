@@ -24,7 +24,7 @@ from abc import ABC, abstractmethod
 
 
 class Parser(ABC):
-    """Base class for parsing output files.
+    r"""Base class for parsing output files.
 
     Attributes
     ----------
@@ -32,7 +32,7 @@ class Parser(ABC):
         Path to output file.
     file_name : :obj:`str`
         The name of the file without extension.
-    """
+    r"""
 
     def __init__(self, out_path, extractors):
         """
@@ -79,7 +79,7 @@ class Parser(ABC):
 
     @property
     def parsed_info(self):
-        """Information parsed from files. Contains the following keys.
+        r"""Information parsed from files. Contains the following keys.
 
         ``system_info``
             Information specifying the system prior to any computation. Such
@@ -108,10 +108,10 @@ class Parser(ABC):
         del self._parsed_info
 
     def after_parse(self):
-        """Replace if desired"""
+        r"""Replace if desired"""
 
     def extract_data_out(self):
-        """Extract data from ``out_path`` using all extractors"""
+        r"""Extract data from ``out_path`` using all extractors"""
         with open(self.out_path, mode="r", encoding="utf-8") as f:
             for line in f:
                 for extractor in self.extractors:
@@ -125,7 +125,7 @@ class Parser(ABC):
         self.combine_extracted()
 
     def combine_extracted(self):
-        """Combines all parsed_info from extractors into the parsed_info in the
+        r"""Combines all parsed_info from extractors into the parsed_info in the
         parser object.
         """
         for extractor in self.extractors:
@@ -140,7 +140,7 @@ class Parser(ABC):
                         pass
 
     def map_cclib_data(self):
-        """Assign cclib-parsed data to our ``parsed_info`` dictionary."""
+        r"""Assign cclib-parsed data to our ``parsed_info`` dictionary."""
         # pylint: disable=too-many-branches
         parsed_info = self.parsed_info
         cclib_data = self.cclib_data  # pylint: disable=no-member

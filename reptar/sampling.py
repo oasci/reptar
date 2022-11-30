@@ -22,11 +22,12 @@
 
 from random import choice, randrange
 import numpy as np
-from . import Saver
+from .save import Saver
 from .utils import center_structures as get_center_structures
 from .utils import gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
-from . import __version__ as reptar_version
+from . import _version
+reptar_version = _version.get_versions()["version"]
 
 try:
     import ray
@@ -37,7 +38,7 @@ else:
 
 
 def entity_mask_gen(entity_ids, entities):
-    """Generate an atom mask for a single entity.
+    r"""Generate an atom mask for a single entity.
 
     Parameters
     ----------
@@ -89,7 +90,7 @@ def entity_mask_gen(entity_ids, entities):
 
 
 def r_from_entities(R, entity_ids, entities):
-    """Slice a geometries containing each entity in the same order as
+    r"""Slice a geometries containing each entity in the same order as
     ``entities``.
 
     Parameters
@@ -152,7 +153,7 @@ def _add_structures_to_r_prov_specs(r_prov_specs, n_to_add, comp_labels):
 
 
 def _generate_structure_samples(quantity, structure_idxs, entity_ids_samples):
-    """Randomly generates structure and entity selections.
+    r"""Randomly generates structure and entity selections.
 
     The prov ID for the structure is not included here and must be
     inserted later.
@@ -225,7 +226,7 @@ def sampler_worker(
     criteria,
     periodic_cell,
 ):
-    """Given generated selections will slice and sample structures from source."""
+    r"""Given generated selections will slice and sample structures from source."""
     if not isinstance(selections, np.ndarray):
         selections = np.array(selections)
     assert selections.ndim == 2
@@ -334,7 +335,7 @@ def sampler_worker(
 
 
 class Sampler:
-    """Randomly sample structures."""
+    r"""Randomly sample structures."""
 
     def __init__(
         self,
@@ -417,13 +418,13 @@ class Sampler:
             self.criteria = ray.put(self.criteria)
 
         self.worker_chunk_size_for_all = 1000
-        """Chunk size used when ``quantity`` is ``'all'``.
+        r"""Chunk size used when ``quantity`` is ``'all'``.
 
         :type: : :obj:`int`
         """
 
     def _prepare_destination(self):
-        """Check for existing sampled structures in destinations and prepare."""
+        r"""Check for existing sampled structures in destinations and prepare."""
         dest_file = self.dest_file
         dest_key = self.dest_key
 
@@ -457,7 +458,7 @@ class Sampler:
         self.comp_ids = dest_file.get(f"{dest_key}/comp_ids", missing_is_none=True)
 
     def _check_comp_ids(self, comp_labels):
-        """Check if desired component IDs to sample is the same as the
+        r"""Check if desired component IDs to sample is the same as the
         destination if they already exist.
         """
         if self.comp_ids is not None:
@@ -473,7 +474,7 @@ class Sampler:
             self.comp_ids = np.array(comp_labels)
 
     def _prepare_source(self, R_source_idxs):
-        """Check for data from source."""
+        r"""Check for data from source."""
         source_file = self.source_file
         source_key = self.source_key
 
@@ -513,7 +514,6 @@ class Sampler:
 
     # pylint: disable-next=too-many-branches
     def _check_r_prov_ids(self):
-        """ """
         # Prepare source r_prov_ids and r_prov_specs.
         # If source is an original, we just need to determine the next prov_id
         # and prov_specs stays None.
@@ -595,7 +595,7 @@ class Sampler:
             self.saver = Saver(self.dest_file.fpath, saver_keys)
 
     def get_avail_entities(self, comp_ids_source, comp_labels, specific_entities=None):
-        """Determines available ``entity_ids`` for each ``comp_id`` in
+        r"""Determines available ``entity_ids`` for each ``comp_id`` in
         requested sampling components..
 
         Parameters
@@ -635,7 +635,7 @@ class Sampler:
         return avail_entity_ids
 
     def _prepare_dest_const_data(self):
-        """Take care of destination constant data like ``atomic_numbers`` and
+        r"""Take care of destination constant data like ``atomic_numbers`` and
         ``entity_ids``, ``comp_ids``. Also puts the data to the destination.
         """
         # Check that all atomic numbers of each entity is consistent.
@@ -700,7 +700,7 @@ class Sampler:
             self.dest_file.put(f"{self.dest_key}/comp_ids", self.comp_ids)
 
     def _initialize_structure_sampling_arrays(self, comp_labels, quantity):
-        """Creates or extends arrays for sampling structures.
+        r"""Creates or extends arrays for sampling structures.
 
         Parameters
         ----------
@@ -758,7 +758,7 @@ class Sampler:
         self.dest_file.update_md5(self.dest_key)
 
     def _cleanup(self):
-        """Remove attributes after sampling to free memory and avoid using
+        r"""Remove attributes after sampling to free memory and avoid using
         old data if new samples are taken.
         """
         # TODO: cleanup

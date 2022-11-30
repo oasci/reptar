@@ -24,7 +24,7 @@ from .extractor import Extractor
 
 
 class ExtractorXTB(Extractor):
-    """xTB extractor"""
+    r"""xTB extractor"""
 
     # We always pass the file object into methods here.
     # pylint: disable=unused-argument
@@ -94,7 +94,7 @@ class ExtractorXTB(Extractor):
         return trig
 
     def xtb_version(self, f, line):
-        """Version of xtb.
+        r"""Version of xtb.
 
         Parameters
         ----------
@@ -117,7 +117,7 @@ class ExtractorXTB(Extractor):
         next(f)
 
     def run_type(self, f, line):
-        """Calculation type (e.g., opt, sp, grad).
+        r"""Calculation type (e.g., opt, sp, grad).
 
         Parameters
         ----------
@@ -148,7 +148,7 @@ class ExtractorXTB(Extractor):
         next(f)
 
     def n_electrons(self, f, line):
-        """Total number of electrons.
+        r"""Total number of electrons.
 
         Parameters
         ----------
@@ -169,7 +169,7 @@ class ExtractorXTB(Extractor):
         self.parsed_info["system_info"]["n_ele"] = int(n_ele)
 
     def charge(self, f, line):
-        """Overall system charge.
+        r"""Overall system charge.
 
         Parameters
         ----------
@@ -190,7 +190,7 @@ class ExtractorXTB(Extractor):
         self.parsed_info["system_info"]["charge"] = int(charge)
 
     def multiplicity(self, f, line):
-        """Overall system multiplicity.
+        r"""Overall system multiplicity.
 
         Parameters
         ----------
@@ -212,7 +212,7 @@ class ExtractorXTB(Extractor):
         self.parsed_info["system_info"]["mult"] = int(mult)
 
     def wall_pot(self, f, line):
-        """Wall potentials.
+        r"""Wall potentials.
 
         Parameters
         ----------
@@ -282,7 +282,7 @@ class ExtractorXTB(Extractor):
         self.parsed_info["runtime_info"]["wall_potential"] = pots
 
     def gfn_setup(self, f, line):
-        """GFN calculation setup.
+        r"""GFN calculation setup.
 
         Parameters
         ----------
@@ -319,7 +319,7 @@ class ExtractorXTB(Extractor):
             line = next(f)
 
     def summary_energies(self, f, line):
-        """Extracts energies listed in SUMMARY box.
+        r"""Extracts energies listed in SUMMARY box.
 
         Parameters
         ----------
@@ -385,7 +385,7 @@ class ExtractorXTB(Extractor):
                 line = next(f)
 
     def md_setup(self, f, line):
-        """Extracts MD
+        r"""Extracts MD
 
         Parameters
         ----------
@@ -457,7 +457,7 @@ class ExtractorXTB(Extractor):
             self.parsed_info["runtime_info"]["md_restarted"] = False
 
     def opt_data(self, f, line):
-        """All information during optimization routine. Incldues setup, energy.
+        r"""All information during optimization routine. Incldues setup, energy.
 
         Parameters
         ----------
@@ -500,7 +500,7 @@ class ExtractorXTB(Extractor):
             line = next(f)
 
     def md_avg_props(self, f, line):
-        """Average MD properties.
+        r"""Average MD properties.
 
         Parameters
         ----------
@@ -530,7 +530,7 @@ class ExtractorXTB(Extractor):
         self.parsed_info["outputs"]["avg_temp"] = float(line.split()[-1])
 
     def thermostat_prob(self, f, line):
-        """If there was an issue with the thermostat.
+        r"""If there was an issue with the thermostat.
 
         Parameters
         ----------
@@ -550,7 +550,7 @@ class ExtractorXTB(Extractor):
         self.parsed_info["runtime_info"]["success"] = False
 
     def success(self, f, line):
-        """If the calculation is successful.
+        r"""If the calculation is successful.
 
         Parameters
         ----------

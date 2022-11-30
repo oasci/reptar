@@ -20,12 +20,11 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import numpy as np
 from .writing_utils import string_xyz_arrays
 
 
 def write_xyz(xyz_path, Z, R, comments=None, data_precision=10):
-    """Write standard XYZ file.
+    r"""Write standard XYZ file.
 
     Parameters
     ----------

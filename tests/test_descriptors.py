@@ -41,7 +41,7 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 
 def test_max_atom_pair_dist_3h2o():
-    """Computing 2-body energy and gradient contributions."""
+    r"""Computing 2-body energy and gradient contributions."""
     exdir_path = get_140h2o_samples_path()
     exdir_file = File(exdir_path, mode="r")
 
@@ -59,7 +59,7 @@ def test_max_atom_pair_dist_3h2o():
 
 
 def test_com_distance_sum_3h2o():
-    """Computing 2-body energy and gradient contributions."""
+    r"""Computing 2-body energy and gradient contributions."""
     exdir_path = get_140h2o_samples_path()
     exdir_file = File(exdir_path, mode="r")
 

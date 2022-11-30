@@ -74,7 +74,7 @@ def nesting_dicts():
 
 
 def test_file_del_nested_json():
-    """Delete a key nested inside a json."""
+    r"""Delete a key nested inside a json."""
     nested_dict, rfile_dict_true, rfile_dict_true_deleted = nesting_dicts()
     rfile = File("./tmp/test.json", mode="w", from_dict=nested_dict)
     np.testing.assert_equal(rfile.File_, rfile_dict_true)
@@ -85,7 +85,7 @@ def test_file_del_nested_json():
 
 
 def test_file_del_nested_exdir():
-    """Delete a key nested inside an exdir file."""
+    r"""Delete a key nested inside an exdir file."""
     nested_dict, _, _ = nesting_dicts()
 
     # Remove exdir file if it already exists

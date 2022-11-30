@@ -24,7 +24,7 @@ from abc import ABC, abstractmethod
 
 
 class Extractor(ABC):
-    """Base class for extracting information from files."""
+    r"""Base class for extracting information from files."""
 
     def __init__(self):
         self.parsed_info = {"system_info": {}, "runtime_info": {}, "outputs": {}}
@@ -32,7 +32,7 @@ class Extractor(ABC):
     @property
     @abstractmethod
     def triggers(self):
-        """A collection of triggers that activate the corresponding extractor.
+        r"""A collection of triggers that activate the corresponding extractor.
 
         The trigger is a lambda function that returns True or False depending
         on the criteria and the name of the extractor method.
@@ -42,7 +42,7 @@ class Extractor(ABC):
 
     @property
     def parsed_info(self):
-        """Information parsed from files. Contains the following keys.
+        r"""Information parsed from files. Contains the following keys.
 
         ``system_info``
             Information specifying the system prior to any computation. Such
@@ -71,7 +71,7 @@ class Extractor(ABC):
         del self._parsed_info
 
     def skip_lines(self, f, n):
-        """Skip a number of lines.
+        r"""Skip a number of lines.
 
         Parameters
         ----------

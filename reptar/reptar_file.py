@@ -29,7 +29,7 @@ from .utils import combine_dicts, dict_iterator, get_md5, remove_nested_key
 
 
 class File:
-    """Create, store, and access data from a variety of formats."""
+    r"""Create, store, and access data from a variety of formats."""
 
     # pylint: disable=unnecessary-dunder-call
 
@@ -57,7 +57,7 @@ class File:
             self._from_dict(file_path, from_dict, mode, allow_remove, plugins)
 
     def _from_path(self, file_path, mode, allow_remove, plugins):
-        """Populates the File object from a file path.
+        r"""Populates the File object from a file path.
 
         Parameters
         ----------
@@ -101,7 +101,7 @@ class File:
         self.File_ = File_
 
     def _from_dict(self, file_path, group_dict, mode, allow_remove, plugins):
-        """Populates the File object from a dictionary.
+        r"""Populates the File object from a dictionary.
 
         Parameters
         ----------
@@ -134,7 +134,7 @@ class File:
 
     @staticmethod
     def clean_key(key):
-        """Clean key and remove any common mistakes.
+        r"""Clean key and remove any common mistakes.
 
         Currently this only corrects instances of ``//``.
 
@@ -154,7 +154,7 @@ class File:
 
     @staticmethod
     def split_key(key):
-        """Split the key into a parent and data key.
+        r"""Split the key into a parent and data key.
 
         Parameters
         ----------
@@ -176,7 +176,7 @@ class File:
         return key_split
 
     def _get_from_dict(self, key):
-        """Get data from dictionary-like file (e.g., json, npz).
+        r"""Get data from dictionary-like file (e.g., json, npz).
 
         Parameters
         ----------
@@ -204,7 +204,7 @@ class File:
         return data
 
     def _get_from_exdir(self, key, as_memmap=False):
-        """Get data from exdir file.
+        r"""Get data from exdir file.
 
         Parameters
         ----------
@@ -240,7 +240,7 @@ class File:
         return data
 
     def get_keys(self, group_key):
-        """A list of keys in a group.
+        r"""A list of keys in a group.
 
         Does not include keys of nested groups.
 
@@ -274,7 +274,7 @@ class File:
         return keys
 
     def get(self, key, as_memmap=False, missing_is_none=False):
-        """Retrieve data.
+        r"""Retrieve data.
 
         Parameters
         ----------
@@ -308,7 +308,7 @@ class File:
 
     @staticmethod
     def _is_iter(data):
-        """If data is iterative (i.e., array, list, or tuple).
+        r"""If data is iterative (i.e., array, list, or tuple).
 
         Returns
         -------
@@ -321,7 +321,7 @@ class File:
 
     @staticmethod
     def simplify_iter_data(data, data_key):
-        """Checks contents of lists, tuples, and arrays to see if we can simplify.
+        r"""Checks contents of lists, tuples, and arrays to see if we can simplify.
 
         Parameters
         ----------
@@ -385,7 +385,7 @@ class File:
         return data
 
     def _put_to_dict(self, key, data):
-        """Add data to dictionary-like file.
+        r"""Add data to dictionary-like file.
 
         Parameters
         ----------
@@ -413,7 +413,7 @@ class File:
         self.File_ = combine_dicts(self.File_, add_dic)
 
     def _put_to_exdir(self, key, data):
-        """Add data to an exdir group.
+        r"""Add data to an exdir group.
 
         Parameters
         ----------
@@ -475,7 +475,7 @@ class File:
         return None
 
     def put(self, key, data, with_md5_update=False):
-        """Put data to file in a specific location.
+        r"""Put data to file in a specific location.
 
         Note that there is some data postprocessing using
         :meth:`~reptar.File.simplify_iter_data`.
@@ -502,7 +502,7 @@ class File:
             self.update_md5(group_key)
 
     def put_all(self, group_key, data, nested=False):
-        """Adds all data from :obj:`dict` to group.
+        r"""Adds all data from :obj:`dict` to group.
 
         This is just a loop over :meth:`~reptar.File.put` for each key-value pair.
 
@@ -530,7 +530,7 @@ class File:
         return self.File_
 
     def _remove_dict(self, key):
-        """Delete dictionary data under ``key``.
+        r"""Delete dictionary data under ``key``.
 
         Parameters
         ----------
@@ -546,7 +546,7 @@ class File:
         remove_nested_key(self.File_, [k for k in key.split("/") if k != ""])
 
     def _remove_exdir(self, key):
-        """Delete exdir data under ``key``.
+        r"""Delete exdir data under ``key``.
 
         Parameters
         ----------
@@ -576,7 +576,7 @@ class File:
                 yaml.dump(attrs, f)
 
     def remove(self, key, with_md5_update=False):
-        """Delete data under ``key``.
+        r"""Delete data under ``key``.
 
         Parameters
         ----------
@@ -599,7 +599,7 @@ class File:
             self.update_md5(group_key)
 
     def copy(self, source_key, dest_key, with_md5_update=False):
-        """Copy data from a source to a destination.
+        r"""Copy data from a source to a destination.
 
         Parameters
         ----------
@@ -611,7 +611,7 @@ class File:
         self.put(dest_key, self.get(source_key), with_md5_update)
 
     def create_group(self, key):
-        """Initialize/create an exdir group with the specified key. This can handle
+        r"""Initialize/create an exdir group with the specified key. This can handle
         creating nested groups.
 
         Parameters
@@ -629,7 +629,7 @@ class File:
         return self.get(key)
 
     def as_dict(self, group_key):
-        """Get a group as a dictionary.
+        r"""Get a group as a dictionary.
 
         Parameters
         ----------
@@ -654,7 +654,7 @@ class File:
         return group
 
     def update_md5(self, group_key):
-        """Update all possible MD5 hashes of a specific group.
+        r"""Update all possible MD5 hashes of a specific group.
 
         Parameters
         ----------
@@ -679,7 +679,7 @@ class File:
             pass
 
     def save(self, json_prettify=True):
-        """Saves non-exdir files.
+        r"""Saves non-exdir files.
 
         Parameters
         ----------

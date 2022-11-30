@@ -27,7 +27,7 @@ from ..utils import atoms_by_number, parse_xyz
 
 
 class ParserXTB(Parser):
-    """Custom parser for xtb output files."""
+    r"""Custom parser for xtb output files."""
 
     # pylint: disable=unused-argument, R0801
 
@@ -59,7 +59,7 @@ class ParserXTB(Parser):
         self.parsed_info["runtime_info"]["prov"] = "xTB"
 
     def parse(self):
-        """Parses trajectory file and extracts information."""
+        r"""Parses trajectory file and extracts information."""
         # Extract information.
         self.extract_data_out()
 
@@ -107,7 +107,7 @@ class ParserXTB(Parser):
         return self.parsed_info
 
     def after_parse(self):
-        """Checks to perform after parsing output file."""
+        r"""Checks to perform after parsing output file."""
         # xtb prints the last energy twice during optimizations.
         # The last printed energy has more significant figures, so we will
         # get rid of the second to last one.

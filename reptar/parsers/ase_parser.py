@@ -26,13 +26,13 @@ from .parser import Parser
 
 
 class ParserASE(Parser):
-    """Custom parser for ASE trajectory files."""
+    r"""Custom parser for ASE trajectory files."""
 
     # We always pass certain paths into methods here.
     # pylint: disable=unused-argument, R0801
 
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
-        """
+        r"""
         Parameters
         ----------
         traj_path : :obj:`str`
@@ -53,12 +53,12 @@ class ParserASE(Parser):
         self.parsed_info["runtime_info"]["prov"] = "ASE"
 
     def parse(self):
-        """Parses trajectory file and extracts information."""
+        r"""Parses trajectory file and extracts information."""
         self.extract_data_out()
         return self.parsed_info
 
     def extract_data_out(self):
-        """Custom extractor driver for ASE trajectory since it is not a text
+        r"""Custom extractor driver for ASE trajectory since it is not a text
         file.
         """
         traj = Trajectory(self.traj_path)

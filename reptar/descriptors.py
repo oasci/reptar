@@ -28,7 +28,7 @@ from qcelemental import periodictable as ptable
 
 
 class Criteria:
-    """Descriptor criteria for accepting a structure based on a descriptor
+    r"""Descriptor criteria for accepting a structure based on a descriptor
     and cutoff.
     """
 

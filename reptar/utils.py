@@ -28,6 +28,7 @@ import hashlib
 import os
 import numpy as np
 from qcelemental import periodictable as ptable
+from .descriptors import get_center_of_mass
 
 
 def get_files(path, expression, recursive=True):
@@ -290,17 +291,10 @@ def center_structures(Z, R):
     if R.ndim == 2:
         R = np.array([R])
 
-    masses = np.empty(R[0].shape)
-
-    for i in range(len(masses)):
-        masses[i, :] = ptable.to_mass(Z[i])
-
-    for i, r in enumerate(R):
-        cm_r = np.average(r, axis=0, weights=masses)
-        R[i] = r - cm_r
+    R -= get_center_of_mass(Z, R)
 
     if R.shape[0] == 1:
-        return R[0]
+        R = R[0]
 
     return R
 
@@ -478,7 +472,7 @@ def dict_iterator(dictionary):
 
 
 def get_nested_key(dictionary, keys):
-    """Access a nested object in a dictionary by key sequence.
+    r"""Access a nested object in a dictionary by key sequence.
 
     Parameters
     ----------
@@ -498,7 +492,7 @@ def get_nested_key(dictionary, keys):
 
 
 def add_nested_key(dictionary, keys, data):
-    """Set a value in a nested dictionary by key sequence.
+    r"""Set a value in a nested dictionary by key sequence.
 
     Parameters
     ----------
