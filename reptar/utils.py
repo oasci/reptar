@@ -291,7 +291,7 @@ def center_structures(Z, R):
     if R.ndim == 2:
         R = np.array([R])
 
-    R -= get_center_of_mass(Z, R)
+    R -= np.repeat(get_center_of_mass(Z, R), R.shape[1]).reshape(R.shape)
 
     if R.shape[0] == 1:
         R = R[0]
