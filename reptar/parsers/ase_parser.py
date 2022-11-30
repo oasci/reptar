@@ -21,15 +21,15 @@
 # SOFTWARE.
 
 from ase.io.trajectory import Trajectory
-from ..extractors import ExtractorASE  # pylint: disable=no-name-in-module
-from .parser import Parser  # pylint: disable=no-name-in-module
+from ..extractors import ExtractorASE
+from .parser import Parser
 
 
 class ParserASE(Parser):
     """Custom parser for ASE trajectory files."""
 
     # We always pass certain paths into methods here.
-    # pylint: disable=unused-argument
+    # pylint: disable=unused-argument, R0801
 
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
         """
@@ -64,9 +64,9 @@ class ParserASE(Parser):
         traj = Trajectory(self.traj_path)
         for atoms in traj:
             for extractor in self.extractors:
-                for i in range(len(extractor.triggers)):
-                    if extractor.triggers[i][0](True):
-                        getattr(extractor, extractor.triggers[i][1])(traj, atoms)
+                for trigger in extractor.triggers:
+                    if trigger[0](True):
+                        getattr(extractor, trigger[1])(traj, atoms)
                         break
                 else:
                     continue

@@ -20,7 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import collections.abc
+import collections
+from functools import reduce
+import operator
 import itertools
 import hashlib
 import os
@@ -29,7 +31,7 @@ from qcelemental import periodictable as ptable
 
 
 def get_files(path, expression, recursive=True):
-    """Returns paths to all files in a given directory that matches a provided
+    r"""Returns paths to all files in a given directory that matches a provided
     expression in the file name.
 
     Commonly used to find all files of a certain type, e.g., output or xyz
@@ -75,7 +77,7 @@ def get_files(path, expression, recursive=True):
 
 
 def atoms_by_element(atom_list):
-    """Converts a list of atoms identified by their atomic number to their
+    r"""Converts a list of atoms identified by their atomic number to their
     elemental symbol in the same order.
 
     Parameters
@@ -92,7 +94,7 @@ def atoms_by_element(atom_list):
 
 
 def atoms_by_number(atom_list):
-    """Converts a list of atoms identified by their elemental symbol to their
+    r"""Converts a list of atoms identified by their elemental symbol to their
     atomic number.
 
     Parameters
@@ -108,8 +110,8 @@ def atoms_by_number(atom_list):
     return [ptable.to_atomic_number(symbol) for symbol in atom_list]
 
 
-def parse_stringfile(stringfile_path):
-    """Parses data from string file.
+def parse_xyz(stringfile_path):
+    r"""Parses data from string file.
 
     A string file is data presented as consecutive xyz data. The data could be
     three Cartesian coordinates for each atom, three atomic force vector
@@ -154,7 +156,7 @@ def parse_stringfile(stringfile_path):
 
 
 def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
-    """Creates MD5 hash for a group.
+    r"""Creates MD5 hash for a group.
 
     Parameters
     ----------
@@ -209,7 +211,7 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
 
 
 def gen_entity_ids(atoms_per_mol, num_mol, starting_idx=0, add_to=None):
-    """Generates entity ids for a single species.
+    r"""Generates entity ids for a single species.
 
     Note that all of the atoms in each molecule must occur in the same order and
     be grouped together.
@@ -243,7 +245,7 @@ def gen_entity_ids(atoms_per_mol, num_mol, starting_idx=0, add_to=None):
 
 
 def gen_comp_ids(label, num_mol, add_to=None):
-    """Prepares the list of component ids for a system with only one species.
+    r"""Prepares the list of component ids for a system with only one species.
 
     Parameters
     ----------
@@ -268,7 +270,7 @@ def gen_comp_ids(label, num_mol, add_to=None):
 
 
 def center_structures(Z, R):
-    """Centers each structure's center of mass to the origin.
+    r"""Centers each structure's center of mass to the origin.
 
     Previously centered structures should not be affected by this technique.
 
@@ -304,7 +306,7 @@ def center_structures(Z, R):
 
 
 def combine_dicts(dict1, dict2):
-    """Combine two dictionaries.
+    r"""Combine two dictionaries.
 
     Parameters
     ----------
@@ -324,7 +326,7 @@ def combine_dicts(dict1, dict2):
 
 
 def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
-    """Find the structure indices of a parent r_prov_specs using a subset of
+    r"""Find the structure indices of a parent r_prov_specs using a subset of
     the specifications.
 
     Useful for identifying structure indices when ``r_prov_specs_subset`` is in
@@ -364,7 +366,7 @@ def find_parent_r_idxs(r_prov_specs, r_prov_specs_subset):
 
 
 def gen_combs(sets, replacement=False):
-    """Generate combinations from multiple sets.
+    r"""Generate combinations from multiple sets.
 
     Parameters
     ----------
@@ -407,7 +409,7 @@ def gen_combs(sets, replacement=False):
 
 
 def chunk_iterable(iterable, n):
-    """Chunk an iterable into ``n`` objects.
+    r"""Chunk an iterable into ``n`` objects.
 
     Parameters
     ----------
@@ -427,7 +429,7 @@ def chunk_iterable(iterable, n):
 
 
 def exists_in_array(a_slice, array):
-    """Check if ``a_slice`` exists in an ``array``.
+    r"""Check if ``a_slice`` exists in an ``array``.
 
     Parameters
     ----------
@@ -450,3 +452,100 @@ def exists_in_array(a_slice, array):
     # At the very end, we will have a 1D array. If any are True, then a_slice
     # exists in array
     return exists.any()
+
+
+def dict_iterator(dictionary):
+    r"""Iterate over nested dictionary.
+
+    Parameters
+    ----------
+    dictionary : :obj:`dict`
+        An arbitrarily nested dictionary.
+
+    Yields
+    ------
+    :obj:`tuple`
+        Keys specifying the walk through a dictionary and the last item as the value.
+    """
+    for k, v in dictionary.items():
+        if isinstance(v, dict):
+            # If value is dict then iterate over all its values
+            for pair in dict_iterator(v):
+                yield k, *pair
+        else:
+            # If value is not dict type then yield the value
+            yield k, v
+
+
+def get_nested_key(dictionary, keys):
+    """Access a nested object in a dictionary by key sequence.
+
+    Parameters
+    ----------
+    dictionary : :obj:`dict`
+        Dictionary to get data from.
+    keys : :obj:`list`
+        Keys that lead to data in ``dictionary``.
+
+    Notes
+    -----
+    Some code here is from `this Stack Overflow answer
+    <https://stackoverflow.com/a/14692747>`__ by
+    `Martijn Pieters <https://stackoverflow.com/users/100297/martijn-pieters>`__,
+    licensed under `CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>`__.
+    """
+    return reduce(operator.getitem, keys, dictionary)
+
+
+def add_nested_key(dictionary, keys, data):
+    """Set a value in a nested dictionary by key sequence.
+
+    Parameters
+    ----------
+    dictionary : :obj:`dict`
+        Dictionary to add data to.
+    keys : :obj:`list`
+        Keys that lead to data in ``dictionary``.
+    data : ``obj``
+        Data to add under ``keys`` in ``dictionary``.
+
+    Returns
+    -------
+    :obj:`dict`
+        ``dictionary`` with the added data.
+
+    Notes
+    -----
+    Some code here is from `this Stack Overflow answer
+    <https://stackoverflow.com/a/14692747>`__ by
+    `Martijn Pieters <https://stackoverflow.com/users/100297/martijn-pieters>`__,
+    licensed under `CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>`__.
+    """
+    get_nested_key(dictionary, keys[:-1])[keys[-1]] = data
+    return dictionary
+
+
+def remove_nested_key(dictionary, keys):
+    r"""Delete data in a nested dictionary.
+
+    Parameters
+    ----------
+    dictionary : :obj:`dict`
+        Dictionary to delete data from.
+    keys : :obj:`list`
+        Keys that lead to data in ``dictionary``.
+
+    Returns
+    -------
+    :obj:`dict`
+        ``dictionary`` with data removed.
+
+    Notes
+    -----
+    Some code here is from `this Stack Overflow answer
+    <https://stackoverflow.com/a/14692747>`__ by
+    `Martijn Pieters <https://stackoverflow.com/users/100297/martijn-pieters>`__,
+    licensed under `CC BY-SA 4.0 <https://creativecommons.org/licenses/by-sa/4.0/>`__.
+    """
+    del get_nested_key(dictionary, keys[:-1])[keys[-1]]
+    return dictionary

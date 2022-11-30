@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Ability to remove data with the ``File`` object.
 - Option (``missing_is_none``) to return ``None`` from ``File.get()`` if the key does not exist.
 - ``Saver`` with sampling.
 - ``with_md5_update`` option for putting data in reptar files.

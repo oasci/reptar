@@ -1,7 +1,5 @@
 """Extract information from files"""
 
-# pylint: disable=no-name-in-module
-
 from .extractor import Extractor
 from .orca_extractor import ExtractorORCA
 from .xtb_extractor import ExtractorXTB

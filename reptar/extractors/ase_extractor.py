@@ -23,7 +23,7 @@
 from math import sqrt
 import numpy as np
 import qcelemental as qcel
-from .extractor import Extractor  # pylint: disable=no-name-in-module
+from .extractor import Extractor
 
 try:
     from ase.calculators.calculator import PropertyNotImplementedError

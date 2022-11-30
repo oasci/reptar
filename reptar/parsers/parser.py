@@ -115,10 +115,9 @@ class Parser(ABC):
         with open(self.out_path, mode="r", encoding="utf-8") as f:
             for line in f:
                 for extractor in self.extractors:
-                    # pylint: disable-next=consider-using-enumerate
-                    for i in range(len(extractor.triggers)):
-                        if extractor.triggers[i][0](line):
-                            getattr(extractor, extractor.triggers[i][1])(f, line)
+                    for trigger in extractor.triggers:
+                        if trigger[0](line):
+                            getattr(extractor, trigger[1])(f, line)
                             break
                     else:
                         continue

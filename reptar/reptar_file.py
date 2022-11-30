@@ -20,15 +20,18 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import exdir
-import json
-import numpy as np
 import os
-from .utils import combine_dicts, get_md5
+import json
+import exdir
+import numpy as np
+import yaml
+from .utils import combine_dicts, dict_iterator, get_md5, remove_nested_key
 
 
 class File:
     """Create, store, and access data from a variety of formats."""
+
+    # pylint: disable=unnecessary-dunder-call
 
     def __init__(
         self, file_path, mode="r", allow_remove=False, plugins=None, from_dict=None
@@ -92,7 +95,7 @@ class File:
         else:
             raise TypeError(f"{f_ext} is not supported.")
 
-        self.fpath = file_path
+        self.fpath = os.path.abspath(file_path)
         self.ftype = f_ext[1:]
         self.fmode = mode
         self.File_ = File_
@@ -118,18 +121,19 @@ class File:
 
         if f_ext == ".exdir":
             self.File_ = exdir.File(file_path, mode, allow_remove, plugins)
-        elif f_ext == ".json" or f_ext == ".npz":
+        elif f_ext in (".json", ".npz"):
             self.File_ = {}
-        self.fpath = file_path
+        self.fpath = os.path.abspath(file_path)
         self.ftype = f_ext[1:]
         self.fmode = mode
 
-        for pair in self._iter_dict(group_dict):
-            key = "/".join(pair[:-1])
-            data = pair[-1]
+        for item in dict_iterator(group_dict):
+            key = "/".join(item[:-1])
+            data = item[-1]
             self.put(key, data)
 
-    def clean_key(self, key):
+    @staticmethod
+    def clean_key(key):
         """Clean key and remove any common mistakes.
 
         Currently this only corrects instances of ``//``.
@@ -148,7 +152,8 @@ class File:
             key = key.replace("//", "/")
         return key
 
-    def split_key(self, key):
+    @staticmethod
+    def split_key(key):
         """Split the key into a parent and data key.
 
         Parameters
@@ -264,7 +269,7 @@ class File:
                     )
                 )
             )
-        elif self.ftype == "json" or self.ftype == "npz":
+        elif self.ftype in ("json", "npz"):
             keys.extend(list(group.keys()))
         return keys
 
@@ -292,7 +297,7 @@ class File:
         try:
             if self.ftype == "exdir":
                 data = self._get_from_exdir(key, as_memmap=as_memmap)
-            elif self.ftype == "json" or self.ftype == "npz":
+            elif self.ftype in ("json", "npz"):
                 data = self._get_from_dict(key)
         except RuntimeError as e:
             if "does not exist" in str(e) and missing_is_none:
@@ -301,7 +306,8 @@ class File:
                 raise
         return data
 
-    def _is_iter(self, data):
+    @staticmethod
+    def _is_iter(data):
         """If data is iterative (i.e., array, list, or tuple).
 
         Returns
@@ -309,40 +315,40 @@ class File:
         :obj:`bool`
             If the data is iterative.
         """
-        if (
-            isinstance(data, np.ndarray)
-            or isinstance(data, list)
-            or isinstance(data, tuple)
-        ):
+        if isinstance(data, (list, tuple, np.ndarray)):
             return True
-        else:
-            return False
+        return False
 
-    def simplify_iter_data(self, data, data_key):
-        """Simplify iterative data if possible.
-
-        Checks contents of lists, tuples, and arrays to see if we can simplify.
-        For example, if a list has only one element this method will return
-        just the element.
-
-        Some exceptions are used to maintain consistency. For example, atomic
-        numbers will always remain a 1D array even if there is only one
-        atom.
-
-        This becomes important when adding parsed data to a file. During
-        parsing, there is a possibility we could have one or more of the same
-        property. We instead assume there will be multiple. Then as a
-        postprocessing step we simplify cases where only one value was parsed.
+    @staticmethod
+    def simplify_iter_data(data, data_key):
+        """Checks contents of lists, tuples, and arrays to see if we can simplify.
 
         Parameters
         ----------
         data : :obj:`numpy.ndarray`, :obj:`list`, :obj:`tuple`
             An iterative data object.
+        data_key : :obj:`str`, default: ``None``
+            Key for the data. There are some hard-coded checks and behaviors.
 
         Returns
         -------
         ``obj``
             Simplified data (if possible).
+
+        Notes
+        -----
+        There are some circumstances where an iterable is not simplified.
+        For example, if there is only one atom and we are trying to simplify
+        ``atomic_numbers`` (i.e., ``[7]``) it is kept as an iterable.
+
+        This routine is important after sampling. As the default behavior is to assume
+        multiple values will be parsed. This routine is used in the end to clean up
+        those data.
+
+        The following cases -> behaviors are enforced on ``data_keys``.
+
+        - Length of iterable is one -> Keep as iterable.
+            - ``atomic_numbers``, ``entity_ids``, ``comp_ids``
         """
         # If data is a list we check the types of data it contains.
         # If all of them are strings, we do not convert to array.
@@ -401,7 +407,7 @@ class File:
             data = self.simplify_iter_data(data, keys[-1])
 
         add_dic = {keys[-1]: data}
-        for key in reversed(keys[:-1]):
+        for key in reversed(keys[:-1]):  # pylint: disable=redefined-argument-from-local
             add_dic = {key: add_dic}
 
         self.File_ = combine_dicts(self.File_, add_dic)
@@ -417,13 +423,22 @@ class File:
             Data to add to exdir file.
         """
         parent_key, data_key = self.split_key(key)
-        group = self.get(parent_key)
-        assert isinstance(group, exdir.core.exdir_file.File) or isinstance(
-            group, exdir.core.group.Group
-        )
+
+        # Handle nested creation of groups.
+        # Suppose we want to put "/group_1/nested_group/data_key" before group_1 or
+        # nested_group exists. We have to create these groups first.
+        # create_group
+        try:
+            group = self.get(parent_key)
+        except KeyError as e:
+            if "No such object:" not in str(e):
+                raise
+            group = self.create_group(parent_key)
+        assert isinstance(group, (exdir.core.exdir_file.File, exdir.core.group.Group))
 
         # Custom handling of parsed data to ensure logical behavior.
         ndarray_to_list_keys = ["dipole_moment", "periodic", "periodic_cell"]
+        # pylint: disable-next=no-else-return
         if data_key in ndarray_to_list_keys:
             if isinstance(data, np.ndarray):
                 data = data.tolist()
@@ -457,6 +472,7 @@ class File:
                 # We remove this dataset and try again.
                 group.__delitem__(data_key)
                 group.create_dataset(data_key, data=data)
+        return None
 
     def put(self, key, data, with_md5_update=False):
         """Put data to file in a specific location.
@@ -477,7 +493,7 @@ class File:
         key = self.clean_key(key)
         if self.ftype == "exdir":
             self._put_to_exdir(key, data)
-        elif self.ftype == "json" or self.ftype == "npz":
+        elif self.ftype in ("json", "npz"):
             self._put_to_dict(key, data)
 
         # Update MD5 of group
@@ -500,9 +516,6 @@ class File:
         nested : :obj:`bool`, default: ``True``
             If``data`` contains one level of nested dictionaries. This is the
             case for ``parsed_info``.
-
-        Returns
-        -------
         """
         if nested:
             for cat_key in data.keys():
@@ -516,6 +529,75 @@ class File:
 
         return self.File_
 
+    def _remove_dict(self, key):
+        """Delete dictionary data under ``key``.
+
+        Parameters
+        ----------
+        key : :obj:`str`
+            Key of the desired data (including parent). Nested keys should be
+            separated by ``/``.
+        """
+        # We know that npz cannot be nested; so we directly delete it.
+        if self.ftype == "npz":
+            del self.File_[key.replace("/", "")]
+
+        # Any other file type we assume could be nested.
+        remove_nested_key(self.File_, [k for k in key.split("/") if k != ""])
+
+    def _remove_exdir(self, key):
+        """Delete exdir data under ``key``.
+
+        Parameters
+        ----------
+        key : :obj:`str`
+            Key of the desired data (including parent). Nested keys should be
+            separated by ``/``.
+        """
+        try:
+            # Handles datasets
+            self.File_.__delitem__(key)
+        except KeyError as e:
+            if "No such object: " not in str(e):
+                raise
+
+            # Handles attributes
+            group_key, attr_key = self.split_key(key)
+            if group_key[0] == "/":
+                group_key = group_key[1:]
+            yaml_path = os.path.join(self.fpath, group_key, "attributes.yaml")
+
+            with open(yaml_path, "r", encoding="utf-8") as f:
+                attrs = yaml.safe_load(f)
+
+            del attrs[attr_key]
+
+            with open(yaml_path, "w", encoding="utf-8") as f:
+                yaml.dump(attrs, f)
+
+    def remove(self, key, with_md5_update=False):
+        """Delete data under ``key``.
+
+        Parameters
+        ----------
+        key : :obj:`str`
+            Key of the desired data (including parent). Nested keys should be
+            separated by ``/``.
+        with_md5_update : :obj:`bool`, default: ``False``
+            Update MD5 hashes after putting data.
+        """
+        key = self.clean_key(key)
+
+        if self.ftype == "exdir":
+            self._remove_exdir(key)
+        elif self.ftype in ("json", "npz"):
+            self._remove_dict(key)
+
+        # Update MD5 of group
+        if with_md5_update:
+            group_key, _ = self.split_key(key)
+            self.update_md5(group_key)
+
     def copy(self, source_key, dest_key, with_md5_update=False):
         """Copy data from a source to a destination.
 
@@ -528,37 +610,23 @@ class File:
         """
         self.put(dest_key, self.get(source_key), with_md5_update)
 
-    def _iter_dict(self, dic):
-        """Iterate over nested dictionary.
-
-        Parameters
-        ----------
-        dic : :obj:`dict`
-            An arbitrarily nested dictionary.
-
-        Yields
-        ------
-        A :obj:`tuple` of keys where the last element is the value.
-        """
-        for k, v in dic.items():
-            if isinstance(v, dict):
-                # If value is dict then iterate over all its values
-                for pair in self._iter_dict(v):
-                    yield (k, *pair)
-            else:
-                # If value is not dict type then yield the value
-                yield (k, v)
-
     def create_group(self, key):
-        """Initialize/create an exdir group with the specified key.
+        """Initialize/create an exdir group with the specified key. This can handle
+        creating nested groups.
 
         Parameters
         ----------
         key : :obj:`str`
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
+
+        Returns
+        -------
+        :obj:`exdir.core.Group`
+            The newly created group.
         """
-        return self.File_.create_group(key)
+        self.File_.create_group(key)
+        return self.get(key)
 
     def as_dict(self, group_key):
         """Get a group as a dictionary.
@@ -574,15 +642,16 @@ class File:
             The desired group as a dictionary.
         """
         group = self.get(group_key)
-        if self.ftype == "json" or self.ftype == "npz":
-            return group
-        elif self.ftype == "exdir":
+        if self.ftype == "exdir":
             group_dict = {}
             data_keys = self.get_keys(group_key)
             get_keys = [f"{group_key}/{d_key}" for d_key in data_keys]
             for d_key, g_key in zip(data_keys, get_keys):
                 group_dict[d_key] = self.get(g_key)
             return group_dict
+
+        # json or npz
+        return group
 
     def update_md5(self, group_key):
         """Update all possible MD5 hashes of a specific group.
@@ -619,6 +688,7 @@ class File:
             line.
         """
         assert self.fmode == "w"
+        # pylint: disable=import-outside-toplevel
         from cclib.io.cjsonwriter import JSONIndentEncoder, NumpyAwareJSONEncoder
 
         if self.ftype == "json":

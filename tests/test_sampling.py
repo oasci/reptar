@@ -33,6 +33,7 @@ import numpy as np
 import pytest
 from reptar import Creator, Sampler
 from reptar.sampling import r_from_entities
+from reptar.utils import exists_in_array
 
 sys.path.append("..")
 
@@ -61,7 +62,7 @@ def test_1h2o_120meoh_prod_sampler():
     dest_key = "/wat.2met-pes"
     dest.rfile.create_group(dest_key)
 
-    quantity = 20
+    quantity = 5
     comp_labels = ("WAT", "MET", "MET")
 
     sampler = Sampler(
@@ -76,7 +77,7 @@ def test_1h2o_120meoh_prod_sampler():
         dry_run=False,
         all_init_size=50000,
         use_ray=False,
-        n_workers=2,
+        n_workers=1,
         ray_address="auto",
     )
     sampler.sample(comp_labels, quantity, R_source_idxs=None, specific_entities=None)
@@ -153,7 +154,7 @@ def test_ray_1h2o_120meoh_prod_sampler():
     dest_key = "/wat.2met-pes"
     dest.rfile.create_group(dest_key)
 
-    quantity = 20
+    quantity = 5
     comp_labels = ("WAT", "MET", "MET")
 
     sampler = Sampler(
@@ -168,7 +169,7 @@ def test_ray_1h2o_120meoh_prod_sampler():
         dry_run=False,
         all_init_size=50000,
         use_ray=True,
-        n_workers=2,
+        n_workers=1,
         ray_address="auto",
     )
     sampler.sample(comp_labels, quantity, R_source_idxs=None, specific_entities=None)
@@ -251,7 +252,7 @@ def test_sampling_from_wat_2met_pes():
         dry_run=False,
         all_init_size=50000,
         use_ray=False,
-        n_workers=2,
+        n_workers=1,
         ray_address="auto",
     )
     sampler.sample(comp_labels, quantity, R_source_idxs=None, specific_entities=None)
@@ -280,10 +281,23 @@ def test_sampling_from_wat_2met_pes():
     )
 
     # We also know the last structure is the last possible dimer.
-    assert np.array_equal(
-        source.rfile.get(f"{source_key}/r_prov_specs")[-1][np.array([0, 1, 2, 4])],
-        source.rfile.get(f"{dest_key}/r_prov_specs")[-1],
-    )
+    # However, if the dimer is already repeated, we check the second-to-last dimer
+    # and verify the last one already exists.
+    last_dimer_spec = source.rfile.get(
+        f"{source_key}/r_prov_specs"
+    )[-1][np.array([0, 1, 2, 4])]
+    second_last_dimer_spec = source.rfile.get(
+        f"{source_key}/r_prov_specs"
+    )[-1][np.array([0, 1, 2, 3])]
+    r_prov_specs_dest = source.rfile.get(f"{dest_key}/r_prov_specs")
+    try:
+        assert np.array_equal(last_dimer_spec, r_prov_specs_dest[-1])
+    except AssertionError:
+        assert exists_in_array(last_dimer_spec, r_prov_specs_dest)
+    try:
+        assert np.array_equal(second_last_dimer_spec, r_prov_specs_dest[-2])
+    except AssertionError:
+        assert exists_in_array(second_last_dimer_spec, r_prov_specs_dest)
 
 
 def test_ray_sampling_from_wat_2met_pes():
@@ -316,7 +330,7 @@ def test_ray_sampling_from_wat_2met_pes():
         dry_run=False,
         all_init_size=50000,
         use_ray=True,
-        n_workers=2,
+        n_workers=1,
         ray_address="auto",
     )
     sampler.sample(comp_labels, quantity, R_source_idxs=None, specific_entities=None)
@@ -345,7 +359,18 @@ def test_ray_sampling_from_wat_2met_pes():
     )
 
     # We also know the last structure is the last possible dimer.
-    assert np.array_equal(
-        source.rfile.get(f"{source_key}/r_prov_specs")[-1][np.array([0, 1, 2, 4])],
-        source.rfile.get(f"{dest_key}/r_prov_specs")[-1],
-    )
+    # However, if the dimer is already repeated, we check the second-to-last dimer
+    # and verify the last one already exists.
+    last_dimer_spec = source.rfile.get(
+        f"{source_key}/r_prov_specs"
+    )[-1][np.array([0, 1, 2, 4])]
+    second_last_dimer_spec = source.rfile.get(
+        f"{source_key}/r_prov_specs"
+    )[-1][np.array([0, 1, 2, 3])]
+    r_prov_specs_dest = source.rfile.get(f"{dest_key}/r_prov_specs")
+    try:
+        assert np.array_equal(last_dimer_spec, r_prov_specs_dest[-1])
+    except AssertionError:
+        assert exists_in_array(last_dimer_spec, r_prov_specs_dest)
+
+    assert np.array_equal(second_last_dimer_spec, r_prov_specs_dest[-2])

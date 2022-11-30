@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
-from .extractor import Extractor  # pylint: disable=no-name-in-module
+from .extractor import Extractor
 
 
 class ExtractorCREST(Extractor):

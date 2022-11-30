@@ -172,7 +172,6 @@ def test_1h2o_120meoh_md_json():
     assert create.rfile.get("prod_1/wall_potential")[0]["sphere_radius"] == 12.500003
 
 
-@pytest.mark.dependency(depends=["test_1h2o_120meoh_md_exdir"], scope="module")
 def test_1h2o_120meoh_md_prod_exdir_to_npz():
     exdir_path = os.path.join(XTB_DIR, "1h2o_120meoh_md.exdir")
     npz_path = os.path.join(XTB_DIR, "1h2o_120meoh_md-prod.npz")

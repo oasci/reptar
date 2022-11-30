@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .extractor import Extractor  # pylint: disable=no-name-in-module
+from .extractor import Extractor
 
 
 class ExtractorXTB(Extractor):

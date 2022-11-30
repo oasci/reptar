@@ -21,9 +21,9 @@
 # SOFTWARE.
 
 import numpy as np
-from ..extractors import ExtractorCREST  # pylint: disable=no-name-in-module
-from .parser import Parser  # pylint: disable=no-name-in-module
-from ..utils import atoms_by_number, parse_stringfile
+from ..extractors import ExtractorCREST
+from .parser import Parser
+from ..utils import atoms_by_number, parse_xyz
 
 
 class ParserCREST(Parser):
@@ -89,8 +89,9 @@ class ParserCREST(Parser):
         self.extract_data_out()
 
         # Extract atomic_numbers and geometry from conformer or rotamer.
-        Z, comments, R = parse_stringfile(self.xyz_path)
+        Z, comments, R = parse_xyz(self.xyz_path)
 
+        # pylint: disable-next=R0801
         if len(set(tuple(i) for i in Z)) == 1:
             Z = Z[0]
         else:

@@ -20,13 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .parser import Parser  # pylint: disable=no-name-in-module
-from ..extractors import ExtractorORCA  # pylint: disable=no-name-in-module
+from .parser import Parser
+from ..extractors import ExtractorORCA
 
 
 class ParserORCA(Parser):
     """Custom parser for ORCA output files."""
 
+    # pylint: disable-next=unused-argument
     def __init__(self, out_path=None, geom_path=None, traj_path=None, extractors=None):
         """
         Parameters
