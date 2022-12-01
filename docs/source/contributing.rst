@@ -217,3 +217,32 @@ Before you submit a pull request, check that it meets these guidelines:
 .. tip::
 
     You can open a draft pull request first to check that GitHub actions pass for all supported Python versions.
+
+
+Deploying
+=========
+
+A reminder for the maintainers on how to deploy.
+
+Our versions are manged with `versioneer <https://github.com/python-versioneer/python-versioneer>`__.
+This primarily relies on tags and distance from the most recent tag.
+Creating a new version is automated with ``bump2version`` (which can be installed with ``pip install bump2version``) and controlled with ``.bumpversion.cfg``.
+Then, the `Upload Python Package <https://github.com/aalexmmaldonado/reptar/actions/workflows/python-publish.yml>`__ GitHub Action will take care of deploying to PyPI.
+
+.. note::
+
+    Each push to ``main`` will trigger a TestPyPI deployment `here <https://test.pypi.org/project/reptar/>`__.
+    Tags will trigger a PyPI deployment `here <https://pypi.org/project/reptar/>`__.
+
+Create a new version of ``reptar`` by running the following command while in the repository root.
+
+.. code-block:: bash
+
+    $ bump2version patch # possible: major / minor / patch
+
+Then, push the commit and tags.
+
+.. code-block:: bash
+
+    $ git push --follow-tags
+
