@@ -20,6 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+# pylint: disable=line-too-long
+
 from .extractor import Extractor
 
 
@@ -493,7 +495,6 @@ class ExtractorORCA(Extractor):
             "ORCA POPULATION ANALYSIS" != line.strip()
             and "*     ORCA property calculations      *" != line.strip()
         ):
-            # pylint: disable=line-too-long
             # Iter       E(tot)           E(Corr)          Delta-E          Residual     Time      <S|S>**1/2
             #  0     -7.469294707     -0.036553055      0.000000000      0.027013328    0.05      0.000000001
             #
@@ -501,7 +502,6 @@ class ExtractorORCA(Extractor):
             #
             # Iter       E(tot)           E(Corr)          Delta-E          Residual     Time
             #   0     -2.897443580     -0.035772194      0.000000000      0.027217829    0.00
-            # pylint: enable=line-too-long
             if (
                 line.strip()[:79]
                 == "Iter       E(tot)           E(Corr)          Delta-E          Residual     Time"
@@ -585,14 +585,12 @@ class ExtractorORCA(Extractor):
             ------------
         """
         while "Total time needed     " not in line.strip():
-            # pylint: disable=line-too-long
             # Hamiltonian:
             #  Ab initio Hamiltonian  Method          .... Hartree-Fock(GTOs)
 
             # General Settings:
             #  Integral files         IntName         .... al.chrg0.mult2-orca.sp.esp-ccsdt.anopvqz.vtightscf.sym-lambda0
             #  Hartree-Fock type      HFTyp           .... UHF
-            # pylint: enable=line-too-long
             if "Ab initio Hamiltonian" == line.strip()[:21]:
                 # We only include the HF type in the keywords.
                 for _ in range(0, 5):

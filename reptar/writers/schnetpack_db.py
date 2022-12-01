@@ -64,10 +64,11 @@ def write_schnetpack_db(
     f_units : :obj:`float`, default: ``1.0``
         Units of forces using ``ase.units``. Essentially the conversion factor
         to eV/A.
-    centering_function : ``callable``, default: schnetpack.data.atoms.get_center_of_mass``
+    centering_function : ``callable``
         A function for centering the ``positions`` when querying the database.
         Defaults to centering the structure according to the center of mass.
-        Set to ``None`` for no centering.
+        Set to ``None`` for no centering. Defaults to
+        ``schnetpack.data.atoms.get_center_of_mass``
 
     Returns
     -------

@@ -540,8 +540,8 @@ class Sampler:
             # Create pseudo r_prov_ids_source.
             r_prov_ids_source = {0: md5_source}
 
-        # If is this not a new destination we cannot always reuse the source information.
-        # Need to check for overlap of ids and specifications.
+        # If is this not a new destination we cannot always reuse the source
+        # information. Need to check for overlap of ids and specifications.
         # Just need to shift the new source IDs up by the maximum destination ID.
         if r_prov_ids is not None:
 
@@ -670,7 +670,8 @@ class Sampler:
                         assert np.array_equal(Z_ref, Z_other)
                     except AssertionError as e:
                         raise AssertionError(
-                            f"Atomic numbers do not match for entity_id of {other_entity}"
+                            "Atomic numbers do not match for entity_id "
+                            f"of {other_entity}"
                         ) from e
 
             entity_id += 1
