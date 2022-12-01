@@ -137,12 +137,6 @@ outputs:
       - attribute
       - dataset
     type: float
-  dipole_moment:
-    description: >+
-      Dipole moment vector in Debyes.
-    storage:
-      - dataset
-    type: float
   energy_ccsd:
     description: >+
       TODO

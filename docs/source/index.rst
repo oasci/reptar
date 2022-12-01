@@ -131,7 +131,6 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Calculators <calculators>
     Descriptors <descriptors>
     Scripts <scripts>
-    Definitions <definitions>
-    Examples <examples/examples>
+    Definitions <definitions/definitions>
     API <api/modules>
     Contributing <contributing>

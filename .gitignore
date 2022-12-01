@@ -105,6 +105,7 @@ ENV/
 docs/source/_build
 docs/html
 docs/source/doc
+docs/source/definitions
 
 # psi4 timer
 timer.dat

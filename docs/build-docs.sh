@@ -3,6 +3,7 @@
 # Will not build current branch documentation; only main and tagged commits.
 cd "${0%/*}"
 rm -rf ./html/
+./convert_definitions.py
 sphinx-multiversion -nT ./source/ ./html/
 touch ./html/.nojekyll
 
