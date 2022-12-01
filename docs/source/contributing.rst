@@ -190,7 +190,10 @@ You can easily build and view the documentation locally by running the ``docs/br
 7. Add a description of the changes in the ``CHANGELOG.md``.
 Please follow the general format specified `here <https://keepachangelog.com/en/1.0.0/>`__.
 
-8. Commit your changes and push your branch to GitHub.
+8. If any changes are made to definitions, be sure to run the ``docs/convert_definitions.py`` script to update the Sphinx documentation pages.
+This script is also called in ``docs/branch-build-docs.sh``.
+
+9. Commit your changes and push your branch to GitHub.
 
 .. code-block:: bash
 
@@ -198,7 +201,7 @@ Please follow the general format specified `here <https://keepachangelog.com/en/
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-branch
 
-9. Submit a pull request through the `GitHub website <https://github.com/aalexmmaldonado/reptar>`__.
+10. Submit a pull request through the `GitHub website <https://github.com/aalexmmaldonado/reptar>`__.
 
 
 

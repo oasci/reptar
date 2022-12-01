@@ -39,7 +39,6 @@ jobs:
           python -m pip install .
       - name: Build documentation
         run: |
-          python ./docs/convert_definitions.py
           sphinx-multiversion -nT ./docs/source ./docs/html
           touch ./docs/html/.nojekyll
           echo "<head>" > ./docs/html/index.html
