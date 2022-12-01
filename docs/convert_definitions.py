@@ -80,9 +80,11 @@ def get_files(path, expression, recursive=True):
 
 
 # Retrieve file paths.
+print("Finding YAML files")
 yaml_file_paths = get_files("../reptar/definitions", ".yaml")
 yaml_file_paths = [os.path.abspath(path) for path in yaml_file_paths]
 
+print("Loading YAML files")
 # Load all YAML files.
 yaml_files = {}
 for file_path in yaml_file_paths:
@@ -92,7 +94,7 @@ for file_path in yaml_file_paths:
         yaml_files[file_name] = yaml.safe_load(f)
 
 
-WRITE_DIR = "./source/definitions"
+WRITE_DIR = os.path.abspath("./source/definitions")
 
 # Remove directory if it exists
 if os.path.exists(WRITE_DIR):
@@ -100,6 +102,8 @@ if os.path.exists(WRITE_DIR):
 os.makedirs(WRITE_DIR)
 
 # Write definitions main rst file
+print("Writing definitions.rst")
+print(f"Directory: {WRITE_DIR}")
 defs_main_path = os.path.join(WRITE_DIR, "definitions.rst")
 
 DEFS_MAIN_HEADING = r"""===========
@@ -132,6 +136,7 @@ with open(defs_main_path, mode="w", encoding="utf-8") as f:
 
 
 # Write individual files
+print("Writing definitions files")
 for file_name, defs in yaml_files.items():
     file_path = os.path.join(WRITE_DIR, file_name + ".rst")
     header_len = int(len(file_name))
