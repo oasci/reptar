@@ -351,7 +351,7 @@ class Sampler:
         dry_run=False,
         all_init_size=50000,
         use_ray=False,
-        n_workers=2,
+        n_workers=1,
         ray_address="auto",
     ):
         """
@@ -390,8 +390,8 @@ class Sampler:
             Use ray to parallelize sampling. If ``False``, then sampling is
             done serially in batches. ``True`` is useful if tons of sampling
             on the order of thousands is desired.
-        n_workers : :obj:`int`, default: ``2``
-            Number of workers to use for sampling if ``use_ray`` is ``True``.
+        n_workers : :obj:`int`, default: ``1``
+            Number of parallel workers to use if ``use_ray`` is ``True``.
             Each worker will have one core.
         ray_address : :obj:`str`, default: ``'auto'``
             Ray cluster address to connect to.

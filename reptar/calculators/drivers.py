@@ -20,7 +20,6 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-import math
 import numpy as np
 from ..utils import chunk_iterable
 
@@ -44,8 +43,8 @@ class DriverEnergy:
         worker,
         worker_kwargs,
         use_ray=False,
-        n_cpus=1,
-        n_cpus_worker=1,
+        n_workers=1,
+        n_cpus_per_worker=1,
         chunk_size=50,
         start_slice=None,
         end_slice=None,
@@ -78,10 +77,10 @@ class DriverEnergy:
             done serially. ``False`` can be useful when running locally or only
             a few calculations are needed. ``True`` is useful for tons of
             calculations.
-        n_cpus : :obj:`int`, default: ``1``
-            Total number of CPUs we can use for ray tasks.
-        n_cpus_worker : :obj:`int`, default: ``1``
-            Number of CPUs to dedicate to each task.
+        n_workers : :obj:`int`, default: ``1``
+            Number of parallel workers to use if ``use_ray`` is ``True``.
+        n_cpus_per_worker : :obj:`int`, default: ``1``
+            Number of CPU cores to provide each worker.
         chunk_size : :obj:`int`, default: ``50``
             Number of calculations per task to do. This should be enough to make
             the ray task overhead significantly less than calculations.
@@ -107,10 +106,9 @@ class DriverEnergy:
         self.start_slice = start_slice
         self.end_slice = end_slice
 
-        self.n_cpus = n_cpus
-        self.n_cpus_worker = n_cpus_worker
+        self.n_workers = n_workers
+        self.n_cpus_per_worker = n_cpus_per_worker
         self.chunk_size = chunk_size
-        self.n_workers = math.floor(n_cpus / n_cpus_worker)
 
         self.use_ray = use_ray
         if use_ray:
@@ -168,7 +166,7 @@ class DriverEnergy:
                 try:
                     chunk = list(next(chunker))
                     workers.append(
-                        worker.options(num_cpus=self.n_cpus_worker).remote(
+                        worker.options(num_cpus=self.n_cpus_per_worker).remote(
                             chunk, self.Z, self.R, **self.worker_kwargs
                         )
                     )
@@ -208,8 +206,8 @@ class DriverEnGrad:
         worker,
         worker_kwargs,
         use_ray=False,
-        n_cpus=1,
-        n_cpus_worker=1,
+        n_workers=1,
+        n_cpus_per_worker=1,
         chunk_size=50,
         start_slice=None,
         end_slice=None,
@@ -246,10 +244,10 @@ class DriverEnGrad:
             done serially. ``False`` can be useful when running locally or only
             a few calculations are needed. ``True`` is useful for tons of
             calculations.
-        n_cpus : :obj:`int`, default: ``1``
-            Total number of CPUs we can use for ray tasks.
-        n_cpus_worker : :obj:`int`, default: ``1``
-            Number of CPUs to dedicate to each task.
+        n_workers : :obj:`int`, default: ``1``
+            Number of parallel workers to use if ``use_ray`` is ``True``.
+        n_cpus_per_worker : :obj:`int`, default: ``1``
+            Number of CPU cores to provide each worker.
         chunk_size : :obj:`int`, default: ``50``
             Number of calculations per task to do. This should be enough to make
             the ray task overhead significantly less than calculations.
@@ -279,10 +277,9 @@ class DriverEnGrad:
         self.start_slice = start_slice
         self.end_slice = end_slice
 
-        self.n_cpus = n_cpus
-        self.n_cpus_worker = n_cpus_worker
+        self.n_workers = n_workers
+        self.n_cpus_per_worker = n_cpus_per_worker
         self.chunk_size = chunk_size
-        self.n_workers = math.floor(n_cpus / n_cpus_worker)
 
         self.use_ray = use_ray
         if use_ray:
@@ -344,7 +341,7 @@ class DriverEnGrad:
                 try:
                     chunk = list(next(chunker))
                     workers.append(
-                        worker.options(num_cpus=self.n_cpus_worker).remote(
+                        worker.options(num_cpus=self.n_cpus_per_worker).remote(
                             chunk, self.Z, self.R, **self.worker_kwargs
                         )
                     )
@@ -387,8 +384,8 @@ class DriverOpt:
         worker,
         worker_kwargs,
         use_ray=False,
-        n_cpus=1,
-        n_cpus_worker=1,
+        n_workers=1,
+        n_cpus_per_worker=1,
         chunk_size=1,
         start_slice=None,
         end_slice=None,
@@ -428,10 +425,10 @@ class DriverOpt:
             done serially. ``False`` can be useful when running locally or only
             a few calculations are needed. ``True`` is useful for tons of
             calculations.
-        n_cpus : :obj:`int`, default: ``1``
-            Total number of CPUs we can use for ray tasks.
-        n_cpus_worker : :obj:`int`, default: ``1``
-            Number of CPUs to dedicate to each task.
+        n_workers : :obj:`int`, default: ``1``
+            Number of parallel workers to use if ``use_ray`` is ``True``.
+        n_cpus_per_worker : :obj:`int`, default: ``1``
+            Number of CPU cores to provide each worker.
         chunk_size : :obj:`int`, default: ``1``
             Number of calculations per task to do. This should be enough to make
             the ray task overhead significantly less than calculations.
@@ -459,10 +456,9 @@ class DriverOpt:
         self.start_slice = start_slice
         self.end_slice = end_slice
 
-        self.n_cpus = n_cpus
-        self.n_cpus_worker = n_cpus_worker
+        self.n_workers = n_workers
+        self.n_cpus_per_worker = n_cpus_per_worker
         self.chunk_size = chunk_size
-        self.n_workers = math.floor(n_cpus / n_cpus_worker)
 
         self.use_ray = use_ray
         if use_ray:
@@ -523,7 +519,7 @@ class DriverOpt:
                 try:
                     chunk = list(next(chunker))
                     workers.append(
-                        worker.options(num_cpus=self.n_cpus_worker).remote(
+                        worker.options(num_cpus=self.n_cpus_per_worker).remote(
                             chunk, self.Z, self.R, **self.worker_kwargs
                         )
                     )

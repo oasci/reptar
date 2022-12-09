@@ -2,6 +2,14 @@
 
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/), and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- Unified specification of ray workers and number of cores.
+``n_workers`` always defaults to ``1`` which ``n_cpus_per_worker`` specifies the number
+of CPU cores per worker (also defaults to ``1``).
+
 ## [0.0.3] - 2022-11-30
 
 ### Added
