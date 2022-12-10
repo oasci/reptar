@@ -17,23 +17,21 @@ jobs:
           lfs: true
           path: examples/reptar-data
       
-      - name: Set up Python 3.10
-        uses: actions/setup-python@v2
-        with:
-          python-version: '3.10'
-      
       - name: Install dependencies
         run: |
           source "$CONDA/etc/profile.d/conda.sh"
           conda create -y --name reptar-test
           conda activate reptar-test
-          conda install -y -c psi4 psi4
+          conda install -y python=3.10 psi4 -c psi4
           pip install --upgrade pip
           pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray
           pip install pytest-cov pytest-order pytest-dependency
       
       - name: Run tests and collect coverage
-        run: pytest --cov=reptar
+        run: |
+          source "$CONDA/etc/profile.d/conda.sh"
+          conda activate reptar-test
+          pytest --cov=reptar
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
