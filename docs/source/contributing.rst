@@ -74,7 +74,20 @@ Installing *Black* can be done with ``pip install black`` and then ran with the 
 
     $ black ./
     All done! ✨ 🍰 ✨
-    52 files left unchanged.
+    55 files left unchanged.
+
+
+Pylint
+======
+
+`Pylint <https://pylint.pycqa.org/en/stable/>`__ is used to lint all new Python code introduced into reptar.
+You can install Pylint with ``pip install pylint`` and locally check mbGDML by running ``pylint --rcfile=.pylintrc reptar`` in the repository root.
+All messages need to be corrected before merging into reptar.
+
+Sometimes the Pylint suggestion does not make sense or cannot be fixed.
+In these situations, you can tell Pylint to ignore that message with something like ``# pylint: disable-next=too-many-branches``.
+Use this responsibly. 
+
 
 
 Get Started!
@@ -126,21 +139,26 @@ Then, while in the repo root directory, you can run all of the tests with the ``
     platform linux -- Python 3.10.4, pytest-7.1.2, pluggy-1.0.0
     rootdir: /home/alex/repos/reptar, configfile: pytest.ini
     plugins: anyio-3.6.1, order-1.0.1
-    collected 19 items                                                   
+    collected 27 items                                                 
 
-    tests/test_creator_ase.py .                                    [  5%]
-    tests/test_creator_crest.py ..                                 [ 15%]
-    tests/test_creator_orca.py ...                                 [ 31%]
-    tests/test_creator_xtb.py ....                                 [ 52%]
-    tests/test_descriptors.py ..                                   [ 63%]
-    tests/test_sampling.py ..                                      [ 73%]
-    tests/test_writer_ase_db.py .                                  [ 78%]
-    tests/test_writer_pdb.py .                                     [ 84%]
-    tests/test_writer_schnetpack_db.py .                           [ 89%]
-    tests/test_writer_xyz.py .                                     [ 94%]
-    tests/test_writer_xyz_gap.py .                                 [100%]
+    tests/test_creator_ase.py .                                  [  3%]
+    tests/test_creator_crest.py .                                [  7%]
+    tests/test_creator_orca.py .                                 [ 11%]
+    tests/test_creator_xtb.py .                                  [ 14%]
+    tests/test_calculators_psi4.py ....                          [ 29%]
+    tests/test_creator_crest.py .                                [ 33%]
+    tests/test_creator_orca.py ..                                [ 40%]
+    tests/test_creator_xtb.py ...                                [ 51%]
+    tests/test_descriptors.py ..                                 [ 59%]
+    tests/test_file.py ..                                        [ 66%]
+    tests/test_sampling.py ....                                  [ 81%]
+    tests/test_writer_ase_db.py .                                [ 85%]
+    tests/test_writer_pdb.py .                                   [ 88%]
+    tests/test_writer_schnetpack_db.py .                         [ 92%]
+    tests/test_writer_xyz.py .                                   [ 96%]
+    tests/test_writer_xyz_gap.py .                               [100%]
 
-    ======================== 19 passed in 20.59s =========================
+    ======================== 27 passed in 20.59s =========================
 
 .. hint::
 

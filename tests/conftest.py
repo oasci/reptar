@@ -24,6 +24,7 @@
 # pylint: disable=import-outside-toplevel, unused-import
 
 import os
+import glob
 import pytest
 
 # pylint: disable-next=unused-argument
@@ -65,3 +66,11 @@ def pytest_sessionfinish(session, exitstatus):
         pass
     else:
         ray.shutdown()
+
+    # Remove any psi4 files.
+    file_list = glob.glob("./tests/psi.*.clean")
+    for file_path in file_list:
+        try:
+            os.remove(file_path)
+        except Exception:
+            print("Error while deleting file : ", file_path)

@@ -89,7 +89,7 @@ def psi4_energy(
     if options is not None:
         psi4.set_options(options)
     R = R[idxs]
-    E = np.empty(R.shape)
+    E = np.empty(R.shape[0])
     for i, r in enumerate(R):
         mol = psi4.core.Molecule.from_arrays(
             geom=r,

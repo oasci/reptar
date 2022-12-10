@@ -20,25 +20,29 @@ jobs:
     steps:
     - name: Checkout reptar
       uses: actions/checkout@v2.5.0
+    
     - name: Checkout reptar-data
       uses: actions/checkout@v2.5.0
       with:
         repository: 'aalexmmaldonado/reptar-data'
         lfs: true
         path: examples/reptar-data
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v3
-      with:
-        python-version: ${{ matrix.python-version }}
+    
+    - name: Setup conda conda environment
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          activate-environment: reptar-test
+          auto-update-conda: true
+          python-version: ${{ matrix.python-version }}
+
     - name: Install dependencies
       run: |
+        conda install -c psi4 psi4
         python -m pip install --upgrade pip
-        python -m pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase
-        python -m pip install pytest pytest-order pytest-dependency
-    - name: Install reptar
-      run: |
-        pip install .
-    - name: Test with pytest
-      run: |
-        pytest .
+        python -m pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray
+        python -m pip install pytest-cov pytest-order pytest-dependency
     
+    - name: Install reptar
+      run: pip install .
+    - name: Test with pytest
+      run: pytest .

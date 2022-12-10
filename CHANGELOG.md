@@ -4,11 +4,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Added
+
+- Tests fo psi4 energy and energy+gradient calculations.
+- Pylint section in documentation.
+
 ### Changed
 
+- System information (i.e., atomic numbers and coordinates) are moved to
+``driver.run()`` instead of during initialization.
 - Unified specification of ray workers and number of cores.
 ``n_workers`` always defaults to ``1`` which ``n_cpus_per_worker`` specifies the number
 of CPU cores per worker (also defaults to ``1``).
+
+### Fixed
+
+- ``psi4_energy`` returned wrong energy shape.
+- ``File.put()`` did not create missing groups consistently in exdir files.
 
 ## [0.0.3] - 2022-11-30
 

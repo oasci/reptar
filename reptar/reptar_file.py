@@ -412,6 +412,7 @@ class File:
 
         self.File_ = combine_dicts(self.File_, add_dic)
 
+    # pylint: disable-next=too-many-branches
     def _put_to_exdir(self, key, data):
         r"""Add data to an exdir group.
 
@@ -432,6 +433,10 @@ class File:
             group = self.get(parent_key)
         except KeyError as e:
             if "No such object:" not in str(e):
+                raise
+            group = self.create_group(parent_key)
+        except RuntimeError as e:
+            if " does not exist" not in str(e):
                 raise
             group = self.create_group(parent_key)
         assert isinstance(group, (exdir.core.exdir_file.File, exdir.core.group.Group))
