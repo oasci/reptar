@@ -50,4 +50,6 @@ jobs:
     
     - name: Test with pytest
       shell: bash -el {0}
-      run: pytest ./
+      run: |
+        conda activate reptar-test
+        pytest ./
