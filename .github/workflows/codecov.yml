@@ -23,6 +23,7 @@ jobs:
           activate-environment: reptar-test
           auto-update-conda: true
           python-version: '3.10'
+          channels: psi4
       
       - name: Install dependencies
         run: |

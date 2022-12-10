@@ -34,6 +34,7 @@ jobs:
         activate-environment: reptar-test
         auto-update-conda: true
         python-version: ${{ matrix.python-version }}
+        channels: psi4
 
     - name: Install dependencies
       run: |
