@@ -29,11 +29,11 @@ jobs:
         path: examples/reptar-data
     
     - name: Setup conda conda environment
-        uses: conda-incubator/setup-miniconda@v2
-        with:
-          activate-environment: reptar-test
-          auto-update-conda: true
-          python-version: ${{ matrix.python-version }}
+      uses: conda-incubator/setup-miniconda@v2
+      with:
+        activate-environment: reptar-test
+        auto-update-conda: true
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
       run: |
