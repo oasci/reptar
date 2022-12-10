@@ -31,8 +31,7 @@ jobs:
         run: |
           source "$CONDA/etc/profile.d/conda.sh"
           conda activate reptar-test
-          pytest --cov=reptar ./
-          ls
+          pytest --cov=reptar
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
