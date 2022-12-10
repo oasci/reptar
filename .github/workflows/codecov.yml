@@ -8,18 +8,24 @@ jobs:
 
     steps:
       - name: Checkout reptar
-        uses: actions/checkout@v2.5.0
+        uses: actions/checkout@v3
       
       - name: Checkout reptar-data
-        uses: actions/checkout@v2.5.0
+        uses: actions/checkout@v3
         with:
           repository: 'aalexmmaldonado/reptar-data'
           lfs: true
           path: examples/reptar-data
       
+      - uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          auto-update-conda: true
+          python-version: "3.10"
+      
       - name: Install dependencies
+        shell: bash -el {0}
         run: |
-          source "$CONDA/etc/profile.d/conda.sh"
           conda create -y --name reptar-test
           conda activate reptar-test
           conda install -y python=3.10 psi4 -c psi4
@@ -28,13 +34,15 @@ jobs:
           pip install pytest-cov pytest-order pytest-dependency
       
       - name: Run tests and collect coverage
+        shell: bash -el {0}
         run: |
           conda activate reptar-test
-          pytest --cov=reptar ./
+          pytest --cov=reptar --cov-report=xml
       
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v3
+        shell: bash -el {0}
         with:
-          directory: /home/runner/work/reptar/reptar
+          env_vars: OS,PYTHON
           fail_ci_if_error: true
           verbose: true

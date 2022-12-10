@@ -19,18 +19,24 @@ jobs:
 
     steps:
     - name: Checkout reptar
-      uses: actions/checkout@v2.5.0
+      uses: actions/checkout@v3
     
     - name: Checkout reptar-data
-      uses: actions/checkout@v2.5.0
+      uses: actions/checkout@v3
       with:
         repository: 'aalexmmaldonado/reptar-data'
         lfs: true
         path: examples/reptar-data
+    
+    - uses: conda-incubator/setup-miniconda@v2
+      with:
+        miniconda-version: "latest"
+        auto-update-conda: true
+        python-version: ${{ matrix.python-version }}
 
     - name: Install dependencies
+      shell: bash -el {0}
       run: |
-        source "$CONDA/etc/profile.d/conda.sh"
         conda create -y --name reptar-test
         conda activate reptar-test
         conda install -y python=${{ matrix.python-version }} psi4 -c psi4
@@ -39,12 +45,9 @@ jobs:
         pip install pytest pytest-order pytest-dependency
     
     - name: Install reptar
-      run: |
-        source "$CONDA/etc/profile.d/conda.sh"
-        conda activate reptar-test
-        pip install .
+      shell: bash -el {0}
+      run: pip install .
+    
     - name: Test with pytest
-      run: |
-        source "$CONDA/etc/profile.d/conda.sh"
-        conda activate reptar-test
-        pytest .
+      shell: bash -el {0}
+      run: pytest ./
