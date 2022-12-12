@@ -29,6 +29,7 @@ jobs:
           conda create -y --name reptar-test
           conda activate reptar-test
           conda install -y python=3.10 psi4 -c psi4
+          conda install -c conda-forge xtb-python
           pip install --upgrade pip
           pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray
           pip install pytest-cov pytest-order pytest-dependency

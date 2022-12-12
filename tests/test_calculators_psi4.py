@@ -122,8 +122,8 @@ def test_calculator_psi4_1h2o_engrad():
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": start_slice,
-        "end_slice": end_slice,
+        "start_slice": None,
+        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -276,8 +276,8 @@ def test_ray_calculator_psi4_1h2o_engrad():
         "n_workers": 2,
         "n_cpus_per_worker": 1,
         "chunk_size": 2,
-        "start_slice": start_slice,
-        "end_slice": end_slice,
+        "start_slice": None,
+        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -421,8 +421,8 @@ def test_calculator_psi4_1h2o_energy():
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": start_slice,
-        "end_slice": end_slice,
+        "start_slice": None,
+        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -540,8 +540,8 @@ def test_ray_calculator_psi4_1h2o_energy():
         "n_workers": 2,
         "n_cpus_per_worker": 1,
         "chunk_size": 2,
-        "start_slice": start_slice,
-        "end_slice": end_slice,
+        "start_slice": None,
+        "end_slice": None,
     }
 
     worker_kwargs = {

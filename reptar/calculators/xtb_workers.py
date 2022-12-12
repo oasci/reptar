@@ -24,8 +24,10 @@ import numpy as np
 
 try:
     from xtb.interface import Calculator, Param
+
+    _HAS_XTB = True
 except ImportError:
-    pass
+    _HAS_XTB = False
 
 
 def xtb_engrad(
@@ -70,6 +72,8 @@ def xtb_engrad(
         Atomic gradients of computed structures in the same order as ``idxs``.
         Units of Hartree/Angstrom.
     """
+    assert _HAS_XTB
+
     n_upair_ele = int(mult - 1)
     R = R[idxs]
     G = np.zeros(R.shape)

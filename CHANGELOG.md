@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Tests fo psi4 energy and energy+gradient calculations.
+- Tests for xtb energy+gradient calculations.
+- Tests for psi4 energy and energy+gradient calculations.
 - Pylint section in documentation.
 
 ### Changed
