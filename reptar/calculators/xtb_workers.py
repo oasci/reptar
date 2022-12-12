@@ -24,7 +24,6 @@ import numpy as np
 
 try:
     from xtb.interface import Calculator, Param
-
     _HAS_XTB = True
 except ImportError:
     _HAS_XTB = False
