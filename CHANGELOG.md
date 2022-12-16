@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- References to ``string`` files are renamed to ``xyz``.
 - System information (i.e., atomic numbers and coordinates) are moved to
 ``driver.run()`` instead of during initialization.
 - Unified specification of ray workers and number of cores.

@@ -111,18 +111,18 @@ def atoms_by_number(atom_list):
     return [ptable.to_atomic_number(symbol) for symbol in atom_list]
 
 
-def parse_xyz(stringfile_path):
-    r"""Parses data from string file.
+def parse_xyz(xyz_path):
+    r"""Parses data from xyz file.
 
-    A string file is data presented as consecutive xyz data. The data could be
+    An xyz file is data presented as consecutive xyz structures. The data could be
     three Cartesian coordinates for each atom, three atomic force vector
     components, or both coordinates and atomic forces in one line (referred to
     as extended xyz).
 
     Parameters
     ----------
-    stringfile_path : :obj:`str`
-        Path to string file.
+    xyz_path : :obj:`str`
+        Path to xyz file.
 
     Returns
     -------
@@ -131,7 +131,7 @@ def parse_xyz(stringfile_path):
         :obj:`float` from string file.
     """
     Z, comments, data = [], [], []
-    with open(stringfile_path, "r", encoding="utf-8") as f:
+    with open(xyz_path, "r", encoding="utf-8") as f:
         for _, line in enumerate(f):
             line = line.strip()
             if not line:
