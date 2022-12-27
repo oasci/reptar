@@ -56,7 +56,7 @@ def write_xyz_gap(
     """
     if R.ndim == 2:
         R = R[None, ...]
-    if F.ndim == 2:
+    if F is not None and F.ndim == 2:
         F = F[None, ...]
 
     lat_str = np.array2string(
