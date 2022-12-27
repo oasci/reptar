@@ -12,6 +12,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Handle 2D arrays in XYZ writers.
 - References to ``string`` files are renamed to ``xyz``.
 - System information (i.e., atomic numbers and coordinates) are moved to
 ``driver.run()`` instead of during initialization.

@@ -40,6 +40,9 @@ def write_xyz(xyz_path, Z, R, comments=None, data_precision=10):
         Number of decimal points for printing array data.
 
     """
+    if R.ndim == 2:
+        R = R[None, ...]
+
     n_atoms = len(Z)
     with open(xyz_path, "w", encoding="utf-8") as f:
         for i, r in enumerate(R):

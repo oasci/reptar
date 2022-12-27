@@ -54,6 +54,11 @@ def write_xyz_gap(
         Number of decimal points for printing array data.
 
     """
+    if R.ndim == 2:
+        R = R[None, ...]
+    if F.ndim == 2:
+        F = F[None, ...]
+
     lat_str = np.array2string(
         lattice.flatten(),
         formatter={"float_kind": lambda x: f"%.{lattice_precision}f" % x},
