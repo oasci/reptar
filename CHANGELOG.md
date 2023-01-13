@@ -22,6 +22,7 @@ of CPU cores per worker (also defaults to ``1``).
 
 ### Fixed
 
+- Explicitly use 3DMol v1.8.0 for documentation.
 - ``psi4_energy`` returned wrong energy shape.
 - ``File.put()`` did not create missing groups consistently in exdir files.
 
