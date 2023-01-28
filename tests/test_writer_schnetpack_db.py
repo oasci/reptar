@@ -22,8 +22,7 @@
 
 """Tests writing schnetpack databases"""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import os
 import sys
@@ -33,7 +32,6 @@ from reptar import File
 from reptar.writers import write_schnetpack_db
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .utils import _pdist
 
 HARTREE_TO_EV = 27.21138602  # Psi4 v1.5

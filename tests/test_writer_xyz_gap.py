@@ -22,8 +22,7 @@
 
 """Tests writing XYZ files for GAP code"""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import os

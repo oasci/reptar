@@ -22,8 +22,7 @@
 
 """Tests for xTB calculations"""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import shutil
@@ -36,7 +35,6 @@ from reptar.calculators.xtb_workers import xtb_engrad
 
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .paths import get_140h2o_samples_path
 
 # Ensures we execute from file directory (for relative paths).
@@ -67,7 +65,6 @@ def test_calculator_xtb_1h2o_engrad():
     start_slice = None
     end_slice = 5
 
-    # pylint: disable-next=invalid-name
     R_ref = np.array(
         [
             [
@@ -107,12 +104,12 @@ def test_calculator_xtb_1h2o_engrad():
     # Setup energy and gradient arrays
     method_label = "gfn2xtb"
 
-    E_key = f"{group_key}/energy_ele_{method_label}"  # pylint: disable=invalid-name
+    E_key = f"{group_key}/energy_ele_{method_label}"
     E = np.empty(R.shape[0], dtype=np.float64)
     E[:] = np.nan
     rfile.put(E_key, E)
 
-    G_key = f"{group_key}/grads_{method_label}"  # pylint: disable=invalid-name
+    G_key = f"{group_key}/grads_{method_label}"
     G = np.empty(R.shape, dtype=np.float64)
     G[:] = np.nan
     rfile.put(G_key, G)
@@ -140,7 +137,6 @@ def test_calculator_xtb_1h2o_engrad():
 
     saver.save(E, G)
 
-    # pylint: disable-next=invalid-name
     E_ref = np.array(
         [
             -3.656060950664,
@@ -150,7 +146,6 @@ def test_calculator_xtb_1h2o_engrad():
             -3.409646976024,
         ]
     )
-    # pylint: disable-next=invalid-name
     G_ref = np.array(
         [
             [

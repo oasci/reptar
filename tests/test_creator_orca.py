@@ -22,8 +22,7 @@
 
 """Tests and example builders for ORCA calculations."""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import os
@@ -33,7 +32,6 @@ from reptar import Creator
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .paths import get_6h2o_temelso_pr_engrad
 
 # Ensures we execute from file directory (for relative paths).

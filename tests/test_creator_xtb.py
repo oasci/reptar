@@ -22,8 +22,7 @@
 
 """Tests and example builders for molecular dynamics with xtb."""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import os
@@ -33,7 +32,6 @@ from reptar import Creator, File
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .paths import (
     get_1h2o_120meoh_eq_paths,
     get_1h2o_120meoh_prod_paths,

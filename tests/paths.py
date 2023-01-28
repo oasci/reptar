@@ -22,6 +22,8 @@
 
 """Paths to files used for tests."""
 
+# pylint: skip-file
+
 import os
 
 data_path = "../examples/reptar-data/"

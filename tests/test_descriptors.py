@@ -22,8 +22,7 @@
 
 """Tests computing structural descriptors"""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import os
@@ -33,7 +32,6 @@ from reptar import File
 from reptar import descriptors
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .paths import get_140h2o_samples_path
 
 # Ensures we execute from file directory (for relative paths).

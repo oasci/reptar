@@ -22,8 +22,7 @@
 
 """Tests sampling structures from exdir Groups"""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import os
@@ -97,11 +96,9 @@ def test_1h2o_120meoh_prod_sampler():
     assert np.array_equal(dest.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels))
 
     # Checks that the correct geometries are sampled and in the correct order.
-    # pylint: disable-next=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     entity_ids_source = source.rfile.get(f"{source_key}/entity_ids")
 
-    # pylint: disable-next=invalid-name
     R_sampled = dest.rfile.get(f"{dest_key}/geometry")
     r_prov_specs = dest.rfile.get(f"{dest_key}/r_prov_specs")
 
@@ -189,11 +186,9 @@ def test_ray_1h2o_120meoh_prod_sampler():
     assert np.array_equal(dest.rfile.get(f"{dest_key}/comp_ids"), np.array(comp_labels))
 
     # Checks that the correct geometries are sampled and in the correct order.
-    # pylint: disable-next=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     entity_ids_source = source.rfile.get(f"{source_key}/entity_ids")
 
-    # pylint: disable-next=invalid-name
     R_sampled = dest.rfile.get(f"{dest_key}/geometry")
     r_prov_specs = dest.rfile.get(f"{dest_key}/r_prov_specs")
 
@@ -268,11 +263,9 @@ def test_sampling_from_wat_2met_pes():
 
     # We know that the first structure in destination is the first possible
     # dimer from the source. This is only because quantity is 'all'.
-    # pylint: disable=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     R_dest = source.rfile.get(f"{dest_key}/geometry")
     R_ref = r_from_entities(R_source[0], entity_ids_source, (0, 1))
-    # pylint: enable=invalid-name
     assert np.allclose(R_ref, R_dest[0])
 
     assert np.array_equal(
@@ -346,11 +339,9 @@ def test_ray_sampling_from_wat_2met_pes():
 
     # We know that the first structure in destination is the first possible
     # dimer from the source. This is only because quantity is 'all'.
-    # pylint: disable=invalid-name
     R_source = source.rfile.get(f"{source_key}/geometry")
     R_dest = source.rfile.get(f"{dest_key}/geometry")
     R_ref = r_from_entities(R_source[0], entity_ids_source, (0, 1))
-    # pylint: enable=invalid-name
     assert np.allclose(R_ref, R_dest[0])
 
     assert np.array_equal(

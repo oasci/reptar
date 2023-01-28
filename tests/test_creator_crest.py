@@ -22,8 +22,7 @@
 
 """Tests and example builders for conformer and rotamer search with crest."""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import os
 import sys
@@ -32,7 +31,6 @@ import numpy as np
 from reptar import Creator, File
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .paths import get_crest_50h2o_nci_paths
 
 # Ensures we execute from file directory (for relative paths).

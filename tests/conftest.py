@@ -20,14 +20,13 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import
+# pylint: skip-file
 
 import os
 import glob
 import pytest
 
-# pylint: disable-next=unused-argument
+
 def pytest_sessionstart(session):  # pytest_configure(config)
     r"""Called after the Session object has been created and
     before performing collection and entering the run test loop.
@@ -57,7 +56,6 @@ def pytest_sessionstart(session):  # pytest_configure(config)
             ray.init()
 
 
-# pylint: disable-next=unused-argument
 def pytest_sessionfinish(session, exitstatus):
     # Shutdown ray if possible.
     try:

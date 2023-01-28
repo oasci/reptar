@@ -22,8 +22,7 @@
 
 """Tests and example builders for molecular dynamics with ASE."""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import os
 import sys
@@ -33,7 +32,6 @@ from reptar import Creator, File
 from reptar.utils import gen_entity_ids, gen_comp_ids
 
 sys.path.append("..")
-# pylint: disable-next=wrong-import-position
 from .paths import get_1h2o_57h2o_pm_periodic_paths
 
 # Ensures we execute from file directory (for relative paths).

@@ -22,8 +22,7 @@
 
 """Tests writing atomic simulation environment (ASE) databases"""
 
-# Stuff for PyTest features like skip.
-# pylint: disable=import-outside-toplevel, unused-import, duplicate-code
+# pylint: skip-file
 
 import sys
 import os
