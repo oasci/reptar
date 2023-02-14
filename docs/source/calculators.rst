@@ -273,49 +273,58 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
         .. code-block:: python
 
             import sys
-            import numpy as np
+            import time
             import os
+            import numpy as np
             from reptar import File, Saver
             from reptar.calculators.drivers import DriverEnGrad
             from reptar.calculators.psi4_workers import psi4_engrad
-            import time
 
-            rfile_path = '../30h2o-gfn2-md.exdir'
-            group_key = '/30h2o/samples_3h2o'
-            E_key = f'{group_key}/energy_ele_df.mp2.def2tzvppd'
-            G_key = f'{group_key}/grads_df.mp2.def2tzvppd'
+            rfile_path = "../30h2o-gfn2-md.exdir"
+            group_key = "/30h2o/samples_3h2o"
+            E_key = f"{group_key}/energy_ele_df.mp2.def2tzvppd"
+            G_key = f"{group_key}/grads_df.mp2.def2tzvppd"
 
             ray_address = str(sys.argv[2])
 
             use_ray = True
             n_cpus = int(sys.argv[1])
-            n_cpus_worker = 4
+            n_cpus_per_worker = 4
+            n_workers = int(n_cpus / n_cpus_per_worker)
             driver_kwargs = {
-                'use_ray': use_ray, 'n_cpus': n_cpus, 'n_cpus_worker': n_cpus_worker,
-                'chunk_size': 50, 'start_slice': None, 'end_slice': None, 'ray_address': ray_address
+                "use_ray": use_ray,
+                "n_workers": n_workers,
+                "n_cpus_per_worker": n_cpus_per_worker,
+                "chunk_size": 50,
+                "start_slice": None,
+                "end_slice": None,
+                "ray_address": ray_address,
             }
 
-            mem = 2*n_cpus_worker
+            mem = 2 * n_cpus_per_worker
             worker = psi4_engrad
-            n_frozen_orbitals = [0]*4
-            n_frozen_orbitals.extend([1]*8)
-            n_frozen_orbitals.extend([5]*18)
-            n_frozen_orbitals.extend([9]*8)
+            n_frozen_orbitals = [0] * 4
+            n_frozen_orbitals.extend([1] * 8)
+            n_frozen_orbitals.extend([5] * 18)
+            n_frozen_orbitals.extend([9] * 8)
             # Setup Psi4 and system options.
             worker_kwargs = {
-                'charge': 0, 'mult': 1, 'method': 'mp2', 'threads': n_cpus_worker,
-                'mem': f'{mem} GB',
-                'options': {
-                    'reference': 'rhf',
-                    'scf_type': 'df',
-                    'mp2_type': 'df',
-                    'e_convergence': 10,
-                    'd_convergence': 10,
-                    'basis': 'def2-tzvppd',
-                    'df_basis_scf': 'def2-universal-jkfit',
-                    'df_basis_mp2': 'def2-tzvppd-ri',
-                    'freeze_core': 'policy',
-                    'freeze_core_policy': n_frozen_orbitals,
+                "charge": 0,
+                "mult": 1,
+                "method": "mp2",
+                "threads": n_cpus_per_worker,
+                "mem": f"{mem} GB",
+                "options": {
+                    "reference": "rhf",
+                    "scf_type": "df",
+                    "mp2_type": "df",
+                    "e_convergence": 10,
+                    "d_convergence": 10,
+                    "basis": "def2-tzvppd",
+                    "df_basis_scf": "def2-universal-jkfit",
+                    "df_basis_mp2": "def2-tzvppd-ri",
+                    "freeze_core": "policy",
+                    "freeze_core_policy": n_frozen_orbitals,
                 },
             }
 
@@ -324,15 +333,15 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
             # Ensures we execute from script directory (for relative paths).
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-            rfile = File(rfile_path, mode='a', allow_remove=False)
+            rfile = File(rfile_path, mode="a", allow_remove=False)
 
-            Z = rfile.get(f'{group_key}/atomic_numbers')
-            R = rfile.get(f'{group_key}/geometry')
+            Z = rfile.get(f"{group_key}/atomic_numbers")
+            R = rfile.get(f"{group_key}/geometry")
             try:
                 E = rfile.get(E_key)
             except RuntimeError as e:
                 # Creates the property array if this is the initial job.
-                if 'does not exist' in str(e):
+                if "does not exist" in str(e):
                     E = np.empty((R.shape[0],))
                     E[:] = np.nan
                     rfile.put(E_key, E)
@@ -340,7 +349,7 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
                 G = rfile.get(G_key)
             except RuntimeError as e:
                 # Creates the property array if this is the initial job.
-                if 'does not exist' in str(e):
+                if "does not exist" in str(e):
                     G = np.empty(R.shape)
                     G[:] = np.nan
                     rfile.put(G_key, G)
@@ -349,14 +358,13 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
             saver = Saver(rfile_path, (E_key, G_key))
 
             # Setup and run energy and gradient calculations.
-            driver = DriverEnGrad(
-                Z, R, E, G, worker, worker_kwargs, **driver_kwargs
-            )
+            driver = DriverEnGrad(worker, worker_kwargs, **driver_kwargs)
             t_start = time.time()
-            driver.run(saver=saver)
+            driver.run(Z, R, E, G, saver=saver)
             t_end = time.time()
 
-            print(f'Took {t_end-t_start:.1f} seconds')
+            print(f"Took {t_end-t_start:.1f} seconds")
+
 
     .. tab-item:: submit-psi4.slurm
 
