@@ -435,7 +435,7 @@ class Sampler:
         :type: : :obj:`int`
         """
         self.validate_geometry = True
-        r"""Validate sampled geometry using part of 
+        r"""Validate sampled geometry using part of
         :obj:`qcelemental.molparse.from_arrays`.
         If ``ValidationError`` is thrown, we discard the sample.
 
