@@ -430,16 +430,20 @@ class Sampler:
             self.criteria = ray.put(self.criteria)
 
         self.worker_chunk_size_for_all = 1000
-        r"""Chunk size used when ``quantity`` is ``'all'``.
+        r"""Chunk size used when ``quantity`` is ``"all"``.
 
-        :type: : :obj:`int`
+        :default: ``1000``
+
+        :type: :obj:`int`
         """
         self.validate_geometry = True
         r"""Validate sampled geometry using part of
         :obj:`qcelemental.molparse.from_arrays`.
         If ``ValidationError`` is thrown, we discard the sample.
 
-        :type: : :obj:`bool`
+        :default: ``True``
+
+        :type: :obj:`bool`
         """
 
     def _prepare_destination(self):
