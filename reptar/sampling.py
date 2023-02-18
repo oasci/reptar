@@ -22,6 +22,8 @@
 
 from random import choice, randrange
 import numpy as np
+from qcelemental.molparse.from_arrays import validate_and_fill_geometry
+from qcelemental.exceptions import ValidationError
 from .save import Saver
 from .utils import center_structures as get_center_structures
 from .utils import gen_combs, exists_in_array, chunk_iterable
@@ -226,6 +228,7 @@ def sampler_worker(
     r_prov_id_source,
     criteria,
     periodic_cell,
+    validate_geometry,
 ):
     r"""Given generated selections will slice and sample structures from source."""
     if not isinstance(selections, np.ndarray):
@@ -311,6 +314,14 @@ def sampler_worker(
             # If descriptor is not met, will not include sample.
             if not accept_r:
                 keep_idxs[i_sel] = False
+                continue
+
+        # Validate geometry using qcelemental. If atoms are too close, ValidationError
+        # is thrown. If this happens, we discard the sample.
+        if validate_geometry:
+            try:
+                validate_and_fill_geometry(geom=R[i_sel])
+            except ValidationError:
                 continue
 
         r_prov_specs[i_sel] = r_prov_spec_selection
@@ -422,6 +433,13 @@ class Sampler:
         r"""Chunk size used when ``quantity`` is ``'all'``.
 
         :type: : :obj:`int`
+        """
+        self.validate_geometry = True
+        r"""Validate sampled geometry using part of 
+        :obj:`qcelemental.molparse.from_arrays`.
+        If ``ValidationError`` is thrown, we discard the sample.
+
+        :type: : :obj:`bool`
         """
 
     def _prepare_destination(self):
@@ -919,6 +937,7 @@ class Sampler:
                     r_prov_id_source,
                     self.criteria,
                     self.periodic_cell,
+                    self.validate_geometry,
                 )
 
                 (
@@ -992,6 +1011,7 @@ class Sampler:
                             r_prov_id_source,
                             self.criteria,
                             self.periodic_cell,
+                            self.validate_geometry,
                         )
                     )
                 except StopIteration:

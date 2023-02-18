@@ -57,6 +57,10 @@ intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "exdir": ("https://exdir.readthedocs.io/en/latest/", None),
+    "qcelemental": (
+        "https://docs.qcarchive.molssi.org/projects/qcelemental/en/latest/",
+        None,
+    ),
 }
 
 # Include __init__ docstring for classes
