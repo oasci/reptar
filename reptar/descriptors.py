@@ -69,9 +69,9 @@ class Criteria:
         :meth:`~reptar.descriptors.Criteria.accept()` are used instead of those
         in ``Criteria.desc_kwargs``.
 
-        :default: ``False``
-
         :type: :obj:`bool`
+
+        :default: ``False``
         """
 
     def accept(self, Z, R, **kwargs):
