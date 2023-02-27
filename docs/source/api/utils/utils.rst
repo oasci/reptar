@@ -19,3 +19,4 @@
     gen_entity_ids
     parse_xyz
     remove_nested_key
+    validate_geometry

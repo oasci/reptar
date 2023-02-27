@@ -7,7 +7,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - Geometry validation during sampling using ``validate_and_fill_geometry`` from
-QCElemental.
+QCElemental. Also added `utils.validate_geometry` function that checks this for
+multiple structures.
 - Tests for xtb energy+gradient calculations.
 - Tests for psi4 energy and energy+gradient calculations.
 - Pylint section in documentation.

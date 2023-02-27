@@ -28,6 +28,8 @@ import hashlib
 import os
 import numpy as np
 from qcelemental import periodictable as ptable
+from qcelemental.molparse.from_arrays import validate_and_fill_geometry
+from qcelemental.exceptions import ValidationError
 from .descriptors import get_center_of_mass
 
 
@@ -543,3 +545,35 @@ def remove_nested_key(dictionary, keys):
     """
     del get_nested_key(dictionary, keys[:-1])[keys[-1]]
     return dictionary
+
+
+def validate_geometry(R, tooclose=0.1):
+    """Checks if any atoms would clash.
+
+    Parameters
+    ----------
+    R : :obj:`numpy.ndarray`, ndim: ``3``
+        Atomic coordinates.
+    too_close : :obj:`float`, default: ``0.1``
+        Threshold for atom distances for validated geometries. All atoms must be at
+        least this far away.
+
+    Returns
+    -------
+    :obj:`int`
+        Number of invalid structures.
+    :obj:`numpy.ndarray`
+        (shape: ``R.shape[0]``) If structures in R are valid.
+    """
+    if R.ndim == 2:
+        R = R[None, ...]
+    is_valid = np.full((R.shape[0],), True, dtype=np.bool)
+    for i in range(R.shape[0]):
+        try:
+            validate_and_fill_geometry(geom=R[i], tooclose=tooclose)
+        except ValidationError:
+            is_valid[i] = False
+
+    n_invalid = (~is_valid).sum()
+
+    return n_invalid, is_valid
