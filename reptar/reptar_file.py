@@ -25,6 +25,7 @@ import json
 import exdir
 import numpy as np
 import yaml
+import zarr
 from .utils import combine_dicts, dict_iterator, get_md5, remove_nested_key
 
 
@@ -92,6 +93,8 @@ class File:
                         File_[k] = v
             else:
                 File_ = {}
+        elif f_ext == ".zarr":
+            File_ = zarr.open(file_path, mode)
         else:
             raise TypeError(f"{f_ext} is not supported.")
 
@@ -123,6 +126,8 @@ class File:
             self.File_ = exdir.File(file_path, mode, allow_remove, plugins)
         elif f_ext in (".json", ".npz"):
             self.File_ = {}
+        elif f_ext == ".zarr":
+            self.File_ = zarr.open(file_path, mode)
         self.fpath = os.path.abspath(file_path)
         self.ftype = f_ext[1:]
         self.fmode = mode
@@ -239,6 +244,35 @@ class File:
 
         return data
 
+    def _get_from_zarr(self, key):
+        r"""Get data from zarr file.
+
+        Parameters
+        ----------
+        key : :obj:`str`
+            Key of the desired data. Nested keys should be separated by ``/``.
+
+        Returns
+        -------
+        Requested data from a exdir source.
+        """
+        if key == "/":
+            return self.File_
+
+        # Check if key is attribute
+        key_parent, key_data = self.split_key(key)
+        attr_keys = list(self.File_[key_parent].attrs.keys())
+        if key_data in attr_keys:
+            data = self.File_[key_parent].attrs[key_data]
+        else:
+            # Should be array.
+            try:
+                data = self.File_[key]
+            except KeyError as e:
+                raise RuntimeError(f"{key} does not exist") from e
+
+        return data
+
     def get_keys(self, group_key):
         r"""A list of keys in a group.
 
@@ -299,6 +333,8 @@ class File:
                 data = self._get_from_exdir(key, as_memmap=as_memmap)
             elif self.ftype in ("json", "npz"):
                 data = self._get_from_dict(key)
+            elif self.ftype == "zarr":
+                data = self._get_from_zarr(key)
         except RuntimeError as e:
             if "does not exist" in str(e) and missing_is_none:
                 data = None
@@ -479,6 +515,52 @@ class File:
                 group.create_dataset(data_key, data=data)
         return None
 
+    def _put_to_zarr(self, key, data):
+        r"""Add data to an zarr group.
+
+        Parameters
+        ----------
+        key : :obj:`str`
+            Where to put the data. Can be a nested key.
+        data : various
+            Data to add to zarr file.
+        """
+        parent_key, data_key = self.split_key(key)
+
+        # Handle nested creation of groups.
+        # Suppose we want to put "/group_1/nested_group/data_key" before group_1 or
+        # nested_group exists. We have to create these groups first.
+        try:
+            group = self.File_[parent_key]
+        except KeyError:
+            group = self.File_.create_group(parent_key)
+        assert isinstance(group, (zarr.hierarchy.Group))
+
+        # Custom handling of parsed data to ensure logical behavior.
+        if data_key == "wall_potential":
+            group.attrs[data_key] = data
+            return None
+
+        # If data is not array/list or array/list of one dimension and
+        # length we make it an exdir attribute.
+        # We make anything else an exdir dataset.
+        is_iter = self._is_iter(data)
+        if is_iter:
+            data = self.simplify_iter_data(data, data_key)
+            if isinstance(data, np.ndarray):
+                store_as = "array"
+            else:
+                store_as = "attr"
+        # Handles all non iterable data.
+        else:
+            store_as = "attr"
+
+        if store_as == "attr":
+            group.attrs[data_key] = data
+        elif store_as == "array":
+            group[data_key] = data
+        return None
+
     def put(self, key, data, with_md5_update=False):
         r"""Put data to file in a specific location.
 
@@ -580,6 +662,36 @@ class File:
             with open(yaml_path, "w", encoding="utf-8") as f:
                 yaml.dump(attrs, f)
 
+    def _remove_zarr(self, key):
+        r"""Delete exdir data under ``key``.
+
+        Parameters
+        ----------
+        key : :obj:`str`
+            Key of the desired data (including parent). Nested keys should be
+            separated by ``/``.
+        """
+        try:
+            # Handles datasets
+            self.File_.__delitem__(key)
+        except KeyError:
+
+            # Handles attributes
+            group_key, attr_key = self.split_key(key)
+            if group_key[0] == "/":
+                group_key = group_key[1:]
+            json_path = os.path.join(self.fpath, group_key, ".zattrs")
+
+            with open(json_path, "r", encoding="utf-8") as f:
+                attrs = json.load(f)
+
+            del attrs[attr_key]
+
+            json_string = json.dumps(attrs)
+
+            with open(self.fpath, "w", encoding="utf-8") as f:
+                f.write(json_string)
+
     def remove(self, key, with_md5_update=False):
         r"""Delete data under ``key``.
 
@@ -597,6 +709,8 @@ class File:
             self._remove_exdir(key)
         elif self.ftype in ("json", "npz"):
             self._remove_dict(key)
+        elif self.ftype == "zarr":
+            self._remove_zarr(key)
 
         # Update MD5 of group
         if with_md5_update:
@@ -630,6 +744,7 @@ class File:
         :obj:`exdir.core.Group`
             The newly created group.
         """
+        # TODO: Specify that this creates an exdir group
         self.File_.create_group(key)
         return self.get(key)
 
