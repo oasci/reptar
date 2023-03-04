@@ -24,6 +24,9 @@
 
 import numpy as np
 from .extractor import Extractor
+from ..logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 class ExtractorCREST(Extractor):

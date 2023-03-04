@@ -24,6 +24,9 @@
 
 import numpy as np
 from scipy.spatial.distance import cdist
+from .logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 def pairwise_distance(R, cutoff=1.5, num_frags=None):

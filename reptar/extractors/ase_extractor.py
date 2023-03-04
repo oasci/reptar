@@ -26,6 +26,9 @@ from math import sqrt
 import numpy as np
 import qcelemental as qcel
 from .extractor import Extractor
+from ..logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 try:
     from ase.calculators.calculator import PropertyNotImplementedError

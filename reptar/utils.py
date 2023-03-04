@@ -29,6 +29,9 @@ import os
 import numpy as np
 from qcelemental import periodictable as ptable
 from .descriptors import get_center_of_mass
+from .logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 def get_files(path, expression, recursive=True):

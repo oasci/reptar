@@ -6,7 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Basic [zarr](https://zarr.readthedocs.io/en/stable/index.html) File handling
+- Logging capabilities with sparse implementation.
+- Basic [zarr](https://zarr.readthedocs.io/en/stable/index.html) File handling.
 - Geometry validation during sampling using ``validate_and_fill_geometry`` from
 QCElemental.
 - Tests for xtb energy+gradient calculations.

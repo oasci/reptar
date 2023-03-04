@@ -23,6 +23,9 @@
 # pylint: disable=line-too-long
 
 from .extractor import Extractor
+from ..logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 class ExtractorORCA(Extractor):

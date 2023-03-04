@@ -22,6 +22,9 @@
 
 import numpy as np
 from ..utils import chunk_iterable
+from ..logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 try:
     import ray

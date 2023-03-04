@@ -63,6 +63,25 @@ def test_6h2o_temelso_engrad_exdir():
     )
 
 
+def test_6h2o_temelso_engrad_zarr():
+    _, out_path = get_6h2o_temelso_pr_engrad()
+    zarr_path = os.path.join(ORCA_DIR, "6h2o_temelso_pr_engrad.zarr")
+
+    create = Creator()
+    create.load(zarr_path, mode="w")
+    create.from_calc("/engrad", out_path=out_path)
+
+    # Reading tests.
+    create = Creator()
+    create.load(zarr_path, mode="r")
+    assert create.rfile.get("/engrad/energy_scf") == -456.40308701
+    assert create.rfile.get("/engrad/energy_ele") == -457.961331933491
+    assert np.array_equal(
+        create.rfile.get("/engrad/dipole_moment"),
+        np.array([2.5265211700823, -0.5830003327751, 1.2353903376292001]),
+    )
+
+
 def test_6h2o_temelso_engrad_json():
     _, out_path = get_6h2o_temelso_pr_engrad()
     json_path = os.path.join(ORCA_DIR, "6h2o_temelso_pr_engrad.json")

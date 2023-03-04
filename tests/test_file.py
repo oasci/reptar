@@ -98,3 +98,20 @@ def test_file_del_nested_exdir():
     rfile.remove("/start/continue/remove")
     assert rfile.get("start/continue/remove", missing_is_none=True) is None
     assert rfile.get("start/continue/remove_too", missing_is_none=True) is None
+
+
+def test_file_del_nested_zarr():
+    r"""Delete a key nested inside an zarr file."""
+    nested_dict, _, _ = nesting_dicts()
+
+    # Remove exdir file if it already exists
+    test_zarr_path = "./tmp/test.zarr"
+    if os.path.exists(test_zarr_path):
+        shutil.rmtree(test_zarr_path)
+    rfile = File(test_zarr_path, mode="w", from_dict=nested_dict)
+    assert rfile.get("start/continue/remove", missing_is_none=True) == 1928
+
+    rfile.remove("/start/continue/remove_too/")
+    rfile.remove("/start/continue/remove")
+    assert rfile.get("start/continue/remove", missing_is_none=True) is None
+    assert rfile.get("start/continue/remove_too", missing_is_none=True) is None
