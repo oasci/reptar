@@ -145,6 +145,7 @@ def test_crest_50h2o_nci_exdir_rotamers():
     )
     assert rfile.get(f"{group_key}/geometry").shape == (16, 150, 3)
 
+
 def test_crest_50h2o_nci_zarr_conformers():
     _, out_path, conf_path, _ = get_crest_50h2o_nci_paths()
     exdir_path = os.path.join(CREST_DIR, "50h2o.zarr")

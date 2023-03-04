@@ -46,6 +46,8 @@ def set_log_level(level):
 
 
 class ReptarLogger:
+    """Logger class for all reptar modules"""
+
     def __init__(self, name, level=logging.INFO):
         self.logger = logging.getLogger(name)
         self.logger.setLevel(level)

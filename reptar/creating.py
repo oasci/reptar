@@ -31,11 +31,10 @@ from . import _version
 from .reptar_file import File
 from .logger import ReptarLogger
 
-log = ReptarLogger(__name__)
-
 # pylint: disable=no-name-in-module
 from .parsers import ParserORCA, ParserXTB, ParserASE, ParserCREST
 
+log = ReptarLogger(__name__)
 __version__ = _version.get_versions()["version"]
 
 defs_reserved = ["base", "md", "molprop", "pes", "qc", "sampl", "solv", "xtb"]

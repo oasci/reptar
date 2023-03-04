@@ -84,6 +84,7 @@ def test_1h2o_57h2o_ase_exdir():
         -0.003541032926883468, abs=1e-10
     )
 
+
 def test_1h2o_57h2o_ase_zarr():
     _, traj_path = get_1h2o_57h2o_pm_periodic_paths()
     zarr_path = os.path.join(ASE_DIR, "1h2o_57h2o_ase.zarr")
