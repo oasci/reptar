@@ -25,7 +25,6 @@
 import os
 import glob
 import pytest
-import logging
 
 
 def pytest_sessionstart(session):  # pytest_configure(config)
