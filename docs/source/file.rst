@@ -11,7 +11,8 @@ Every file type comes with its own list of advantages and disadvantages leading 
 We let the user decide what file format to use and have reptar provide a consistent way of interacting with the data.
 Reptar currently supports the following file types:
 
-- exdir,
+- `exdir <https://exdir.readthedocs.io/en/latest/>`__,
+- `zarr <https://zarr.dev/>`__,
 - JSON,
 - npz.
 
@@ -29,7 +30,7 @@ For example, ``energy_pot`` and ``geometry`` refers to potential energy and Cart
 More information about key definitions can be found :ref:`here<definitions>`.
 
 The key also tells reptar where the data is stored.
-Many file types (e.g., exdir and JSON) support nested objects which allow us to organize our data into groups.
+Many file types (e.g., exdir, zarr, and JSON) support nested objects which allow us to organize our data into groups.
 A group is essentially a collection of related data (e.g., a directory) that could also contain other groups.
 We specify keys for nested groups the same way we do directory paths where the file itself is considered the root: ``group1``, ``/group1``, and ``group1/nested_group`` are all valid group keys.
 
@@ -79,7 +80,7 @@ Note that exdir groups must be initialized first with :meth:`~reptar.File.create
 Saving
 ======
 
-Besides exdir, all other file types need to be explicitly saved using the following method.
+JSON and npz files need to be explicitly saved using the following method.
 
 .. automethod:: reptar.File.save
     :noindex:

@@ -31,7 +31,7 @@ from reptar.writers import write_xyz
 import numpy as np
 
 def main():
-    
+
     parser = argparse.ArgumentParser(
         description='Write XYZ file from exdir file.'
     )
@@ -69,7 +69,7 @@ def main():
         comments = rfile.get(f'{group_key}/{comment_key}')
     else:
         comments = None
-    
+
     if isinstance(comments, np.ndarray):
         print('Handling comment data')
         if comments.ndim > 1:
