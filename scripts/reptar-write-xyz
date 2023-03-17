@@ -33,12 +33,15 @@ import numpy as np
 def main():
 
     parser = argparse.ArgumentParser(
-        description='Write XYZ file from exdir file.'
+        description='Write XYZ file from a reptar supported file type.'
     )
     parser.add_argument(
-        'group_key', type=str, nargs='?',
-        help='Path to group key. Will take absolute path and split '
-        'based on `.exdir`.'
+        'group_path', type=str, nargs='?',
+        help='Path to group path. This can be to a file or exdir/zarr group.'
+    )
+    parser.add_argument(
+        '--group_key', type=str, nargs='?', default='',
+        help='Manually specify group key for file.'
     )
     parser.add_argument(
         '--comment_key', type=str, nargs='?', default='',
@@ -54,19 +57,34 @@ def main():
     print(f'reptar {reptar_version}')
 
     print('Parsing args')
-    abs_path = os.path.abspath(args.group_key)
+    abs_path = os.path.abspath(args.group_path)
+    group_key = args.group_key
     comment_key = args.comment_key
     save_dir = args.save_dir
 
-    idx_split = abs_path.rfind('.exdir') + 6
-    exdir_path, group_key = abs_path[:idx_split], abs_path[idx_split:]
+    if ".exdir" in abs_path:
+        idx_split = abs_path.rfind('.exdir') + 6
+    elif ".zarr" in abs_path:
+        idx_split = abs_path.rfind('.zarr') + 5
+    elif ".json" in abs_path:
+        idx_split = abs_path.rfind('.json') + 5
+    elif ".npz" in abs_path:
+        idx_split = abs_path.rfind('.npz') + 4
+    else:
+        raise ValueError("File type is not recognized.")
+
+    if group_key == '':
+        # Need to find parse group_key
+        file_path, group_key = abs_path[:idx_split], abs_path[idx_split:]
+    else:
+        file_path = abs_path
 
     print('Collecting data')
-    rfile = File(exdir_path, mode='r')
-    Z = rfile.get(f'{group_key}/atomic_numbers')
-    R = rfile.get(f'{group_key}/geometry')
+    rfile = File(file_path, mode='r')
+    Z = rfile.get(os.path.join(group_key, 'atomic_numbers'))
+    R = rfile.get(os.path.join(group_key, 'geometry'))
     if comment_key != '':
-        comments = rfile.get(f'{group_key}/{comment_key}')
+        comments = rfile.get(os.path.join(group_key, comment_key))
     else:
         comments = None
 
@@ -76,11 +94,8 @@ def main():
             raise ValueError(
                 f'Comments has {comments.ndim} dimensions, but it must be 1.'
             )
-        else:
-            if 'energy' in comment_key or 'grad' in comment_key:
-                hartree2kcalmol = 627.5094737775374055927342256  # Psi4 constant
-                comments *= hartree2kcalmol
-            comments = [str(i) for i in comments]
+
+        comments = [str(i) for i in comments]
     print('Writing XYZ file')
     write_xyz(os.path.join(save_dir, 'data.xyz'), Z, R, comments=comments)
     print('Done!')
