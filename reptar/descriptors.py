@@ -25,6 +25,9 @@
 import itertools
 import numpy as np
 from qcelemental import periodictable as ptable
+from .logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 class Criteria:

@@ -29,10 +29,12 @@ from pkg_resources import resource_stream
 import yaml
 from . import _version
 from .reptar_file import File
+from .logger import ReptarLogger
 
 # pylint: disable=no-name-in-module
 from .parsers import ParserORCA, ParserXTB, ParserASE, ParserCREST
 
+log = ReptarLogger(__name__)
 __version__ = _version.get_versions()["version"]
 
 defs_reserved = ["base", "md", "molprop", "pes", "qc", "sampl", "solv", "xtb"]
@@ -253,7 +255,7 @@ class Creator:
         """
         assert hasattr(self, "rfile")
 
-        if self.rfile.ftype == "exdir":
+        if self.rfile.ftype in ("exdir", "zarr"):
             self.rfile.create_group(group_key)
 
         # Parsable calculations using an output file.

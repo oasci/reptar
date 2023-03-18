@@ -11,6 +11,7 @@ API
    Extractors <extractors-api/extractors-module>
    File <file>
    Fragment <fragment/fragment>
+   Logger <logger/logger_module>
    Parsers <parsers-api/parsers-module>
    Periodic <periodic/periodic_module>
    Sampler <Sampler>

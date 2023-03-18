@@ -21,6 +21,9 @@
 # SOFTWARE.
 
 import numpy as np
+from ..logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 try:
     from xtb.interface import Calculator, Param

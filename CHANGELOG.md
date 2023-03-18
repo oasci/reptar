@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Logging capabilities with sparse implementation.
+- Basic [zarr](https://zarr.readthedocs.io/en/stable/index.html) File handling.
 - Geometry validation during sampling using ``validate_and_fill_geometry`` from
 QCElemental. Also added `utils.validate_geometry` function that checks this for
 multiple structures.
@@ -15,6 +17,7 @@ multiple structures.
 
 ### Changed
 
+- ``reptar-write-xyz`` now supports all file types.
 - Handle 2D arrays in XYZ writers.
 - References to ``string`` files are renamed to ``xyz``.
 - System information (i.e., atomic numbers and coordinates) are moved to

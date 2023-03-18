@@ -33,7 +33,7 @@ jobs:
           conda install -y python=3.10
           conda install -y psi4 -c psi4
           pip install --upgrade pip
-          pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray
+          pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray zarr
           pip install pytest-cov pytest-order pytest-dependency
       
       - name: Run tests and collect coverage

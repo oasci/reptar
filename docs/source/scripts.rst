@@ -11,23 +11,25 @@ We love to work in XYZ files; however, text files can quickly grow in size.
 Binary files, like ``npy``, store the same data in less space.
 Most visualization packages require XYZ files, so this script quickly looks up the relevant data in a group and writes an XYZ file.
 
-.. code-block:: bash
+.. code-block:: text
 
     $ reptar-write-xyz --help
-    usage: reptar-write-xyz [-h] [--comment_key [COMMENT_KEY]] [--save_dir [SAVE_DIR]] [group_key]
+    usage: reptar-write-xyz [-h] [--group_key [GROUP_KEY]] [--comment_key [COMMENT_KEY]] [--save_dir [SAVE_DIR]]
+                        [group_path]
 
-    Write XYZ file from exdir file.
+    Write XYZ file from a reptar supported file type.
 
     positional arguments:
-    group_key             Path to group key. Will take absolute path and split based on `.exdir`.
+    group_path            Path to group path. This can be to a file or exdir/zarr group.
 
     options:
     -h, --help            show this help message and exit
+    --group_key [GROUP_KEY]
+        Manually specify group key for file.
     --comment_key [COMMENT_KEY]
-                            Label of data to include as xyz comment. If "energy" or "grad" is in the key, then we convert to
-                            kcal/mol.
+        Label of data to include as xyz comment.
     --save_dir [SAVE_DIR]
-                            Directory to save XYZ file.
+        Directory to save XYZ file.
 
 .. admonition:: Example
 
@@ -38,7 +40,7 @@ Most visualization packages require XYZ files, so this script quickly looks up t
         $ ls
         file.exdir
         $ reptar-write-xyz ./file.exdir/parent_key/group_key
-        reptar v0.0.2+74.g9d22eb8
+        reptar v0.0.3.post41
         Parsing args
         Collecting data
         Writing XYZ file

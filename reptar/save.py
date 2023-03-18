@@ -21,6 +21,9 @@
 # SOFTWARE.
 
 from .reptar_file import File
+from .logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 class Saver:

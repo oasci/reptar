@@ -31,6 +31,9 @@ from qcelemental import periodictable as ptable
 from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 from qcelemental.exceptions import ValidationError
 from .descriptors import get_center_of_mass
+from .logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
 def get_files(path, expression, recursive=True):

@@ -13,6 +13,7 @@ requirements = [
     "qcelemental>=0.25.1",
     "pyyaml",
     "ase",
+    "zarr",
 ]
 
 setup_requirements = ["versioneer"]

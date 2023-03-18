@@ -63,13 +63,14 @@ Or, the latest development version can be installed directly from the `GitHub re
 File types
 ==========
 
-Reptar supports three file types with a single interface: exdir, JSON, and npz.
+Reptar supports three file types with a single interface: exdir, zarr, JSON, and npz.
 JSON is a text file for storing key-value pairs with few dimensions (i.e., no large arrays).
 NumPy's npz format is useful for arrays; however, no nesting is possible and loading data often requires postprocessing for 0D arrays (e.g., ``np.array('data')``).
 
-Exdir is a simple, yet powerful open file format that mimics the `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_ format with metadata and data stored in directories with YAML and npy files instead of a single binary file.
-This provides several advantages such as mixing human-readable YAML and binary NumPy files, being easier for version control, and only loading requested portions of datasets into memory.
+`Exdir <https://exdir.readthedocs.io/en/latest/>`__ is a simple, yet powerful open file format that mimics the `HDF5 <https://www.hdfgroup.org/solutions/hdf5/>`_ format with metadata and data stored in directories with YAML and npy files instead of a single binary file.
 For more detailed information, please read this `Front. Neuroinform. article about exdir <https://doi.org/10.3389/fninf.2018.00016>`__.
+`Zarr <https://zarr.dev/>`__ is a similar hierarchical data format for chunked and compressed NumPy-like arrays and JSON attributes.
+Both of these file types provide several advantages such as mixing human-readable and binary files, being easier for version control, and only loading requested portions of arrays into memory.
 
 Key-value pairs
 ===============
@@ -96,7 +97,7 @@ Data can also be manually added by using ``File.put(key, data)`` where ``key`` i
 Accessing data
 --------------
 
-Data can be added or retrieved using the same interface regardless of the underlying file format (e.g., exdir, JSON, and npz).
+Data can be added or retrieved using the same interface regardless of the underlying file format (e.g., exdir, zarr, JSON, and npz).
 The only thing required is the respective ``key`` specifying where it is stored.
 Then, ``File.get(key)`` can retrieve the data.
 

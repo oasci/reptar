@@ -71,13 +71,14 @@ pip install .
 
 # File types
 
-Reptar supports three file types with a single interface: exdir, JSON, and npz.
+Reptar supports four file types with a single interface: exdir, zarr, JSON, and npz.
 JSON is a text file for storing key-value pairs with few dimensions (i.e., no large arrays).
 NumPy's npz format is useful for arrays; however, no nesting is possible and loading data often requires postprocessing for 0D arrays (e.g., ``np.array('data')``).
 
 Exdir is a simple, yet powerful open file format that mimics the [HDF5](https://www.hdfgroup.org/solutions/hdf5/) format with metadata and data stored in directories with YAML and npy files instead of a single binary file.
-This provides several advantages such as mixing human-readable YAML and binary NumPy files, being easier for version control, and only loading requested portions of datasets into memory.
 For more detailed information, please read this [*Front. Neuroinform.* article about exdir](https://doi.org/10.3389/fninf.2018.00016).
+[Zarr](https://zarr.dev/) is a similar hierarchical data format for chunked and compressed NumPy-like arrays and JSON attributes.
+Both of these file types provide several advantages such as mixing human-readable and binary files, being easier for version control, and only loading requested portions of arrays into memory.
 
 # Key-value pairs
 

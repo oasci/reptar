@@ -29,6 +29,9 @@ from .utils import center_structures as get_center_structures
 from .utils import gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
 from . import _version
+from .logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 reptar_version = _version.get_versions()["version"]
 

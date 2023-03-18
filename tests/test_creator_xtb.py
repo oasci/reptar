@@ -170,6 +170,69 @@ def test_1h2o_120meoh_md_json():
     assert create.rfile.get("prod_1/wall_potential")[0]["sphere_radius"] == 12.500003
 
 
+@pytest.mark.dependency(depends=["test_1h2o_120meoh_md_exdir"], scope="module")
+def test_1h2o_120meoh_md_zarr():
+    _, _, out_path_eq, geom_path_eq, traj_path_eq = get_1h2o_120meoh_eq_paths()
+    _, _, out_path_prod, geom_path_prod, traj_path_prod = get_1h2o_120meoh_prod_paths()
+    zarr_path = os.path.join(XTB_DIR, "1h2o_120meoh_md.zarr")
+
+    num_waters = 1
+    atoms_per_water = 3
+    num_methanols = 120
+    atoms_per_methanol = 6
+
+    # For water molecules.
+    entity_ids = gen_entity_ids(atoms_per_water, num_waters)
+    comp_ids = gen_comp_ids("WAT", num_waters)
+    # For methanol molecules.
+    entity_ids = gen_entity_ids(
+        atoms_per_methanol,
+        num_methanols,
+        starting_idx=np.max(entity_ids) + 1,
+        add_to=entity_ids,
+    )
+    comp_ids = gen_comp_ids("MET", num_methanols, add_to=comp_ids)
+
+    create = Creator()
+    create.load(zarr_path, mode="w")
+    create.from_calc(
+        "/eq_1", out_path=out_path_eq, geom_path=geom_path_eq, traj_path=traj_path_eq
+    )
+    create.ids("/eq_1", entity_ids, comp_ids)
+    create.from_calc(
+        "prod_1",
+        out_path=out_path_prod,
+        geom_path=geom_path_prod,
+        traj_path=traj_path_prod,
+    )
+    create.ids("prod_1", entity_ids, comp_ids)
+
+    assert create.rfile.get("prod_1/geometry").shape == (1001, 723, 3)
+    assert create.rfile.get("prod_1/geometry")[0][3][1] == -2.64576119977354
+    assert create.rfile.get("prod_1/geometry")[-1][-1][0] == -1.62420092727186
+    assert create.rfile.get("prod_1/energy_pot").shape == (1001,)
+    assert create.rfile.get("prod_1/energy_pot")[0] == -991.881189902216
+    assert create.rfile.get("prod_1/energy_pot")[-1] == -991.818996146108
+    assert create.rfile.get("prod_1/wall_potential")[0]["sphere_radius"] == 12.500003
+
+    create.rfile.put(
+        "readme",
+        "500 K MD simulation driven by GFN2-xTB for sampling water and methanol geometries.\n"
+        "Constrains one water molecule to the origin solvated in methanol droplet.",
+    )
+
+    create = Creator()
+    create.load(zarr_path, mode="r")
+
+    assert create.rfile.get("prod_1/geometry").shape == (1001, 723, 3)
+    assert create.rfile.get("prod_1/geometry")[0][3][1] == -2.64576119977354
+    assert create.rfile.get("prod_1/geometry")[-1][-1][0] == -1.62420092727186
+    assert create.rfile.get("prod_1/energy_pot").shape == (1001,)
+    assert create.rfile.get("prod_1/energy_pot")[0] == -991.881189902216
+    assert create.rfile.get("prod_1/energy_pot")[-1] == -991.818996146108
+    assert create.rfile.get("prod_1/wall_potential")[0]["sphere_radius"] == 12.500003
+
+
 def test_1h2o_120meoh_md_prod_exdir_to_npz():
     exdir_path = os.path.join(XTB_DIR, "1h2o_120meoh_md.exdir")
     npz_path = os.path.join(XTB_DIR, "1h2o_120meoh_md-prod.npz")
