@@ -25,10 +25,10 @@
 import os
 import argparse
 
+import numpy as np
 from reptar import __version__ as reptar_version
 from reptar import File
 from reptar.writers import write_xyz
-import numpy as np
 
 def main():
 
@@ -45,8 +45,7 @@ def main():
     )
     parser.add_argument(
         '--comment_key', type=str, nargs='?', default='',
-        help='Label of data to include as xyz comment. If "energy" or "grad" is in '
-        'the key, then we convert to kcal/mol.'
+        help='Label of data to include as xyz comment.'
     )
     parser.add_argument(
         '--save_dir', type=str, nargs='?', default='.',
