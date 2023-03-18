@@ -16,6 +16,7 @@ QCElemental.
 
 ### Changed
 
+- ``reptar-write-xyz`` now supports all file types.
 - Handle 2D arrays in XYZ writers.
 - References to ``string`` files are renamed to ``xyz``.
 - System information (i.e., atomic numbers and coordinates) are moved to
