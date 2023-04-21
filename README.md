@@ -40,8 +40,6 @@
     <a href="#license">License</a>
 </p>
 
-<p align="center"><b>Disclaimer:</b> reptar is under active development and is not suitable for production.</p>
-
 # Motivation
 
 The computational chemistry community often fails to openly provide raw and/or processed data used to draw their scientific conclusions.
