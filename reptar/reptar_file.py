@@ -368,7 +368,7 @@ class File:
         :obj:`bool`
             If the data is iterative.
         """
-        if isinstance(data, (list, tuple, np.ndarray)):
+        if isinstance(data, (list, tuple, np.ndarray, zarr.core.Array)):
             return True
         return False
 
@@ -573,7 +573,7 @@ class File:
         is_iter = self._is_iter(data)
         if is_iter:
             data = self.simplify_iter_data(data, data_key)
-            if isinstance(data, np.ndarray):
+            if isinstance(data, (np.ndarray, zarr.core.Array)):
                 store_as = "array"
             else:
                 store_as = "attr"
