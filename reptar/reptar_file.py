@@ -146,7 +146,8 @@ class File:
     def clean_key(key):
         r"""Clean key and remove any common mistakes.
 
-        Currently this only corrects instances of ``//``.
+        This corrects instances of ``//`` and enforces instances where the start of the
+        key contains ``.``.
 
         Parameters
         ----------
@@ -162,6 +163,9 @@ class File:
         log.debug("Original key: %s", key)
         if "//" in key:
             key = key.replace("//", "/")
+        while key[0] == ".":
+            log.debug("Removing . at beginning")
+            key = key[1:]
         log.debug("Cleaned key: %s", key)
         return key
 

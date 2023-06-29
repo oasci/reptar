@@ -81,7 +81,7 @@ Pylint
 ======
 
 `Pylint <https://pylint.pycqa.org/en/stable/>`__ is used to lint all new Python code introduced into reptar.
-You can install Pylint with ``pip install pylint`` and locally check mbGDML by running ``pylint --rcfile=.pylintrc reptar`` in the repository root.
+You can install Pylint with ``pip install pylint`` and locally check reptar by running ``pylint --rcfile=.pylintrc reptar`` in the repository root.
 All messages need to be corrected before merging into reptar.
 
 Sometimes the Pylint suggestion does not make sense or cannot be fixed.
