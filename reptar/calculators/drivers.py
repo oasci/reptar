@@ -497,9 +497,9 @@ class DriverOpt:
                     [idx], Z, R, **self.worker_kwargs
                 )
                 opt_conv[idx] = opt_conv_done
-                R_opt[idx] = R_opt_done
-                E[idx] = E_done
-                G[idx] = G_done
+                R_opt[idx] = R_opt_done[0]
+                E[idx] = E_done[0]
+                G[idx] = G_done[0]
 
                 if saver is not None:
                     saver.save(opt_conv, R_opt, E, G)
