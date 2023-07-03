@@ -33,7 +33,7 @@ except ImportError:
     _HAS_XTB = False
 
 
-def xtb_engrad(
+def xtb_python_engrad(
     idxs, Z, R, charge=0, mult=1, calc_acc=0.1, max_iterations=300, params=None
 ):
     r"""Ray remote function for computing total electronic energy and atomic

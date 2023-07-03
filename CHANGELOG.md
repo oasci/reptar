@@ -4,6 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
+### Change
+
+- Renamed `xtb_engrad` to `xtb_python_engrad` to reflect the Python interface being used.
+
 ### Fixed
 
 - Psi4 optimizations without ray would crash.

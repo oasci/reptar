@@ -31,7 +31,7 @@ import pytest
 import numpy as np
 from reptar import File, Saver
 from reptar.calculators.drivers import DriverEnergy, DriverEnGrad
-from reptar.calculators.xtb_workers import xtb_engrad
+from reptar.calculators.xtb_workers import xtb_python_engrad
 
 
 sys.path.append("..")
@@ -133,7 +133,7 @@ def test_calculator_xtb_1h2o_engrad():
 
     saver = Saver(exdir_path_dest, (E_key, G_key))
 
-    driver = DriverEnGrad(xtb_engrad, worker_kwargs, **driver_kwargs)
+    driver = DriverEnGrad(xtb_python_engrad, worker_kwargs, **driver_kwargs)
 
     saver.save(E, G)
 
