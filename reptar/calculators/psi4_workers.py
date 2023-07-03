@@ -209,7 +209,7 @@ def psi4_opt(
         Total molecular charge.
     mult : :obj:`int`, default: ``1``
         Total molecular multiplicity.
-    method : :obj:`str`, default: ``'b3lyp-d3bj'``
+    method : :obj:`str`, default: ``'mp2'``
         Specifies the Psi4 method used for the gradient. For more information,
         please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
         opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
