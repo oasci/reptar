@@ -32,6 +32,7 @@ html_title = "reptar"
 # ones.
 extensions = [
     "sphinx.ext.autodoc",
+    "autoapi.extension",
     "sphinx.ext.napoleon",
     "sphinx.ext.intersphinx",
     "sphinx.ext.viewcode",
@@ -101,3 +102,12 @@ html_extra_path = [
     "./files/30h2o-md/30h2o-gfn2-opt.xyz",
     "./files/30h2o-md/30h2o.pm.xyz",
 ]
+
+
+# autoapi
+autoapi_type = "python"
+autoapi_generate_api_docs = False
+autoapi_dirs = ["../../reptar"]
+autoapi_add_toctree_entry = False
+autoapi_python_class_content = "both"
+autoapi_keep_files = True

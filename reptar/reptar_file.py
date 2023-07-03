@@ -205,7 +205,8 @@ class File:
 
         Returns
         -------
-        Requested data from a dictionary source.
+        ``various``
+            Requested data from a dictionary source.
         """
         log.debug("Getting data from dictionary")
 
@@ -234,7 +235,8 @@ class File:
 
         Returns
         -------
-        Requested data from a exdir source.
+        ``various``
+            Requested data from a exdir source.
         """
         log.debug("Getting data from exdir")
 
@@ -267,7 +269,8 @@ class File:
 
         Returns
         -------
-        Requested data from a zarr source.
+        ``various``
+            Requested data from a zarr source.
         """
         log.debug("Getting data from zarr")
 
@@ -451,7 +454,7 @@ class File:
         ----------
         key : :obj:`str`
             Where to put the data. Can be a nested key.
-        data : various
+        data : ``various``
             Data to add to file.
         """
         if isinstance(data, np.ndarray):
@@ -480,7 +483,7 @@ class File:
         ----------
         key : :obj:`str`
             Where to put the data. Can be a nested key.
-        data : various
+        data : ``various``
             Data to add to exdir file.
         """
         parent_key, data_key = self.split_key(key)
@@ -546,7 +549,7 @@ class File:
         ----------
         key : :obj:`str`
             Where to put the data. Can be a nested key.
-        data : various
+        data : ``various``
             Data to add to zarr file.
         """
         parent_key, data_key = self.split_key(key)

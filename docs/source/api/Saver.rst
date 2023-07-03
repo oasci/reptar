@@ -1,5 +1,5 @@
 ``Saver``
 =========
 
-.. autoclass:: reptar.Saver
+.. autoapiclass:: reptar.Saver
     :members:

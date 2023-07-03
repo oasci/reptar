@@ -18,9 +18,6 @@ Reptar currently supports the following file types:
 
 Any data stored in this format can be interacted with through a :class:`~reptar.File` object.
 
-.. autoclass:: reptar.File
-    :noindex:
-
 Concepts
 ========
 
@@ -56,42 +53,25 @@ Retrieving data
 Reptar provides a single method, :meth:`~reptar.File.get`, to retrieve data from any of the supported file types.
 This can return any nested data stored in a loaded file including other groups.
 
-.. automethod:: reptar.File.get
-    :noindex:
-
 You can also get a list of all non-group keys using :meth:`~reptar.File.get_keys`.
 
-.. automethod:: reptar.File.get_keys
-    :noindex:
 
 Adding data
 ===========
 
 Reptar provides a single method, :meth:`~reptar.File.put`, to store data in any of the supported file types.
 
-.. automethod:: reptar.File.put
-    :noindex:
-
 Note that exdir groups must be initialized first with :meth:`~reptar.File.create_group` before adding data.
-
-.. automethod:: reptar.File.create_group
-    :noindex:
 
 Saving
 ======
 
-JSON and npz files need to be explicitly saved using the following method.
-
-.. automethod:: reptar.File.save
-    :noindex:
+JSON and npz files need to be explicitly saved using :meth:`reptar.File.save`.
 
 File conversion
 ===============
 
 A group from any file type can be directly converted to a dictionary using :meth:`~reptar.File.as_dict`.
-
-.. automethod:: reptar.File.as_dict
-    :noindex:
 
 Dictionaries and can also be used to populate a :class:`~reptar.File` object with any specified file type.
 

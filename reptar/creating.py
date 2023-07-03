@@ -120,7 +120,7 @@ class Creator:
     def rfile(self):
         r"""The reptar file to manage.
 
-        :obj:`reptar.File`
+        :type: :obj:`reptar.File`
         """
         return self._rfile
 

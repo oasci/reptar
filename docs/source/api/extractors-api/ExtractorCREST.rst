@@ -1,5 +1,5 @@
 ``ExtractorCREST``
 ==================
 
-.. autoclass:: reptar.extractors.ExtractorCREST
+.. autoapiclass:: reptar.extractors.ExtractorCREST
     :members:

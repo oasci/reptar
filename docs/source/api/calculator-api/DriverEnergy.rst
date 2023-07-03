@@ -1,5 +1,5 @@
 ``DriverEnergy``
 ================
 
-.. autoclass:: reptar.calculators.drivers.DriverEnergy
+.. autoapiclass:: reptar.calculators.drivers.DriverEnergy
     :members:

@@ -1,5 +1,5 @@
 ``get_nested_key``
 ==================
 
-.. autofunction:: reptar.utils.get_nested_key
+.. autoapifunction:: reptar.utils.get_nested_key
     

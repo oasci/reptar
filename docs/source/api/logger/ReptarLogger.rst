@@ -1,6 +1,6 @@
 ``ReptarLogger``
 ================
 
-.. autoclass:: reptar.logger.ReptarLogger
+.. autoapiclass:: reptar.logger.ReptarLogger
     :members:
     

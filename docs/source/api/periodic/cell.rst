@@ -1,5 +1,5 @@
 ``Cell``
 ========
 
-.. autoclass:: reptar.periodic.Cell
+.. autoapiclass:: reptar.periodic.Cell
     :members:

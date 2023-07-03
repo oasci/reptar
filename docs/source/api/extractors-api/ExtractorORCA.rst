@@ -1,5 +1,5 @@
 ``ExtractorORCA``
 =================
 
-.. autoclass:: reptar.extractors.ExtractorORCA
+.. autoapiclass:: reptar.extractors.ExtractorORCA
     :members:

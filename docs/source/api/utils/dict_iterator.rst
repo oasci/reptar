@@ -1,5 +1,5 @@
 ``dict_iterator``
 =================
 
-.. autofunction:: reptar.utils.dict_iterator
+.. autoapifunction:: reptar.utils.dict_iterator
     

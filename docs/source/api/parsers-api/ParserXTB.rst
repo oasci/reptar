@@ -1,5 +1,5 @@
 ``ParserXTB``
 =============
 
-.. autoclass:: reptar.parsers.ParserXTB
+.. autoapiclass:: reptar.parsers.ParserXTB
     :members:

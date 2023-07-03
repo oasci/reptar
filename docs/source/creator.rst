@@ -36,20 +36,11 @@ Group creation
 First, a :ref:`File<file>` object needs to be loaded into the creator.
 Reptar provides two ways to do this: by initializing a :class:`~reptar.Creator` object with a :ref:`File<file>` object, or by using the :meth:`~reptar.Creator.load` method.
 
-.. autoclass:: reptar.Creator
-    :noindex:
-
-.. automethod:: reptar.Creator.load
-    :noindex:
-
 .. note::
 
     This :ref:`File<file>` object is stored in the :attr:`~reptar.Creator.rfile` attribute.
 
-Reptar can then parse information and create a group by specifying the paths to the relevant output files.
-
-.. automethod:: reptar.Creator.from_calc
-    :noindex:
+Reptar can then parse information and create a group by specifying the paths to the relevant output files with :meth:`reptar.Creator.from_calc`.
 
 Types of output files
 ---------------------
@@ -84,13 +75,11 @@ Component and entity ids
 
 TODO:
 
-.. automethod:: reptar.Creator.ids
-    :noindex:
+:meth:`reptar.Creator.ids`
 
 File definitions
 ----------------
 
 TODO:
 
-.. automethod:: reptar.Creator.definitions
-    :noindex:
+:meth:`reptar.Creator.definitions`

@@ -1,5 +1,5 @@
 ``DriverEnGrad``
 ================
 
-.. autoclass:: reptar.calculators.drivers.DriverEnGrad
+.. autoapiclass:: reptar.calculators.drivers.DriverEnGrad
     :members:

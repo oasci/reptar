@@ -1,5 +1,5 @@
 ``ExtractorASE``
 ================
 
-.. autoclass:: reptar.extractors.ExtractorASE
+.. autoapiclass:: reptar.extractors.ExtractorASE
     :members:

@@ -1,5 +1,5 @@
 ``identify_trajectory``
 =======================
 
-.. autofunction:: reptar.creating.identify_trajectory
+.. autoapifunction:: reptar.creating.identify_trajectory
     

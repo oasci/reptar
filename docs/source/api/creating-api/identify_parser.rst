@@ -1,5 +1,5 @@
 ``identify_parser``
 ===================
 
-.. autofunction:: reptar.creating.identify_parser
+.. autoapifunction:: reptar.creating.identify_parser
     

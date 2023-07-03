@@ -1,5 +1,5 @@
 ``ExtractorXTB``
 ================
 
-.. autoclass:: reptar.extractors.ExtractorXTB
+.. autoapiclass:: reptar.extractors.ExtractorXTB
     :members:

@@ -1,5 +1,5 @@
 ``ParserORCA``
 ==============
 
-.. autoclass:: reptar.parsers.ParserORCA
+.. autoapiclass:: reptar.parsers.ParserORCA
     :members:

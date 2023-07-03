@@ -1,5 +1,5 @@
 ``Parser``
 ==========
 
-.. autoclass:: reptar.parsers.Parser
+.. autoapiclass:: reptar.parsers.Parser
     :members:

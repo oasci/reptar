@@ -1,6 +1,6 @@
 ``Criteria``
 ============
 
-.. autoclass:: reptar.descriptors.Criteria
+.. autoapiclass:: reptar.descriptors.Criteria
     :members:
     

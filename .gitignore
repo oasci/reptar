@@ -115,3 +115,5 @@ tests/tmp/
 
 # Reptar data
 examples/reptar-data
+
+docs/source/autoapi

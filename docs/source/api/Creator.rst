@@ -1,5 +1,5 @@
 ``Creator``
 ===========
 
-.. autoclass:: reptar.Creator
+.. autoapiclass:: reptar.Creator
     :members:

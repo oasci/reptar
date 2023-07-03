@@ -9,26 +9,17 @@ Parsers
 
 A parser a package-specific driver for iterating through each line of output files and storing data.
 Each package has its own parser that inherits the base :class:`~reptar.parsers.Parser` class which provides common attributes and methods.
-For example, we have an xTB parser class:
-
-.. autoclass:: reptar.parsers.ParserXTB
-    :noindex:
+For example, we have an xTB parser, :class:`reptar.parsers.ParserXTB`.
 
 ``parse``
 ---------
 After initializing a parser object with the relevant paths, you can then call the :meth:`~reptar.parsers.Parser.parse` method.
 Each package parser class must define its own :meth:`~reptar.parsers.Parser.parse` method.
 
-.. automethod:: reptar.parsers.Parser.parse
-    :noindex:
-
 ``parsed_info``
 ---------------
 
-Used to store any and all information that can be added to a :ref:`File <file>` object.
-
-.. autoattribute:: reptar.parsers.Parser.parsed_info
-    :noindex:
+:attr:`reptar.parsers.Parser.parsed_info` is used to store any and all information that can be added to a :ref:`File <file>` object.
 
 
 Extractors
@@ -41,10 +32,7 @@ Triggers
 --------
 
 Reptar has to know when to start extracting information while reading the output files.
-This is accomplished with a tuple of triggers.
-
-.. autoattribute:: reptar.extractors.Extractor.triggers
-    :noindex:
+This is accomplished with a tuple of :attr:`reptar.extractors.Extractor.triggers`.
 
 Each element is a tuple of length two with a lambda function and corresponding extractor method name as a string.
 The lambda function returns ``True`` if a line contains specific words or formatting that signals reptar to parse certain information.

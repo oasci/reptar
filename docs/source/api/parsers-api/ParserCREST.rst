@@ -1,5 +1,5 @@
 ``ParserCREST``
 ===============
 
-.. autoclass:: reptar.parsers.ParserCREST
+.. autoapiclass:: reptar.parsers.ParserCREST
     :members:

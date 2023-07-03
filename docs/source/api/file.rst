@@ -1,6 +1,6 @@
 ``File``
 ========
 
-.. autoclass:: reptar.File
+.. autoapiclass:: reptar.File
     :members:
     

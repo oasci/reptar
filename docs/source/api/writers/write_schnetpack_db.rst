@@ -1,5 +1,5 @@
 ``write_schnetpack_db``
 =======================
 
-.. autofunction:: reptar.writers.write_schnetpack_db
+.. autoapifunction:: reptar.writers.write_schnetpack_db
     

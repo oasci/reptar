@@ -9,8 +9,6 @@ Structural descriptors
 
 TODO: 
 
-.. autofunction:: reptar.descriptors.max_atom_pair_dist
-    :noindex:
+:func:`reptar.descriptors.max_atom_pair_dist`
 
-.. autofunction:: reptar.descriptors.com_distance_sum
-    :noindex:
+:func:`reptar.descriptors.com_distance_sum`

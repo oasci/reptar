@@ -32,7 +32,8 @@ class Parser(ABC):
         Path to output file.
     file_name : :obj:`str`
         The name of the file without extension.
-    r"""
+
+    """
 
     def __init__(self, out_path, extractors):
         """
@@ -65,9 +66,6 @@ class Parser(ABC):
             :meth:`~reptar.parsers.Parser.extract_data_out`.
             Each extractor has its own ``parsed_info`` that needs to be added to
             :attr:`~reptar.parsers.Parser.parsed_info`.
-
-            .. automethod:: reptar.parsers.Parser.extract_data_out
-                :noindex:
 
         :**Postprocessing**:
             Any additional tasks to complete parsing.

@@ -1,5 +1,5 @@
 ``validate_geometry``
 =====================
 
-.. autofunction:: reptar.utils.validate_geometry
+.. autoapifunction:: reptar.utils.validate_geometry
     

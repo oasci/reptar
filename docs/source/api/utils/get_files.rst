@@ -1,5 +1,5 @@
 ``get_files``
 =============
 
-.. autofunction:: reptar.utils.get_files
+.. autoapifunction:: reptar.utils.get_files
     
