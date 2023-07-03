@@ -2,7 +2,7 @@
 =================
 
 .. toctree::
+    :glob:
     :maxdepth: 1
 
-    ReptarLogger
-    set_log_level
+    *

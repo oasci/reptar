@@ -2,6 +2,7 @@
 ===================
 
 .. toctree::
+    :glob:
     :maxdepth: 1
 
-    pairwise_distance
+    *

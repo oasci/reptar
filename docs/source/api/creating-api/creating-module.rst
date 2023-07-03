@@ -2,7 +2,7 @@
 ===================
 
 .. toctree::
+    :glob:
     :maxdepth: 1
     
-    identify_parser
-    identify_trajectory
+    *

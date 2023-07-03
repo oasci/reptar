@@ -2,11 +2,8 @@
 =====================
 
 .. toctree::
+    :glob:
     :maxdepth: 1
 
-    Extractor
-    ExtractorASE
-    ExtractorCREST
-    ExtractorORCA
-    ExtractorXTB
+    *
 

@@ -58,7 +58,7 @@ intersphinx_mapping = {
     "numpy": ("https://numpy.org/doc/stable/", None),
     "exdir": ("https://exdir.readthedocs.io/en/latest/", None),
     "qcelemental": (
-        "https://docs.qcarchive.molssi.org/projects/qcelemental/en/latest/",
+        "https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable/",
         None,
     ),
 }

@@ -2,7 +2,8 @@
 ===================
 
 .. toctree::
+    :glob:
     :maxdepth: 1
 
-    cell
+    *
     
