@@ -4,8 +4,10 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ## [Unreleased]
 
-### Change
+### Changed
 
+- Drivers and workers should only return guaranteed values.
+`DriverOpt` and respective workers no longer return gradients.
 - Renamed `xtb_engrad` to `xtb_python_engrad` to reflect the Python interface being used.
 
 ### Fixed

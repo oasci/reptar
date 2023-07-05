@@ -102,7 +102,7 @@ class DriverEnergy:
         Returns
         -------
         :obj:`numpy.ndarray`
-            Indices for ``R`` that are missing energie values.
+            Indices for ``R`` that are missing energy values.
         """
         # pylint: disable-next=invalid-name
         E = E[start_slice:end_slice]
@@ -266,7 +266,7 @@ class DriverEnGrad:
         Returns
         -------
         :obj:`numpy.ndarray`
-            Indices for ``R`` that are missing energie values.
+            Indices for ``R`` that are missing energy values.
         """
         # pylint: disable-next=invalid-name
         E = E[start_slice:end_slice]
@@ -440,12 +440,12 @@ class DriverOpt:
         Returns
         -------
         :obj:`numpy.ndarray`
-            Indices for ``R`` that are missing energie values.
+            Indices for ``R`` that are missing energy values.
         """
         return np.where(~opt_conv[start_slice:end_slice])[0]
 
     # pylint: disable-next=invalid-name
-    def run(self, Z, R, R_opt, E, G, saver=None):
+    def run(self, Z, R, R_opt, E, saver=None):
         r"""Run the calculations.
 
         Parameters
@@ -465,10 +465,6 @@ class DriverOpt:
             to be calculated should have ``NaN`` in the element corresponding
             to the same index in ``R``. Should have shape ``(j,)``. Units are in
             Hartrees.
-        G : :obj:`numpy.ndarray`, ndim: ``3``
-            Atomic gradients of all structures in ``R``. Gradients that need to be
-            calculated should have ``NaN`` in the corresponding elements. Should
-            have the same shape as ``R``. Units are in Hartrees/Angstrom.
         saver : :obj:`reptar.Saver`, optional
             Save data after every worker finishes.
 
@@ -493,16 +489,15 @@ class DriverOpt:
         if not self.use_ray:
             for idx in idxs_todo:
                 # pylint: disable-next=invalid-name
-                _, opt_conv_done, R_opt_done, E_done, G_done = worker(
+                _, opt_conv_done, R_opt_done, E_done = worker(
                     [idx], Z, R, **self.worker_kwargs
                 )
                 opt_conv[idx] = opt_conv_done
                 R_opt[idx] = R_opt_done[0]
                 E[idx] = E_done[0]
-                G[idx] = G_done[0]
 
                 if saver is not None:
-                    saver.save(opt_conv, R_opt, E, G)
+                    saver.save(opt_conv, R_opt, E)
         else:
             worker = ray.remote(worker)
             Z = ray.put(Z)
@@ -530,17 +525,14 @@ class DriverOpt:
                 done_id, workers = ray.wait(workers)
 
                 # pylint: disable-next=invalid-name
-                idxs_done, opt_conv_done, R_opt_done, E_done, G_done = ray.get(done_id)[
-                    0
-                ]
+                idxs_done, opt_conv_done, R_opt_done, E_done = ray.get(done_id)[0]
                 opt_conv[idxs_done] = opt_conv_done
                 R_opt[idxs_done] = R_opt_done
                 E[idxs_done] = E_done
-                G[idxs_done] = G_done
 
                 if saver is not None:
-                    saver.save(opt_conv, R_opt, E, G)
+                    saver.save(opt_conv, R_opt, E)
 
                 add_worker(workers, chunker)
 
-        return opt_conv, R_opt, E, G
+        return opt_conv, R_opt, E

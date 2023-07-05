@@ -239,8 +239,6 @@ def psi4_opt(
         Optimized geometries.
     :obj:`numpy.ndarray`
         Total electronic energies of optimized structures. Units of Hartree.
-    :obj:`numpy.ndarray`
-        Atomic gradients of optimized structures. Units of Hartree/Angstrom.
 
     Notes
     -----
@@ -258,7 +256,6 @@ def psi4_opt(
     R = R[idxs]
     opt_conv = np.full(R.shape[0], False, dtype=np.bool8)
     R_opt = np.empty(R.shape, dtype=np.float64)
-    G = np.full(R.shape, np.nan, dtype=np.float64)
     E = np.full(R.shape[0], np.nan, dtype=np.float64)
     for i, r in enumerate(R):
         mol = psi4.core.Molecule.from_arrays(
@@ -272,20 +269,16 @@ def psi4_opt(
         try:
             e, wfn = psi4.opt(method, molecule=mol, return_wfn=True)
             r_opt = np.asarray(wfn.molecule().geometry())
-            g = np.asarray(wfn.gradient())
             r_opt_conv = True
         except psi4.OptimizationConvergenceError as ex:
             r_opt_conv = False
             r_opt = np.asarray(ex.wfn.molecule().geometry())
             e = ex.wfn.energy()
-            g = np.asarray(ex.wfn.gradient())
         finally:
             r_opt *= psi4.constants.bohr2angstroms
-            g /= psi4.constants.bohr2angstroms
 
             opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
             R_opt[i] = r_opt
             E[i] = e  # pylint: disable=used-before-assignment
-            G[i] = g
 
-    return idxs, opt_conv, R_opt, E, G
+    return idxs, opt_conv, R_opt, E
