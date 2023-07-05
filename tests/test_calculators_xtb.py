@@ -30,8 +30,9 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad
-from reptar.calculators.xtb_workers import xtb_python_engrad
+from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverOpt
+from reptar.calculators.xtb_workers import xtb_python_engrad, xtb_opt
+from reptar.calculators.utils import prep_xtb_input_lines
 
 
 sys.path.append("..")
@@ -179,3 +180,90 @@ def test_calculator_xtb_1h2o_engrad():
 
     assert np.allclose(E, E_ref)
     assert np.allclose(G, G_ref)
+
+
+def test_calculator_xtb_1h2o_opt():
+    has_xtb_in_path = shutil.which("xtb")
+    if has_xtb_in_path is None:
+        pytest.skip("xtb package not installed")
+
+    exdir_path_source = get_140h2o_samples_path()
+    rfile_source = File(exdir_path_source, mode="r")
+
+    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-xtb.exdir")
+
+    if os.path.exists(exdir_path_dest):
+        shutil.rmtree(exdir_path_dest)
+    rfile = File(exdir_path_dest, mode="w")
+
+    # Copy over a few structures for calculations.
+    group_key = "1h2o"
+    start_slice = None
+    end_slice = 5
+
+    Z = rfile_source.get(f"{group_key}/atomic_numbers")
+    R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
+    R_opt = np.full(R.shape, np.nan)
+    E_opt = np.full(R.shape[0], np.nan)
+
+    # Setup energy and gradient arrays
+    method_label = "gfn2xtb"
+
+    driver_kwargs = {
+        "use_ray": False,
+        "n_workers": 1,
+        "n_cpus_per_worker": 1,
+        "chunk_size": 1,
+        "start_slice": None,
+        "end_slice": None,
+    }
+
+    input_lines = prep_xtb_input_lines(
+        charge=0, multiplicity=1, constraints=None, save_traj=False
+    )
+    worker_kwargs = {
+        "input_lines": input_lines,
+        "acc": 0.1,
+        "n_cores": 1,
+        "xtb_path": "xtb",
+        "work_dir": "/home/alex/Documents/test",
+    }
+
+    R_opt_ref = np.array(
+        [
+            [
+                [-2.15056849e-02, -5.97725604e-04, 5.62896714e-03],
+                [5.05895012e-02, 2.57050398e-01, -9.15716350e-01],
+                [8.69368072e-01, -1.35050669e-01, 3.34504748e-01],
+            ],
+            [
+                [-3.45281222e-02, -5.81202624e-02, -3.84269640e-03],
+                [5.74230085e-01, 3.60285970e-01, -6.16068470e-01],
+                [-1.05128983e-01, 5.13770614e-01, 7.62966631e-01],
+            ],
+            [
+                [-5.14642316e-02, -2.87476342e-02, -5.32639553e-02],
+                [7.64072766e-01, 4.75694465e-01, -2.89287984e-02],
+                [-2.88231350e-01, -2.29744450e-01, 8.54284056e-01],
+            ],
+            [
+                [-5.23413493e-02, -6.10226352e-02, 3.33436723e-02],
+                [8.59010546e-01, -3.73028788e-02, -2.65156540e-01],
+                [-4.13946661e-01, 8.18951899e-01, -8.97192821e-02],
+            ],
+            [
+                [1.14998754e-02, -2.09476517e-02, 1.24209105e-02],
+                [-6.53408460e-01, 6.55319358e-01, 1.55943362e-01],
+                [3.68651976e-01, 1.14173880e-01, -8.67516277e-01],
+            ],
+        ]
+    )
+    E_opt_ref = np.array(
+        [-5.07054432, -5.07054437, -5.07054445, -5.07054441, -5.07054445]
+    )
+    driver = DriverOpt(xtb_opt, worker_kwargs, **driver_kwargs)
+    opt_conv, R_opt, E_opt = driver.run(Z, R, R_opt, E_opt)
+
+    assert np.all(opt_conv == True)
+    assert np.allclose(R_opt, R_opt_ref)
+    assert np.allclose(E_opt, E_opt_ref)
