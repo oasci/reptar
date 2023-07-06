@@ -415,7 +415,7 @@ class DriverOpt:
         end_slice : :obj:`int`, default: ``None``
             Trims ``R`` to end at this index.
         ray_address : :obj:`str`, default: ``'auto'``
-            Ray cluster address to connect to. Passes ``opt_conv, R_opt, E, G`` into
+            Ray cluster address to connect to. Passes ``conv_opt, R_opt, E, G`` into
             :meth:`~reptar.Saver.save`.
         """
         # Storing arrays and other information
@@ -434,7 +434,7 @@ class DriverOpt:
                 ray.init(address=ray_address)
 
     @staticmethod
-    def _idx_todo(opt_conv, start_slice=None, end_slice=None):
+    def _idx_todo(conv_opt, start_slice=None, end_slice=None):
         r"""Indices of NaN geometries (calculations to do).
 
         Returns
@@ -442,10 +442,10 @@ class DriverOpt:
         :obj:`numpy.ndarray`
             Indices for ``R`` that are missing energy values.
         """
-        return np.where(~opt_conv[start_slice:end_slice])[0]
+        return np.where(~conv_opt[start_slice:end_slice])[0]
 
     # pylint: disable-next=invalid-name
-    def run(self, Z, R, R_opt, E, saver=None):
+    def run(self, Z, R, conv_opt, R_opt, E_opt, saver=None):
         r"""Run the calculations.
 
         Parameters
@@ -457,10 +457,12 @@ class DriverOpt:
             Cartesian coordinates of all structures in group. Should have shape
             ``(j, i, 3)`` where ``j`` is the number of structures. Units are in
             Angstroms.
+        conv_opt : :obj:`numpy.ndarray`, ndim: ``1``
+            Boolean flags for if the geometry optimization was successful.
         R_opt : :obj:`numpy.ndarray`, ndim: ``3``
             Optimized Cartesian coordinates of all structures in group. This
             is used to identifying which optimizations need to be done.
-        E : :obj:`numpy.ndarray`, ndim: ``1``
+        E_opt : :obj:`numpy.ndarray`, ndim: ``1``
             Total electronic energies of all structures in ``R``. Energies that need
             to be calculated should have ``NaN`` in the element corresponding
             to the same index in ``R``. Should have shape ``(j,)``. Units are in
@@ -480,24 +482,22 @@ class DriverOpt:
         assert Z.shape[0] == R.shape[1]
         assert R.shape[2] == 3
 
-        opt_conv = ~np.isnan(R_opt[:, 0, 0])
-
         worker = self.worker
-        idxs_todo = self._idx_todo(opt_conv, self.start_slice, self.end_slice)
+        idxs_todo = self._idx_todo(conv_opt, self.start_slice, self.end_slice)
         chunker = chunk_iterable(idxs_todo, self.chunk_size)
 
         if not self.use_ray:
             for idx in idxs_todo:
                 # pylint: disable-next=invalid-name
-                _, opt_conv_done, R_opt_done, E_done = worker(
+                _, conv_opt_done, R_opt_done, E_opt_done = worker(
                     [idx], Z, R, **self.worker_kwargs
                 )
-                opt_conv[idx] = opt_conv_done
+                conv_opt[idx] = conv_opt_done
                 R_opt[idx] = R_opt_done[0]
-                E[idx] = E_done[0]
+                E_opt[idx] = E_opt_done[0]
 
                 if saver is not None:
-                    saver.save(opt_conv, R_opt, E)
+                    saver.save(conv_opt, R_opt, E_opt)
         else:
             worker = ray.remote(worker)
             Z = ray.put(Z)
@@ -525,14 +525,14 @@ class DriverOpt:
                 done_id, workers = ray.wait(workers)
 
                 # pylint: disable-next=invalid-name
-                idxs_done, opt_conv_done, R_opt_done, E_done = ray.get(done_id)[0]
-                opt_conv[idxs_done] = opt_conv_done
+                idxs_done, conv_opt_done, R_opt_done, E_done = ray.get(done_id)[0]
+                conv_opt[idxs_done] = conv_opt_done
                 R_opt[idxs_done] = R_opt_done
-                E[idxs_done] = E_done
+                E_opt[idxs_done] = E_done
 
                 if saver is not None:
-                    saver.save(opt_conv, R_opt, E)
+                    saver.save(conv_opt, R_opt, E_opt)
 
                 add_worker(workers, chunker)
 
-        return opt_conv, R_opt, E
+        return conv_opt, R_opt, E_opt

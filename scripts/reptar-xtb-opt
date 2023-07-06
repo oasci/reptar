@@ -1,0 +1,122 @@
+#!/usr/bin/env python3
+
+"""Run Psi4 optimizations"""
+
+import sys
+import argparse
+import os
+import yaml
+from reptar import File, Saver
+from reptar.calculators.drivers import DriverOpt
+from reptar.calculators.xtb_workers import xtb_opt
+from reptar.utils import prep_group_opt
+from reptar.logger import ReptarLogger, set_log_level
+
+log = ReptarLogger(__name__)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Prepare CREST jobs for configurational sampling"
+    )
+    parser.add_argument(
+        "config_path",
+        type=str,
+        nargs="?",
+        help="Path to YAML configuration file",
+    )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        nargs="?",
+        default="info",
+        help="Desired logging level",
+    )
+    return parser.parse_args()
+
+
+def _psi4_dihedral_atoms_string(dihedral_atoms):
+    return " ".join([str(i + 1) for i in dihedral_atoms])
+
+
+def prep_frozen_dihedral(config):
+    phi_atoms_string = _psi4_dihedral_atoms_string(
+        config["residue"]["phi_dihedral_atoms"]
+    )
+    psi_atoms_string = _psi4_dihedral_atoms_string(
+        config["residue"]["phi_dihedral_atoms"]
+    )
+
+    freeze_option = f"{phi_atoms_string} {psi_atoms_string}"
+    return freeze_option
+
+
+def main(args):
+    log.info("Loading config.yaml")
+    config_path = args.config_path
+    with open(config_path, "r", encoding="utf-8") as stream:
+        config = yaml.safe_load(stream)
+
+    log.info("Opening data file")
+    rfile_info = config["rfile"]
+    rfile_path = os.path.abspath(rfile_info["path"])
+    if os.path.exists(rfile_path):
+        if config["overwrite"]:
+            rfile = File(rfile_path, mode="a", allow_remove=True)
+        else:
+            log.error("%s exists and overwrite is False")
+            sys.exit(0)
+    else:
+        rfile = File(rfile_path, mode="a", allow_remove=True)
+
+    source_key = rfile_info["source_key"]
+    dest_key = rfile_info["dest_key"]
+    assert source_key != dest_key
+    # pylint: disable-next=invalid-name
+    Z_key = os.path.join(source_key, rfile_info["Z_label"])
+    # pylint: disable-next=invalid-name
+    R_key = os.path.join(source_key, rfile_info["R_label"])
+    Z = rfile.get(Z_key)
+    R = rfile.get(R_key)
+
+    keys, data = prep_group_opt(
+        rfile,
+        Z_key,
+        R_key,
+        dest_key,
+        Z_opt_label=rfile_info["Z_label"],
+        conv_opt_label=rfile_info["conv_opt_label"],
+        R_opt_label=rfile_info["R_opt_label"],
+        E_opt_label=rfile_info["E_opt_label"],
+    )
+    saver = Saver(rfile_path, keys[1:])
+    _, conv_opt, R_opt, E_opt = data  # pylint: disable=invalid-name
+
+    log.info("Preparing worker options")
+    worker_kwargs = {
+        "charge": config["residue"]["charge"],
+        "mult": config["residue"]["multiplicity"],
+        "method": config["psi4"]["method"],
+        "threads": config["job"]["n_cpus_per_worker"],
+        "options": config["psi4"]["options"],
+        "mem": config["job"]["mem_per_worker"],
+    }
+
+    driver = DriverOpt(
+        xtb_opt,
+        worker_kwargs,
+        use_ray=config["job"]["use_ray"],
+        n_workers=config["job"]["n_workers"],
+        n_cpus_per_worker=config["job"]["n_cpus_per_worker"],
+        chunk_size=config["job"]["chunk_size"],
+        start_slice=config["job"]["start_slice"],
+        end_slice=config["job"]["end_slice"],
+        ray_address=config["job"]["ray_address"],
+    )
+    driver.run(Z, R, conv_opt, R_opt, E_opt, saver=saver)
+
+
+if __name__ == "__main__":
+    parsed_args = parse_args()
+    set_log_level(parsed_args.log_level.upper())
+    main(parsed_args)

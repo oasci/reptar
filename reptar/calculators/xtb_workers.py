@@ -148,11 +148,15 @@ def xtb_opt(
         Total electronic energies of optimized structures. Units of Hartree.
     """
     # pylint: disable=consider-using-with
+    log.debug("Initializing optimization arrays")
+    log.debug("R array indices to do:")
+    log.log_array(idxs, level=10)
     R = R[idxs]
     opt_conv = np.full(R.shape[0], False, dtype=np.bool8)
-    R_opt = np.empty(R.shape, dtype=np.float64)
-    E = np.zeros(R.shape[0])
+    R_opt = np.empty(R.shape, dtype=np.float64)  # pylint: disable=invalid-name
+    E_opt = np.zeros(R.shape[0])  # pylint: disable=invalid-name
 
+    log.debug("Setting up work directory and input files")
     if work_dir is None:
         temp_dir = TemporaryDirectory()
         work_dir = temp_dir.name
@@ -163,6 +167,7 @@ def xtb_opt(
     with open(xtb_input.name, "w", encoding="utf-8") as f:
         f.writelines(input_lines)
 
+    log.debug("Starting xTB computations")
     for i, r in enumerate(R):
         # Write temporary input file for coordinates
         xyz_input = NamedTemporaryFile(suffix=".xyz")
@@ -199,6 +204,6 @@ def xtb_opt(
 
         opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
         R_opt[i] = r_opt
-        E[i] = e  # pylint: disable=used-before-assignment
+        E_opt[i] = e  # pylint: disable=used-before-assignment
     os.chdir(cwd_path)
-    return idxs, opt_conv, R_opt, E
+    return idxs, opt_conv, R_opt, E_opt

@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- `reptar-xtb-opt` script with example YAML configuration file.
 - `xtb` optimization worker that can be used with ray.
 
 ### Changed

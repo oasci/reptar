@@ -204,6 +204,7 @@ def test_calculator_xtb_1h2o_opt():
     Z = rfile_source.get(f"{group_key}/atomic_numbers")
     R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
     R_opt = np.full(R.shape, np.nan)
+    conv_opt = np.full(R.shape[0], False)
     E_opt = np.full(R.shape[0], np.nan)
 
     # Setup energy and gradient arrays
@@ -226,7 +227,6 @@ def test_calculator_xtb_1h2o_opt():
         "acc": 0.1,
         "n_cores": 1,
         "xtb_path": "xtb",
-        "work_dir": "/home/alex/Documents/test",
     }
 
     R_opt_ref = np.array(
@@ -262,7 +262,7 @@ def test_calculator_xtb_1h2o_opt():
         [-5.07054432, -5.07054437, -5.07054445, -5.07054441, -5.07054445]
     )
     driver = DriverOpt(xtb_opt, worker_kwargs, **driver_kwargs)
-    opt_conv, R_opt, E_opt = driver.run(Z, R, R_opt, E_opt)
+    opt_conv, R_opt, E_opt = driver.run(Z, R, conv_opt, R_opt, E_opt)
 
     assert np.all(opt_conv == True)
     assert np.allclose(R_opt, R_opt_ref)

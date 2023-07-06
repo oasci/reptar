@@ -1,0 +1,53 @@
+
+overwrite: true
+
+# Information about system used to run xTB calculations.
+system:
+
+  # Total charge.
+  charge: 0
+
+  # Multiplicity.
+  multiplicity: 1
+
+rfile:
+
+  path: data.zarr
+
+  source_key: ./
+
+  Z_label: atomic_numbers
+
+  R_label: geometry
+
+  R_opt_label: geometry
+
+  E_opt_label: energy_ele_gfn2
+
+  conv_opt_label: conv_opt
+
+  dest_key: opt-gfn2
+
+xtb:
+
+  # xTB accuracy. Lower is more accurate.
+  acc: 0.01
+
+  # https://xtb-docs.readthedocs.io/en/latest/optimization.html#optimization-levels
+  opt_level: vtight
+
+job:
+
+  use_ray: true
+
+  ray_address: auto
+
+  n_workers: 2
+
+  n_cpus_per_worker: 2
+
+  chunk_size: 2
+
+  start_slice: null
+
+  end_slice: null
