@@ -6,9 +6,11 @@ import sys
 import argparse
 import os
 import yaml
+import numpy as np
 from reptar import File, Saver
 from reptar.calculators.drivers import DriverOpt
 from reptar.calculators.xtb_workers import xtb_opt
+from reptar.calculators.utils import prep_xtb_input_lines
 from reptar.utils import prep_group_opt
 from reptar.logger import ReptarLogger, set_log_level
 
@@ -93,15 +95,22 @@ def main(args):
     _, conv_opt, R_opt, E_opt = data  # pylint: disable=invalid-name
 
     log.info("Preparing worker options")
+    input_lines = prep_xtb_input_lines(
+        charge=config["system"]["charge"],
+        multiplicity=config["system"]["multiplicity"],
+        constraints=config["xtb"]["constraints"],
+        save_traj=False,
+    )
     worker_kwargs = {
-        "charge": config["residue"]["charge"],
-        "mult": config["residue"]["multiplicity"],
-        "method": config["psi4"]["method"],
-        "threads": config["job"]["n_cpus_per_worker"],
-        "options": config["psi4"]["options"],
-        "mem": config["job"]["mem_per_worker"],
+        "input_lines": input_lines,
+        "acc": config["xtb"]["acc"],
+        "n_cores": config["job"]["n_cpus_per_worker"],
+        "xtb_path": config["xtb"]["path"],
     }
 
+    log.info("Preparing optimization driver")
+    start_slice = config["job"]["start_slice"]
+    end_slice = config["job"]["end_slice"]
     driver = DriverOpt(
         xtb_opt,
         worker_kwargs,
@@ -109,11 +118,18 @@ def main(args):
         n_workers=config["job"]["n_workers"],
         n_cpus_per_worker=config["job"]["n_cpus_per_worker"],
         chunk_size=config["job"]["chunk_size"],
-        start_slice=config["job"]["start_slice"],
-        end_slice=config["job"]["end_slice"],
+        start_slice=start_slice,
+        end_slice=end_slice,
         ray_address=config["job"]["ray_address"],
     )
-    driver.run(Z, R, conv_opt, R_opt, E_opt, saver=saver)
+    log.info("Running optimizations")
+    n_todo = int(np.count_nonzero(~conv_opt[start_slice:end_slice]))
+    log.info("There are %r structures to optimize", n_todo)
+    if n_todo > 0:
+        driver.run(Z, R, conv_opt, R_opt, E_opt, saver=saver)
+        log.info("Optimizations done")
+    else:
+        log.warning("Check your bounds if you are selecting a subset of structures")
 
 
 if __name__ == "__main__":

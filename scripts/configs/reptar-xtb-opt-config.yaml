@@ -16,6 +16,8 @@ rfile:
 
   source_key: ./
 
+  dest_key: opt_gfn2
+
   Z_label: atomic_numbers
 
   R_label: geometry
@@ -26,15 +28,34 @@ rfile:
 
   conv_opt_label: conv_opt
 
-  dest_key: opt-gfn2
-
 xtb:
 
-  # xTB accuracy. Lower is more accurate.
+  path: xtb
+
+  # https://xtb-docs.readthedocs.io/en/latest/sp.html#accuracy
   acc: 0.01
 
   # https://xtb-docs.readthedocs.io/en/latest/optimization.html#optimization-levels
   opt_level: vtight
+
+  # https://xtb-docs.readthedocs.io/en/latest/xcontrol.html#constraining-potentials
+  constraints: null
+  # Alternatively, below is an example where we add a constraint to xTB. These formats
+  # create the nested lists format.
+  # constraints:
+  #   - 
+  #     - distance
+  #     - 
+  #       - 0
+  #       - 3
+  #       - 1.4
+  #   - 
+  #     - angle
+  #     - 
+  #       - 4
+  #       - 5
+  #       - 6
+  #       - auto
 
 job:
 
