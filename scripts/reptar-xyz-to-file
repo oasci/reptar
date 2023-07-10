@@ -1,0 +1,76 @@
+#!/usr/bin/env python3
+
+"""Make a zarr file from XYZ"""
+
+import sys
+import argparse
+import os
+import numpy as np
+from reptar import File
+from reptar.utils import parse_xyz, atoms_by_number
+from reptar.logger import ReptarLogger, set_log_level
+
+log = ReptarLogger(__name__)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(
+        description="Make a reptar file from XYZ",
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter,
+    )
+    parser.add_argument(
+        "xyz_path",
+        type=str,
+        nargs="?",
+        help="Path to XYZ file",
+    )
+    parser.add_argument(
+        "--save_path",
+        type=str,
+        nargs="?",
+        default="data.zarr",
+        help="File name",
+    )
+    parser.add_argument(
+        "--overwrite",
+        default=False,
+        action="store_true",
+        help="If file exists, overwrite all data",
+    )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        nargs="?",
+        default="info",
+        help="Desired logging level",
+    )
+    return parser.parse_args()
+
+
+def main(args):
+    log.info("Opening data file")
+    save_path = args.save_path
+    if os.path.exists(save_path):
+        if args.overwrite:
+            rfile = File(save_path, mode="w", allow_remove=True)
+        else:
+            log.error("%s exists and overwrite is False", save_path)
+            sys.exit(0)
+    else:
+        rfile = File(save_path, mode="w", allow_remove=True)
+
+    log.info("Parsing XYZ file")
+    Z, _, R = parse_xyz(os.path.abspath(args.xyz_path))
+    Z = atoms_by_number(Z[0])
+    Z = np.array(Z, dtype="uint8")
+    R = np.array(R, dtype="float64")
+
+    log.info("Storing coordinates")
+    rfile.put("atomic_numbers", Z)
+    rfile.put("geometry", R)
+
+
+if __name__ == "__main__":
+    parsed_args = parse_args()
+    set_log_level(parsed_args.log_level.upper())
+    main(parsed_args)

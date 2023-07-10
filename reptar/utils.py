@@ -674,12 +674,14 @@ def prep_group_opt(
     rfile.put(Z_opt_key, Z)
 
     R_opt_key = os.path.join(dest_key, R_opt_label)
-    R_opt = prep_array(rfile, R_opt_key, R.shape, "float64")
+    R_opt = prep_array(rfile, R_opt_key, R.shape, dtype="float64")
 
     conv_opt_key = os.path.join(dest_key, conv_opt_label)
-    conv_opt = prep_array(rfile, conv_opt_key, R.shape[0], "bool")
+    conv_opt = prep_array(
+        rfile, conv_opt_key, R.shape[0], dtype="bool", fill_with=False
+    )
 
     E_opt_key = os.path.join(dest_key, E_opt_label)
-    E_opt = prep_array(rfile, E_opt_key, R.shape[0], "float64")
+    E_opt = prep_array(rfile, E_opt_key, R.shape[0], dtype="float64")
 
     return (Z_opt_key, conv_opt_key, R_opt_key, E_opt_key), (Z, conv_opt, R_opt, E_opt)

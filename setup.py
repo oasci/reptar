@@ -35,5 +35,6 @@ setup(
     scripts=[
         "scripts/reptar-write-xyz",
         "scripts/reptar-xtb-opt",
+        "scripts/reptar-xyz-to-file",
     ],
 )
