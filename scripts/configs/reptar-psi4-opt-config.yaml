@@ -1,0 +1,61 @@
+
+overwrite: true
+
+# Information about system.
+system:
+
+  # Total charge.
+  charge: 0
+
+  # Multiplicity.
+  multiplicity: 1
+
+rfile:
+
+  path: data.zarr
+
+  source_key: ./
+
+  dest_key: opt_bp86
+
+  Z_label: atomic_numbers
+
+  R_label: geometry
+
+  R_opt_label: geometry
+
+  E_opt_label: energy_ele_bp86.def2svp
+
+  conv_opt_label: conv_opt
+
+psi4:
+
+  method: bp86
+
+  options:
+
+    basis: def2-svp
+
+    e_convergence: 6
+
+    d_convergence: 6
+
+    geom_maxiter: 200
+
+    g_convergence: gau
+
+job:
+
+  use_ray: true
+
+  ray_address: auto
+
+  n_workers: 2
+
+  n_cpus_per_worker: 4
+
+  chunk_size: 2
+
+  start_slice: null
+
+  end_slice: null
