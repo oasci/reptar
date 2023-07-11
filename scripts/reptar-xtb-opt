@@ -28,6 +28,13 @@ def parse_args():
         help="Path to YAML configuration file",
     )
     parser.add_argument(
+        "--ray_address",
+        type=str,
+        nargs="?",
+        default="",
+        help="Desired ray address (will override config file)",
+    )
+    parser.add_argument(
         "--log_level",
         type=str,
         nargs="?",
@@ -35,22 +42,6 @@ def parse_args():
         help="Desired logging level",
     )
     return parser.parse_args()
-
-
-def _psi4_dihedral_atoms_string(dihedral_atoms):
-    return " ".join([str(i + 1) for i in dihedral_atoms])
-
-
-def prep_frozen_dihedral(config):
-    phi_atoms_string = _psi4_dihedral_atoms_string(
-        config["residue"]["phi_dihedral_atoms"]
-    )
-    psi_atoms_string = _psi4_dihedral_atoms_string(
-        config["residue"]["phi_dihedral_atoms"]
-    )
-
-    freeze_option = f"{phi_atoms_string} {psi_atoms_string}"
-    return freeze_option
 
 
 def main(args):
@@ -111,6 +102,9 @@ def main(args):
     log.info("Preparing optimization driver")
     start_slice = config["job"]["start_slice"]
     end_slice = config["job"]["end_slice"]
+    ray_address = config["job"]["ray_address"]
+    if args.ray_address != "":
+        ray_address = args.ray_address
     driver = DriverOpt(
         xtb_opt,
         worker_kwargs,
@@ -120,7 +114,7 @@ def main(args):
         chunk_size=config["job"]["chunk_size"],
         start_slice=start_slice,
         end_slice=end_slice,
-        ray_address=config["job"]["ray_address"],
+        ray_address=ray_address,
     )
     log.info("Running optimizations")
     n_todo = int(np.count_nonzero(~conv_opt[start_slice:end_slice]))

@@ -27,6 +27,13 @@ def parse_args():
         help="Path to YAML configuration file",
     )
     parser.add_argument(
+        "--ray_address",
+        type=str,
+        nargs="?",
+        default="",
+        help="Desired ray address (will override config file)",
+    )
+    parser.add_argument(
         "--log_level",
         type=str,
         nargs="?",
@@ -89,6 +96,9 @@ def main(args):
 
     start_slice = config["job"]["start_slice"]
     end_slice = config["job"]["end_slice"]
+    ray_address = config["job"]["ray_address"]
+    if args.ray_address != "":
+        ray_address = args.ray_address
     driver = DriverOpt(
         psi4_opt,
         worker_kwargs,
@@ -98,7 +108,7 @@ def main(args):
         chunk_size=config["job"]["chunk_size"],
         start_slice=start_slice,
         end_slice=end_slice,
-        ray_address=config["job"]["ray_address"],
+        ray_address=ray_address,
     )
     log.info("Running optimizations")
     n_todo = int(np.count_nonzero(~conv_opt[start_slice:end_slice]))
