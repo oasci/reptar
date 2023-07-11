@@ -86,8 +86,8 @@ def main(args):
 
     log.info("Preparing worker options")
     worker_kwargs = {
-        "charge": config["residue"]["charge"],
-        "mult": config["residue"]["multiplicity"],
+        "charge": config["system"]["charge"],
+        "mult": config["system"]["multiplicity"],
         "method": config["psi4"]["method"],
         "threads": config["job"]["n_cpus_per_worker"],
         "options": config["psi4"]["options"],
