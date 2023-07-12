@@ -27,6 +27,7 @@ log = ReptarLogger(__name__)
 
 try:
     import psi4
+    from optking.exceptions import AlgError
 except ImportError:
     pass
 
@@ -270,7 +271,7 @@ def psi4_opt(
             e, wfn = psi4.opt(method, molecule=mol, return_wfn=True)
             r_opt = np.asarray(wfn.molecule().geometry())
             r_opt_conv = True
-        except psi4.OptimizationConvergenceError as ex:
+        except (psi4.OptimizationConvergenceError, AlgError) as ex:
             r_opt_conv = False
             r_opt = np.asarray(ex.wfn.molecule().geometry())
             e = ex.wfn.energy()
