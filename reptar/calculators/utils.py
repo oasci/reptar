@@ -20,8 +20,33 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from .drivers import DriverOpt
+from ..utils import prep_group_opt
+from ..save import Saver
 
-def prep_xtb_constrain_block(constraints):
+
+def _prep_xtb_opt_block(block):
+    """Prepare xTB constrain block lines for input file.
+
+    Parameters
+    ----------
+    block : :obj:`dict`
+        Keywords for the optimization block in xTB.
+
+    Returns
+    -------
+    :obj:`list`
+        Lines for the input file. Does not contain newline characters.
+    """
+    lines = []
+    lines.append("$opt")
+    for key, value in block.items():
+        lines.append(f"    {key}: {value}")
+    lines.append("$end")
+    return lines
+
+
+def _prep_xtb_constrain_block(constraints):
     """Prepare xTB constrain block lines for input file.
 
     Parameters
@@ -54,7 +79,9 @@ def prep_xtb_constrain_block(constraints):
     return lines
 
 
-def prep_xtb_input_lines(charge, multiplicity, constraints=None, save_traj=False):
+def prep_xtb_input_lines(
+    charge, multiplicity, opt_block=None, constraints=None, save_traj=False
+):
     """Prepare lines for xtb input file.
 
     Parameters
@@ -63,6 +90,8 @@ def prep_xtb_input_lines(charge, multiplicity, constraints=None, save_traj=False
         Total charge of the system.
     multiplicity : :obj:`int`
         Spin state multiplicity of the system.
+    opt_block : :obj:`dict`
+        Optimization block keywords and values.
     constraints : :obj:`tuple`
         Internal constraints in a nested tuple to add to the xtb input file. The first
         element is the label (e.g., ``"distance"`` or ``"dihedral"``) and the second
@@ -77,10 +106,44 @@ def prep_xtb_input_lines(charge, multiplicity, constraints=None, save_traj=False
     """
     spin = int(multiplicity - 1)
     xtb_input_lines = [f"$chrg {charge} $end", f"$spin {spin} $end"]
+    if opt_block is not None:
+        opt_lines = _prep_xtb_opt_block(opt_block)
+        xtb_input_lines.extend(opt_lines)
     if constraints is not None:
-        constraint_lines = prep_xtb_constrain_block(constraints)
+        constraint_lines = _prep_xtb_constrain_block(constraints)
         xtb_input_lines.extend(constraint_lines)
     if save_traj:
         xtb_input_lines.extend(["$opt", "    logfile=xtbopt.trj", "$end"])
     xtb_input_lines = [i + "\n" for i in xtb_input_lines]
     return xtb_input_lines
+
+
+# pylint: disable=invalid-name
+def prep_opt_job(
+    rfile,
+    Z_key,
+    R_key,
+    dest_key,
+    worker,
+    worker_kwargs,
+    driver_kwargs,
+    Z_opt_label="atomic_numbers",
+    conv_opt_label="conv_opt",
+    R_opt_label="geometry",
+    E_opt_label="energy_ele",
+):
+    driver = DriverOpt(worker, worker_kwargs, **driver_kwargs)
+
+    keys, data = prep_group_opt(
+        rfile,
+        Z_key,
+        R_key,
+        dest_key,
+        Z_opt_label=Z_opt_label,
+        conv_opt_label=conv_opt_label,
+        R_opt_label=R_opt_label,
+        E_opt_label=E_opt_label,
+    )
+    saver = Saver(rfile.fpath, keys[1:])
+
+    return driver, saver, data

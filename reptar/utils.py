@@ -23,6 +23,7 @@
 import collections
 from functools import reduce
 import operator
+import importlib
 import itertools
 import hashlib
 import os
@@ -685,3 +686,22 @@ def prep_group_opt(
     E_opt = prep_array(rfile, E_opt_key, R.shape[0], dtype="float64")
 
     return (Z_opt_key, conv_opt_key, R_opt_key, E_opt_key), (Z, conv_opt, R_opt, E_opt)
+
+
+def get_obj_from_string(import_string):
+    """Retrieves a function object based on an import string and object name.
+
+    Parameters
+    ----------
+    import_string : :obj:`str`
+        The import string representing the module containing the desired object.
+
+    Returns
+    -------
+    ``object``
+        The object identified by the import string.
+    """
+    module_name, obj_name = import_string.rsplit(".", 1)
+    module = importlib.import_module(module_name)
+    obj = getattr(module, obj_name)
+    return obj

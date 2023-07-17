@@ -1,7 +1,4 @@
-
-overwrite: true
-
-# Information about system.
+# Information about the physical system.
 system:
 
   # Total charge.
@@ -10,39 +7,83 @@ system:
   # Multiplicity.
   multiplicity: 1
 
+# Information about the reptar file containing structures to optimize and where
+# to store the results.
 rfile:
 
+  # File path to reptar file.
   path: data.zarr
 
+  # Key to the source of structures to optimize.
   source_key: ./
 
-  dest_key: opt_gfn2
-
+  # Label for the atomic numbers data in ``source``.
   Z_label: atomic_numbers
 
+  # Label for the Cartesian coordinate data in ``source``.
   R_label: geometry
 
-  R_opt_label: geometry
+  # Key to store the optimization results. We recommend this be different than
+  # ``source_key``.
+  dest_key: opt_gfn2
 
-  E_opt_label: energy_ele_gfn2
-
+  # Label to store if an optimization converged in ``destination``.
   conv_opt_label: conv_opt
 
-xtb:
+  # Label to store the Cartesian coordinates of the last optimization step in
+  # ``destination``.
+  R_opt_label: geometry
 
-  path: xtb
+  # Label to store the electronic energy of the last optimization step in
+  # ``destination``.
+  E_opt_label: energy_ele_gfn2
 
-  # https://xtb-docs.readthedocs.io/en/latest/sp.html#accuracy
-  acc: 0.01
+# Driver for the desired calculation.
+driver:
 
-  # https://xtb-docs.readthedocs.io/en/latest/optimization.html#optimization-levels
-  opt_level: vtight
+  # Import string for the desired calculation driver.
+  class: reptar.calculators.drivers.DriverOpt
 
+  # Keyword arguments for the specified driver in ``class``.
+  # Please refer to the specific driver's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
+
+    use_ray: true
+
+    ray_address: auto
+
+    n_workers: 2
+
+    n_cpus_per_worker: 3
+
+    chunk_size: 5
+
+    start_slice: null
+
+    end_slice: null
+
+# Worker to be used with the driver.
+worker:
+
+  # Import string for the desired worker.
+  function: reptar.calculators.xtb_workers.xtb_opt
+
+  # Blocks specified in xcontrol that will be used to generate ``input_lines``.
+  # Each key and value should be specified in the same format as xTB desires.
+  # https://github.com/grimme-lab/xtb/blob/main/man/xcontrol.7.adoc
+  blocks:
+
+    opt:
+      
+      optlevel: verytight
+
+  # Special handling of geometry constraints.
   # https://xtb-docs.readthedocs.io/en/latest/xcontrol.html#constraining-potentials
-  constraints: null
+  constrain: null
   # Alternatively, below is an example where we add a constraint to xTB. These formats
   # create the nested lists format.
-  # constraints:
+  # constrain:
   #   - 
   #     - distance
   #     - 
@@ -57,18 +98,16 @@ xtb:
   #       - 6
   #       - auto
 
-job:
+  # Keyword arguments for the ``xtb_opt`` worker. ``input_lines`` is handled separately.
+  # These are kept separate as they must be specified as a command line argument.
+  # Please refer to the specific workers's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
 
-  use_ray: true
+    acc: 0.01
+    
+    n_cores: 3
 
-  ray_address: auto
+    xtb_path: xtb
 
-  n_workers: 2
-
-  n_cpus_per_worker: 2
-
-  chunk_size: 2
-
-  start_slice: null
-
-  end_slice: null
+    work_dir: ~/repos/resiparm-examples/gfp-cro/5-reptar-xtb-opt/logs

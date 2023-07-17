@@ -1,6 +1,3 @@
-
-overwrite: true
-
 # Information about system.
 system:
 
@@ -10,52 +7,88 @@ system:
   # Multiplicity.
   multiplicity: 1
 
+# Information about the reptar file containing structures to optimize and where
+# to store the results.
 rfile:
 
+  # File path to reptar file.
   path: data.zarr
 
+  # Key to the source of structures to optimize.
   source_key: ./
 
-  dest_key: opt_bp86
-
+  # Label for the atomic numbers data in ``source``.
   Z_label: atomic_numbers
 
+  # Label for the Cartesian coordinate data in ``source``.
   R_label: geometry
 
-  R_opt_label: geometry
+  # Key to store the optimization results. We recommend this be different than
+  # ``source_key``.
+  dest_key: opt_bp86
 
-  E_opt_label: energy_ele_bp86.def2svp
-
+  # Label to store if an optimization converged in ``destination``.
   conv_opt_label: conv_opt
 
-psi4:
+  # Label to store the Cartesian coordinates of the last optimization step in
+  # ``destination``.
+  R_opt_label: geometry
 
-  method: bp86
+  # Label to store the electronic energy of the last optimization step in
+  # ``destination``.
+  E_opt_label: energy_ele_bp86.def2svp
 
-  options:
+# Driver for the desired calculation.
+driver:
 
-    basis: def2-svp
+  # Import string for the desired calculation driver.
+  class: reptar.calculators.drivers.DriverOpt
 
-    e_convergence: 6
+  # Keyword arguments for the specified driver in ``class``.
+  # Please refer to the specific driver's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
 
-    d_convergence: 6
+    use_ray: true
 
-    geom_maxiter: 200
+    ray_address: auto
 
-    g_convergence: gau
+    n_workers: 2
 
-job:
+    n_cpus_per_worker: 3
 
-  use_ray: true
+    chunk_size: 5
 
-  ray_address: auto
+    start_slice: null
 
-  n_workers: 2
+    end_slice: null
 
-  n_cpus_per_worker: 4
+# Worker to be used with the driver.
+worker:
 
-  chunk_size: 2
+  # Import string for the desired worker.
+  function: reptar.calculators.psi4_workers.psi4_opt
 
-  start_slice: null
+  # Keyword arguments for the ``psi4_opt`` worker. ``input_lines`` is handled separately.
+  # These are kept separate as they must be specified as a command line argument.
+  # Please refer to the specific workers's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
 
-  end_slice: null
+    charge: 0
+
+    mult: 1
+
+    method: bp86
+
+    options:
+
+      basis: def2-svp
+
+      e_convergence: 6
+
+      d_convergence: 6
+
+      geom_maxiter: 200
+
+      g_convergence: gau

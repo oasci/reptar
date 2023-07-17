@@ -1,0 +1,129 @@
+#!/usr/bin/env python3
+
+"""Run reptar calculations"""
+
+import argparse
+import os
+import yaml
+import numpy as np
+from reptar import File
+from reptar.calculators.utils import prep_opt_job, prep_xtb_input_lines
+from reptar.utils import get_obj_from_string
+from reptar.logger import ReptarLogger, set_log_level
+
+log = ReptarLogger(__name__)
+
+
+def parse_args():
+    parser = argparse.ArgumentParser(description="Run calculations using reptar")
+    parser.add_argument(
+        "config_path",
+        type=str,
+        nargs="?",
+        help="Path to YAML configuration file",
+    )
+    parser.add_argument(
+        "--ray_address",
+        type=str,
+        nargs="?",
+        default="",
+        help="Desired ray address (will override config file)",
+    )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        nargs="?",
+        default="info",
+        help="Desired logging level",
+    )
+    return parser.parse_args()
+
+
+def _load_config(config_path):
+    log.info("Loading config.yaml")
+    with open(config_path, "r", encoding="utf-8") as stream:
+        config = yaml.safe_load(stream)
+    return config
+
+
+def main(args):
+    config = _load_config(args.config_path)
+
+    log.info("Opening data file")
+    rfile_path = os.path.abspath(config["rfile"]["path"])
+    rfile = File(rfile_path, mode="a", allow_remove=True)
+
+    source_key = config["rfile"]["source_key"]
+    dest_key = config["rfile"]["dest_key"]
+
+    log.info("Preparing worker and driver")
+    driver_obj = get_obj_from_string(config["driver"]["class"])
+    driver_kwargs = config["driver"]["kwargs"]
+    worker_obj = get_obj_from_string(config["worker"]["function"])
+
+    if args.ray_address != "":
+        driver_kwargs["ray_address"] = args.ray_address
+    start_slice = driver_kwargs["start_slice"]
+    end_slice = driver_kwargs["end_slice"]
+
+    if driver_obj.__name__ == "DriverOpt":
+        worker_name = worker_obj.__name__
+        assert worker_name in ("xtb_opt", "psi4_opt")
+        calc_label = "optimization"
+
+        # pylint: disable-next=invalid-name
+        Z_key = os.path.join(source_key, config["rfile"]["Z_label"])
+        # pylint: disable-next=invalid-name
+        R_key = os.path.join(source_key, config["rfile"]["R_label"])
+        Z = rfile.get(Z_key)
+        R = rfile.get(R_key)
+
+        # Handling worker arguments
+        if worker_name == "xtb_opt":
+            opt_block = config["worker"]["blocks"].get("opt", None)
+            constraints = config["worker"].get("constrain", None)
+            input_lines = prep_xtb_input_lines(
+                charge=config["system"]["charge"],
+                multiplicity=config["system"]["multiplicity"],
+                opt_block=opt_block,
+                constraints=constraints,
+                save_traj=False,
+            )
+            worker_kwargs = {
+                "input_lines": input_lines,
+                **config["worker"]["kwargs"],
+            }
+        elif worker_name == "psi4_opt":
+            worker_kwargs = config["worker"]["kwargs"]
+
+        driver, saver, data = prep_opt_job(
+            rfile,
+            Z_key,
+            R_key,
+            dest_key,
+            worker_obj,
+            worker_kwargs,
+            driver_kwargs,
+            Z_opt_label=config["rfile"]["Z_label"],
+            conv_opt_label=config["rfile"]["conv_opt_label"],
+            R_opt_label=config["rfile"]["R_opt_label"],
+            E_opt_label=config["rfile"]["E_opt_label"],
+        )
+        _, conv_opt, R_opt, E_opt = data  # pylint: disable=invalid-name
+        n_todo = int(np.count_nonzero(~conv_opt[start_slice:end_slice]))
+        run_args = (Z, R, conv_opt, R_opt, E_opt, saver)
+
+    log.info("There are %r %s to run", n_todo, calc_label)
+
+    if n_todo > 0:
+        log.info("Running %s", calc_label)
+        driver.run(*run_args)
+        log.info("%s done", calc_label)
+    else:
+        log.warning("Check your bounds if you are selecting a subset of structures")
+
+
+if __name__ == "__main__":
+    parsed_args = parse_args()
+    set_log_level(parsed_args.log_level.upper())
+    main(parsed_args)

@@ -161,6 +161,7 @@ def xtb_opt(
         temp_dir = TemporaryDirectory()
         work_dir = temp_dir.name
     cwd_path = os.getcwd()
+    os.makedirs(work_dir, exist_ok=True)
     os.chdir(work_dir)
 
     xtb_input = NamedTemporaryFile(suffix=".in")
@@ -173,8 +174,7 @@ def xtb_opt(
         xyz_input = NamedTemporaryFile(suffix=".xyz")
         write_xyz(xyz_input.name, Z, r)
 
-        output_file = NamedTemporaryFile(suffix=".out")
-        output_path = output_file.name
+        output_path = f"{idxs[i]}.out"
 
         xtb_command = [
             xtb_path,
@@ -205,5 +205,15 @@ def xtb_opt(
         opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
         R_opt[i] = r_opt
         E_opt[i] = e  # pylint: disable=used-before-assignment
+    for tmp_file in [
+        "charges",
+        "wbo",
+        "xtbopt.log",
+        "xtbopt.xyz",
+        "xtbrestart",
+        "xtbtopo.mol",
+        ".xtboptok",
+    ]:
+        os.remove(tmp_file)
     os.chdir(cwd_path)
     return idxs, opt_conv, R_opt, E_opt

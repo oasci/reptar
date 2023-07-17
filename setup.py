@@ -34,8 +34,7 @@ setup(
     cmdclass=versioneer.get_cmdclass(),
     scripts=[
         "scripts/reptar-write-xyz",
-        "scripts/reptar-xtb-opt",
         "scripts/reptar-xyz-to-file",
-        "scripts/reptar-psi4-opt",
+        "scripts/reptar-calc",
     ],
 )

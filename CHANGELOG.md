@@ -6,9 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- `reptar-psi4-opt` script with example YAML configuration file.
+- `reptar-calc` script to handle all calculations with example YAML configuration files.
 - `reptar-xyz-to-file` script to convert XYZ coordinates to a reptar-supported file.
-- `reptar-xtb-opt` script with example YAML configuration file.
 - `xtb` optimization worker that can be used with ray.
 
 ### Changed
