@@ -212,6 +212,6 @@ def xtb_opt(
         opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
         R_opt[i] = r_opt
         E_opt[i] = e  # pylint: disable=used-before-assignment
-    cleanup_xtb_calc(workdir="./")
+    # TODO: figure out multiple workers using same dir
     os.chdir(cwd_path)
     return idxs, opt_conv, R_opt, E_opt
