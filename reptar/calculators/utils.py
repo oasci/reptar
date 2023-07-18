@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import os
 from .drivers import DriverOpt
 from ..utils import prep_group_opt
 from ..save import Saver
@@ -147,3 +148,26 @@ def prep_opt_job(
     saver = Saver(rfile.fpath, keys[1:])
 
     return driver, saver, data
+
+
+def cleanup_xtb_calc(work_dir="./"):
+    """Remove xTB files that are not commonly needed.
+
+    Parameters
+    ----------
+    work_dir : :obj:`str`, default: ``./``
+        Work directory to look for files to remove.
+    """
+    for tmp_file in [
+        "charges",
+        "wbo",
+        "xtbopt.log",
+        "xtbopt.xyz",
+        "xtbrestart",
+        "xtbtopo.mol",
+        ".xtboptok",
+    ]:
+        try:
+            os.remove(os.path.join(work_dir, tmp_file))
+        except FileNotFoundError:
+            pass

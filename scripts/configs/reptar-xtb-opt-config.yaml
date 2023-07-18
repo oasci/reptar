@@ -111,3 +111,5 @@ worker:
     xtb_path: xtb
 
     work_dir: ~/repos/resiparm-examples/gfp-cro/5-reptar-xtb-opt/logs
+
+    keep_logs: false

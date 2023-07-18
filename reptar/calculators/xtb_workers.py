@@ -25,6 +25,7 @@ import subprocess
 from tempfile import NamedTemporaryFile, TemporaryDirectory
 import numpy as np
 from ..writers.xyz import write_xyz
+from .utils import cleanup_xtb_calc
 from ..utils import parse_xyz
 from ..logger import ReptarLogger
 
@@ -109,6 +110,7 @@ def xtb_opt(
     n_cores=1,
     xtb_path="xtb",
     work_dir=None,
+    keep_logs=False,
 ):
     r"""Ray remote function for computing total electronic energy and atomic
     gradients using xtb.
@@ -133,8 +135,10 @@ def xtb_opt(
     xtb_path : :obj:`str`, default: ``"xtb"``
         Path to xtb executable to use. Defaults to assuming ``xtb`` is in your path.
     work_dir : :obj:`str`, default: ``None``
-        Work directory for the xtb calculations. If nothing is specified, the
+        Work directory for the xtb calculations. If nothing is specified, a
         temporary directory is used.
+    keep_logs : :obj:`bool`, default: ``False``
+        Keep output files in ``work_dir``.
 
     Returns
     -------
@@ -191,6 +195,9 @@ def xtb_opt(
         with open(output_path, "w", encoding="utf-8") as f_out:
             subprocess.run(xtb_command, check=False, shell=False, stdout=f_out)
 
+        if not keep_logs:
+            os.remove(output_path)
+
         _, comments, r_opt = parse_xyz("xtbopt.xyz")
         e = float(comments[0].split()[1])
 
@@ -205,15 +212,6 @@ def xtb_opt(
         opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
         R_opt[i] = r_opt
         E_opt[i] = e  # pylint: disable=used-before-assignment
-    for tmp_file in [
-        "charges",
-        "wbo",
-        "xtbopt.log",
-        "xtbopt.xyz",
-        "xtbrestart",
-        "xtbtopo.mol",
-        ".xtboptok",
-    ]:
-        os.remove(tmp_file)
+    cleanup_xtb_calc(workdir="./")
     os.chdir(cwd_path)
     return idxs, opt_conv, R_opt, E_opt
