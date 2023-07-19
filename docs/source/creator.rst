@@ -7,7 +7,7 @@ Open data is a crucial for making this happen, but established solutions often c
 In order to make this as easy as possible, reptar provides a :class:`~reptar.Creator` class that handles turning calculations into reproducible data.
 By providing a customizable parser framework, reptar will automatically take care of storing the essential information while leaving the option for the user to easily parse their own data.
 
-Reptar supports the following packages and jobs with their respective tests.
+Reptar supports parsing data the following packages and jobs with their respective tests.
 
 .. table::
     :align: center
@@ -29,6 +29,10 @@ Other calculation types and packages other than the ones above are supported as 
 .. _ORCA: https://sites.google.com/site/orcainputlibrary/home
 .. _xTB: https://xtb-docs.readthedocs.io/en/latest/contents.html
 .. _CREST: https://crest-lab.github.io/crest-docs/
+
+.. note::
+
+    Other data can be obtained through :ref:`calculators<calculators>` where data is directly calculated instead of parsed.
 
 Group creation
 ==============

@@ -29,6 +29,31 @@ You can use :func:`~reptar.writers.write_ase_db` to write these databases as sho
 
     db = write_ase_db(db_path, Z, R, energy=E)
 
+ForceBalance
+============
+
+Reptar can write ``qdata.txt`` files used with `ForceBalance <https://github.com/leeping/forcebalance>`__ package with :func:`~reptar.writers.write_qdata`.
+
+.. code-block:: python
+
+    from reptar import File
+    from reptar.writers import write_qdata
+
+    rfile_path = "h2o-temelso.etal.exdir"
+    write_path = "qdata.txt"
+
+    rfile = File(rfile_path, mode="r")
+
+    source_key = "6h2o/samples_1h2o/"
+
+    Z = rfile.get(os.path.join(source_key, "atomic_numbers"))
+    R = rfile.get(os.path.join(source_key, "geometry"))
+    E = rfile.get(os.path.join(source_key, "energy_ele_mp2.def2tzvp_orca"))  # Eh
+    G = rfile.get(os.path.join(source_key, "grads_mp2.def2tzvp_orca"))  # Eh/A
+    F = np.negative(G[:])
+
+    write_qdata(write_path, R, energy=E, forces=F)
+
 GAP
 ===
 
