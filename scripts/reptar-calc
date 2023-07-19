@@ -128,7 +128,7 @@ def main(args):
     if n_todo > 0:
         t_start = time.perf_counter()
         driver.run(*run_args)
-        log.info("%s done", calc_label)
+        log.info("Calculations are done")
         t_end = time.perf_counter()
         duration = str(datetime.timedelta(seconds=t_end - t_start))
         log.info("Finished in %s", duration)
