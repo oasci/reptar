@@ -42,7 +42,7 @@ def _prep_xtb_opt_block(block):
     lines = []
     lines.append("$opt")
     for key, value in block.items():
-        lines.append(f"    {key}: {value}")
+        lines.append(f"    {key}={value}")
     lines.append("$end")
     return lines
 
@@ -106,7 +106,7 @@ def prep_xtb_input_lines(
         Lines of xtb input file.
     """
     spin = int(multiplicity - 1)
-    xtb_input_lines = [f"$chrg {charge} $end", f"$spin {spin} $end"]
+    xtb_input_lines = [f"$chrg {charge}", f"$spin {spin}"]
     if opt_block is not None:
         opt_lines = _prep_xtb_opt_block(opt_block)
         xtb_input_lines.extend(opt_lines)

@@ -3,6 +3,8 @@
 """Run reptar calculations"""
 
 import argparse
+import time
+import datetime
 import os
 import yaml
 import numpy as np
@@ -46,6 +48,10 @@ def _load_config(config_path):
     return config
 
 
+def _n_incomplete_calcs_opt(conv_opt, start_slice=None, end_slice=None):
+    return int(np.count_nonzero(~conv_opt[start_slice:end_slice]))
+
+
 def main(args):
     config = _load_config(args.config_path)
 
@@ -66,8 +72,11 @@ def main(args):
     start_slice = driver_kwargs["start_slice"]
     end_slice = driver_kwargs["end_slice"]
 
-    if driver_obj.__name__ == "DriverOpt":
-        worker_name = worker_obj.__name__
+    driver_name = driver_obj.__name__
+    worker_name = worker_obj.__name__
+    log.info("Selected driver: %s", driver_name)
+    log.info("Selected worker: %s", worker_name)
+    if driver_name == "DriverOpt":
         assert worker_name in ("xtb_opt", "psi4_opt")
         calc_label = "optimization"
 
@@ -110,17 +119,27 @@ def main(args):
             E_opt_label=config["rfile"]["E_opt_label"],
         )
         _, conv_opt, R_opt, E_opt = data  # pylint: disable=invalid-name
-        n_todo = int(np.count_nonzero(~conv_opt[start_slice:end_slice]))
+        incomplete_bool_key = saver.data_keys[0]
+        n_todo = _n_incomplete_calcs_opt(conv_opt, start_slice, end_slice)
         run_args = (Z, R, conv_opt, R_opt, E_opt, saver)
 
-    log.info("There are %r %s to run", n_todo, calc_label)
+    log.info("Running %r %s calculations", n_todo, calc_label)
 
     if n_todo > 0:
-        log.info("Running %s", calc_label)
+        t_start = time.perf_counter()
         driver.run(*run_args)
         log.info("%s done", calc_label)
+        t_end = time.perf_counter()
+        duration = str(datetime.timedelta(seconds=t_end - t_start))
+        log.info("Finished in %s", duration)
     else:
         log.warning("Check your bounds if you are selecting a subset of structures")
+
+    if calc_label == "optimization":
+        n_remaining = _n_incomplete_calcs_opt(
+            rfile.get(incomplete_bool_key), None, None
+        )
+    log.info("There are %r incomplete calculations remaining", n_remaining)
 
 
 if __name__ == "__main__":

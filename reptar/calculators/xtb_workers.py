@@ -101,17 +101,7 @@ def xtb_python_engrad(
     return idxs, E, G
 
 
-def xtb_opt(
-    idxs,
-    Z,
-    R,
-    input_lines,
-    acc=0.1,
-    n_cores=1,
-    xtb_path="xtb",
-    work_dir=None,
-    keep_logs=False,
-):
+def xtb_opt(idxs, Z, R, input_lines, acc=0.1, n_cores=1, xtb_path="xtb", log_dir=None):
     r"""Ray remote function for computing total electronic energy and atomic
     gradients using xtb.
 
@@ -134,11 +124,9 @@ def xtb_opt(
         Number of cores to use for xTB calculation.
     xtb_path : :obj:`str`, default: ``"xtb"``
         Path to xtb executable to use. Defaults to assuming ``xtb`` is in your path.
-    work_dir : :obj:`str`, default: ``None``
-        Work directory for the xtb calculations. If nothing is specified, a
-        temporary directory is used.
-    keep_logs : :obj:`bool`, default: ``False``
-        Keep output files in ``work_dir``.
+    log_dir : :obj:`str`, default: ``None``
+        Work directory for the xtb calculations. If nothing is specified, no logs are
+        stored.
 
     Returns
     -------
@@ -160,43 +148,43 @@ def xtb_opt(
     R_opt = np.empty(R.shape, dtype=np.float64)  # pylint: disable=invalid-name
     E_opt = np.zeros(R.shape[0])  # pylint: disable=invalid-name
 
-    log.debug("Setting up work directory and input files")
-    if work_dir is None:
-        temp_dir = TemporaryDirectory()
-        work_dir = temp_dir.name
+    log.debug("Setting up work and log directories")
+    work_dir = TemporaryDirectory()
+    if log_dir is not None:
+        log_dir = os.path.abspath(log_dir)
+        os.makedirs(log_dir, exist_ok=True)
+    else:
+        log_dir = work_dir.name
     cwd_path = os.getcwd()
-    os.makedirs(work_dir, exist_ok=True)
-    os.chdir(work_dir)
+    os.chdir(work_dir.name)
 
-    xtb_input = NamedTemporaryFile(suffix=".in")
-    with open(xtb_input.name, "w", encoding="utf-8") as f:
+    xtb_input_path = "xtb-opt.in"
+    with open(xtb_input_path, "w", encoding="utf-8") as f:
         f.writelines(input_lines)
+
+    xyz_initial_path = "initial.xyz"
+
+    xtb_command = [
+        xtb_path,
+        "--input",
+        xtb_input_path,
+        xyz_initial_path,
+        "--acc",
+        str(acc),
+        "--opt",
+        "--parallel",
+        str(n_cores),
+    ]
 
     log.debug("Starting xTB computations")
     for i, r in enumerate(R):
         # Write temporary input file for coordinates
-        xyz_input = NamedTemporaryFile(suffix=".xyz")
-        write_xyz(xyz_input.name, Z, r)
+        write_xyz(xyz_initial_path, Z, r)
 
-        output_path = f"{idxs[i]}.out"
-
-        xtb_command = [
-            xtb_path,
-            xyz_input.name,
-            "--acc",
-            str(acc),
-            "--input",
-            xtb_input.name,
-            "--opt",
-            "--parallel",
-            str(n_cores),
-        ]
+        output_path = os.path.join(log_dir, f"{idxs[i]}.out")
 
         with open(output_path, "w", encoding="utf-8") as f_out:
             subprocess.run(xtb_command, check=False, shell=False, stdout=f_out)
-
-        if not keep_logs:
-            os.remove(output_path)
 
         _, comments, r_opt = parse_xyz("xtbopt.xyz")
         e = float(comments[0].split()[1])
@@ -212,6 +200,5 @@ def xtb_opt(
         opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
         R_opt[i] = r_opt
         E_opt[i] = e  # pylint: disable=used-before-assignment
-    # TODO: figure out multiple workers using same dir
     os.chdir(cwd_path)
     return idxs, opt_conv, R_opt, E_opt
