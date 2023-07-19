@@ -22,10 +22,9 @@
 
 import os
 import subprocess
-from tempfile import NamedTemporaryFile, TemporaryDirectory
+from tempfile import TemporaryDirectory
 import numpy as np
 from ..writers.xyz import write_xyz
-from .utils import cleanup_xtb_calc
 from ..utils import parse_xyz
 from ..logger import ReptarLogger
 

@@ -29,7 +29,7 @@ def _write_array(f, label, array, fmt):
     f.write("\n")
 
 
-def write_qdata(file_path, R, energy=None, forces=None):
+def write_qdata(file_path, R, energy=None, forces=None, espxyz=None, espval=None):
     """Write a ``qdata.txt`` file in the `ForceBalance format
     <http://leeping.github.io/forcebalance/doc/html/usage.html>`__.
 
@@ -43,8 +43,15 @@ def write_qdata(file_path, R, energy=None, forces=None):
         Energies used for force field fitting.
     forces : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
         Forces used for force field fitting.
+    espxyz : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
+        Cartesian coordinates of points where the electrostatic potential is probed.
+        This must be provided with ``espval``.
+    espval : :obj:`numpy.ndarray`, ndim: ``3``, default: ``None``
+        Electrostatic potential values at the same Cartesian coordinates as specified
+        by ``espxyz``.
     """
     assert R.ndim == 3
+    include_esp = not bool(espxyz is None or espval is None)
     with open(file_path, "w", encoding="utf-8") as f:
         for i in range(R.shape[0]):
             f.write(f"JOB {i}\n")
@@ -53,4 +60,7 @@ def write_qdata(file_path, R, energy=None, forces=None):
                 f.write(f"ENERGY {energy[i]:.12e}\n")
             if forces is not None:
                 _write_array(f, "FORCES", forces[i], "%.12e")
+            if include_esp:
+                _write_array(f, "ESPXYZ", espxyz[i], "%.12e")
+                _write_array(f, "ESPVAL", espval[i], "%.12e")
             f.write("\n")

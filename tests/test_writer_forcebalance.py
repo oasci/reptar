@@ -64,4 +64,3 @@ def test_qdata_writer_1h2o():
     F = np.negative(G[:])
 
     write_qdata(write_path, R, energy=E, forces=F)
-    sys.exit(0)
