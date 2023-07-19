@@ -20,9 +20,17 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+import numpy as np
+
+
+def _write_array(f, label, array, fmt):
+    f.write(f"{label} ")
+    np.savetxt(f, array.flatten(), fmt=fmt, delimiter=" ", newline=" ")
+    f.write("\n")
+
 
 def write_qdata(file_path, R, energy=None, forces=None):
-    """Write a ``qdata.txt`` file in the `ForceBalance format 
+    """Write a ``qdata.txt`` file in the `ForceBalance format
     <http://leeping.github.io/forcebalance/doc/html/usage.html>`__.
 
     Parameters
@@ -40,3 +48,9 @@ def write_qdata(file_path, R, energy=None, forces=None):
     with open(file_path, "w", encoding="utf-8") as f:
         for i in range(R.shape[0]):
             f.write(f"JOB {i}\n")
+            _write_array(f, "COORDS", R[i], "%.12e")
+            if energy is not None:
+                f.write(f"ENERGY {energy[i]:.12e}\n")
+            if forces is not None:
+                _write_array(f, "FORCES", forces[i], "%.12e")
+            f.write("\n")

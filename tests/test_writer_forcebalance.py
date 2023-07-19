@@ -44,7 +44,7 @@ WRITING_DIR = "./tmp/writing/"
 os.makedirs(WRITING_DIR, exist_ok=True)
 
 
-def test_qcdata_writer_1h2o():
+def test_qdata_writer_1h2o():
     r"""Writing small schnetpack database"""
 
     exdir_path = os.path.join(DATA_DIR, "h2o-temelso.etal.exdir")
@@ -60,6 +60,8 @@ def test_qcdata_writer_1h2o():
     Z = rfile.get(os.path.join(source_key, "atomic_numbers"))
     R = rfile.get(os.path.join(source_key, "geometry"))
     E = rfile.get(os.path.join(source_key, "energy_ele_mp2.def2tzvp_orca"))  # Eh
+    G = rfile.get(os.path.join(source_key, "grads_mp2.def2tzvp_orca"))  # Eh/A
+    F = np.negative(G[:])
 
-    write_qdata(write_path, R, energy=E)
+    write_qdata(write_path, R, energy=E, forces=F)
     sys.exit(0)
