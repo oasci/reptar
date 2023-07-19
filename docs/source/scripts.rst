@@ -93,9 +93,9 @@ YAML files are used to specify how to run the calculations.
 
                     n_workers: 2
 
-                    n_cpus_per_worker: 3
+                    n_cpus_per_worker: 4
 
-                    chunk_size: 5
+                    chunk_size: 10
 
                     start_slice: null
 
@@ -144,12 +144,11 @@ YAML files are used to specify how to run the calculations.
 
                     acc: 0.01
                     
-                    n_cores: 3
+                    n_cores: 4
 
                     xtb_path: xtb
 
-                    work_dir: ~/repos/resiparm-examples/gfp-cro/5-reptar-xtb-opt/logs
-
+                    log_dir: /home/alex/repos/resiparm-examples/gfp-cro/5-reptar-xtb-opt/logs
           
         .. tab-item:: Psi4 optimization
 

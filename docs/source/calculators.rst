@@ -7,8 +7,8 @@ Currently, drivers for energies and gradients are provided along with workers fo
 
 - `psi4 <https://psicode.org/psi4manual/master/index.html>`__: quantum chemical methods such as DFT and wave function methods.
     - :func:`~reptar.calculators.psi4_workers.psi4_energy`, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, :func:`~reptar.calculators.psi4_workers.psi4_opt`
-- `xtb-python <https://xtb-python.readthedocs.io/en/latest/>`__: a semiempirical quantum mechanics method.
-    - :func:`~reptar.calculators.xtb_workers.xtb_python_engrad`
+- `xtb <https://xtb-docs.readthedocs.io/en/latest/contents.html>`__ and `xtb-python <https://xtb-python.readthedocs.io/en/latest/>`__: a semiempirical quantum mechanics method.
+    - :func:`~reptar.calculators.xtb_workers.xtb_opt`, :func:`~reptar.calculators.xtb_workers.xtb_python_engrad`
 
 We use `ray <https://docs.ray.io/en/latest/ray-overview/installation.html>`__ to parallelize our calculations across one or multiple nodes.
 
