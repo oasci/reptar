@@ -103,3 +103,9 @@ We would love for you to add functionality to reptar, but sometimes you just nee
 Reptar was designed to be easily accommodate custom extractors for a supported parser.
 You can write your own :class:`~reptar.extractors.Extractor` child class that implements its own triggers and extractor methods.
 
+Other
+=====
+
+Not all data needs to be parsed in the above format, so some data have their own parsers.
+
+- Gaussian Cube files: :func:`~reptar.parsers.parse_cube`
