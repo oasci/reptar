@@ -23,6 +23,10 @@
 import numpy as np
 
 
+def _get_cube_line(line):
+    return (float(i) for i in line.strip().split())
+
+
 def _get_cube_coords(f_obj):
     r"""Reads header information to generate Cartesian coordinates of cube data.
 
@@ -33,18 +37,36 @@ def _get_cube_coords(f_obj):
 
     Returns
     -------
+    :obj:`int`
+        Total number of atoms.
     :obj:`numpy.ndarray`
         Cartesian coordinates of points in space.
     """
-    _, origin_x, origin_y, origin_z = f_obj.readline().strip().split()
-    n_x, spacing_x, _, _ = f_obj.readline().strip().split()
-    n_y, _, spacing_y, _ = f_obj.readline().strip().split()
-    n_z, _, _, spacing_z = f_obj.readline().strip().split()
-    coords = np.empty((n_x, n_y, n_z), dtype=np.float64)
-    coords[:, 0] = np.linspace(origin_x, spacing_x, num=n_x)
-    coords[:, 1] = np.linspace(origin_y, spacing_y, num=n_y)
-    coords[:, 2] = np.linspace(origin_z, spacing_z, num=n_z)
-    return coords
+    n_atoms, origin_x, origin_y, origin_z = _get_cube_line(f_obj.readline())
+    n_x, spacing_x, _, _ = _get_cube_line(f_obj.readline())
+    n_y, _, spacing_y, _ = _get_cube_line(f_obj.readline())
+    n_z, _, _, spacing_z = _get_cube_line(f_obj.readline())
+    n_x = int(n_x)
+    n_y = int(n_y)
+    n_z = int(n_z)
+    n_points = n_x * n_y * n_z
+    coords = np.empty((n_points, 3), dtype=np.float64)
+    x_coords = np.linspace(
+        origin_x, origin_x + (n_x * spacing_x), num=n_x, endpoint=False
+    )
+    y_coords = np.linspace(
+        origin_y, origin_y + (n_y * spacing_y), num=n_y, endpoint=False
+    )
+    z_coords = np.linspace(
+        origin_z, origin_z + (n_z * spacing_z), num=n_z, endpoint=False
+    )
+    x_coords, y_coords, z_coords = np.meshgrid(
+        x_coords, y_coords, z_coords, indexing="ij"
+    )
+    coords[:, 0] = x_coords.flatten()
+    coords[:, 1] = y_coords.flatten()
+    coords[:, 2] = z_coords.flatten()
+    return int(n_atoms), coords
 
 
 def parse_cube(file_path):
@@ -65,13 +87,14 @@ def parse_cube(file_path):
     with open(file_path, "r", encoding="utf-8") as f_cube:
         f_cube.readline()
         f_cube.readline()
-        cube_R = _get_cube_coords(f_cube)
-        n_x, n_y, n_z = cube_R.shape
-        data = np.zeros((n_x * n_y * n_z))
+        n_atoms, cube_R = _get_cube_coords(f_cube)  # pylint: disable=invalid-name
+        # Skip over atom positions.
+        for _ in range(n_atoms):
+            f_cube.readline()
+        cube_V = np.zeros((cube_R.shape[0]), dtype=np.float64)
         idx = 0
         for line in f_cube:
             for val in line.strip().split():
-                data[idx] = float(val)
+                cube_V[idx] = float(val)
                 idx += 1
-    data = np.reshape(data, cube_R.shape)
-    return cube_R, data
+    return cube_R, cube_V
