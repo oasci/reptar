@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from tempfile import TemporaryFile
 import numpy as np
 from ..logger import ReptarLogger
+from ..parsers.gaussian_cube import parse_cube
 
 log = ReptarLogger(__name__)
 
@@ -183,11 +185,11 @@ def psi4_engrad(
             fix_com=True,
             fix_orientation=True,
         )
-        g, wfn_mp2 = psi4.gradient(method, molecule=mol, return_wfn=True)
+        g, wfn = psi4.gradient(method, molecule=mol, return_wfn=True)
         g = g.to_array()
         g /= psi4.constants.bohr2angstroms
         G[i] = g
-        E[i] = wfn_mp2.energy()
+        E[i] = wfn.energy()
     return idxs, E, G
 
 
@@ -283,3 +285,116 @@ def psi4_opt(
             E[i] = e  # pylint: disable=used-before-assignment
 
     return idxs, opt_conv, R_opt, E
+
+
+def psi4_cube(
+    idxs,
+    Z,
+    R,
+    charge=0,
+    mult=1,
+    method="mp2",
+    options=None,
+    threads=1,
+    mem="1 GB",
+):
+    r"""Worker function for computing cube data using Psi4.
+
+    Parameters
+    ----------
+    idxs : :obj:`numpy.ndarray`, ndim: ``1``
+        Indices of the structures from ``R`` to compute energies and gradients
+        for.
+    Z : :obj:`numpy.ndarray`, ndim: ``1``
+        Atomic numbers of the atoms with respect to ``R``.
+    R : :obj:`numpy.ndarray`, ndim: ``3``
+        Cartesian coordinates of all structures in group. This includes
+        unused structures.
+    charge : :obj:`int`, default: ``0``
+        Total molecular charge.
+    mult : :obj:`int`, default: ``1``
+        Total molecular multiplicity.
+    method : :obj:`str`, default: ``'b3lyp-d3bj'``
+        Specifies the Psi4 method used for the calculation. For more information,
+        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
+        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
+        for your specific version.
+    options : :obj:`dict`
+        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html
+        #job-control-keywords>`__ using the PsiAPI format.
+
+        You must specify ``cubeprop_tasks`` (the tasks are
+        listed `here <https://psicode.org/psi4manual/master/cubeprop.html
+        #cubeprop-tasks>`__). If ``cubeprop_filepath`` is not specified then no
+        text-based cube file is saved.
+    threads : :obj:`int`, default: ``1``
+        Number of threads for Psi4. This is almost always the number of cores
+        being used for the worker. For more information, see the
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
+    mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
+        The amount of memory available. For more information, see the
+        `documentation <https://psicode.org/psi4manual/master/api/
+        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+
+    Returns
+    -------
+    :obj:`numpy.ndarray`
+        ``idxs``
+    :obj:`numpy.ndarray`
+        Cartesian coordinates of points where the electrostatic potential is probed.
+    :obj:`numpy.ndarray`
+        Electrostatic potential values at the same Cartesian coordinates.
+
+    Notes
+    -----
+    Uses ```CubeProp()`` <https://psicode.org/psi4manual/master/cubeprop.html>`__ to
+    generate a cube file, then parses back into an array.
+
+    Psi4 uses QCElemental to build molecules from arrays.
+    There is some postprocessing in the `from_arrays routine
+    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
+    qcelemental.molparse.from_arrays.html#from-arrays>`__.
+    QCElemental will translate and rotate molecules which affects computed gradients.
+    Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
+    """
+    assert "cubeprop_tasks" in options
+
+    psi4.core.set_num_threads(threads)
+    psi4.set_memory(mem)
+    if options is not None:
+        psi4.set_options(options)
+    R = R[idxs]
+    n_r = R.shape[0]
+
+    if "cubeprop_filepath" not in options:
+        cube_file = TemporaryFile(mode="w+")
+        cube_path = cube_file.name
+        options["cubeprop_filepath"] = cube_path
+    else:
+        cube_path = options["cubeprop_filepath"]
+
+    for i, r in enumerate(R):
+        mol = psi4.core.Molecule.from_arrays(
+            geom=r,
+            elez=Z,
+            molecular_charge=charge,
+            molecular_multiplicity=mult,
+            fix_com=True,
+            fix_orientation=True,
+        )
+        _, wfn = psi4.energy(method, molecule=mol, return_wfn=True)
+        psi4.cubeprop(wfn)
+        esp_r, esp_v = parse_cube(cube_path)
+        if i == 0:
+            esp_R = np.full((n_r, *esp_r.shape), np.nan, dtype=np.float64)
+            esp_V = np.full((n_r, *esp_v.shape), np.nan, dtype=np.float64)
+        esp_R[i] = esp_r
+        esp_V[i] = esp_v
+
+        # Clear cube file contents
+        open(  # pylint: disable=consider-using-with
+            options["cubeprop_filepath"], "w", encoding="utf-8"
+        ).close()
+    del cube_file
+    return idxs, esp_R, esp_V
