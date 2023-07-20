@@ -20,6 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from abc import ABC, abstractmethod
 import numpy as np
 from ..utils import chunk_iterable
 from ..logger import ReptarLogger
@@ -32,11 +33,46 @@ except ImportError:
     pass
 
 
-class DriverEnergy:
-    r"""Supervisor of energy+gradient workers.
+def add_worker(
+    workers_list, worker, chunker, worker_args, worker_kwargs, n_cpus_per_worker=1
+):
+    """Add a ray worker to a running list.
 
-    Creates and manages ray tasks using specified worker.
+    Parameters
+    ----------
+    workers_list : :obj:`list`
+        List of all running ray workers.
+    worker : ``callable``
+        Ray worker.
+    chunker : ``iterable``
+        Provides a chunk of indices assigned to this worker.
+    worker_args : :obj:`list`
+        Positional arguments for worker with the exception of ``idxs`` (provided by
+        ``chunker``).
+    worker_kwargs : :obj:`dict`
+        Keyword arguments for worker.
+    n_cpus_per_worker : :obj:`int`, default: ``1``
+        Number of CPU cores to assign the worker.
+
+    Returns
+    -------
+    :obj:`list`
+        Updated ``workers_list``.
     """
+    try:
+        chunk = list(next(chunker))
+        workers_list.append(
+            worker.options(num_cpus=n_cpus_per_worker).remote(
+                chunk, *worker_args, **worker_kwargs
+            )
+        )
+    except StopIteration:
+        pass
+    return workers_list
+
+
+class Driver(ABC):
+    r"""Template driver class"""
 
     def __init__(
         self,
@@ -94,21 +130,180 @@ class DriverEnergy:
                 ray.init(address=ray_address)
 
     @staticmethod
-    def _idx_todo(E, start_slice=None, end_slice=None):
-        r"""Indices of missing energies (calculations to do).
+    @abstractmethod
+    def idx_todo(args, start_slice=None, end_slice=None):
+        r"""Determine which calculations need to be done.
 
-        Determines this by finding all ``NaN`` elements.
+        Parameters
+        ----------
+        args : :obj:`tuple`
+            ``run()`` arguments.
+        start_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` starting at this index.
+        end_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` stopping at this index.
 
         Returns
         -------
         :obj:`numpy.ndarray`
-            Indices for ``R`` that are missing energy values.
+            Indices of source data where calculations need to be ran.
+        """
+
+    @abstractmethod
+    def check_run_args(self, args):
+        """Perform any checks on run arguments."""
+
+    @abstractmethod
+    def prep_worker_args(self, args):
+        """Prepare worker arguments"""
+
+    @abstractmethod
+    def setup_results(self, args):
+        """Setup attribute containing the returns of ``run``."""
+
+    @abstractmethod
+    def process_worker_returns(self, returns):
+        """Process worker returns"""
+
+    @abstractmethod
+    def prepare_run_returns(self):
+        """Prepare and process final ``run`` returns"""
+
+    def run(self, *args, saver=None):
+        self.check_run_args(args)
+        self.saver = saver
+
+        worker = self.worker
+        idxs_todo = self.idx_todo(args, self.start_slice, self.end_slice)
+        chunker = chunk_iterable(idxs_todo, self.chunk_size)
+        worker_args = self.prep_worker_args(args)
+        self.setup_results(args)
+
+        if not self.use_ray:
+            for idx in idxs_todo:
+                # pylint: disable-next=invalid-name
+                worker_returns = worker([idx], *worker_args, **self.worker_kwargs)
+                self.process_worker_returns(worker_returns)
+        else:
+            worker = ray.remote(worker)
+
+            # Initialize ray workers
+            workers = []
+
+            for _ in range(self.n_workers):
+                workers = add_worker(
+                    workers,
+                    worker,
+                    chunker,
+                    worker_args,
+                    self.worker_kwargs,
+                    self.n_cpus_per_worker,
+                )
+
+            # Start calculations
+            while len(workers) != 0:
+                done_id, workers = ray.wait(workers)
+
+                worker_returns = ray.get(done_id)[0]  # pylint: disable=invalid-name
+                self.process_worker_returns(worker_returns)
+
+                workers = add_worker(
+                    workers,
+                    worker,
+                    chunker,
+                    worker_args,
+                    self.worker_kwargs,
+                    self.n_cpus_per_worker,
+                )
+
+        return self.prepare_run_returns()
+
+
+class DriverEnergy(Driver):
+    r"""Supervisor of energy workers.
+
+    Creates and manages ray tasks using specified worker.
+    """
+
+    def __init__(
+        self,
+        worker,
+        worker_kwargs,
+        use_ray=False,
+        n_workers=1,
+        n_cpus_per_worker=1,
+        chunk_size=50,
+        start_slice=None,
+        end_slice=None,
+        ray_address="auto",
+    ):
+        Driver.__init__(
+            self,
+            worker,
+            worker_kwargs,
+            use_ray,
+            n_workers,
+            n_cpus_per_worker,
+            chunk_size,
+            start_slice,
+            end_slice,
+            ray_address,
+        )
+
+    @staticmethod
+    def idx_todo(args, start_slice=None, end_slice=None):
+        r"""Determine which calculations need to be done.
+
+        Parameters
+        ----------
+        arr : :obj:`numpy.ndarray`
+            ``run()`` arguments.
+        start_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` starting at this index.
+        end_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` stopping at this index.
+
+        Returns
+        -------
+        :obj:`numpy.ndarray`
+            Indices of source data where calculations need to be ran.
+
+        Notes
+        -----
+        Selects electronic energies from ``args``.
         """
         # pylint: disable-next=invalid-name
-        E = E[start_slice:end_slice]
-        idx_todo = np.argwhere(np.isnan(E))[:, 0]
+        idx_todo = np.argwhere(np.isnan(args[2][start_slice:end_slice]))[:, 0]
         return idx_todo
 
+    def check_run_args(self, args):
+        # Z, R, E
+        assert args[1].ndim == 3
+        assert args[0].shape[0] == args[1].shape[1]
+        assert args[1].shape[0] == args[2].shape[0]
+        assert args[1].shape[2] == 3
+
+    def prep_worker_args(self, args):
+        # Z, R, E
+        if self.use_ray:
+            return ray.put(args[0]), ray.put(args[1])
+        return args[0], args[1]
+
+    def setup_results(self, args):
+        # Z, R, E
+        self.results = {"E": args[2]}
+
+    def process_worker_returns(self, returns):
+        # idx_done, E_done
+        self.results["E"][returns[0]] = returns[1]
+
+        if self.saver is not None:
+            self.saver.save(self.results["E"])
+
+    def prepare_run_returns(self):
+        return self.results["E"]
+
+    # pylint: disable-next=arguments-differ
     def run(self, Z, R, E, saver=None):
         r"""Run the calculations.
 
@@ -135,64 +330,7 @@ class DriverEnergy:
         :obj:`numpy.ndarray`
             The total electronic energy array, ``E``, after all computations.
         """
-        # Check arrays (obsessively)
-        assert R.ndim == 3
-        assert Z.shape[0] == R.shape[1]
-        assert R.shape[0] == E.shape[0]
-        assert R.shape[2] == 3
-
-        worker = self.worker
-        idxs_todo = self._idx_todo(E, self.start_slice, self.end_slice)
-        chunker = chunk_iterable(idxs_todo, self.chunk_size)
-
-        if not self.use_ray:
-            for idx in idxs_todo:
-                # pylint: disable-next=invalid-name
-                _, E_done = worker([idx], Z, R, **self.worker_kwargs)
-                print(E_done)
-                E[idx] = E_done
-
-                if saver is not None:
-                    saver.save(E)
-        else:
-            worker = ray.remote(worker)
-            Z = ray.put(Z)
-            R = ray.put(R)
-
-            # Initialize ray workers
-            workers = []
-
-            def add_worker(workers, chunker):
-                try:
-                    chunk = list(next(chunker))
-                    workers.append(
-                        worker.options(num_cpus=self.n_cpus_per_worker).remote(
-                            chunk, Z, R, **self.worker_kwargs
-                        )
-                    )
-                except StopIteration:
-                    pass
-
-            for _ in range(self.n_workers):
-                add_worker(workers, chunker)
-
-            # Start calculations
-            while len(workers) != 0:
-                done_id, workers = ray.wait(workers)
-
-                idx_done, E_done = ray.get(done_id)[0]  # pylint: disable=invalid-name
-                E[idx_done] = E_done
-
-                if saver is not None:
-                    saver.save(E)
-
-                add_worker(workers, chunker)
-
-            # Cleanup ray object store
-            del Z
-            del R
-
-        return E
+        return Driver.run(self, Z, R, E, saver=saver)
 
 
 class DriverEnGrad:
@@ -213,35 +351,6 @@ class DriverEnGrad:
         end_slice=None,
         ray_address="auto",
     ):
-        r"""
-        Parameters
-        ----------
-        worker : ``callable``
-            The desired worker function to compute energy and gradients. It should
-            be the same as any previous calculations. The ``ray.remote`` decorator
-            will be applied automatically.
-        worker_kwargs : :obj:`tuple`, ndim: ``1``
-            The other keyword arguments for the worker function after
-            ``R_idxs``, ``Z``, and ``R``.
-        use_ray : :obj:`bool`, default: ``False``
-            Use ray to parallelize calculations. If ``False``, calculations are
-            done serially. ``False`` can be useful when running locally or only
-            a few calculations are needed. ``True`` is useful for tons of
-            calculations.
-        n_workers : :obj:`int`, default: ``1``
-            Number of parallel workers to use if ``use_ray`` is ``True``.
-        n_cpus_per_worker : :obj:`int`, default: ``1``
-            Number of CPU cores to provide each worker.
-        chunk_size : :obj:`int`, default: ``50``
-            Number of calculations per task to do. This should be enough to make
-            the ray task overhead significantly less than calculations.
-        start_slice : :obj:`int`, default: ``None``
-            Trims ``R`` to start at this index.
-        end_slice : :obj:`int`, default: ``None``
-            Trims ``R`` to end at this index.
-        ray_address : :obj:`str`, default: ``'auto'``
-            Ray cluster address to connect to.
-        """
         # Storing arrays and other information
         self.worker = worker
         self.worker_kwargs = worker_kwargs
@@ -258,19 +367,25 @@ class DriverEnGrad:
                 ray.init(address=ray_address)
 
     @staticmethod
-    def _idx_todo(E, start_slice=None, end_slice=None):
-        r"""Indices of missing energies (calculations to do).
+    def idx_todo(arr, start_slice=None, end_slice=None):
+        r"""Determine which calculations need to be done.
 
-        Determines this by finding all ``NaN`` elements.
+        Parameters
+        ----------
+        arr : :obj:`numpy.ndarray`
+            Energies that tracks if calculations are converged or finished.
+        start_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` starting at this index.
+        end_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` stopping at this index.
 
         Returns
         -------
         :obj:`numpy.ndarray`
-            Indices for ``R`` that are missing energy values.
+            Indices of source data where calculations need to be ran.
         """
         # pylint: disable-next=invalid-name
-        E = E[start_slice:end_slice]
-        idx_todo = np.argwhere(np.isnan(E))[:, 0]
+        idx_todo = np.argwhere(np.isnan(arr[start_slice:end_slice]))[:, 0]
         return idx_todo
 
     def run(self, Z, R, E, G, saver=None):
@@ -315,7 +430,7 @@ class DriverEnGrad:
         assert G.shape[2] == 3
 
         worker = self.worker
-        idxs_todo = self._idx_todo(E, self.start_slice, self.end_slice)
+        idxs_todo = self.idx_todo(E, self.start_slice, self.end_slice)
         chunker = chunk_iterable(idxs_todo, self.chunk_size)
 
         if not self.use_ray:
@@ -383,41 +498,11 @@ class DriverOpt:
         use_ray=False,
         n_workers=1,
         n_cpus_per_worker=1,
-        chunk_size=1,
+        chunk_size=50,
         start_slice=None,
         end_slice=None,
         ray_address="auto",
     ):
-        r"""
-        Parameters
-        ----------
-        worker : ``callable``
-            The desired worker function to compute energy and gradients. It should
-            be the same as any previous calculations. The ``ray.remote`` decorator
-            will be applied automatically.
-        worker_kwargs : :obj:`tuple`, ndim: ``1``
-            The other keyword arguments for the worker function after
-            ``R_idxs``, ``Z``, and ``R``.
-        use_ray : :obj:`bool`, default: ``False``
-            Use ray to parallelize calculations. If ``False``, calculations are
-            done serially. ``False`` can be useful when running locally or only
-            a few calculations are needed. ``True`` is useful for tons of
-            calculations.
-        n_workers : :obj:`int`, default: ``1``
-            Number of parallel workers to use if ``use_ray`` is ``True``.
-        n_cpus_per_worker : :obj:`int`, default: ``1``
-            Number of CPU cores to provide each worker.
-        chunk_size : :obj:`int`, default: ``1``
-            Number of calculations per task to do. This should be enough to make
-            the ray task overhead significantly less than calculations.
-        start_slice : :obj:`int`, default: ``None``
-            Trims ``R`` to start at this index.
-        end_slice : :obj:`int`, default: ``None``
-            Trims ``R`` to end at this index.
-        ray_address : :obj:`str`, default: ``'auto'``
-            Ray cluster address to connect to. Passes ``conv_opt, R_opt, E, G`` into
-            :meth:`~reptar.Saver.save`.
-        """
         # Storing arrays and other information
         self.worker = worker
         self.worker_kwargs = worker_kwargs
@@ -434,15 +519,24 @@ class DriverOpt:
                 ray.init(address=ray_address)
 
     @staticmethod
-    def _idx_todo(conv_opt, start_slice=None, end_slice=None):
-        r"""Indices of NaN geometries (calculations to do).
+    def idx_todo(arr, start_slice=None, end_slice=None):
+        r"""Determine which calculations need to be done.
+
+        Parameters
+        ----------
+        arr : :obj:`numpy.ndarray`
+            ``conv_opt`` that tracks if optimizations are converged.
+        start_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` starting at this index.
+        end_slice : :obj:`int`, default: ``None``
+            Slice ``arr`` stopping at this index.
 
         Returns
         -------
         :obj:`numpy.ndarray`
-            Indices for ``R`` that are missing energy values.
+            Indices of source data where calculations need to be ran.
         """
-        return np.where(~conv_opt[start_slice:end_slice])[0]
+        return np.where(~arr[start_slice:end_slice])[0]
 
     # pylint: disable-next=invalid-name
     def run(self, Z, R, conv_opt, R_opt, E_opt, saver=None):
@@ -475,7 +569,7 @@ class DriverOpt:
         :obj:`numpy.ndarray`
             The total electronic energy array, ``E``, after all computations.
         :obj:`numpy.ndarray`
-            The atomic gradients array, ``E``, after all computations.
+            The atomic gradients array, ``G``, after all computations.
         """
         # Check arrays (obsessively)
         assert R.ndim == 3
@@ -483,7 +577,7 @@ class DriverOpt:
         assert R.shape[2] == 3
 
         worker = self.worker
-        idxs_todo = self._idx_todo(conv_opt, self.start_slice, self.end_slice)
+        idxs_todo = self.idx_todo(conv_opt, self.start_slice, self.end_slice)
         chunker = chunk_iterable(idxs_todo, self.chunk_size)
 
         if not self.use_ray:
