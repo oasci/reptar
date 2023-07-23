@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
+from ..calculators.cube import get_grid_points
 
 
 def _get_cube_line(line):
@@ -46,26 +47,12 @@ def _get_cube_coords(f_obj):
     n_x, spacing_x, _, _ = _get_cube_line(f_obj.readline())
     n_y, _, spacing_y, _ = _get_cube_line(f_obj.readline())
     n_z, _, _, spacing_z = _get_cube_line(f_obj.readline())
-    n_x = int(n_x)
-    n_y = int(n_y)
-    n_z = int(n_z)
-    n_points = n_x * n_y * n_z
-    coords = np.empty((n_points, 3), dtype=np.float64)
-    x_coords = np.linspace(
-        origin_x, origin_x + (n_x * spacing_x), num=n_x, endpoint=False
-    )
-    y_coords = np.linspace(
-        origin_y, origin_y + (n_y * spacing_y), num=n_y, endpoint=False
-    )
-    z_coords = np.linspace(
-        origin_z, origin_z + (n_z * spacing_z), num=n_z, endpoint=False
-    )
-    x_coords, y_coords, z_coords = np.meshgrid(
-        x_coords, y_coords, z_coords, indexing="ij"
-    )
-    coords[:, 0] = x_coords.flatten()
-    coords[:, 1] = y_coords.flatten()
-    coords[:, 2] = z_coords.flatten()
+
+    origin = np.array([origin_x, origin_y, origin_z], dtype=np.float64)
+    n_points = np.array([int(n_x), int(n_y), int(n_z)], dtype=np.uint32)
+    spacing = np.array([spacing_x, spacing_y, spacing_z], dtype=np.float64)
+
+    coords = get_grid_points(origin, n_points, spacing)
     return int(n_atoms), coords
 
 
@@ -91,6 +78,7 @@ def parse_cube(file_path):
         # Skip over atom positions.
         for _ in range(n_atoms):
             f_cube.readline()
+        # pylint: disable-next=invalid-name
         cube_V = np.zeros((cube_R.shape[0]), dtype=np.float64)
         idx = 0
         for line in f_cube:
