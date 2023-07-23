@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from tempfile import TemporaryFile
+import os
+from tempfile import TemporaryDirectory
 import numpy as np
+from .cube import initialize_grid_arrays
 from ..logger import ReptarLogger
 from ..parsers.gaussian_cube import parse_cube
 
@@ -291,12 +293,14 @@ def psi4_cube(
     idxs,
     Z,
     R,
+    total_n_points,
     charge=0,
     mult=1,
     method="mp2",
     options=None,
     threads=1,
     mem="1 GB",
+    cube_file_name=None,
 ):
     r"""Worker function for computing cube data using Psi4.
 
@@ -310,6 +314,8 @@ def psi4_cube(
     R : :obj:`numpy.ndarray`, ndim: ``3``
         Cartesian coordinates of all structures in group. This includes
         unused structures.
+    total_n_points : :obj:`int`
+        Number of points to initialize arrays with.
     charge : :obj:`int`, default: ``0``
         Total molecular charge.
     mult : :obj:`int`, default: ``1``
@@ -336,15 +342,19 @@ def psi4_cube(
         The amount of memory available. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api/
         psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+    cube_file_name : :obj:`str`, default: ``None``
+        You can manually specify the name of the cube file to parse. Otherwise
+        we will automatically choose. Typical options are ``ESP.cube``, ``Dt.cube``,
+
 
     Returns
     -------
     :obj:`numpy.ndarray`
         ``idxs``
     :obj:`numpy.ndarray`
-        Cartesian coordinates of points where the electrostatic potential is probed.
+        Cartesian coordinates of points where a property is probed.
     :obj:`numpy.ndarray`
-        Electrostatic potential values at the same Cartesian coordinates.
+        Property values at the same Cartesian coordinates.
 
     Notes
     -----
@@ -359,42 +369,36 @@ def psi4_cube(
     Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
     """
     assert "cubeprop_tasks" in options
+    if cube_file_name is None:
+        if options["cubeprop_tasks"][0].lower() == "esp":
+            cube_file_name = "ESP.cube"
+        elif options["cubeprop_tasks"][0].lower() == "density":
+            cube_file_name = "Dt.cube"
 
-    psi4.core.set_num_threads(threads)
-    psi4.set_memory(mem)
-    if options is not None:
-        psi4.set_options(options)
-    R = R[idxs]
-    n_r = R.shape[0]
+    with TemporaryDirectory() as temp_dir:
+        options["cubeprop_filepath"] = temp_dir
 
-    if "cubeprop_filepath" not in options:
-        cube_file = TemporaryFile(mode="w+")
-        cube_path = cube_file.name
-        options["cubeprop_filepath"] = cube_path
-    else:
-        cube_path = options["cubeprop_filepath"]
+        psi4.core.set_num_threads(threads)
+        psi4.set_memory(mem)
+        if options is not None:
+            psi4.set_options(options)
+        R = R[idxs]
 
-    for i, r in enumerate(R):
-        mol = psi4.core.Molecule.from_arrays(
-            geom=r,
-            elez=Z,
-            molecular_charge=charge,
-            molecular_multiplicity=mult,
-            fix_com=True,
-            fix_orientation=True,
-        )
-        _, wfn = psi4.energy(method, molecule=mol, return_wfn=True)
-        psi4.cubeprop(wfn)
-        esp_r, esp_v = parse_cube(cube_path)
-        if i == 0:
-            esp_R = np.full((n_r, *esp_r.shape), np.nan, dtype=np.float64)
-            esp_V = np.full((n_r, *esp_v.shape), np.nan, dtype=np.float64)
-        esp_R[i] = esp_r
-        esp_V[i] = esp_v
+        cube_R, cube_V = initialize_grid_arrays(R, max_points=total_n_points)
 
-        # Clear cube file contents
-        open(  # pylint: disable=consider-using-with
-            options["cubeprop_filepath"], "w", encoding="utf-8"
-        ).close()
-    del cube_file
-    return idxs, esp_R, esp_V
+        for i, r in enumerate(R):
+            mol = psi4.core.Molecule.from_arrays(
+                geom=r,
+                elez=Z,
+                molecular_charge=charge,
+                molecular_multiplicity=mult,
+                fix_com=True,
+                fix_orientation=True,
+            )
+            _, wfn = psi4.energy(method, molecule=mol, return_wfn=True)
+            psi4.cubeprop(wfn)
+            cube_r, cube_v = parse_cube(os.path.join(temp_dir, cube_file_name))
+
+            cube_R[i, : cube_r.shape[0], :] = cube_r
+            cube_V[i, : cube_v.shape[0]] = cube_v
+    return idxs, cube_R, cube_V

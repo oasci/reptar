@@ -30,8 +30,10 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad
-from reptar.calculators.psi4_workers import psi4_energy, psi4_engrad
+from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverCube
+from reptar.calculators.psi4_workers import psi4_energy, psi4_engrad, psi4_cube
+from reptar.calculators.cube import initialize_grid_arrays
+import qcelemental as qcel
 
 
 sys.path.append("..")
@@ -571,3 +573,111 @@ def test_ray_calculator_psi4_1h2o_energy():
     E = driver.run(Z, R, E, saver=saver)
 
     assert np.allclose(E, E_ref)
+
+
+def test_ray_calculator_psi4_1h2o_esp():
+    try:
+        import psi4
+    except ImportError:
+        pytest.skip("psi4 package not installed")
+    try:
+        import ray
+    except ImportError:
+        pytest.skip("ray package not installed")
+
+    exdir_path_source = get_140h2o_samples_path()
+    rfile_source = File(exdir_path_source, mode="r")
+
+    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+
+    if os.path.exists(exdir_path_dest):
+        shutil.rmtree(exdir_path_dest)
+    rfile = File(exdir_path_dest, mode="w")
+
+    # Copy over a few structures for calculations.
+    group_key = "1h2o"
+    start_slice = None
+    end_slice = 3
+
+    R_ref = np.array(
+        [
+            [
+                [-0.060401859445, -0.008161713319, 0.038695740786],
+                [0.081656670824, 0.256790001513, -0.919880479138],
+                [0.877197077102, -0.127226284815, 0.305602103897],
+            ],
+            [
+                [-0.029215828214, -0.054854435349, -0.009617450002],
+                [0.564775863493, 0.357610588759, -0.602273276481],
+                [-0.100987055674, 0.513180168492, 0.754946191924],
+            ],
+            [
+                [-0.028530376949, -0.014602259575, -0.051906786482],
+                [0.797151206373, 0.499067262665, -0.076776383384],
+                [-0.344243644933, -0.267262622045, 0.900774472492],
+            ],
+        ]
+    )
+    Z = rfile_source.get(f"{group_key}/atomic_numbers")
+    R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
+    assert np.allclose(R, R_ref)
+
+    rfile.put(f"{group_key}/atomic_numbers", Z)
+    rfile.put(f"{group_key}/geometry", R)
+
+    # Setup arrays
+    method_label = "df.mp2.def2tzvp"
+
+    cube_R_key = f"{group_key}/esp_coords_{method_label}"
+    cube_V_key = f"{group_key}/esp_{method_label}"
+
+    spacing = [0.2, 0.2, 0.2]  # Bohr
+    overage = [4.0, 4.0, 4.0]  # Bohr
+    cube_R, cube_V = initialize_grid_arrays(
+        R / qcel.constants.bohr2angstroms, overage=overage, spacing=spacing
+    )
+
+    driver_kwargs = {
+        "use_ray": False,
+        "n_workers": 2,
+        "n_cpus_per_worker": 1,
+        "chunk_size": 2,
+        "start_slice": None,
+        "end_slice": None,
+    }
+
+    worker_kwargs = {
+        "charge": 0,
+        "mult": 1,
+        "method": "mp2",
+        "threads": 1,
+        "options": {
+            "basis": "def2-svp",
+            "df_basis_scf": "def2-universal-jkfit",
+            "df_basis_mp2": "def2-svp-ri",
+            "reference": "rhf",
+            "e_convergence": 10,
+            "d_convergence": 10,
+            "scf_type": "df",
+            "mp2_type": "df",
+            "qc_module": "dfmp2",
+            "print": 2,
+            "cubeprop_tasks": ["esp"],
+            "cubic_grid_spacing": spacing,
+            "cubic_grid_overage": overage,
+        },
+    }
+
+    saver = Saver(
+        exdir_path_dest,
+        (
+            cube_R_key,
+            cube_V_key,
+        ),
+    )
+
+    driver = DriverCube(psi4_cube, worker_kwargs, **driver_kwargs)
+
+    cube_R, cube_V = driver.run(Z, R, cube_R, cube_V, saver=saver)
+    assert cube_R[0][0][0] == -4.12824
+    assert cube_V[0][0] == -0.00174447

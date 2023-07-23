@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- `DriverCube` and `psi4_cube` for cube property calculations like electrostatic potentials.
 - `parse_cube` parser for Gaussian cube files.
 - `write_qdata` for [ForceBalance](https://github.com/leeping/forcebalance) package.
 - `reptar-calc` script to handle all calculations with example YAML configuration files.

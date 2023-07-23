@@ -271,7 +271,7 @@ class DriverEnergy(Driver):
         self.results = {"E": args[2]}
 
     def process_worker_returns(self, returns):
-        # idx_done, E_done
+        # returns = (idx_done, E_done)
         self.results["E"][returns[0]] = returns[1]
 
         if self.saver is not None:
@@ -310,8 +310,7 @@ class DriverEnergy(Driver):
 
 
 class DriverEnGrad(Driver):
-    r"""Supervisor of energy+gradient workers.
-    """
+    r"""Supervisor of energy+gradient workers."""
 
     def __init__(
         self,
@@ -461,7 +460,7 @@ class DriverOpt(Driver):
         self.results = {"conv_opt": args[2], "R_opt": args[3], "E_opt": args[4]}
 
     def process_worker_returns(self, returns):
-        # returns = (conv_opt_done, R_opt_done, E_opt_one)
+        # returns = (idx_done, conv_opt_done, R_opt_done, E_opt_one)
         self.results["conv_opt"][returns[0]] = returns[1]
         self.results["R_opt"][returns[0]] = returns[2]
         self.results["E_opt"][returns[0]] = returns[3]
@@ -510,3 +509,94 @@ class DriverOpt(Driver):
             The last electronic energy of the geometry optimization, ``E_opt``.
         """
         return Driver._run(self, Z, R, conv_opt, R_opt, E_opt, saver=saver)
+
+
+class DriverCube(Driver):
+    r"""Supervisor of cube workers."""
+
+    def __init__(
+        self,
+        worker,
+        worker_kwargs,
+        use_ray=False,
+        n_workers=1,
+        n_cpus_per_worker=1,
+        chunk_size=50,
+        start_slice=None,
+        end_slice=None,
+        ray_address="auto",
+    ):
+        Driver.__init__(
+            self,
+            worker,
+            worker_kwargs,
+            use_ray,
+            n_workers,
+            n_cpus_per_worker,
+            chunk_size,
+            start_slice,
+            end_slice,
+            ray_address,
+        )
+
+    @staticmethod
+    def idx_todo(args, start_slice=None, end_slice=None):
+        # args = (Z, R, cube_R, cube_V)
+        # Checks the first element per structure in cube_V for NaN
+        return np.argwhere(np.isnan(args[3][start_slice:end_slice][:, 0]))[:, 0]
+
+    def check_run_args(self, args):
+        # args = (Z, R, cube_R, cube_V)
+        assert args[1].ndim == 3
+        assert args[0].shape[0] == args[1].shape[1]
+        assert args[1].shape[2] == 3
+
+    def prep_worker_args(self, args):
+        # args = (Z, R, cube_R, cube_V)
+        if self.use_ray:
+            return ray.put(args[0]), ray.put(args[1]), args[3].shape[-1]
+        return args[0], args[1], args[3].shape[-1]
+
+    def setup_results(self, args):
+        # args = (Z, R, cube_R, cube_V)
+        self.results = {"cube_R": args[2], "cube_V": args[3]}
+
+    def process_worker_returns(self, returns):
+        # returns = (idx_done, cube_R, cube_V)
+        self.results["cube_R"][returns[0]] = returns[1]
+        self.results["cube_V"][returns[0]] = returns[2]
+
+        if self.saver is not None:
+            self.saver.save(self.results["cube_R"], self.results["cube_V"])
+
+    def prepare_run_returns(self):
+        return self.results["cube_R"], self.results["cube_V"]
+
+    # pylint: disable-next=invalid-name
+    def run(self, Z, R, cube_R, cube_V, saver=None):
+        r"""Run the calculations.
+
+        Parameters
+        ----------
+        Z : :obj:`numpy.ndarray`, ndim: ``1``
+            Atomic numbers of the atoms with respect to ``R``. Should have shape
+            ``(i,)`` where ``i`` is the number of atoms in the system.
+        R : :obj:`numpy.ndarray`, ndim: ``3``
+            Cartesian coordinates of all structures in group. Should have shape
+            ``(j, i, 3)`` where ``j`` is the number of structures. Units are in
+            Angstroms.
+        cube_R : :obj:`numpy.ndarray`, ndim: ``3``
+            Cartesian coordinates of points where a property is probed.
+        cube_V : :obj:`numpy.ndarray`, ndim: ``2``
+            Property values at the same Cartesian coordinates as ``cube_R``.
+        saver : :obj:`reptar.Saver`, optional
+            Save data after every worker finishes.
+
+        Returns
+        -------
+        :obj:`numpy.ndarray`
+            Cartesian coordinates of points where a property is probed.
+        :obj:`numpy.ndarray`
+            Property values at the same Cartesian coordinates.
+        """
+        return Driver._run(self, Z, R, cube_R, cube_V, saver=saver)
