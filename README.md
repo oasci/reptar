@@ -1,6 +1,6 @@
 <h1 align="center">reptar</h1>
 
-<h4 align="center">A tool for storing and analyzing manuscript-scale computational chemistry data</h4>
+<h4 align="center">A tool for computing, storing, and analyzing manuscript-scale computational chemistry and biology data</h4>
 
 <h4 align="center" style="padding-bottom: 0.5em;"><a href="https://www.aalexmmaldonado.com/reptar/">Documentation</a></h4>
 
@@ -42,7 +42,7 @@
 
 # Motivation
 
-The computational chemistry community often fails to openly provide raw and/or processed data used to draw their scientific conclusions.
+The computational chemistry and biology communities often fails to openly provide raw and/or processed data used to draw their scientific conclusions.
 
 For large projects, frameworks such as [QCArchive](https://qcarchive.molssi.org/), [Materials Project](https://materialsproject.org/), [Pitt Quantum Repository](https://pqr.pitt.edu/), [ioChem-BD](https://www.iochem-bd.org/) and many others provide great storage solutions.
 This approach would not be practical for fluid data pipelines and small-scale projects such as a single manuscript.

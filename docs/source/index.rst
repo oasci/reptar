@@ -2,7 +2,7 @@
 reptar
 ======
 
-A tool for storing and analyzing manuscript-scale computational chemistry data.
+A tool for computing, storing, and analyzing manuscript-scale computational chemistry and biology data.
 
 .. image:: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml/badge.svg
     :target: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml
@@ -32,7 +32,7 @@ A tool for storing and analyzing manuscript-scale computational chemistry data.
 Motivation
 ==========
 
-The computational chemistry community often fails to openly provide raw and/or processed data used to their draw scientific conclusions.
+The computational chemistry and biology communities often fails to openly provide raw and/or processed data used to their draw scientific conclusions.
 
 For large projects, frameworks such as `QCArchive <https://qcarchive.molssi.org/>`__, `Materials Project <https://materialsproject.org/>`__, `Pitt Quantum Repository <https://pqr.pitt.edu/>`__, `ioChem-BD <https://www.iochem-bd.org/>`__ and many others provide great storage solutions.
 This approach would not be practical for fluid data pipelines and small-scale projects such as a single manuscript.
