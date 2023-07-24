@@ -60,9 +60,9 @@ def get_n_grid_points(spacing, R_span, overage):
 
     Notes
     -----
-    This function is based off of `Psi4's grid generations code <
-    https://github.com/psi4/psi4/blob/2cd33eda01b7018a23739d00c1cdd51ca87faa64
-    /psi4/src/psi4/libcubeprop/csg.cc#L132>`__.
+    This function is based off of `Psi4's grid generation code <https://github.com/
+    psi4/psi4/blob/2cd33eda01b7018a23739d00c1cdd51ca87faa64/psi4/src/psi4/libcubeprop
+    /csg.cc#L94-L223>`__.
     """
     if not isinstance(overage, np.ndarray):
         overage = np.array(overage)

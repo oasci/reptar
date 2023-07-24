@@ -688,6 +688,56 @@ def prep_group_opt(
     return (Z_opt_key, conv_opt_key, R_opt_key, E_opt_key), (Z, conv_opt, R_opt, E_opt)
 
 
+# pylint: disable=invalid-name
+def prep_group_engrad(
+    rfile,
+    R_key,
+    dest_key,
+    E_label="energy_ele",
+    G_label="grads",
+):
+    """Prepare group for geometry optimization calculations in a reptar file.
+
+    Parameters
+    ----------
+    rfile : :obj:`reptar.File`
+        File to prepare a group for optimization-like data.
+    R_key : :obj:`str`
+        Source key for Cartesian coordinates of structures to optimize.
+    dest_key : :obj:`str`
+        Key to create new group for optimization. All data will be stored here.
+    E_key : :obj:`str`, default: ``energy_ele``
+        Label to store the electronic energy.
+    G_key : :obj:`str`, default: ``grads``
+        Label to store the atomic gradient.
+
+    Returns
+    -------
+    :obj:`tuple`
+        ``E_key`` and ``G_key``.
+    :obj:`tuple`
+        ``E``, and ``G`` arrays.
+    """
+    R = rfile.get(R_key)
+
+    log.debug("Initializing energy and gradient data")
+    try:
+        rfile.get(dest_key)
+    except RuntimeError as e:
+        if " does not exist" in str(e):
+            rfile.create_group(dest_key)
+        else:
+            raise RuntimeError from e
+
+    E_key = os.path.join(dest_key, E_label)
+    E = prep_array(rfile, E_key, R.shape[0], dtype="float64", fill_with=np.nan)
+
+    G_key = os.path.join(dest_key, G_label)
+    G = prep_array(rfile, G_key, R.shape, dtype="float64", fill_with=np.nan)
+
+    return (E_key, G_key), (E, G)
+
+
 def get_obj_from_string(import_string):
     """Retrieves a function object based on an import string and object name.
 

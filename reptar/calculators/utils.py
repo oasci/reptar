@@ -21,8 +21,8 @@
 # SOFTWARE.
 
 import os
-from .drivers import DriverOpt
-from ..utils import prep_group_opt
+from .drivers import DriverOpt, DriverEnGrad
+from ..utils import prep_group_opt, prep_group_engrad
 from ..save import Saver
 
 
@@ -133,6 +133,42 @@ def prep_opt_job(
     R_opt_label="geometry",
     E_opt_label="energy_ele",
 ):
+    r"""Prepare driver, group, and saver for optimization calculations.
+
+    Parameters
+    ----------
+    rfile : :obj:`reptar.File`
+        Reptar file to work in.
+    Z_key : :obj:`str`
+        Source key for atomic numbers.
+    R_key : :obj:`str`
+        Source key for Cartesian coordinates.
+    dest_key : :obj:`str`
+        Destination key to store calculation data.
+    worker : ``callable``
+        Worker function for calculations.
+    worker_kwargs : :obj:`dict`
+        Keyword arguments for ``worker``.
+    driver_kwargs : :obj:`dict`
+        Keyword arguments for the driver.
+    Z_opt_label : :obj:`str`
+        Label to store atomic numbers of optimized structures.
+    conv_opt_label : :obj:`str`
+        Label to store if geometry optimizations have converged.
+    R_opt_label : :obj:`str`
+        Label to store optimization Cartesian coordinates.
+    E_opt_label : :obj:`str`
+        Label to store electronic energies of the last optimization step.
+
+    Returns
+    -------
+    :obj:`reptar.drivers.DriverOpt`
+        Initialized optimization driver.
+    :obj:`reptar.save.Saver`
+        Initialized saver object.
+    :obj:`tuple`
+        Initialized arrays containing data to use as arguments for ``worker``.
+    """
     driver = DriverOpt(worker, worker_kwargs, **driver_kwargs)
 
     keys, data = prep_group_opt(
@@ -144,6 +180,61 @@ def prep_opt_job(
         conv_opt_label=conv_opt_label,
         R_opt_label=R_opt_label,
         E_opt_label=E_opt_label,
+    )
+    saver = Saver(rfile.fpath, keys[1:])
+
+    return driver, saver, data
+
+
+# pylint: disable=invalid-name
+def prep_engrad_job(
+    rfile,
+    R_key,
+    dest_key,
+    worker,
+    worker_kwargs,
+    driver_kwargs,
+    E_label="energy_ele",
+    G_label="grads",
+):
+    r"""Prepare driver, group, and saver for energy+gradient calculations.
+
+    Parameters
+    ----------
+    rfile : :obj:`reptar.File`
+        Reptar file to work in.
+    R_key : :obj:`str`
+        Source key for Cartesian coordinates.
+    dest_key : :obj:`str`
+        Destination key to store calculation data.
+    worker : ``callable``
+        Worker function for calculations.
+    worker_kwargs : :obj:`dict`
+        Keyword arguments for ``worker``.
+    driver_kwargs : :obj:`dict`
+        Keyword arguments for the driver.
+    R_opt_label : :obj:`str`
+        Label to store optimization Cartesian coordinates.
+    E_opt_label : :obj:`str`
+        Label to store electronic energies of the last optimization step.
+
+    Returns
+    -------
+    :obj:`reptar.drivers.DriverOpt`
+        Initialized optimization driver.
+    :obj:`reptar.save.Saver`
+        Initialized saver object.
+    :obj:`tuple`
+        Initialized arrays containing data to use as arguments for ``worker``.
+    """
+    driver = DriverEnGrad(worker, worker_kwargs, **driver_kwargs)
+
+    keys, data = prep_group_engrad(
+        rfile,
+        R_key,
+        dest_key,
+        E_label=E_label,
+        G_label=G_label,
     )
     saver = Saver(rfile.fpath, keys[1:])
 
