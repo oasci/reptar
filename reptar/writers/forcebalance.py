@@ -61,6 +61,6 @@ def write_qdata(file_path, R, energy=None, forces=None, espxyz=None, espval=None
             if forces is not None:
                 _write_array(f, "FORCES", forces[i], "%.12e")
             if include_esp:
-                _write_array(f, "ESPXYZ", espxyz[i], "%.12e")
-                _write_array(f, "ESPVAL", espval[i], "%.12e")
+                _write_array(f, "ESPXYZ", espxyz[i][~np.isnan(espxyz)], "%.12e")
+                _write_array(f, "ESPVAL", espval[i][~np.isnan(espval)], "%.12e")
             f.write("\n")
