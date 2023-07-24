@@ -1,4 +1,4 @@
-``extractor``
+``Extractor``
 =============
 
 .. autoapiclass:: reptar.extractors.Extractor
