@@ -6,6 +6,8 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- `DriverCube` and `psi4_cube` for cube property calculations like electrostatic potentials.
+- `parse_cube` parser for Gaussian cube files.
 - `write_qdata` for [ForceBalance](https://github.com/leeping/forcebalance) package.
 - `reptar-calc` script to handle all calculations with example YAML configuration files.
 - `reptar-xyz-to-file` script to convert XYZ coordinates to a reptar-supported file.
@@ -13,6 +15,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
+- Redesigned drivers to inherit routine code from a parent `Driver` class.
 - Drivers and workers should only return guaranteed values.
 `DriverOpt` and respective workers no longer return gradients.
 - Renamed `xtb_engrad` to `xtb_python_engrad` to reflect the Python interface being used.

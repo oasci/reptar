@@ -3,9 +3,15 @@ Calculators
 ===========
 
 Reptar provides several driver and workers for calculations on data stored in supported file formats.
-Currently, drivers for energies and gradients are provided along with workers for the following packages.
+We have the following drivers available.
 
-- `psi4 <https://psicode.org/psi4manual/master/index.html>`__: quantum chemical methods such as DFT and wave function methods.
+- :class:`~reptar.calculators.drivers.DriverEnergy`
+- :class:`~reptar.calculators.drivers.DriverEnGrad`
+- :class:`~reptar.calculators.drivers.DriverOpt`
+
+The above drivers can be used with any of the compatible workers below (e.g., ``engrad`` workers with ``DriverEnGrad``).
+
+- `Psi4 <https://psicode.org/psi4manual/master/index.html>`__: quantum chemical methods such as DFT and wave function methods.
     - :func:`~reptar.calculators.psi4_workers.psi4_energy`, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, :func:`~reptar.calculators.psi4_workers.psi4_opt`
 - `xtb <https://xtb-docs.readthedocs.io/en/latest/contents.html>`__ and `xtb-python <https://xtb-python.readthedocs.io/en/latest/>`__: a semiempirical quantum mechanics method.
     - :func:`~reptar.calculators.xtb_workers.xtb_opt`, :func:`~reptar.calculators.xtb_workers.xtb_python_engrad`
