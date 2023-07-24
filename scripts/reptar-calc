@@ -9,7 +9,6 @@ import os
 import yaml
 from reptar import File
 from reptar.calculators.utils import prep_opt_job, prep_engrad_job, prep_xtb_input_lines
-from reptar.calculators.drivers import DriverOpt, DriverEnGrad
 from reptar.utils import get_obj_from_string
 from reptar.logger import ReptarLogger, set_log_level
 
