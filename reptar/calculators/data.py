@@ -33,10 +33,10 @@ class Data:
     of ways.
 
     - **Write data.** Providing ``rfile`` and keys allows you to use the
-      :meth:`~reptar.Data.save` method to write stored arrays to the reptar file.
+      :meth:`~reptar.calculators.Data.save` method to write stored arrays to the reptar file.
     - **Worker data.** Used to store data computed by a worker that is then used with
-      :meth:`~reptar.Data.update` and ``idxs_source`` to update another
-      :class:`~reptar.Data` object.
+      :meth:`~reptar.calculators.Data.update` and ``idxs_source`` to update another
+      :class:`~reptar.calculators.Data` object.
 
     """
 
@@ -44,14 +44,6 @@ class Data:
         self,
         rfile: "File" | None = None,
         idxs_source: np.ndarray | None = None,
-        E: np.ndarray | None = None,
-        E_key: str | None = None,
-        G: np.ndarray | None = None,
-        G_key: str | None = None,
-        cube_R: np.ndarray | None = None,
-        cube_R_key: str | None = None,
-        cube_V: np.ndarray | None = None,
-        cube_V_key: str | None = None,
     ) -> None:
         r"""
         Parameters
@@ -61,25 +53,39 @@ class Data:
         idxs_source
             Specifies slice indices of sources where values will eventually be updated.
             This is normally specified in calculation workers and used in
-            :meth:`~reptar.Data.update`.
+            :meth:`~reptar.calculators.Data.update`.
         """
         self.rfile = rfile
 
         self.idxs_source = idxs_source
 
-        self.E = E
-        self.E_key = E_key
-        self.G = G
-        self.G_key = G_key
-        self.cube_R = cube_R
-        self.cube_R_key = cube_R_key
-        self.cube_V = cube_V
-        self.cube_V_key = cube_V_key
+    def update(self, data: Data) -> None:
+        r"""Update self with another data object. ``rfile`` must be specified.
+
+        Parameters
+        ----------
+        data
+            A subset of data that will be used to update ``self``.
+        """
+        if data.idxs_source is None:
+            raise ValueError("data must specify `idxs_source`")
+        for data_attr_label in ["E", "G", "cube_R", "cube_V"]:
+            data_attr = getattr(data, data_attr_label)
+            if data_attr is not None:
+                setattr(self, data_attr_label, (data.idxs_source, data_attr))
+
+    def save(self) -> None:
+        r"""Will write all data to the reptar file."""
+        for data_key_label in ["E_key", "G_key", "cube_R_key", "cube_V_key"]:
+            if data_key_label is not None:
+                self.rfile.put(data_key_label, getattr(self, data_key_label[:-4]))
 
     @property
     def E(self) -> np.ndarray | None:
         r"""Energy."""
-        return self._E
+        if hasattr(self, "_E"):
+            return self._E
+        return None
 
     @E.setter
     def E(self, value: Iterable[str, np.ndarray] | np.ndarray | None) -> None:
@@ -102,7 +108,9 @@ class Data:
     @property
     def E_key(self) -> str | None:
         r"""Energy key to save in reptar file."""
-        return self._E_key
+        if hasattr(self, "_E_key"):
+            return self._E_key
+        return None
 
     @E_key.setter
     def E_key(self, value: str):
@@ -111,7 +119,9 @@ class Data:
     @property
     def G(self) -> np.ndarray | None:
         r"""Atomic gradients."""
-        return self._G
+        if hasattr(self, "_G"):
+            return self._G
+        return None
 
     @G.setter
     def G(self, value: Iterable[np.ndarray] | np.ndarray | None):
@@ -134,7 +144,9 @@ class Data:
     @property
     def G_key(self) -> str | None:
         r"""Gradient key to save in reptar file."""
-        return self._G_key
+        if hasattr(self, "_G_key"):
+            return self._G_key
+        return None
 
     @G_key.setter
     def G_key(self, value: str):
@@ -143,7 +155,9 @@ class Data:
     @property
     def cube_R(self) -> np.ndarray | None:
         r"""Cartesian coordinates of points where a property is probed on a grid."""
-        return self._cube_R
+        if hasattr(self, "_cube_R"):
+            return self._cube_R
+        return None
 
     @cube_R.setter
     def cube_R(self, value: Iterable[np.ndarray] | np.ndarray | None):
@@ -166,7 +180,9 @@ class Data:
     @property
     def cube_R_key(self) -> str | None:
         r"""Grid/cube coordinate key to save in reptar file."""
-        return self._cube_R_key
+        if hasattr(self, "_cube_R_key"):
+            return self._cube_R_key
+        return None
 
     @cube_R_key.setter
     def cube_R_key(self, value: str):
@@ -175,7 +191,9 @@ class Data:
     @property
     def cube_V(self) -> np.ndarray | None:
         r"""Property values on a grid specified by ``cube_R``."""
-        return self._cube_R
+        if hasattr(self, "_cube_V"):
+            return self._cube_V
+        return None
 
     @cube_V.setter
     def cube_V(self, value: Iterable[np.ndarray] | np.ndarray | None):
@@ -198,29 +216,10 @@ class Data:
     @property
     def cube_V_key(self) -> str | None:
         r"""Grid/cube coordinate key to save in reptar file."""
-        return self._cube_V_key
+        if hasattr(self, "_cube_V_key"):
+            return self._cube_V_key
+        return None
 
     @cube_V_key.setter
     def cube_V_key(self, value: str):
         self._cube_V_key = value
-
-    def update(self, data: Data) -> None:
-        r"""Update self with another data object. ``rfile`` must be specified.
-
-        Parameters
-        ----------
-        data
-            A subset of data that will be used to update ``self``.
-        """
-        if data.idxs_source is None:
-            raise ValueError("data must specify `idxs_source`")
-        for data_attr_label in ["E", "G", "cube_R", "cube_V"]:
-            data_attr = getattr(data, data_attr_label)
-            if data_attr is not None:
-                setattr(self, data_attr_label, (data.idxs_source, data_attr))
-
-    def save(self) -> None:
-        r"""Will write all data to the reptar file."""
-        for data_key_label in ["E_key", "G_key", "cube_R_key", "cube_V_key"]:
-            if data_key_label is not None:
-                self.rfile.put(data_key_label, getattr(self, data_key_label[:-4]))

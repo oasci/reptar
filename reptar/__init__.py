@@ -8,6 +8,5 @@ from .creating import Creator
 from .reptar_file import File
 from .save import Saver
 from .sampling import Sampler
-from .data import Data
 
-__all__ = ["Creator", "File", "Saver", "Sampler", "Data"]
+__all__ = ["Creator", "File", "Saver", "Sampler"]
