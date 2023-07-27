@@ -111,3 +111,4 @@ autoapi_dirs = ["../../reptar"]
 autoapi_add_toctree_entry = False
 autoapi_python_class_content = "both"
 autoapi_keep_files = True
+autodoc_typehints = "description"
