@@ -41,6 +41,7 @@ extensions = [
     "sphinx_design",
     "sphinxcontrib.mermaid",
     "sphinxemoji.sphinxemoji",
+    "sphinx_autodoc_typehints",
 ]
 
 suppress_warnings = ["autosectionlabel.*"]
