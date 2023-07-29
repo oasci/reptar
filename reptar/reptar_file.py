@@ -55,6 +55,8 @@ class File:
         from_dict : :obj:`dict`, default: ``None``
             Load data from a dictionary.
         """
+        self.allow_remove = allow_remove
+        self.plugins = plugins
         if from_dict is None:
             self._from_path(file_path, mode, allow_remove, plugins)
         else:
@@ -106,6 +108,16 @@ class File:
         self.ftype = f_ext[1:]
         self.fmode = mode
         self.File_ = File_
+
+    def __getstate__(self):
+        r"""Having File_ makes this not serializable."""
+        state = self.__dict__.copy()
+        del state["File_"]
+        return state
+
+    def __setstate__(self, state):
+        self.__dict__.update(state)
+        self._from_path(self.fpath, self.fmode, self.allow_remove, self.plugins)
 
     def _from_dict(self, file_path, group_dict, mode, allow_remove, plugins):
         r"""Populates the File object from a dictionary.

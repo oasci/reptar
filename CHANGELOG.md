@@ -23,6 +23,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Fixed
 
+- Made ``File`` serializable.
 - Psi4 optimizations without ray would crash.
 - Zarr arrays were classified as attributes when putting data.
 Now reptar correctly identifies them as iterables and array-like data.
