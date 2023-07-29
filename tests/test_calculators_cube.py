@@ -30,8 +30,6 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad
-from reptar.calculators.psi4_workers import psi4_energy, psi4_engrad
 from reptar.calculators.cube import initialize_grid_arrays
 import qcelemental as qcel
 

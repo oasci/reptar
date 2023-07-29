@@ -30,8 +30,9 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverCube
-from reptar.calculators.psi4_workers import psi4_energy, psi4_engrad, psi4_cube
+from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverCube, Driver
+from reptar.calculators.data import Data
+from reptar.calculators.psi4_workers import psi4_worker
 from reptar.calculators.cube import initialize_grid_arrays
 import qcelemental as qcel
 
@@ -116,6 +117,15 @@ def test_calculator_psi4_1h2o_engrad():
     G[:] = np.nan
     rfile.put(G_key, G)
 
+    data = Data()
+    data.rfile_path = rfile.fpath
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+    data.G = G
+    data.G_key = G_key
+
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 1,
@@ -144,11 +154,7 @@ def test_calculator_psi4_1h2o_engrad():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key, G_key))
-
-    driver = DriverEnGrad(psi4_engrad, worker_kwargs, **driver_kwargs)
-
-    saver.save(E, G)
+    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
 
     E_ref = np.array(
         [
@@ -188,10 +194,10 @@ def test_calculator_psi4_1h2o_engrad():
             ],
         ]
     )
-    E, G = driver.run(Z, R, E, G, saver=saver)
+    data = driver.run(data, ["G"])
 
-    assert np.allclose(E, E_ref)
-    assert np.allclose(G, G_ref)
+    assert np.allclose(data.E, E_ref)
+    assert np.allclose(data.G, G_ref)
 
 
 def test_ray_calculator_psi4_1h2o_engrad():
@@ -211,7 +217,7 @@ def test_ray_calculator_psi4_1h2o_engrad():
 
     if os.path.exists(exdir_path_dest):
         shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    rfile = File(exdir_path_dest, mode="w", allow_remove=True)
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -267,6 +273,15 @@ def test_ray_calculator_psi4_1h2o_engrad():
     G[:] = np.nan
     rfile.put(G_key, G)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+    data.G = G
+    data.G_key = G_key
+
     driver_kwargs = {
         "use_ray": True,
         "n_workers": 2,
@@ -295,11 +310,7 @@ def test_ray_calculator_psi4_1h2o_engrad():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key, G_key))
-
-    driver = DriverEnGrad(psi4_engrad, worker_kwargs, **driver_kwargs)
-
-    saver.save(E, G)
+    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
 
     E_ref = np.array(
         [
@@ -339,10 +350,10 @@ def test_ray_calculator_psi4_1h2o_engrad():
             ],
         ]
     )
-    E, G = driver.run(Z, R, E, G, saver=saver)
+    data = driver.run(data, ["G"])
 
-    assert np.allclose(E, E_ref)
-    assert np.allclose(G, G_ref)
+    assert np.allclose(data.E, E_ref)
+    assert np.allclose(data.G, G_ref)
 
 
 def test_calculator_psi4_1h2o_energy():

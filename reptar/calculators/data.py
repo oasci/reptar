@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 from __future__ import annotations
-from typing import Iterable
+from collections.abc import Iterable
 import numpy as np
-from .logger import ReptarLogger
+from .. import File
+from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
 
@@ -33,7 +34,8 @@ class Data:
     of ways.
 
     - **Write data.** Providing ``rfile`` and keys allows you to use the
-      :meth:`~reptar.calculators.Data.save` method to write stored arrays to the reptar file.
+      :meth:`~reptar.calculators.Data.save` method to write stored arrays to the reptar
+      file.
     - **Worker data.** Used to store data computed by a worker that is then used with
       :meth:`~reptar.calculators.Data.update` and ``idxs_source`` to update another
       :class:`~reptar.calculators.Data` object.
@@ -42,7 +44,7 @@ class Data:
 
     def __init__(
         self,
-        rfile: "File" | None = None,
+        rfile: File | None = None,
         idxs_source: np.ndarray | None = None,
     ) -> None:
         r"""
@@ -58,6 +60,15 @@ class Data:
         self.rfile = rfile
 
         self.idxs_source = idxs_source
+        self.data_labels = ["E", "G", "conv_opt", "R_opt", "cube_R", "cube_V"]
+        self.data_key_labels = [
+            "E_key",
+            "G_key",
+            "conv_opt_key",
+            "R_opt_key",
+            "cube_R_key",
+            "cube_V_key",
+        ]
 
     def update(self, data: Data) -> None:
         r"""Update self with another data object. ``rfile`` must be specified.
@@ -69,16 +80,81 @@ class Data:
         """
         if data.idxs_source is None:
             raise ValueError("data must specify `idxs_source`")
-        for data_attr_label in ["E", "G", "cube_R", "cube_V"]:
-            data_attr = getattr(data, data_attr_label)
+        for data_label in self.data_labels:
+            data_attr = getattr(data, data_label)
             if data_attr is not None:
-                setattr(self, data_attr_label, (data.idxs_source, data_attr))
+                self.add_subset(data_label, data.idxs_source, data_attr)
+
+    def add_subset(self, prop: str, idxs: np.ndarray, values: np.ndarray) -> None:
+        r"""Add a subset of values to a property"""
+        data_original = getattr(self, prop)
+        data_original[idxs] = values
+        setattr(self, prop, data_original)
+
+    def idxs_unfinished(
+        self, start_slice: int | None = None, end_slice: int | None = None
+    ) -> dict[str, np.ndarray]:
+        r"""Determines indices of missing data depending on what is loaded.
+
+        Parameters
+        ----------
+        start_slice
+            Slice arrays in ``args`` starting at this index.
+        end_slice
+            Slice arrays` in ``args`` stopping at this index.
+        """
+        todo = {}
+        if isinstance(self.E, np.ndarray):
+            todo["E"] = np.argwhere(np.isnan(self.E[start_slice:end_slice]))[:, 0]
+        if isinstance(self.G, np.ndarray):
+            todo["G"] = np.argwhere(np.isnan(self.G[start_slice:end_slice][:, 0]))[:, 0]
+        if isinstance(self.conv_opt, np.ndarray):
+            todo["opt"] = np.argwhere(np.isnan(self.conv_opt[start_slice:end_slice]))[
+                :, 0
+            ]
+        if isinstance(self.cube_V, np.ndarray):
+            todo["cube"] = np.argwhere(
+                np.isnan(self.cube_V[start_slice:end_slice][:, 0])
+            )[:, 0]
+        return todo
 
     def save(self) -> None:
         r"""Will write all data to the reptar file."""
-        for data_key_label in ["E_key", "G_key", "cube_R_key", "cube_V_key"]:
+        for data_key_label in self.data_key_labels:
             if data_key_label is not None:
                 self.rfile.put(data_key_label, getattr(self, data_key_label[:-4]))
+
+    @property
+    def Z(self) -> np.ndarray | None:
+        r"""Atomic numbers"""
+        if hasattr(self, "_Z"):
+            return self._Z
+        return None
+
+    @Z.setter
+    def Z(self, value: np.ndarray | None) -> None:
+        # We directly store the value if it is None or an array.
+        if isinstance(value, type(None)):
+            self._Z = value
+        elif isinstance(value, np.ndarray):
+            assert value.ndim == 1
+            self._Z = value
+
+    @property
+    def R(self) -> np.ndarray | None:
+        r"""Last geometry during an optimization."""
+        if hasattr(self, "_R"):
+            return self._R
+        return None
+
+    @R.setter
+    def R(self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None) -> None:
+        # We directly store the value if it is None or an array.
+        if isinstance(value, type(None)):
+            self._R = value
+        elif isinstance(value, np.ndarray):
+            assert value.ndim == 3
+            self._R = value
 
     @property
     def E(self) -> np.ndarray | None:
@@ -88,7 +164,7 @@ class Data:
         return None
 
     @E.setter
-    def E(self, value: Iterable[str, np.ndarray] | np.ndarray | None) -> None:
+    def E(self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None) -> None:
         # We directly store the value if it is None or an array.
         if isinstance(value, type(None)):
             self._E = value
@@ -124,22 +200,13 @@ class Data:
         return None
 
     @G.setter
-    def G(self, value: Iterable[np.ndarray] | np.ndarray | None):
+    def G(self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None):
         # We directly store the value if it is None or an array.
         if isinstance(value, type(None)):
             self._G = value
         elif isinstance(value, np.ndarray):
             assert value.ndim == 3
             self._G = value
-        # Next case is if we provided a tuple of (idxs, data). This happens in
-        # self.update().
-        elif isinstance(value, (tuple, list)):
-            if len(value) != 2:
-                raise RuntimeError(
-                    "If updating this data object, you must provide idxs and values"
-                )
-            idxs, g_values = value
-            self._G[idxs] = g_values
 
     @property
     def G_key(self) -> str | None:
@@ -153,6 +220,64 @@ class Data:
         self._G_key = value
 
     @property
+    def conv_opt(self) -> np.ndarray | None:
+        r"""Convergence of geometry optimizations."""
+        if hasattr(self, "_conv_opt"):
+            return self._conv_opt
+        return None
+
+    @conv_opt.setter
+    def conv_opt(
+        self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None
+    ) -> None:
+        # We directly store the value if it is None or an array.
+        if isinstance(value, type(None)):
+            self._conv_opt = value
+        elif isinstance(value, np.ndarray):
+            assert value.ndim == 1
+            self._conv_opt = value
+
+    @property
+    def conv_opt_key(self) -> str | None:
+        r"""Optimization convergence key to save in reptar file."""
+        if hasattr(self, "_conv_opt_key"):
+            return self._conv_opt_key
+        return None
+
+    @conv_opt_key.setter
+    def conv_opt_key(self, value: str):
+        self._conv_opt_key = value
+
+    @property
+    def R_opt(self) -> np.ndarray | None:
+        r"""Last geometry during an optimization."""
+        if hasattr(self, "_R_opt"):
+            return self._R_opt
+        return None
+
+    @R_opt.setter
+    def R_opt(
+        self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None
+    ) -> None:
+        # We directly store the value if it is None or an array.
+        if isinstance(value, type(None)):
+            self._R_opt = value
+        elif isinstance(value, np.ndarray):
+            assert value.ndim == 3
+            self._R_opt = value
+
+    @property
+    def R_opt_key(self) -> str | None:
+        r"""Key for last geometry optimization step to save in reptar file."""
+        if hasattr(self, "_R_opt_key"):
+            return self._R_opt_key
+        return None
+
+    @R_opt_key.setter
+    def R_opt_key(self, value: str):
+        self._R_opt_key = value
+
+    @property
     def cube_R(self) -> np.ndarray | None:
         r"""Cartesian coordinates of points where a property is probed on a grid."""
         if hasattr(self, "_cube_R"):
@@ -160,22 +285,13 @@ class Data:
         return None
 
     @cube_R.setter
-    def cube_R(self, value: Iterable[np.ndarray] | np.ndarray | None):
+    def cube_R(self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None):
         # We directly store the value if it is None or an array.
         if isinstance(value, type(None)):
             self._cube_R = value
         elif isinstance(value, np.ndarray):
             assert value.ndim == 3
             self._cube_R = value
-        # Next case is if we provided a tuple of (idxs, data). This happens in
-        # self.update().
-        elif isinstance(value, (tuple, list)):
-            if len(value) != 2:
-                raise RuntimeError(
-                    "If updating this data object, you must provide idxs and values"
-                )
-            idxs, cube_r_values = value
-            self._cube_R[idxs] = cube_r_values
 
     @property
     def cube_R_key(self) -> str | None:
@@ -196,22 +312,13 @@ class Data:
         return None
 
     @cube_V.setter
-    def cube_V(self, value: Iterable[np.ndarray] | np.ndarray | None):
+    def cube_V(self, value: Iterable[np.ndarray, np.ndarray] | np.ndarray | None):
         # We directly store the value if it is None or an array.
         if isinstance(value, type(None)):
             self._cube_V = value
         elif isinstance(value, np.ndarray):
             assert value.ndim == 3
             self._cube_V = value
-        # Next case is if we provided a tuple of (idxs, data). This happens in
-        # self.update().
-        elif isinstance(value, (tuple, list)):
-            if len(value) != 2:
-                raise RuntimeError(
-                    "If updating this data object, you must provide idxs and values"
-                )
-            idxs, cube_r_values = value
-            self._cube_V[idxs] = cube_r_values
 
     @property
     def cube_V_key(self) -> str | None:

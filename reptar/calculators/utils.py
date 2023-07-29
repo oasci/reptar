@@ -20,8 +20,10 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
 import os
-from .drivers import DriverOpt, DriverEnGrad
+from collections.abc import Callable
+from .drivers import Driver
 from ..utils import prep_group_opt, prep_group_engrad
 from ..save import Saver
 
@@ -81,8 +83,12 @@ def _prep_xtb_constrain_block(constraints):
 
 
 def prep_xtb_input_lines(
-    charge, multiplicity, opt_block=None, constraints=None, save_traj=False
-):
+    charge: int,
+    multiplicity: int,
+    opt_block: dict | None = None,
+    constraints: tuple[str] | None = None,
+    save_traj: bool = False,
+) -> list[str]:
     """Prepare lines for xtb input file.
 
     Parameters
@@ -121,18 +127,18 @@ def prep_xtb_input_lines(
 
 # pylint: disable=invalid-name
 def prep_opt_job(
-    rfile,
-    Z_key,
-    R_key,
-    dest_key,
-    worker,
-    worker_kwargs,
-    driver_kwargs,
-    Z_opt_label="atomic_numbers",
-    conv_opt_label="conv_opt",
-    R_opt_label="geometry",
-    E_opt_label="energy_ele",
-):
+    rfile: "File",
+    Z_key: str,
+    R_key: str,
+    dest_key: str,
+    worker: Callable[["..."], "Any"],
+    worker_kwargs: dict,
+    driver_kwargs: dict,
+    Z_opt_label: str = "atomic_numbers",
+    conv_opt_label: str = "conv_opt",
+    R_opt_label: str = "geometry",
+    E_opt_label: str = "energy_ele",
+) -> tuple["Driver", "Saver", "Data"]:
     r"""Prepare driver, group, and saver for optimization calculations.
 
     Parameters
@@ -169,7 +175,7 @@ def prep_opt_job(
     :obj:`tuple`
         Initialized arrays containing data to use as arguments for ``worker``.
     """
-    driver = DriverOpt(worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(worker, worker_kwargs, **driver_kwargs)
 
     keys, data = prep_group_opt(
         rfile,
@@ -188,15 +194,15 @@ def prep_opt_job(
 
 # pylint: disable=invalid-name
 def prep_engrad_job(
-    rfile,
-    R_key,
-    dest_key,
-    worker,
-    worker_kwargs,
-    driver_kwargs,
-    E_label="energy_ele",
-    G_label="grads",
-):
+    rfile: "File",
+    R_key: str,
+    dest_key: str,
+    worker: Callable[["..."], "Data"],
+    worker_kwargs: dict[str, "Any"],
+    driver_kwargs: dict[str, "Any"],
+    E_label: str = "energy_ele",
+    G_label: str = "grads",
+) -> tuple["Driver", "Saver", "Data"]:
     r"""Prepare driver, group, and saver for energy+gradient calculations.
 
     Parameters
@@ -227,7 +233,7 @@ def prep_engrad_job(
     :obj:`tuple`
         Initialized arrays containing data to use as arguments for ``worker``.
     """
-    driver = DriverEnGrad(worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(worker, worker_kwargs, **driver_kwargs)
 
     keys, data = prep_group_engrad(
         rfile,
@@ -241,7 +247,7 @@ def prep_engrad_job(
     return driver, saver, data
 
 
-def cleanup_xtb_calc(work_dir="./"):
+def cleanup_xtb_calc(work_dir: str = "./") -> None:
     """Remove xTB files that are not commonly needed.
 
     Parameters
