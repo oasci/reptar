@@ -755,3 +755,22 @@ def get_obj_from_string(import_string):
     module = importlib.import_module(module_name)
     obj = getattr(module, obj_name)
     return obj
+
+
+def common_elements(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
+    r"""Provides only elements that are shared between two arrays.
+
+    Parameters
+    ----------
+    arr1
+        First array.
+    arr2
+        Second array.
+
+    Returns
+    -------
+    :obj:`np.ndarray`
+        Array containing only shared elements between ``arr1`` and ``arr2``.
+    """
+    u, c = np.unique(np.concatenate((arr1, arr2)), return_counts=True)
+    return u[c > 1]
