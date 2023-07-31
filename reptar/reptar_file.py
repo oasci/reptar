@@ -38,7 +38,7 @@ class File:
     # pylint: disable=unnecessary-dunder-call
 
     def __init__(
-        self, file_path, mode="r", allow_remove=False, plugins=None, from_dict=None
+        self, file_path, mode="r", plugins=None, from_dict=None
     ):
         """
         Parameters
@@ -48,13 +48,15 @@ class File:
             be created if possible.
         mode : :obj:`str`, default: ``'r'``
             A file mode string that defines the read/write behavior.
-        allow_remove : :obj:`bool`, default: ``False``
-            Allow the removal of exdir groups in ``'w'`` operation.
         plugins : :obj:`list`, default: ``None``
             A list of instantiated exdir plugins.
         from_dict : :obj:`dict`, default: ``None``
             Load data from a dictionary.
         """
+        if "w" in mode:
+            allow_remove = True
+        elif mode in ["a", "r"]:
+            allow_remove = False
         self.allow_remove = allow_remove
         self.plugins = plugins
         if from_dict is None:

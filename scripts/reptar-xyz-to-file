@@ -52,12 +52,12 @@ def main(args):
     save_path = args.save_path
     if os.path.exists(save_path):
         if args.overwrite:
-            rfile = File(save_path, mode="w", allow_remove=True)
+            rfile = File(save_path, mode="w")
         else:
             log.error("%s exists and overwrite is False", save_path)
             sys.exit(0)
     else:
-        rfile = File(save_path, mode="w", allow_remove=True)
+        rfile = File(save_path, mode="w")
 
     log.info("Parsing XYZ file")
     Z, _, R = parse_xyz(os.path.abspath(args.xyz_path))

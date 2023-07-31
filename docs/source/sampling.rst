@@ -355,7 +355,7 @@ After running the MD simulation, we stored the data in :download:`this exdir fil
     entity_ids = gen_entity_ids(atoms_per_molecule, num_molecules)
     comp_ids = gen_comp_ids(label=comp_id, num_mol=num_molecules)
 
-    rfile = File(rfile_path, mode='a', allow_remove=False)
+    rfile = File(rfile_path, mode='a')
     create = Creator(rfile=rfile)
 
     create.from_calc(
@@ -389,7 +389,7 @@ The following script will sample and store 5000 random trimers from the entire M
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
     # Load exdir file.
-    rfile = File(rfile_path, mode='a', allow_remove=False)
+    rfile = File(rfile_path, mode='a')
 
     # Initialize group.
     rfile.create_group(sample_key)
@@ -428,7 +428,7 @@ We can use the :func:`~reptar.descriptors.com_distance_sum` descriptor and the :
     os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
     # Load exdir file.
-    rfile = File(rfile_path, mode='a', allow_remove=False)
+    rfile = File(rfile_path, mode='a')
 
     # Initialize group.
     rfile.create_group(sample_key)

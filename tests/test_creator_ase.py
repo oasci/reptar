@@ -56,7 +56,7 @@ def test_1h2o_57h2o_ase_exdir():
 
     group_key = "nvt_run_0"
     create = Creator()
-    create.load(exdir_path, mode="w", allow_remove=True)
+    create.load(exdir_path, mode="w")
     create.from_calc(group_key, traj_path=traj_path)
     create.ids(group_key, entity_ids, comp_ids)
 
@@ -98,7 +98,7 @@ def test_1h2o_57h2o_ase_zarr():
 
     group_key = "nvt_run_0"
     create = Creator()
-    create.load(zarr_path, mode="w", allow_remove=True)
+    create.load(zarr_path, mode="w")
     create.from_calc(group_key, traj_path=traj_path)
     create.ids(group_key, entity_ids, comp_ids)
 

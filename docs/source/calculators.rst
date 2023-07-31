@@ -99,7 +99,7 @@ Ideally we would have an even distribution of configurational space, so we first
             # Ensures we execute from script directory (for relative paths).
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-            rfile = File(rfile_path, mode='a', allow_remove=False)
+            rfile = File(rfile_path, mode='a')
 
             # Create the destination group if it does not exist.
             try:
@@ -339,7 +339,7 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
             # Ensures we execute from script directory (for relative paths).
             os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
-            rfile = File(rfile_path, mode="a", allow_remove=False)
+            rfile = File(rfile_path, mode="a")
 
             Z = rfile.get(f"{group_key}/atomic_numbers")
             R = rfile.get(f"{group_key}/geometry")

@@ -57,7 +57,7 @@ def test_1h2o_120meoh_prod_sampler():
     source_key = "/eq_1"
 
     dest = Creator()
-    dest.load(dest_path, mode="w", allow_remove=True)
+    dest.load(dest_path, mode="w")
     dest_key = "/wat.2met-pes"
     dest.rfile.create_group(dest_key)
 
@@ -147,7 +147,7 @@ def test_ray_1h2o_120meoh_prod_sampler():
     source_key = "/eq_1"
 
     dest = Creator()
-    dest.load(dest_path, mode="w", allow_remove=True)
+    dest.load(dest_path, mode="w")
     dest_key = "/wat.2met-pes"
     dest.rfile.create_group(dest_key)
 

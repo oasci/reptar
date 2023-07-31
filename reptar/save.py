@@ -84,7 +84,7 @@ class Saver:
             Note we use the ``*`` operator to unpack the data; however,
             it is fine if you forget it.
         """
-        rfile = File(self.rfile_path, mode="a", allow_remove=False)
+        rfile = File(self.rfile_path, mode="a")
 
         # Handles data where * is dropped.
         if isinstance(data, tuple):

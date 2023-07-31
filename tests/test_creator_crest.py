@@ -47,7 +47,7 @@ def test_crest_50h2o_nci_exdir_conformers():
     exdir_path = os.path.join(CREST_DIR, "50h2o.exdir")
 
     create = Creator()
-    create.load(exdir_path, mode="w", allow_remove=True)
+    create.load(exdir_path, mode="w")
     group_key = "/0-crest/conformers"
     rfile = create.from_calc(
         group_key,
@@ -87,7 +87,7 @@ def test_crest_50h2o_nci_exdir_rotamers():
     exdir_path = os.path.join(CREST_DIR, "50h2o.exdir")
 
     create = Creator()
-    create.load(exdir_path, mode="w", allow_remove=True)
+    create.load(exdir_path, mode="w")
     group_key = "/0-crest/rotamers"
     rfile = create.from_calc(
         group_key,
@@ -151,7 +151,7 @@ def test_crest_50h2o_nci_zarr_conformers():
     exdir_path = os.path.join(CREST_DIR, "50h2o.zarr")
 
     create = Creator()
-    create.load(exdir_path, mode="w", allow_remove=True)
+    create.load(exdir_path, mode="w")
     group_key = "/0-crest/conformers"
     rfile = create.from_calc(
         group_key,
@@ -191,7 +191,7 @@ def test_crest_50h2o_nci_zarr_rotamers():
     zarr_path = os.path.join(CREST_DIR, "50h2o.zarr")
 
     create = Creator()
-    create.load(zarr_path, mode="w", allow_remove=True)
+    create.load(zarr_path, mode="w")
     group_key = "/0-crest/rotamers"
     rfile = create.from_calc(
         group_key,
