@@ -30,7 +30,7 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverOpt
+from reptar.calculators.drivers import Driver
 from reptar.calculators.xtb_workers import xtb_python_engrad, xtb_opt
 from reptar.calculators.utils import prep_xtb_input_lines
 

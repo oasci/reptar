@@ -137,12 +137,12 @@ def _do_psi4_task(
             cube_path = os.path.join(temp_dir, cube_file_name)
             cube_r, cube_v, wfn = _do_psi4_cube(method, mol, cube_path, wfn)
 
-            cube_r_slice = slice(
-                (None, None, None),
-                (None, cube_r.shape[0], None),
-                (None, None, None),
+            cube_r_slice = (
+                slice(None, None, None),
+                slice(None, cube_r.shape[0], None),
+                slice(None, None, None),
             )
-            cube_v_slice = slice((None, None, None), (None, cube_v.shape[0], None))
+            cube_v_slice = (slice(None, None, None), slice(None, cube_v.shape[0], None))
             data_worker.add_subset("cube_R", cube_r_slice, cube_r)
             data_worker.add_subset("cube_V", cube_v_slice, cube_v)
     return data_worker, wfn
@@ -200,14 +200,8 @@ def psi4_worker(
 
     Returns
     -------
-    :obj:`numpy.ndarray`
-        ``idxs``
-    :obj:`numpy.ndarray`
-        If the optimizations converged or not.
-    :obj:`numpy.ndarray`
-        Optimized geometries.
-    :obj:`numpy.ndarray`
-        Total electronic energies of optimized structures. Units of Hartree.
+    :obj:`reptar.calculators.data.Data`
+        Data object from this worker.
 
     Notes
     -----

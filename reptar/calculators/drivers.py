@@ -173,7 +173,7 @@ class Driver:
         - ``cube``: ``Z``, ``R``, ``cube_R``, ``cube_V``.
         """
         worker = self.worker
-        data_todo = data.idxs_unfinished()
+        data_todo = data.idxs_todo()
 
         # We make a list of indices that are missing all requested calculations.
         idxs_todo = data_todo[tasks[0]]

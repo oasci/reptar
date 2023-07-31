@@ -91,7 +91,7 @@ class Data:
         data_original[idxs] = values
         setattr(self, prop, data_original)
 
-    def idxs_unfinished(
+    def idxs_todo(
         self, start_slice: int | None = None, end_slice: int | None = None
     ) -> dict[str, np.ndarray]:
         r"""Determines indices of missing data depending on what is loaded.
@@ -317,7 +317,7 @@ class Data:
         if isinstance(value, type(None)):
             self._cube_V = value
         elif isinstance(value, np.ndarray):
-            assert value.ndim == 3
+            assert value.ndim == 2
             self._cube_V = value
 
     @property

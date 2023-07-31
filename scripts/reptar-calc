@@ -102,7 +102,7 @@ def _prep_opt_job(
     _, conv_opt, R_opt, E_opt = data  # pylint: disable=invalid-name
     incomplete_bool_key = saver.data_keys[0]
     run_args = (Z, R, conv_opt, R_opt, E_opt, saver)
-    n_todo = len(driver.idx_todo(run_args, start_slice, end_slice))
+    n_todo = len(driver.idxs_todo(run_args, start_slice, end_slice))
 
     return calc_label, driver, n_todo, incomplete_bool_key, run_args
 
@@ -145,7 +145,7 @@ def _prep_engrad_job(
     E, G = data  # pylint: disable=invalid-name
     incomplete_bool_key = saver.data_keys[0]
     run_args = (Z, R, E, G, saver)
-    n_todo = len(driver.idx_todo(run_args, start_slice, end_slice))
+    n_todo = len(driver.idxs_todo(run_args, start_slice, end_slice))
 
     return calc_label, driver, n_todo, incomplete_bool_key, run_args
 
@@ -155,7 +155,7 @@ def main(args):
 
     log.info("Opening data file")
     rfile_path = os.path.abspath(config["rfile"]["path"])
-    rfile = File(rfile_path, mode="a", allow_remove=True)
+    rfile = File(rfile_path, mode="a")
 
     source_key = config["rfile"]["source_key"]
     dest_key = config["rfile"]["dest_key"]
@@ -219,7 +219,7 @@ def main(args):
         )
     elif calc_label == "energy+gradient":
         n_remaining_args = (None, None, rfile.get(incomplete_bool_key), None, None)
-    n_remaining = driver.idx_todo(n_remaining_args, None, None)
+    n_remaining = driver.idxs_todo(n_remaining_args, None, None)
     log.info("There are %r incomplete calculations remaining", n_remaining)
 
 

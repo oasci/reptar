@@ -37,9 +37,7 @@ class File:
 
     # pylint: disable=unnecessary-dunder-call
 
-    def __init__(
-        self, file_path, mode="r", plugins=None, from_dict=None
-    ):
+    def __init__(self, file_path, mode="r", plugins=None, from_dict=None):
         """
         Parameters
         ----------

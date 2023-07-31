@@ -30,7 +30,7 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverCube, Driver
+from reptar.calculators.drivers import Driver
 from reptar.calculators.data import Data
 from reptar.calculators.psi4_workers import psi4_worker
 from reptar.calculators.cube import initialize_grid_arrays
@@ -118,7 +118,7 @@ def test_calculator_psi4_1h2o_engrad():
     rfile.put(G_key, G)
 
     data = Data()
-    data.rfile_path = rfile.fpath
+    data.rfile = rfile
     data.Z = Z
     data.R = R
     data.E = E
@@ -217,7 +217,7 @@ def test_ray_calculator_psi4_1h2o_engrad():
 
     if os.path.exists(exdir_path_dest):
         shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w", allow_remove=True)
+    rfile = File(exdir_path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -420,6 +420,13 @@ def test_calculator_psi4_1h2o_energy():
     E[:] = np.nan
     rfile.put(E_key, E)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 1,
@@ -448,11 +455,7 @@ def test_calculator_psi4_1h2o_energy():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key,))
-
-    driver = DriverEnergy(psi4_energy, worker_kwargs, **driver_kwargs)
-
-    saver.save(E)
+    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
 
     E_ref = np.array(
         [
@@ -464,9 +467,9 @@ def test_calculator_psi4_1h2o_energy():
         ]
     )
 
-    E = driver.run(Z, R, E, saver=saver)
+    Edata = driver.run(data, ["E"])
 
-    assert np.allclose(E, E_ref)
+    assert np.allclose(data.E, E_ref)
 
 
 def test_ray_calculator_psi4_1h2o_energy():
@@ -537,6 +540,13 @@ def test_ray_calculator_psi4_1h2o_energy():
     E[:] = np.nan
     rfile.put(E_key, E)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+
     driver_kwargs = {
         "use_ray": True,
         "n_workers": 2,
@@ -565,11 +575,7 @@ def test_ray_calculator_psi4_1h2o_energy():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key,))
-
-    driver = DriverEnergy(psi4_energy, worker_kwargs, **driver_kwargs)
-
-    saver.save(E)
+    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
 
     E_ref = np.array(
         [
@@ -581,9 +587,9 @@ def test_ray_calculator_psi4_1h2o_energy():
         ]
     )
 
-    E = driver.run(Z, R, E, saver=saver)
+    data = driver.run(data, ["E"])
 
-    assert np.allclose(E, E_ref)
+    assert np.allclose(data.E, E_ref)
 
 
 def test_ray_calculator_psi4_1h2o_esp():
@@ -648,6 +654,15 @@ def test_ray_calculator_psi4_1h2o_esp():
         R / qcel.constants.bohr2angstroms, overage=overage, spacing=spacing
     )
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.cube_R = cube_R
+    data.cube_R_key = cube_R_key
+    data.cube_V = cube_V
+    data.cube_V_key = cube_V_key
+
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 2,
@@ -674,21 +689,14 @@ def test_ray_calculator_psi4_1h2o_esp():
             "qc_module": "dfmp2",
             "print": 2,
             "cubeprop_tasks": ["esp"],
-            "cubic_grid_spacing": spacing,
-            "cubic_grid_overage": overage,
+            "cubic_grid_spacing": spacing,  # Needs to be Bohr
+            "cubic_grid_overage": overage,  # Needs to be Bohr
         },
+        "total_grid_points": cube_V.shape[-1],
     }
 
-    saver = Saver(
-        exdir_path_dest,
-        (
-            cube_R_key,
-            cube_V_key,
-        ),
-    )
+    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
 
-    driver = DriverCube(psi4_cube, worker_kwargs, **driver_kwargs)
-
-    cube_R, cube_V = driver.run(Z, R, cube_R, cube_V, saver=saver)
-    assert cube_R[0][0][0] == -4.12824
-    assert cube_V[0][0] == -0.00174447
+    data = driver.run(data, ["cube"])
+    assert data.cube_R[0][0][0] == -4.12824
+    assert data.cube_V[0][0] == -0.00174447

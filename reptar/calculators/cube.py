@@ -20,15 +20,16 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
 import numpy as np
 
 
-def get_R_span(R):  # pylint: disable=invalid-name
+def get_R_span(R: np.ndarray) -> np.ndarray:  # pylint: disable=invalid-name
     """Span of ``x``, `y``, and ``z`` coordinates of all structures.
 
     Parameters
     ----------
-    R : :obj:`numpy.ndarray`
+    R
         Cartesian coordinates of all structures to consider.
 
     Returns
@@ -39,17 +40,19 @@ def get_R_span(R):  # pylint: disable=invalid-name
     return np.subtract(np.max(R, axis=-2), np.min(R, axis=-2))
 
 
-# pylint: disable-next=invalid-name
-def get_n_grid_points(spacing, R_span, overage):
+# pylint: disable=invalid-name
+def get_n_grid_points(
+    spacing: np.ndarray, R_span: np.ndarray, overage: np.ndarray
+) -> np.ndarray:
     """Compute the number of cubic grid points in the ``x``, ``y``, ``z`` directions.
 
     Parameters
     ----------
-    spacing : :obj:`float`
+    spacing
         Spacing between grid points for all ``x``, ``y``, and ``z`` directions.
-    R_span : :obj:`numpy.ndarray`, ndim: ``2`` or ``3``
+    R_span
         The span of ``x``, ``y``, and ``z`` coordinates for one or many structures.
-    overage : :obj:`numpy.ndarray`
+    overage
         Additional space in the minimum or maximum ``x``, ``y``, and ``z`` directions.
         Must be in the same units as ``R_span``.
 
@@ -81,16 +84,18 @@ def get_n_grid_points(spacing, R_span, overage):
 
 
 # pylint: disable-next=invalid-name
-def get_total_grid_points(spacing, R_span, overage):
+def get_total_grid_points(
+    spacing: np.ndarray, R_span: np.ndarray, overage: np.ndarray
+) -> np.ndarray:
     """Compute the total number of cubic grid points.
 
     Parameters
     ----------
-    spacing : :obj:`numpy.ndarray`
+    spacing
         Spacing between grid points for all ``x``, ``y``, and ``z`` directions.
-    R_span : :obj:`numpy.ndarray`, ndim: ``2`` or ``3``
+    R_span
         The span of ``x``, ``y``, and ``z`` coordinates for one or many structures.
-    overage : :obj:`numpy.ndarray`
+    overage
         Additional space in the minimum or maximum ``x``, ``y``, and ``z`` directions.
         Must be in the same units as ``R_span``.
 
@@ -103,7 +108,12 @@ def get_total_grid_points(spacing, R_span, overage):
 
 
 # pylint: disable-next=invalid-name
-def get_grid_origin(R_min, R_max, spacing, n_points):
+def get_grid_origin(
+    R_min: np.ndarray,
+    R_max: np.ndarray,
+    spacing: np.ndarray | float,
+    n_points: np.ndarray | float,
+) -> np.ndarray:
     """Determine origin of a cubic grid.
 
     Parameters
@@ -118,16 +128,18 @@ def get_grid_origin(R_min, R_max, spacing, n_points):
     return R_min - (spacing * (n_points - 1) - (R_max - R_min)) / 2.0
 
 
-def get_grid_points(origin, n_points, spacing):
+def get_grid_points(
+    origin: np.ndarray, n_points: np.ndarray, spacing: np.ndarray | float
+) -> np.ndarray:
     """Generate grid coordinates from coordinate vectors.
 
     Parameters
     ----------
-    origin : :obj:`numpy.ndarray`, ndim: ``1``
+    origin
         Origin of the cubic grid (with the minimum coordinates).
-    n_points : :obj:`numpy.ndarray`, ndim: ``1``
+    n_points
         Number of points in the ``x``, ``y``, and ``z`` direction.
-    spacing : :obj:`numpy.ndarray`, ndim: ``1``
+    spacing
         Space between grid points for all ``x``, ``y``, and ``z`` directions.
 
     Returns
@@ -177,18 +189,20 @@ def get_grid_points(origin, n_points, spacing):
 
 
 # pylint: disable-next=invalid-name
-def get_max_grid_points(R_span, overage, spacing):
+def get_max_grid_points(
+    R_span: np.ndarray, overage: np.ndarray | float, spacing: np.ndarray | float
+) -> np.ndarray:
     """Determine cubic grid spacing for a set of structures that will keep the number
     of points the same.
 
     Parameters
     ----------
-    R_span : :obj:`numpy.ndarray`
+    R_span
         Span of structure coordinates.
-    overage : :obj:`numpy.ndarray`, ndim: ``1``
+    overage
         Additional space in the minimum and maximum ``x``, ``y``, and ``z`` directions.
         Must be in the same units as ``R``.
-    spacing : :obj:`float` or :obj:`numpy.ndarray`
+    spacing
         The space between grid points in ``x``, ``y``, and ``z`` directions. If only
         :obj:`float` is provided, we broadcast it in all dimensions.
     """

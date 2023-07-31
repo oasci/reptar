@@ -110,9 +110,7 @@ class Creator:
         plugins : :obj:`list`, default: ``None``
             A list of instantiated exdir plugins.
         """
-        self.rfile = File(
-            file_path, mode=mode, plugins=plugins
-        )
+        self.rfile = File(file_path, mode=mode, plugins=plugins)
 
     @property
     def rfile(self):
