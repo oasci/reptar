@@ -30,8 +30,8 @@ import os
 import pytest
 import numpy as np
 from reptar import File, Saver
+from reptar.calculators import Data
 from reptar.calculators.drivers import Driver
-from reptar.calculators.data import Data
 from reptar.calculators.psi4_workers import psi4_worker
 from reptar.calculators.cube import initialize_grid_arrays
 import qcelemental as qcel
@@ -54,14 +54,14 @@ def test_calculator_psi4_1h2o_engrad():
     except ImportError:
         pytest.skip("psi4 package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -210,14 +210,14 @@ def test_ray_calculator_psi4_1h2o_engrad():
     except ImportError:
         pytest.skip("ray package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -362,14 +362,14 @@ def test_calculator_psi4_1h2o_energy():
     except ImportError:
         pytest.skip("psi4 package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -482,14 +482,14 @@ def test_ray_calculator_psi4_1h2o_energy():
     except ImportError:
         pytest.skip("ray package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -602,14 +602,14 @@ def test_ray_calculator_psi4_1h2o_esp():
     except ImportError:
         pytest.skip("ray package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"

@@ -25,8 +25,8 @@ import os
 from collections.abc import Iterator
 from tempfile import TemporaryDirectory
 import numpy as np
-from .data import Data
-from .cube import initialize_grid_arrays
+from . import Data
+from .utils import initialize_worker_data
 from ..logger import ReptarLogger
 from ..parsers.gaussian_cube import parse_cube
 
@@ -90,23 +90,6 @@ def _do_psi4_opt(
     return r_conv_opt, r_opt, e, wfn
 
 
-def _initialize_worker_data(
-    tasks: Iterator[str], data: Data, R: np.ndarray, total_grid_points: int
-) -> Data:
-    if ("E" in tasks) or ("G" in tasks) or ("opt" in tasks):
-        data.E = np.full(R.shape[0], np.nan, dtype=np.float64)
-    if "G" in tasks:
-        data.G = np.full(R.shape, np.nan, dtype=np.float64)
-    if "opt" in tasks:
-        data.conv_opt = np.full(R.shape[0], False, dtype=np.bool8)
-        data.R_opt = np.full(R.shape, np.nan, dtype=np.float64)
-    if "cube" in tasks:
-        data.cube_R, data.cube_V = initialize_grid_arrays(
-            R, max_points=total_grid_points
-        )
-    return data
-
-
 def _do_psi4_task(
     task: str,
     data_worker: Data,
@@ -164,12 +147,12 @@ def psi4_worker(
 
     Parameters
     ----------
-    tasks
-        Calculations this worker needs to run in the order specified here. In general,
-        we recommend using this ordering: ``opt``, ``E``, ``G``, ``cube``.
     idxs
         Indices of the structures from ``R`` to compute energies and gradients
         for.
+    tasks
+        Calculations this worker needs to run in the order specified here. In general,
+        we recommend using this ordering: ``opt``, ``E``, ``G``, ``cube``.
     data
         All required data required for computations such as ``Z``, ``R``, ``conv_opt``,
         etc.
@@ -200,7 +183,7 @@ def psi4_worker(
 
     Returns
     -------
-    :obj:`reptar.calculators.data.Data`
+    :obj:`reptar.calculators.Data`
         Data object from this worker.
 
     Notes
@@ -213,6 +196,11 @@ def psi4_worker(
     properties. Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid
     this.
     """
+    implemented_tasks = ["E", "G", "opt", "cube"]
+    for task in tasks:
+        if task not in implemented_tasks:
+            raise ValueError(f"Task ({task}) is not implemented in this worker")
+
     psi4.core.set_num_threads(threads)
     psi4.set_memory(mem)
 
@@ -221,7 +209,9 @@ def psi4_worker(
     R = data.R[idxs]
 
     # Initialize data object with resulting arrays
-    data_worker = _initialize_worker_data(tasks, Data(), R, total_grid_points)
+    data_worker = initialize_worker_data(
+        tasks, Data(), R, total_grid_points=total_grid_points
+    )
     data_worker.idxs_source = idxs
 
     cube_file_name = None

@@ -21,10 +21,8 @@
 # SOFTWARE.
 
 from __future__ import annotations
-from abc import ABC, abstractmethod
 from collections.abc import Callable, Iterator
-import numpy as np
-from .data import Data
+from . import Data
 from ..utils import chunk_iterable, common_elements
 from ..logger import ReptarLogger
 
@@ -38,7 +36,7 @@ except ImportError:
 
 def add_worker(
     workers_list: list[Callable],
-    worker: Callable[[...], Data],
+    worker: Callable[["..."], Data],
     chunker: Iterator[list[int]],
     worker_args: tuple,
     worker_kwargs: dict,
@@ -156,7 +154,7 @@ class Driver:
             .. note::
 
                 The above labels are used to keep track of calculation completeness.
-                :obj:`np.NaN` is used to flag incomplete/unfinished calculations.
+                :obj:`numpy.NaN` is used to flag incomplete/unfinished calculations.
                 Other data need to be initialized for the calculation. For example,
                 ``R_opt`` is needed for geometry optimizations and ``cube_R`` for
                 cube property.

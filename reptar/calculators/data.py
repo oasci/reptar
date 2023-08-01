@@ -23,7 +23,6 @@
 from __future__ import annotations
 from collections.abc import Iterable
 import numpy as np
-from .. import File
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
@@ -44,7 +43,7 @@ class Data:
 
     def __init__(
         self,
-        rfile: File | None = None,
+        rfile: "File" | None = None,
         idxs_source: np.ndarray | None = None,
     ) -> None:
         r"""
@@ -109,9 +108,7 @@ class Data:
         if isinstance(self.G, np.ndarray):
             todo["G"] = np.argwhere(np.isnan(self.G[start_slice:end_slice][:, 0]))[:, 0]
         if isinstance(self.conv_opt, np.ndarray):
-            todo["opt"] = np.argwhere(np.isnan(self.conv_opt[start_slice:end_slice]))[
-                :, 0
-            ]
+            todo["opt"] = np.where(~self.conv_opt[start_slice:end_slice])[0]
         if isinstance(self.cube_V, np.ndarray):
             todo["cube"] = np.argwhere(
                 np.isnan(self.cube_V[start_slice:end_slice][:, 0])
@@ -121,8 +118,10 @@ class Data:
     def save(self) -> None:
         r"""Will write all data to the reptar file."""
         for data_key_label in self.data_key_labels:
-            if data_key_label is not None:
-                self.rfile.put(data_key_label, getattr(self, data_key_label[:-4]))
+            data_key = getattr(self, data_key_label)
+            data = getattr(self, data_key_label[:-4])
+            if (data_key is not None) and (data is not None):
+                self.rfile.put(data_key, data)
 
     @property
     def Z(self) -> np.ndarray | None:

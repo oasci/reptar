@@ -3,18 +3,12 @@ Calculators
 ===========
 
 Reptar provides several driver and workers for calculations on data stored in supported file formats.
-We have the following drivers available.
-
-- :class:`~reptar.calculators.drivers.DriverEnergy`
-- :class:`~reptar.calculators.drivers.DriverEnGrad`
-- :class:`~reptar.calculators.drivers.DriverOpt`
-
-The above drivers can be used with any of the compatible workers below (e.g., ``engrad`` workers with ``DriverEnGrad``).
+The :class:`~reptar.calculators.drivers.Driver` class manages all calculations and workers for reptar.
 
 - `Psi4 <https://psicode.org/psi4manual/master/index.html>`__: quantum chemical methods such as DFT and wave function methods.
-    - :func:`~reptar.calculators.psi4_workers.psi4_energy`, :func:`~reptar.calculators.psi4_workers.psi4_engrad`, :func:`~reptar.calculators.psi4_workers.psi4_opt`
+    - :func:`~reptar.calculators.psi4_workers.psi4_worker`
 - `xtb <https://xtb-docs.readthedocs.io/en/latest/contents.html>`__ and `xtb-python <https://xtb-python.readthedocs.io/en/latest/>`__: a semiempirical quantum mechanics method.
-    - :func:`~reptar.calculators.xtb_workers.xtb_opt`, :func:`~reptar.calculators.xtb_workers.xtb_python_engrad`
+    - :func:`~reptar.calculators.xtb_workers.xtb_worker`, :func:`~reptar.calculators.xtb_workers.xtb_python_worker`
 
 We use `ray <https://docs.ray.io/en/latest/ray-overview/installation.html>`__ to parallelize our calculations across one or multiple nodes.
 
@@ -29,7 +23,7 @@ Reptar uses a driver/supervisor and worker workflow where the results are direct
 When running calculations, you first create a property (e.g., energy) array where all values are ``NaN``.
 Each ``NaN`` value represents a calculation that still needs to run.
 The driver then spawns workers with batches of calculations to run.
-Once a worker is finished, we use a :class:`~reptar.Saver` object to store the results in case the job terminates early.
+Once a worker is finished, we use the :meth:`~reptar.calculators.Data.Save` method to store the results in case the job terminates early.
 
 .. mermaid::
 
@@ -282,9 +276,10 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
             import time
             import os
             import numpy as np
-            from reptar import File, Saver
-            from reptar.calculators.drivers import DriverEnGrad
-            from reptar.calculators.psi4_workers import psi4_engrad
+            from reptar import File
+            from reptar.calculators import Data
+            from reptar.calculators.drivers import Driver
+            from reptar.calculators.psi4_workers import psi4_worker
 
             rfile_path = "../30h2o-gfn2-md.exdir"
             group_key = "/30h2o/samples_3h2o"
@@ -359,14 +354,20 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
                     G = np.empty(R.shape)
                     G[:] = np.nan
                     rfile.put(G_key, G)
-
-            # Saver object for energy and gradients after each work finishes.
-            saver = Saver(rfile_path, (E_key, G_key))
+            
+            data = Data()
+            data.rfile = rfile
+            data.Z = Z
+            data.R = R
+            data.E = E
+            data.E_key = E_key
+            data.G = G
+            data.G_key = G_key
 
             # Setup and run energy and gradient calculations.
-            driver = DriverEnGrad(worker, worker_kwargs, **driver_kwargs)
+            driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
             t_start = time.time()
-            driver.run(Z, R, E, G, saver=saver)
+            data = driver.run(data, ["E", "G"])
             t_end = time.time()
 
             print(f"Took {t_end-t_start:.1f} seconds")
