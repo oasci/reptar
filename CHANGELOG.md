@@ -7,7 +7,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 ### Added
 
 - `common_elements` to determine what elements two arrays share.
-- Functions to prepare groups for different calculations.
+- Methods to prepare groups for different calculations in `Data`.
 - `DriverCube` and `psi4_cube` for cube property calculations like electrostatic potentials.
 - `parse_cube` parser for Gaussian cube files.
 - `write_qdata` for [ForceBalance](https://github.com/leeping/forcebalance) package.
