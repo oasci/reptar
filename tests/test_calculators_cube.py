@@ -25,13 +25,13 @@
 # pylint: skip-file
 
 import sys
-import shutil
 import os
 import pytest
 import numpy as np
-from reptar import File, Saver
-from reptar.calculators.cube import initialize_grid_arrays
 import qcelemental as qcel
+from reptar import File
+from reptar.calculators.cube import initialize_grid_arrays
+
 
 
 sys.path.append("..")
@@ -48,12 +48,6 @@ os.makedirs(WRITING_DIR, exist_ok=True)
 def test_ray_cube_max_points():
     exdir_path_source = get_140h2o_samples_path()
     rfile_source = File(exdir_path_source, mode="r")
-
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
-
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -79,7 +73,6 @@ def test_ray_cube_max_points():
             ],
         ]
     )
-    Z = rfile_source.get(f"{group_key}/atomic_numbers")
     R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
     assert np.allclose(R, R_ref)
 
