@@ -29,7 +29,7 @@ import shutil
 import os
 import pytest
 import numpy as np
-from reptar import File, Saver
+from reptar import File
 from reptar.calculators import Data
 from reptar.calculators.drivers import Driver
 from reptar.calculators.psi4_workers import psi4_worker
@@ -154,7 +154,7 @@ def test_calculator_psi4_1h2o_engrad():
         },
     }
 
-    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -194,7 +194,7 @@ def test_calculator_psi4_1h2o_engrad():
             ],
         ]
     )
-    data = driver.run(data, ["G"])
+    data = driver.run(psi4_worker, worker_kwargs, data, ["G"])
 
     assert np.allclose(data.E, E_ref)
     assert np.allclose(data.G, G_ref)
@@ -310,7 +310,7 @@ def test_ray_calculator_psi4_1h2o_engrad():
         },
     }
 
-    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -350,7 +350,7 @@ def test_ray_calculator_psi4_1h2o_engrad():
             ],
         ]
     )
-    data = driver.run(data, ["G"])
+    data = driver.run(psi4_worker, worker_kwargs, data, ["G"])
 
     assert np.allclose(data.E, E_ref)
     assert np.allclose(data.G, G_ref)
@@ -455,7 +455,7 @@ def test_calculator_psi4_1h2o_energy():
         },
     }
 
-    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -467,7 +467,7 @@ def test_calculator_psi4_1h2o_energy():
         ]
     )
 
-    Edata = driver.run(data, ["E"])
+    Edata = driver.run(psi4_worker, worker_kwargs, data, ["E"])
 
     assert np.allclose(data.E, E_ref)
 
@@ -575,7 +575,7 @@ def test_ray_calculator_psi4_1h2o_energy():
         },
     }
 
-    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -587,7 +587,7 @@ def test_ray_calculator_psi4_1h2o_energy():
         ]
     )
 
-    data = driver.run(data, ["E"])
+    data = driver.run(psi4_worker, worker_kwargs, data, ["E"])
 
     assert np.allclose(data.E, E_ref)
 
@@ -695,8 +695,8 @@ def test_ray_calculator_psi4_1h2o_esp():
         "total_grid_points": cube_V.shape[-1],
     }
 
-    driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
+    driver = Driver(**driver_kwargs)
 
-    data = driver.run(data, ["cube"])
+    data = driver.run(psi4_worker, worker_kwargs, data, ["cube"])
     assert data.cube_R[0][0][0] == -4.12824
     assert data.cube_V[0][0] == -0.00174447

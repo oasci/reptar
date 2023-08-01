@@ -29,7 +29,7 @@ import shutil
 import os
 import pytest
 import numpy as np
-from reptar import File, Saver
+from reptar import File
 from reptar.calculators import Data
 from reptar.calculators.drivers import Driver
 from reptar.calculators.xtb_workers import xtb_python_worker, xtb_worker
@@ -133,8 +133,6 @@ def test_calculator_xtb_1h2o_engrad():
         "params": None,
     }
 
-    driver = Driver(xtb_python_worker, worker_kwargs, **driver_kwargs)
-
     E_ref = np.array(
         [
             -3.656060950664,
@@ -173,8 +171,9 @@ def test_calculator_xtb_1h2o_engrad():
             ],
         ]
     )
+
     driver = Driver(xtb_python_worker, worker_kwargs, **driver_kwargs)
-    data = driver.run(data, ["G"])
+    data = driver.run(xtb_python_worker, worker_kwargs, data, ["G"])
 
     assert np.allclose(data.E, E_ref)
     assert np.allclose(data.G, G_ref)
@@ -261,8 +260,9 @@ def test_calculator_xtb_1h2o_opt():
     E_opt_ref = np.array(
         [-5.07054432, -5.07054437, -5.07054445, -5.07054441, -5.07054445]
     )
-    driver = Driver(xtb_worker, worker_kwargs, **driver_kwargs)
-    data = driver.run(data, ["opt"])
+
+    driver = Driver(**driver_kwargs)
+    data = driver.run(xtb_worker, worker_kwargs, data, ["opt"])
 
     assert np.all(data.conv_opt == True)
     assert np.allclose(data.R_opt, R_opt_ref)

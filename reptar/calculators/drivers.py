@@ -82,8 +82,6 @@ class Driver:
 
     def __init__(
         self,
-        worker: Callable[["..."], Data],
-        worker_kwargs: dict,
         use_ray: bool = False,
         n_workers: int = 1,
         n_cpus_per_worker: int = 1,
@@ -95,13 +93,6 @@ class Driver:
         r"""
         Parameters
         ----------
-        worker
-            The desired worker function to compute energy and gradients. It should
-            be the same as any previous calculations. The ``ray.remote`` decorator
-            will be applied automatically.
-        worker_kwargs
-            The other keyword arguments for the worker function after
-            ``R_idxs``, ``Z``, and ``R``.
         use_ray
             Use ray to parallelize calculations. If ``False``, calculations are
             done serially. ``False`` can be useful when running locally or only
@@ -121,8 +112,6 @@ class Driver:
         ray_address
             Ray cluster address to connect to.
         """
-        self.worker = worker
-        self.worker_kwargs = worker_kwargs
         self.start_slice = start_slice
         self.end_slice = end_slice
 
@@ -135,11 +124,24 @@ class Driver:
             if not ray.is_initialized():
                 ray.init(address=ray_address)
 
-    def run(self, data: Data, tasks: Iterator[str]) -> Data:
+    def run(
+        self,
+        worker: Callable[["..."], Data],
+        worker_kwargs: dict[str, "Any"],
+        data: Data,
+        tasks: Iterator[str],
+    ) -> Data:
         r"""
 
         Parameters
         ----------
+        worker
+            The desired worker function to compute energy and gradients. It should
+            be the same as any previous calculations. The ``ray.remote`` decorator
+            will be applied automatically.
+        worker_kwargs
+            The other keyword arguments for the worker function after
+            ``R_idxs``, ``Z``, and ``R``.
         data
             Parent data from current reptar file with initialized arrays required
             for ``worker`` arguments.
@@ -170,7 +172,6 @@ class Driver:
         - ``opt``: ``Z``, ``R``, ``E``, ``conv_opt``, ``R_opt``.
         - ``cube``: ``Z``, ``R``, ``cube_R``, ``cube_V``.
         """
-        worker = self.worker
         data_todo = data.idxs_todo()
 
         # We make a list of indices that are missing all requested calculations.
@@ -182,7 +183,7 @@ class Driver:
 
         if not self.use_ray:
             for idx in idxs_todo:
-                data_worker = worker([idx], tasks, data, **self.worker_kwargs)
+                data_worker = worker([idx], tasks, data, **worker_kwargs)
                 data.update(data_worker)
                 data.save()
         else:
@@ -198,7 +199,7 @@ class Driver:
                     worker,
                     chunker,
                     worker_args,
-                    self.worker_kwargs,
+                    worker_kwargs,
                     self.n_cpus_per_worker,
                 )
 
@@ -215,7 +216,7 @@ class Driver:
                     worker,
                     chunker,
                     worker_args,
-                    self.worker_kwargs,
+                    worker_kwargs,
                     self.n_cpus_per_worker,
                 )
 
