@@ -23,9 +23,20 @@
 from __future__ import annotations
 from collections.abc import Iterable
 import numpy as np
+import qcelemental as qcel
+from .cube import get_R_span, get_max_grid_points
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
+
+
+class MissingDataException(Exception):
+    r"""Data that should be provided for specific task."""
+
+    def __init__(self, message):
+        super().__init__(message)
+        self.message = message
+
 
 # pylint: disable=invalid-name
 class Data:
@@ -39,6 +50,9 @@ class Data:
       :meth:`~reptar.calculators.Data.update` and ``idxs_source`` to update another
       :class:`~reptar.calculators.Data` object.
 
+    We store data in this class with properties (e.g., ``E``, ``R_opt``, ``cube_V``)
+    that have a companion property with a ``_key`` suffix. These ``_key``
+    properties are used to write data to ``rfile``.
     """
 
     def __init__(
@@ -59,15 +73,16 @@ class Data:
         self.rfile = rfile
 
         self.idxs_source = idxs_source
-        self.data_labels = ["E", "G", "conv_opt", "R_opt", "cube_R", "cube_V"]
-        self.data_key_labels = [
-            "E_key",
-            "G_key",
-            "conv_opt_key",
-            "R_opt_key",
-            "cube_R_key",
-            "cube_V_key",
-        ]
+        self.data_labels = ["Z", "R", "E", "G", "conv_opt", "R_opt", "cube_R", "cube_V"]
+        self.data_key_labels = [key + "_key" for key in self.data_labels]
+
+        self.task_data_map = {
+            "E": ["E"],
+            "G": ["E", "G"],
+            "opt": ["E", "conv_opt", "R_opt"],
+            "cube": ["cube_R", "cube_V"],
+        }
+        self._require_init_cube = False
 
     def update(self, data: Data) -> None:
         r"""Update self with another data object. ``rfile`` must be specified.
@@ -115,13 +130,101 @@ class Data:
             )[:, 0]
         return todo
 
+    def validate(self, tasks: Iterable[str] | str | None) -> None:
+        r"""Will check if required data is loaded to complete tasks.
+
+        Parameters
+        ----------
+        tasks
+            Calculations that will be performed with these data. If ``None``, then this
+            only checks for ``Z`` and ``R``.
+
+        Raises
+        ------
+        ``MissingDataException``
+            If data that should be present for specific task is missing.
+        """
+        if self.Z is None:
+            raise MissingDataException("Z is required for all tasks but is missing")
+        if self.R is None:
+            raise MissingDataException("R is required for all tasks but is missing")
+
+        if tasks is None:
+            return None
+
+        if isinstance(tasks, str):
+            tasks = (tasks,)
+
+        for task in tasks:
+            data_attrs = self.task_data_map[task]
+            for data_attr in data_attrs:
+                if getattr(self, data_attr) is None:
+                    raise MissingDataException(
+                        f"{data_attr} is required for {task} but is missing"
+                    )
+        return None
+
+    def initialize_array(self, label: str) -> np.ndarray:
+        r"""Initialize array given ``Z`` and ``R``.
+
+        Properties
+        ----------
+        label
+            Name of the attribute.
+        """
+        if "cube" in label:
+            self._require_init_cube = True
+        setattr(self, label, np.full(**self.array_init_specs[label]))
+
     def save(self) -> None:
-        r"""Will write all data to the reptar file."""
+        r"""Write all data to the reptar file."""
         for data_key_label in self.data_key_labels:
             data_key = getattr(self, data_key_label)
             data = getattr(self, data_key_label[:-4])
             if (data_key is not None) and (data is not None):
                 self.rfile.put(data_key, data)
+
+    @property
+    def array_init_specs(self) -> dict[str, "Any"]:
+        r"""Specifications for initializing arrays."""
+        self.validate(None)
+        array_specs = {
+            "E": {
+                "shape": self.R.shape[0],
+                "fill_value": np.nan,
+                "dtype": np.float64,
+            },
+            "G": {"shape": self.R.shape, "fill_value": np.nan, "dtype": np.float64},
+            "conv_opt": {"shape": self.R.shape[0], "fill_value": False, "dtype": bool},
+            "R_opt": {"shape": self.R.shape, "fill_value": np.nan, "dtype": np.float64},
+            "cube_R": {
+                "shape": self.R.shape,
+                "fill_value": np.nan,
+                "dtype": np.float64,
+            },
+            "cube_V": {
+                "shape": self.R.shape,
+                "fill_value": np.nan,
+                "dtype": np.float64,
+            },
+        }
+        if self._require_init_cube:
+            if self._max_grid_points is None:
+                self._max_grid_points = get_max_grid_points(
+                    get_R_span(self.R), self.cube_grid_overage, self.cube_grid_spacing
+                )
+            array_specs["cube_R"] = {
+                "shape": (self.R.shape[0], self._max_grid_points, 3),
+                "fill_value": np.nan,
+                "dtype": np.float64,
+            }
+            array_specs["cube_V"] = {
+                "shape": (self.R.shape[0], self._max_grid_points),
+                "fill_value": np.nan,
+                "dtype": np.float64,
+            }
+
+        return array_specs
 
     @property
     def Z(self) -> np.ndarray | None:
@@ -140,6 +243,17 @@ class Data:
             self._Z = value
 
     @property
+    def Z_key(self) -> str | None:
+        r"""Atomic number key to save in reptar file."""
+        if hasattr(self, "_Z_key"):
+            return self._Z_key
+        return None
+
+    @Z_key.setter
+    def Z_key(self, value: str):
+        self._Z_key = value
+
+    @property
     def R(self) -> np.ndarray | None:
         r"""Last geometry during an optimization."""
         if hasattr(self, "_R"):
@@ -154,6 +268,18 @@ class Data:
         elif isinstance(value, np.ndarray):
             assert value.ndim == 3
             self._R = value
+        self._max_grid_points = None  # Force recalculate if requested.
+
+    @property
+    def R_key(self) -> str | None:
+        r"""Atomic number key to save in reptar file."""
+        if hasattr(self, "_R_key"):
+            return self._R_key
+        return None
+
+    @R_key.setter
+    def R_key(self, value: str):
+        self._R_key = value
 
     @property
     def E(self) -> np.ndarray | None:
@@ -329,3 +455,43 @@ class Data:
     @cube_V_key.setter
     def cube_V_key(self, value: str):
         self._cube_V_key = value
+
+    @property
+    def cube_grid_overage(self) -> np.ndarray | None:
+        r"""Overage for cube in Angstroms.
+
+        `Defaults <https://psicode.org/psi4manual/master/
+        autodoc_glossary_options_c.html#term-CUBIC_GRID_OVERAGE-GLOBALS>`__ to ``4.0``
+        Bohr (approximately ``2.117`` Angstroms) in ``x``, ``y``, and ``z``.
+        """
+        if hasattr(self, "_cube_grid_overage"):
+            return self._cube_grid_overage
+        default_overage = np.array([4.0, 4.0, 4.0], dtype=np.float64)
+        default_overage *= qcel.constants.bohr2angstroms
+        return default_overage
+
+    @cube_grid_overage.setter
+    def cube_grid_overage(self, value: np.ndarray | float) -> None:
+        if isinstance(value, float):
+            value = np.array([value, value, value], dtype=np.float64)
+        self._cube_grid_overage = value
+
+    @property
+    def cube_grid_spacing(self) -> np.ndarray | None:
+        r"""Spacing for cube grid in Angstroms.
+
+        `Defaults <https://psicode.org/psi4manual/master/
+        autodoc_glossary_options_c.html#term-CUBIC_GRID_SPACING-GLOBALS>`__ to ``0.2``
+        Bohr (approximately ``0.108`` Angstroms) in ``x``, ``y``, and ``z``.
+        """
+        if hasattr(self, "_cube_grid_spacing"):
+            return self._cube_grid_spacing
+        default_spacing = np.array([0.2, 0.2, 0.2], dtype=np.float64)
+        default_spacing *= qcel.constants.bohr2angstroms
+        return default_spacing
+
+    @cube_grid_spacing.setter
+    def cube_grid_spacing(self, value: np.ndarray | float) -> None:
+        if isinstance(value, float):
+            value = np.array([value, value, value], dtype=np.float64)
+        self._cube_grid_spacing = value

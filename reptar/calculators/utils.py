@@ -22,18 +22,21 @@
 
 from __future__ import annotations
 import os
-from collections.abc import Callable
-from .drivers import Driver
-from ..utils import prep_group_opt, prep_group_engrad
-from ..save import Saver
+from collections.abc import Iterator
+import numpy as np
+from . import Data
+from .cube import initialize_grid_arrays
+from ..logger import ReptarLogger
+
+log = ReptarLogger(__name__)
 
 
-def _prep_xtb_opt_block(block):
+def _prep_xtb_opt_block(block: dict[str, "Any"]) -> list[str]:
     """Prepare xTB constrain block lines for input file.
 
     Parameters
     ----------
-    block : :obj:`dict`
+    block
         Keywords for the optimization block in xTB.
 
     Returns
@@ -126,125 +129,71 @@ def prep_xtb_input_lines(
 
 
 # pylint: disable=invalid-name
-def prep_opt_job(
+def prep_calc_data(
+    tasks: Iterator[str],
     rfile: "File",
-    Z_key: str,
-    R_key: str,
+    source_key: str,
+    source_labels: dict[str, str],
     dest_key: str,
-    worker: Callable[["..."], "Any"],
-    worker_kwargs: dict,
-    driver_kwargs: dict,
-    Z_opt_label: str = "atomic_numbers",
-    conv_opt_label: str = "conv_opt",
-    R_opt_label: str = "geometry",
-    E_opt_label: str = "energy_ele",
-) -> tuple["Driver", "Saver", "Data"]:
-    r"""Prepare driver, group, and saver for optimization calculations.
+    dest_labels: dict[str, str],
+) -> Data:
+    """Prepare group and data for reptar calculations
 
     Parameters
     ----------
-    rfile : :obj:`reptar.File`
-        Reptar file to work in.
-    Z_key : :obj:`str`
-        Source key for atomic numbers.
-    R_key : :obj:`str`
-        Source key for Cartesian coordinates.
-    dest_key : :obj:`str`
-        Destination key to store calculation data.
-    worker : ``callable``
-        Worker function for calculations.
-    worker_kwargs : :obj:`dict`
-        Keyword arguments for ``worker``.
-    driver_kwargs : :obj:`dict`
-        Keyword arguments for the driver.
-    Z_opt_label : :obj:`str`
-        Label to store atomic numbers of optimized structures.
-    conv_opt_label : :obj:`str`
-        Label to store if geometry optimizations have converged.
-    R_opt_label : :obj:`str`
-        Label to store optimization Cartesian coordinates.
-    E_opt_label : :obj:`str`
-        Label to store electronic energies of the last optimization step.
+    tasks
+        Reptar calculations that will be ran with :class:`~reptar.calculators.Driver`.
+    rfile
+        File to prepare a group for optimization-like data.
+    source_key
+        Key to group containing data sources.
+    source_labels
+        Labels of data from group ``source_key`` to populate the data object. No
+        ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
+        this ``dict``.
+    dest_key
+        Key to store calculation results.
+    dest_labels
+        Labels of data in group ``dest_key`` to populate the data object. Any data
+        that is not provided will be initialized here based on ``tasks``.
+        ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
+        this ``dict``.
 
     Returns
     -------
-    :obj:`reptar.drivers.DriverOpt`
-        Initialized optimization driver.
-    :obj:`reptar.save.Saver`
-        Initialized saver object.
-    :obj:`tuple`
-        Initialized arrays containing data to use as arguments for ``worker``.
+    :obj:`reptar.calculators.Data`
+        Data for calculations.
     """
-    driver = Driver(worker, worker_kwargs, **driver_kwargs)
+    data = Data()
+    data.rfile = rfile
 
-    keys, data = prep_group_opt(
-        rfile,
-        Z_key,
-        R_key,
-        dest_key,
-        Z_opt_label=Z_opt_label,
-        conv_opt_label=conv_opt_label,
-        R_opt_label=R_opt_label,
-        E_opt_label=E_opt_label,
-    )
-    saver = Saver(rfile.fpath, keys[1:])
+    log.debug("Retrieving source data")
+    for data_attr, label in source_labels.items():
+        data_key = os.path.join(source_key, label)
+        value = rfile.get(data_key)
+        setattr(data, data_attr, value)
+    data.validate(None)  # Checks for Z and R
 
-    return driver, saver, data
+    log.debug("Checking calculation data")
+    try:
+        rfile.get(dest_key)
+    except RuntimeError as e:
+        if " does not exist" in str(e):
+            rfile.create_group(dest_key)
+        else:
+            raise RuntimeError from e
 
+    for data_attr, label in dest_labels.items():
+        data_key = os.path.join(dest_key, label)
+        setattr(data, data_attr + "_key", data_key)
 
-# pylint: disable=invalid-name
-def prep_engrad_job(
-    rfile: "File",
-    R_key: str,
-    dest_key: str,
-    worker: Callable[["..."], "Data"],
-    worker_kwargs: dict[str, "Any"],
-    driver_kwargs: dict[str, "Any"],
-    E_label: str = "energy_ele",
-    G_label: str = "grads",
-) -> tuple["Driver", "Saver", "Data"]:
-    r"""Prepare driver, group, and saver for energy+gradient calculations.
-
-    Parameters
-    ----------
-    rfile : :obj:`reptar.File`
-        Reptar file to work in.
-    R_key : :obj:`str`
-        Source key for Cartesian coordinates.
-    dest_key : :obj:`str`
-        Destination key to store calculation data.
-    worker : ``callable``
-        Worker function for calculations.
-    worker_kwargs : :obj:`dict`
-        Keyword arguments for ``worker``.
-    driver_kwargs : :obj:`dict`
-        Keyword arguments for the driver.
-    R_opt_label : :obj:`str`
-        Label to store optimization Cartesian coordinates.
-    E_opt_label : :obj:`str`
-        Label to store electronic energies of the last optimization step.
-
-    Returns
-    -------
-    :obj:`reptar.drivers.DriverOpt`
-        Initialized optimization driver.
-    :obj:`reptar.save.Saver`
-        Initialized saver object.
-    :obj:`tuple`
-        Initialized arrays containing data to use as arguments for ``worker``.
-    """
-    driver = Driver(worker, worker_kwargs, **driver_kwargs)
-
-    keys, data = prep_group_engrad(
-        rfile,
-        R_key,
-        dest_key,
-        E_label=E_label,
-        G_label=G_label,
-    )
-    saver = Saver(rfile.fpath, keys[1:])
-
-    return driver, saver, data
+        # If included from source, then we may have previous data already.
+        # Check before initializing.
+        if getattr(data, data_attr) is None:
+            data.initialize_array(data_attr)
+    data.validate(tasks)
+    data.save()
+    return data
 
 
 def cleanup_xtb_calc(work_dir: str = "./") -> None:
@@ -268,3 +217,23 @@ def cleanup_xtb_calc(work_dir: str = "./") -> None:
             os.remove(os.path.join(work_dir, tmp_file))
         except FileNotFoundError:
             pass
+
+
+def initialize_worker_data(
+    tasks: Iterator[str],
+    data: Data,
+    R: np.ndarray,
+    total_grid_points: int | None = None,
+) -> Data:
+    if ("E" in tasks) or ("G" in tasks) or ("opt" in tasks):
+        data.E = np.full(R.shape[0], np.nan, dtype=np.float64)
+    if "G" in tasks:
+        data.G = np.full(R.shape, np.nan, dtype=np.float64)
+    if "opt" in tasks:
+        data.conv_opt = np.full(R.shape[0], False, dtype=np.bool8)
+        data.R_opt = np.full(R.shape, np.nan, dtype=np.float64)
+    if "cube" in tasks:
+        data.cube_R, data.cube_V = initialize_grid_arrays(
+            R, max_points=total_grid_points
+        )
+    return data
