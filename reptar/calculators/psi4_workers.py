@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 import os
-from collections.abc import Iterator
+from collections.abc import Iterable
 from tempfile import TemporaryDirectory
 import numpy as np
 from . import Data
@@ -132,8 +132,8 @@ def _do_psi4_task(
 
 
 def psi4_worker(
-    idxs: Iterator[int],
-    tasks: Iterator[str],
+    idxs: Iterable[int],
+    tasks: Iterable[str],
     data: Data,
     charge: int = 0,
     mult: int = 1,

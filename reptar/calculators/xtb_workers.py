@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 from __future__ import annotations
-from collections.abc import Iterator
+from collections.abc import Iterable
 import os
 import subprocess
 from tempfile import TemporaryDirectory
@@ -43,8 +43,8 @@ except ImportError:
 
 
 def xtb_python_worker(
-    idxs: Iterator[int],
-    tasks: Iterator[str],
+    idxs: Iterable[int],
+    tasks: Iterable[str],
     data: Data,
     charge: int = 0,
     mult: int = 1,
@@ -144,10 +144,10 @@ def _do_xtb_task(
 
 
 def xtb_worker(
-    idxs: Iterator[int],
-    tasks: Iterator[str],
+    idxs: Iterable[int],
+    tasks: Iterable[str],
     data: Data,
-    input_lines: Iterator[str],
+    input_lines: Iterable[str],
     acc: float = 0.1,
     n_cores: int = 1,
     xtb_path: str = "xtb",

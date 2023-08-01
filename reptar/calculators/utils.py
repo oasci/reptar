@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 import os
-from collections.abc import Iterator
+from collections.abc import Iterable
 import numpy as np
 from . import Data
 from .cube import initialize_grid_arrays
@@ -130,7 +130,7 @@ def prep_xtb_input_lines(
 
 # pylint: disable=invalid-name
 def prep_calc_data(
-    tasks: Iterator[str],
+    tasks: Iterable[str],
     rfile: "File",
     source_key: str,
     source_labels: dict[str, str],
@@ -220,7 +220,7 @@ def cleanup_xtb_calc(work_dir: str = "./") -> None:
 
 
 def initialize_worker_data(
-    tasks: Iterator[str],
+    tasks: Iterable[str],
     data: Data,
     R: np.ndarray,
     total_grid_points: int | None = None,

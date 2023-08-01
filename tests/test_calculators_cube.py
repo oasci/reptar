@@ -33,7 +33,6 @@ from reptar import File
 from reptar.calculators.cube import initialize_grid_arrays
 
 
-
 sys.path.append("..")
 from .paths import get_140h2o_samples_path
 
