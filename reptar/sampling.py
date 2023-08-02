@@ -36,6 +36,7 @@ log = ReptarLogger(__name__)
 
 reptar_version = _version.get_versions()["version"]
 
+
 def entity_mask_gen(entity_ids, entities):
     r"""Generate an atom mask for a single entity.
 
