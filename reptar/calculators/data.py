@@ -181,7 +181,7 @@ class Data:
     def initialize_array(self, label: str) -> np.ndarray:
         r"""Initialize array given ``Z`` and ``R``.
 
-        Properties
+        Parameters
         ----------
         label
             Name of the attribute.
@@ -268,11 +268,6 @@ class Data:
             that is not provided will be initialized here based on ``tasks``.
             ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
             this ``dict``.
-
-        Returns
-        -------
-        :obj:`reptar.calculators.Data`
-            Data for calculations.
         """
         log.debug("Retrieving source data")
         for data_attr, label in source_labels.items():

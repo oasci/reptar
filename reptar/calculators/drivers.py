@@ -42,7 +42,7 @@ def add_worker(
     worker_kwargs: dict,
     n_cpus_per_worker: int = 1,
 ):
-    """Add a ray worker to a running list.
+    r"""Add a ray worker to a running list.
 
     Parameters
     ----------
@@ -78,7 +78,7 @@ def add_worker(
 
 
 class Driver:
-    r"""Template driver class"""
+    r"""Manage all calculations that we can perform with reptar workers."""
 
     def __init__(
         self,
@@ -124,7 +124,7 @@ class Driver:
         start_slice: int = None,
         end_slice: int = None,
     ) -> Data:
-        r"""
+        r"""Run tasks with specified workers and parameters.
 
         Parameters
         ----------
