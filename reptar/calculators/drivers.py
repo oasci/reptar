@@ -22,7 +22,7 @@
 
 from __future__ import annotations
 from collections.abc import Callable, Iterator
-from . import Data
+from .data import Data
 from ..utils import chunk_iterable
 from ..logger import ReptarLogger
 

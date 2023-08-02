@@ -618,5 +618,6 @@ def common_elements(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
     :obj:`np.ndarray`
         Array containing only shared elements between ``arr1`` and ``arr2``.
     """
+    # pylint: disable-next=invalid-name
     u, c = np.unique(np.concatenate((arr1, arr2)), return_counts=True)
     return u[c > 1]

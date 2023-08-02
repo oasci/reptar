@@ -22,90 +22,19 @@
 
 from random import choice, randrange
 import numpy as np
+import ray
 from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 from qcelemental.exceptions import ValidationError
 from .utils import center_structures as get_center_structures
 from .utils import gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
-from . import _version, File
+from . import _version
+from .saver import Saver
 from .logger import ReptarLogger
 
 log = ReptarLogger(__name__)
 
 reptar_version = _version.get_versions()["version"]
-
-import ray
-
-
-class Saver:
-    r"""Saves data to File.
-
-    Useful for drivers that should save current data periodically. For example,
-    when running quantum chemistry calculations or sampling. This uses the
-    provided ``data_keys`` that specify where to store data in ``rfile`` in the
-    same order as the :meth:`~reptar.Saver.save`.
-    """
-
-    def __init__(self, rfile_path, data_keys):
-        """
-        Parameters
-        ----------
-        rfile_path : :obj:`reptar.File`
-            Path to File.
-        data_keys : :obj:`tuple`
-            Keys to save data for the particular worker
-        """
-        self.rfile_path = rfile_path
-        self.data_keys = data_keys
-
-    def save(self, *data):
-        r"""Put data to rfile.
-
-        Parameters
-        ----------
-        *data
-            Data to add to file in the same order as ``data_keys``.
-
-        Returns
-        -------
-        :obj:`reptar.File`
-            File after putting data.
-
-        Examples
-        --------
-        Suppose you have a script that calculates electronic energies of water
-        molecules. For some reason, you want to continuously update the atomic
-        numbers and the electronic energy under the keys
-        ``/1h2o/atomic_numbers`` and ``/1h2o/energy_ele``, respectively.
-
-        We first initialize the ``Saver`` class with the path to the file and
-        the keys where we want to store the data.
-
-        >>> saver = Saver(
-        ...    'path/to/file.exdir', ('/1h2o/atomic_numbers', '/1h2o/energy_ele')
-        ... )
-
-        Then in our script we provide the data in the same order as we specified
-        the keys when initializing ``saver``.
-
-        >>> saver.save(*(np.array([8, 1, 1]), -76.35015973429272))
-
-        .. note::
-
-            Note we use the ``*`` operator to unpack the data; however,
-            it is fine if you forget it.
-        """
-        rfile = File(self.rfile_path, mode="a")
-
-        # Handles data where * is dropped.
-        if isinstance(data, tuple):
-            if len(data) == 1 and isinstance(data[0], tuple):
-                data = data[0]
-
-        for key, d in zip(self.data_keys, data):
-            rfile.put(key, d)
-        return rfile
-
 
 def entity_mask_gen(entity_ids, entities):
     r"""Generate an atom mask for a single entity.

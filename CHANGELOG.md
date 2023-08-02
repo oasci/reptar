@@ -32,7 +32,7 @@ Now reptar correctly identifies them as iterables and array-like data.
 
 ### Removed
 
-- `Saver` in favor of `Data.save()`.
+- `Saver` in favor of `Data.save()` for calculations.
 - `allow_remove` is determined from `mode` in `File` instead of a parameter.
 
 ## [0.1.0] - 2023-04-21
