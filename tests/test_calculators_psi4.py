@@ -31,7 +31,7 @@ import pytest
 import numpy as np
 from reptar import File
 from reptar.calculators import Data
-from reptar.calculators.drivers import Driver
+from reptar.calculators import Driver
 from reptar.calculators.psi4_workers import psi4_worker
 from reptar.calculators.cube import initialize_grid_arrays
 import qcelemental as qcel

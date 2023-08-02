@@ -31,7 +31,7 @@ import pytest
 import numpy as np
 from reptar import File
 from reptar.calculators import Data
-from reptar.calculators.drivers import Driver
+from reptar.calculators import Driver
 from reptar.calculators.xtb_workers import xtb_python_worker, xtb_worker
 from reptar.calculators.utils import prep_xtb_input_lines
 
