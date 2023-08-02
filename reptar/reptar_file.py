@@ -300,13 +300,16 @@ class File:
 
         return data
 
-    def _get_from_zarr(self, key: str) -> "Any":
+    def _get_from_zarr(self, key: str, to_numpy: bool = True) -> "Any":
         r"""Get data from zarr file.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data. Nested keys should be separated by ``/``.
+        to_numpy
+            Will return :obj:`numpy.ndarray` instead of :obj:`zarr.core.Array` and thus
+            load the entire array into memory.
 
         Returns
         -------
@@ -319,11 +322,13 @@ class File:
         if key_data in attr_keys:
             data = self.File_[key_parent].attrs[key_data]
         else:
-            # Should be array.
             try:
                 data = self.File_[key]
             except KeyError as e:
                 raise RuntimeError(f"{key} does not exist") from e
+
+        if isinstance(data, zarr.core.Array) and to_numpy:
+            data = data[...]  # Converts to numpy
 
         return data
 
@@ -362,7 +367,8 @@ class File:
         return keys
 
     def get(
-        self, key: str, as_memmap: bool = False, missing_is_none: bool = False
+        self, key: str, as_memmap: bool = False, missing_is_none: bool = False, 
+        zarr_to_numpy: bool = True
     ) -> "Any":
         r"""Retrieve data.
 
@@ -375,6 +381,9 @@ class File:
         missing_is_none
             Catch the ``RuntimeError`` and return ``None`` if the key does not
             exits.
+        zarr_to_numpy
+            Load :obj:`zarr.core.Array` objects into memory and return as
+            :obj:`numpy.ndarray`.
 
         Examples
         --------
@@ -396,7 +405,7 @@ class File:
             elif self.ftype in ("json", "npz"):
                 data = self._get_from_dict(key)
             elif self.ftype == "zarr":
-                data = self._get_from_zarr(key)
+                data = self._get_from_zarr(key, to_numpy=zarr_to_numpy)
         except RuntimeError as e:
             if "does not exist" in str(e) and missing_is_none:
                 data = None
