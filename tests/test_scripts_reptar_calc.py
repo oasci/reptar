@@ -135,7 +135,10 @@ def test_script_psi4_engrad():
         ]
     )
 
-    command = ["reptar-calc", "./data/script-configs/config-psi4-engrads.yaml", "--log_level", "debug"]
+    command = [
+        "reptar-calc",
+        "./data/script-configs/config-psi4-engrads.yaml"
+    ]
     subprocess.run(command, check=True)
 
     assert np.allclose(rfile.get(f"{group_key}/energy_ele_mp2.def2tzvp"), E_ref)

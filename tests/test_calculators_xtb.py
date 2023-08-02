@@ -121,8 +121,6 @@ def test_calculator_xtb_1h2o_engrad():
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -214,8 +212,6 @@ def test_calculator_xtb_1h2o_opt():
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     input_lines = prep_xtb_input_lines(
