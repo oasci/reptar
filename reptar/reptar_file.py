@@ -367,8 +367,11 @@ class File:
         return keys
 
     def get(
-        self, key: str, as_memmap: bool = False, missing_is_none: bool = False, 
-        zarr_to_numpy: bool = True
+        self,
+        key: str,
+        as_memmap: bool = False,
+        missing_is_none: bool = False,
+        zarr_to_numpy: bool = True,
     ) -> "Any":
         r"""Retrieve data.
 
