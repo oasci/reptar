@@ -365,9 +365,9 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
             data.G_key = G_key
 
             # Setup and run energy and gradient calculations.
-            driver = Driver(psi4_worker, worker_kwargs, **driver_kwargs)
+            driver = Driver(**driver_kwargs)
             t_start = time.time()
-            data = driver.run(data, ["E", "G"])
+            data = driver.run(psi4_worker, worker_kwargs, data, ["E", "G"])
             t_end = time.time()
 
             print(f"Took {t_end-t_start:.1f} seconds")

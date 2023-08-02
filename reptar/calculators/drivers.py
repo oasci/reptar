@@ -23,7 +23,7 @@
 from __future__ import annotations
 from collections.abc import Callable, Iterator
 from . import Data
-from ..utils import chunk_iterable, common_elements
+from ..utils import chunk_iterable
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
@@ -86,8 +86,6 @@ class Driver:
         n_workers: int = 1,
         n_cpus_per_worker: int = 1,
         chunk_size: int = 50,
-        start_slice: int = None,
-        end_slice: int = None,
         ray_address: str = "auto",
     ) -> None:
         r"""
@@ -105,16 +103,9 @@ class Driver:
         chunk_size
             Number of calculations per task to do. This should be enough to make
             the ray task overhead significantly less than calculations.
-        start_slice
-            Trims ``R`` to start at this index.
-        end_slice
-            Trims ``R`` to end at this index.
         ray_address
             Ray cluster address to connect to.
         """
-        self.start_slice = start_slice
-        self.end_slice = end_slice
-
         self.n_workers = n_workers
         self.n_cpus_per_worker = n_cpus_per_worker
         self.chunk_size = chunk_size
@@ -130,6 +121,8 @@ class Driver:
         worker_kwargs: dict[str, "Any"],
         data: Data,
         tasks: Iterator[str],
+        start_slice: int = None,
+        end_slice: int = None,
     ) -> Data:
         r"""
 
@@ -160,6 +153,10 @@ class Driver:
                 Other data need to be initialized for the calculation. For example,
                 ``R_opt`` is needed for geometry optimizations and ``cube_R`` for
                 cube property.
+        start_slice
+            Trims ``R`` to start at this index.
+        end_slice
+            Trims ``R`` to end at this index.
 
         Notes
         -----
@@ -172,14 +169,7 @@ class Driver:
         - ``opt``: ``Z``, ``R``, ``E``, ``conv_opt``, ``R_opt``.
         - ``cube``: ``Z``, ``R``, ``cube_R``, ``cube_V``.
         """
-        data_todo = data.idxs_todo()
-
-        # We make a list of indices that are missing all requested calculations.
-        idxs_todo = data_todo[tasks[0]]
-        if len(tasks) > 1:
-            for i in range(1, len(tasks)):
-                idxs_todo = common_elements(idxs_todo, data_todo[i])
-        chunker = chunk_iterable(idxs_todo, self.chunk_size)
+        idxs_todo = data.get_idxs_todo(tasks, start_slice, end_slice)
 
         if not self.use_ray:
             for idx in idxs_todo:
@@ -187,6 +177,8 @@ class Driver:
                 data.update(data_worker)
                 data.save()
         else:
+            chunker = chunk_iterable(idxs_todo, self.chunk_size)
+
             worker = ray.remote(worker)
             worker_args = (ray.put(tasks), ray.put(data))
 

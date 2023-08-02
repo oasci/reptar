@@ -1,0 +1,98 @@
+# Information about the physical system.
+system:
+
+  # Total charge.
+  charge: 0
+
+  # Multiplicity.
+  multiplicity: 1
+
+# Computations to complete in the order they are provided.
+tasks:
+  - E
+  - G
+
+# Information about the reptar file containing structures to optimize and where
+# to store the results.
+rfile:
+
+  # File path to reptar file.
+  path: ./tmp/calculators/1h2o-psi4-script.zarr
+
+  # Information for data sources
+  source:
+
+    # Key to group to retrieve data.
+    key: /1h2o
+
+    # Only used to get data.
+    labels:
+      Z: atomic_numbers
+      R: geometry
+  
+  # Information for where to store calculated data.
+  # This location can be the same as ``source``
+  destination:
+
+    # Key to group to store data.
+    key: 1h2o
+
+    # Used to put data.
+    labels:
+      Z: atomic_numbers
+      R: geometry
+      E: energy_ele_mp2.def2tzvp
+      G: grads_mp2.def2tzvp
+
+# Driver for the desired calculation.
+driver:
+
+  # Import string for the desired calculation driver.
+  path: reptar.calculators.drivers.Driver
+
+  # Keyword arguments for the specified driver in ``class``.
+  # Please refer to the specific driver's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
+
+    use_ray: false
+    n_workers: 1
+    n_cpus_per_worker: 2
+    chunk_size: 1
+    ray_address: auto
+  
+  start_slice: null
+
+  end_slice: null
+
+# Worker to be used with the driver.
+worker:
+
+  # Import string for the desired worker.
+  path: reptar.calculators.psi4_workers.psi4_worker
+
+  # Keyword arguments for the worker.
+  # These are kept separate as they must be specified as a command line argument.
+  # Please refer to the specific workers's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
+
+    charge: 0
+
+    mult: 1
+
+    method: mp2
+
+    options:
+
+      basis: def2-TZVP
+      reference: rhf
+      scf_type: df
+      e_convergence: 8
+      d_convergence: 8
+      mp2_type: df
+      freeze_core: true
+
+    threads: 2
+
+    mem: 1 GB

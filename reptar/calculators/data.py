@@ -21,10 +21,12 @@
 # SOFTWARE.
 
 from __future__ import annotations
+import os
 from collections.abc import Iterable
 import numpy as np
 import qcelemental as qcel
 from .cube import get_R_span, get_max_grid_points
+from ..utils import common_elements
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
@@ -105,13 +107,19 @@ class Data:
         data_original[idxs] = values
         setattr(self, prop, data_original)
 
-    def idxs_todo(
-        self, start_slice: int | None = None, end_slice: int | None = None
-    ) -> dict[str, np.ndarray]:
-        r"""Determines indices of missing data depending on what is loaded.
+    def get_idxs_todo(
+        self,
+        tasks: Iterable[str],
+        start_slice: int | None = None,
+        end_slice: int | None = None,
+    ) -> np.ndarray:
+        r"""Determines indices of missing data depending on what is loaded and desired
+        tasks.
 
         Parameters
         ----------
+        tasks
+            Desired computations to perform.
         start_slice
             Slice arrays in ``args`` starting at this index.
         end_slice
@@ -128,7 +136,13 @@ class Data:
             todo["cube"] = np.argwhere(
                 np.isnan(self.cube_V[start_slice:end_slice][:, 0])
             )[:, 0]
-        return todo
+
+        # We make a list of indices that are missing all requested calculations.
+        idxs_todo = todo[tasks[0]]
+        if len(tasks) > 1:
+            for i in range(1, len(tasks)):
+                idxs_todo = common_elements(idxs_todo, todo[tasks[i]])
+        return idxs_todo
 
     def validate(self, tasks: Iterable[str] | str | None) -> None:
         r"""Will check if required data is loaded to complete tasks.
@@ -225,6 +239,68 @@ class Data:
             }
 
         return array_specs
+
+    def prepare_tasks(
+        self,
+        tasks: Iterable[str],
+        source_key: str,
+        source_labels: dict[str, str],
+        dest_key: str,
+        dest_labels: dict[str, str],
+    ) -> None:
+        r"""Prepare group and data for reptar calculations
+
+        Parameters
+        ----------
+        tasks
+            Reptar calculations that will be ran with
+            :class:`~reptar.calculators.Driver`.
+        source_key
+            Key to group containing data sources.
+        source_labels
+            Labels of data from group ``source_key`` to populate the data object. No
+            ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
+            this ``dict``.
+        dest_key
+            Key to store calculation results.
+        dest_labels
+            Labels of data in group ``dest_key`` to populate the data object. Any data
+            that is not provided will be initialized here based on ``tasks``.
+            ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
+            this ``dict``.
+
+        Returns
+        -------
+        :obj:`reptar.calculators.Data`
+            Data for calculations.
+        """
+        log.debug("Retrieving source data")
+        for data_attr, label in source_labels.items():
+            data_key = os.path.join(source_key, label)
+            value = self.rfile.get(data_key)
+            setattr(self, data_attr, value[:])
+        self.validate(None)  # Checks for Z and R
+
+        log.debug("Checking calculation data")
+        try:
+            self.rfile.get(dest_key)
+        except RuntimeError as e:
+            if " does not exist" in str(e):
+                self.rfile.create_group(dest_key)
+            else:
+                raise RuntimeError from e
+
+        for data_attr, label in dest_labels.items():
+            data_key = os.path.join(dest_key, label)
+            setattr(self, data_attr + "_key", data_key)
+
+            # If included from source, then we may have previous data already.
+            # Check before initializing.
+            if getattr(self, data_attr) is None:
+                self.initialize_array(data_attr)
+
+        self.validate(tasks)
+        self.save()
 
     @property
     def Z(self) -> np.ndarray | None:

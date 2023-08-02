@@ -2,13 +2,15 @@
 
 """Run reptar calculations"""
 
+from collections.abc import Iterable
 import argparse
 import time
 import datetime
 import os
 import yaml
 from reptar import File
-from reptar.calculators.utils import prep_opt_job, prep_engrad_job, prep_xtb_input_lines
+from reptar.calculators import Data, Driver
+from reptar.calculators.utils import prep_xtb_input_lines
 from reptar.utils import get_obj_from_string
 from reptar.logger import ReptarLogger, set_log_level
 
@@ -47,160 +49,84 @@ def _load_config(config_path):
     return config
 
 
-def _prep_opt_job(
-    worker_obj,
-    rfile,
-    source_key,
-    dest_key,
-    config,
-    start_slice,
-    end_slice,
-    driver_kwargs,
+def _process_worker_kwargs(
+    tasks: Iterable[str],
+    config: dict[str, "Any"],
+    worker_name: str,
 ):
-    worker_name = worker_obj.__name__
-    assert worker_name in ("xtb_opt", "psi4_opt")
-    calc_label = "optimization"
+    r"""Prepare worker keyword arguments as they are dependent on task and worker.
 
-    # pylint: disable-next=invalid-name
-    Z_key = os.path.join(source_key, config["rfile"]["Z_label"])
-    # pylint: disable-next=invalid-name
-    R_key = os.path.join(source_key, config["rfile"]["R_label"])
-    Z = rfile.get(Z_key)
-    R = rfile.get(R_key)
+    Parameters
+    ----------
+    tasks
+        Requested computations.
+    config
+        Configuration file.
+    worker_name
+        Function name to identify the worker.
+    """
+    worker_kwargs = config["worker"]["kwargs"]
 
     # Handling worker arguments
-    if worker_name == "xtb_opt":
-        opt_block = config["worker"]["blocks"].get("opt", None)
-        constraints = config["worker"].get("constrain", None)
-        input_lines = prep_xtb_input_lines(
-            charge=config["system"]["charge"],
-            multiplicity=config["system"]["multiplicity"],
-            opt_block=opt_block,
-            constraints=constraints,
-            save_traj=False,
-        )
-        worker_kwargs = {
-            "input_lines": input_lines,
-            **config["worker"]["kwargs"],
-        }
-    elif worker_name == "psi4_opt":
-        worker_kwargs = config["worker"]["kwargs"]
+    if "opt" in tasks:
+        if worker_name == "xtb_worker":
+            opt_block = config["worker"]["blocks"].get("opt", None)
+            constraints = config["worker"].get("constrain", None)
+            input_lines = prep_xtb_input_lines(
+                charge=config["system"]["charge"],
+                multiplicity=config["system"]["multiplicity"],
+                opt_block=opt_block,
+                constraints=constraints,
+                save_traj=False,
+            )
+            worker_kwargs["input_lines"] = input_lines
 
-    driver, saver, data = prep_opt_job(
-        rfile,
-        Z_key,
-        R_key,
-        dest_key,
-        worker_obj,
-        worker_kwargs,
-        driver_kwargs,
-        Z_opt_label=config["rfile"]["Z_label"],
-        conv_opt_label=config["rfile"]["conv_opt_label"],
-        R_opt_label=config["rfile"]["R_opt_label"],
-        E_opt_label=config["rfile"]["E_opt_label"],
-    )
-    _, conv_opt, R_opt, E_opt = data  # pylint: disable=invalid-name
-    incomplete_bool_key = saver.data_keys[0]
-    run_args = (Z, R, conv_opt, R_opt, E_opt, saver)
-    n_todo = len(driver.idxs_todo(run_args, start_slice, end_slice))
-
-    return calc_label, driver, n_todo, incomplete_bool_key, run_args
-
-
-def _prep_engrad_job(
-    worker_obj,
-    rfile,
-    source_key,
-    dest_key,
-    config,
-    start_slice,
-    end_slice,
-    driver_kwargs,
-):
-    worker_name = worker_obj.__name__
-    assert worker_name in ("xtb_python_engrad", "psi4_engrad")
-    calc_label = "energy+gradient"
-
-    # pylint: disable-next=invalid-name
-    Z_key = os.path.join(source_key, config["rfile"]["Z_label"])
-    # pylint: disable-next=invalid-name
-    R_key = os.path.join(source_key, config["rfile"]["R_label"])
-    Z = rfile.get(Z_key)
-    R = rfile.get(R_key)
-
-    # Handling worker arguments
-    if worker_name in ("xtb_python_engrad", "psi4_engrad"):
-        worker_kwargs = config["worker"]["kwargs"]
-
-    driver, saver, data = prep_engrad_job(
-        rfile,
-        R_key,
-        dest_key,
-        worker_obj,
-        worker_kwargs,
-        driver_kwargs,
-        E_label=config["rfile"]["E_label"],
-        G_label=config["rfile"]["G_label"],
-    )
-    E, G = data  # pylint: disable=invalid-name
-    incomplete_bool_key = saver.data_keys[0]
-    run_args = (Z, R, E, G, saver)
-    n_todo = len(driver.idxs_todo(run_args, start_slice, end_slice))
-
-    return calc_label, driver, n_todo, incomplete_bool_key, run_args
+    return worker_kwargs
 
 
 def main(args):
     config = _load_config(args.config_path)
 
-    log.info("Opening data file")
+    log.info("Opening file")
     rfile_path = os.path.abspath(config["rfile"]["path"])
     rfile = File(rfile_path, mode="a")
 
-    source_key = config["rfile"]["source_key"]
-    dest_key = config["rfile"]["dest_key"]
+    log.info("Preparing data for calculations")
+    # Getting rfile information
+    tasks = config["tasks"]
 
-    log.info("Preparing worker and driver")
-    driver_obj = get_obj_from_string(config["driver"]["class"])
+    source_key = config["rfile"]["source"]["key"]
+    source_labels = config["rfile"]["source"]["labels"]
+    dest_key = config["rfile"]["destination"]["key"]
+    dest_labels = config["rfile"]["destination"]["labels"]
+
+    data = Data()
+    data.rfile = rfile
+    data.prepare_tasks(tasks, source_key, source_labels, dest_key, dest_labels)
+
+    driver_obj = get_obj_from_string(config["driver"]["path"])
+    log.info("Selected driver: %s", driver_obj.__name__)
+
     driver_kwargs = config["driver"]["kwargs"]
-    worker_obj = get_obj_from_string(config["worker"]["function"])
-
     if args.ray_address != "":
         driver_kwargs["ray_address"] = args.ray_address
-    start_slice = driver_kwargs["start_slice"]
-    end_slice = driver_kwargs["end_slice"]
+    driver = Driver(**driver_kwargs)
+    start_slice = config["driver"]["start_slice"]
+    end_slice = config["driver"]["end_slice"]
 
-    driver_name = driver_obj.__name__
-    log.info("Selected driver: %s", driver_name)
-    log.info("Selected worker: %s", worker_obj.__name__)
-    if driver_name == "DriverOpt":
-        calc_label, driver, n_todo, incomplete_bool_key, run_args = _prep_opt_job(
-            worker_obj,
-            rfile,
-            source_key,
-            dest_key,
-            config,
-            start_slice,
-            end_slice,
-            driver_kwargs,
-        )
-    elif driver_name == "DriverEnGrad":
-        calc_label, driver, n_todo, incomplete_bool_key, run_args = _prep_engrad_job(
-            worker_obj,
-            rfile,
-            source_key,
-            dest_key,
-            config,
-            start_slice,
-            end_slice,
-            driver_kwargs,
-        )
+    worker_obj = get_obj_from_string(config["worker"]["path"])
+    worker_name = worker_obj.__name__
+    log.info("Selected worker: %s", worker_name)
+    worker_kwargs = _process_worker_kwargs(tasks, config, worker_name)
 
-    log.info("Running %r %s calculations", n_todo, calc_label)
+    log.info("Requested tasks: %s", ", ".join(tasks))
+
+    n_todo = data.get_idxs_todo(tasks, start_slice, end_slice).shape[0]
+    log.info("Running %r calculations", n_todo)
 
     if n_todo > 0:
         t_start = time.perf_counter()
-        driver.run(*run_args)
+        driver.run(worker_obj, worker_kwargs, data, tasks, start_slice, end_slice)
         log.info("Calculations are done")
         t_end = time.perf_counter()
         duration = str(datetime.timedelta(seconds=t_end - t_start))
@@ -208,18 +134,7 @@ def main(args):
     else:
         log.warning("Check your bounds if you are selecting a subset of structures")
 
-    if calc_label == "optimization":
-        n_remaining_args = (
-            None,
-            None,
-            rfile.get(incomplete_bool_key),
-            None,
-            None,
-            None,
-        )
-    elif calc_label == "energy+gradient":
-        n_remaining_args = (None, None, rfile.get(incomplete_bool_key), None, None)
-    n_remaining = driver.idxs_todo(n_remaining_args, None, None)
+    n_remaining = data.get_idxs_todo(tasks, start_slice, end_slice).shape[0]
     log.info("There are %r incomplete calculations remaining", n_remaining)
 
 

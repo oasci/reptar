@@ -96,7 +96,7 @@ class File:
         plugins
             A list of instantiated exdir plugins.
         """
-        log.debug("Opening file from path %s", file_path)
+        log.debug("Opening file from %s", file_path)
         exists = os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
 
