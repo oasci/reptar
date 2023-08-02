@@ -85,12 +85,15 @@ worker:
 
     options:
 
-      basis: def2-TZVP
+      basis: def2-TZVPPD
+      df_basis_scf: def2-universal-jkfit
+      df_basis_mp2: def2-tzvppd-ri
       reference: rhf
       scf_type: df
-      e_convergence: 8
-      d_convergence: 8
+      e_convergence: 10
+      d_convergence: 10
       mp2_type: df
+      qc_module: dfmp2
       freeze_core: true
 
     threads: 2
