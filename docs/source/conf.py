@@ -63,6 +63,7 @@ intersphinx_mapping = {
         "https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable/",
         None,
     ),
+    "zarr": ("https://zarr.readthedocs.io/en/stable/", None)
 }
 
 # Include __init__ docstring for classes
