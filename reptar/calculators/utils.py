@@ -24,7 +24,7 @@ from __future__ import annotations
 import os
 from collections.abc import Iterable
 import numpy as np
-from .data import Data
+from . import Data
 from .cube import initialize_grid_arrays
 from ..logger import ReptarLogger
 

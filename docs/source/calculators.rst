@@ -3,7 +3,7 @@ Calculators
 ===========
 
 Reptar provides several driver and workers for calculations on data stored in supported file formats.
-The :class:`~reptar.calculators.drivers.Driver` class manages all calculations and workers for reptar.
+The :class:`~reptar.calculators.Driver` class manages all calculations and workers for reptar.
 
 - `Psi4 <https://psicode.org/psi4manual/master/index.html>`__: quantum chemical methods such as DFT and wave function methods.
     - :func:`~reptar.calculators.psi4_workers.psi4_worker`
@@ -23,7 +23,7 @@ Reptar uses a driver/supervisor and worker workflow where the results are direct
 When running calculations, you first create a property (e.g., energy) array where all values are ``NaN``.
 Each ``NaN`` value represents a calculation that still needs to run.
 The driver then spawns workers with batches of calculations to run.
-Once a worker is finished, we use the :meth:`~reptar.calculators.Data.Save` method to store the results in case the job terminates early.
+Once a worker is finished, we use the :meth:`~reptar.calculators.Data.save` method to store the results in case the job terminates early.
 
 .. mermaid::
 
@@ -277,8 +277,7 @@ The following scripts show how to run DF-MP2/def2-TZVPPD calculations in Psi4 wi
             import os
             import numpy as np
             from reptar import File
-            from reptar.calculators import Data
-            from reptar.calculators.drivers import Driver
+            from reptar.calculators import Data, Driver
             from reptar.calculators.psi4_workers import psi4_worker
 
             rfile_path = "../30h2o-gfn2-md.exdir"

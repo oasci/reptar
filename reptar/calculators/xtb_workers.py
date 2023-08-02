@@ -26,7 +26,7 @@ import os
 import subprocess
 from tempfile import TemporaryDirectory
 import numpy as np
-from .data import Data
+from . import Data
 from .utils import initialize_worker_data
 from ..writers.xyz import write_xyz
 from ..utils import parse_xyz
