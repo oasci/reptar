@@ -55,20 +55,20 @@ H2O energy+gradient (Psi4)
 --------------------------
 
 This provides a script of computing energy and gradient (`engrad`) calculations with Psi4 of water molecules.
-We use :download:`this zarr file<./files/1h2o.zarr.zip>` (make sure to extract the file first).
+We use :download:`this zarr file<./files/data/1h2o.zarr.zip>` (make sure to extract the file first).
 
 .. tab-set::
 
     .. tab-item:: Script
 
-        .. literalinclude:: ./files/1h2o-psi4-engrads.py
+        .. literalinclude:: ./files/scripts/1h2o-psi4-engrads.py
             :language: python
             :linenos:
 
 
     .. tab-item:: Output
 
-        .. literalinclude:: ./files/1h2o-psi4-engrads.txt
+        .. literalinclude:: ./files/scripts/1h2o-psi4-engrads.txt
             :language: text
             :linenos:
 
