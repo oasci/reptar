@@ -104,9 +104,6 @@ def main(args):
     data.rfile = rfile
     data.prepare_tasks(tasks, source_key, source_labels, dest_key, dest_labels)
 
-    driver_obj = get_obj_from_string(config["driver"]["path"])
-    log.info("Selected driver: %s", driver_obj.__name__)
-
     driver_kwargs = config["driver"]["kwargs"]
     if args.ray_address != "":
         driver_kwargs["ray_address"] = args.ray_address
