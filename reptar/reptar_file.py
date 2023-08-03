@@ -362,6 +362,9 @@ class File:
                     )
                 )
             )
+        elif self.ftype == "zarr":
+            keys.extend(list(group.array_keys()))
+            keys.extend(group.attrs.keys())
         elif self.ftype in ("json", "npz"):
             keys.extend(list(group.keys()))
         return keys
