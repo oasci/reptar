@@ -290,9 +290,13 @@ class Data:
             setattr(self, data_attr + "_key", data_key)
 
             # If included from source, then we may have previous data already.
-            # Check before initializing.
             if getattr(self, data_attr) is None:
-                self.initialize_array(data_attr)
+                # If data does not already exists in destination we will initialize it.
+                data = self.rfile.get(data_key, missing_is_none=True)
+                if data is None:
+                    self.initialize_array(data_attr)
+                else:
+                    setattr(self, data_attr, data)
 
         self.validate(tasks)
         self.save()
