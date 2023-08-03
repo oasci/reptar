@@ -66,7 +66,7 @@ Note that exdir groups must be initialized first with :meth:`~reptar.File.create
 Saving
 ======
 
-JSON and npz files need to be explicitly saved using :meth:`reptar.File.save`.
+JSON and npz files need to be explicitly saved using :meth:`~reptar.File.save`.
 
 File conversion
 ===============

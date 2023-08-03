@@ -129,7 +129,7 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Sampling <sampling>
     Calculators <calculators>
     Descriptors <descriptors>
-    Scripts <scripts>
+    Scripts <scripts/scripts>
     Definitions <definitions/definitions>
     API <api/modules>
     Contributing <contributing>

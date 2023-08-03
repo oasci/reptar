@@ -103,6 +103,7 @@ html_sidebars = {
 html_extra_path = [
     "./files/30h2o-md/30h2o-gfn2-opt.xyz",
     "./files/30h2o-md/30h2o.pm.xyz",
+    "./files/1h2o.zarr.zip",
 ]
 
 

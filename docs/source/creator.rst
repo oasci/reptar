@@ -30,7 +30,7 @@ Other calculation types and packages other than the ones above are supported as 
 .. _xTB: https://xtb-docs.readthedocs.io/en/latest/contents.html
 .. _CREST: https://crest-lab.github.io/crest-docs/
 
-.. note::
+.. tip::
 
     Other data can be obtained through :ref:`calculators<calculators>` where data is directly calculated instead of parsed.
 
@@ -44,7 +44,7 @@ Reptar provides two ways to do this: by initializing a :class:`~reptar.Creator` 
 
     This :ref:`File<file>` object is stored in the :attr:`~reptar.Creator.rfile` attribute.
 
-Reptar can then parse information and create a group by specifying the paths to the relevant output files with :meth:`reptar.Creator.from_calc`.
+Reptar can then parse information and create a group by specifying the paths to the relevant output files with :meth:`~reptar.Creator.from_calc`.
 
 Types of output files
 ---------------------
@@ -66,7 +66,7 @@ There are currently three basic types of output files used.
     
     If both ``geom_path`` and ``traj_path`` are provided, the structure defined in ``geom_path`` is considered the initial structure.
 
-Some package parsers (e.g., :class:`reptar.parsers.ParserCREST`) require other output files.
+Some package parsers (e.g., :class:`~reptar.parsers.ParserCREST`) require other output files.
 
 Additional data
 ===============
@@ -79,11 +79,11 @@ Component and entity ids
 
 TODO:
 
-:meth:`reptar.Creator.ids`
+:meth:`~reptar.Creator.ids`
 
 File definitions
 ----------------
 
 TODO:
 
-:meth:`reptar.Creator.definitions`
+:meth:`~reptar.Creator.definitions`
