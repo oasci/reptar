@@ -209,6 +209,8 @@ class File:
         log.debug("Original key: %s", key)
         if "//" in key:
             key = key.replace("//", "/")
+        if key == "":
+            key = "/"
         while key[0] == ".":
             log.debug("Removing . at beginning")
             key = key[1:]
