@@ -129,7 +129,7 @@ class Data:
         if isinstance(self.E, np.ndarray):
             todo["E"] = np.argwhere(np.isnan(self.E[start_slice:end_slice]))[:, 0]
         if isinstance(self.G, np.ndarray):
-            todo["G"] = np.argwhere(np.isnan(self.G[start_slice:end_slice][:, 0]))[:, 0]
+            todo["G"] = np.argwhere(np.isnan(self.G[start_slice:end_slice, 0, 0]))[:, 0]
         if isinstance(self.conv_opt, np.ndarray):
             todo["opt"] = np.where(~self.conv_opt[start_slice:end_slice])[0]
         if isinstance(self.cube_V, np.ndarray):
