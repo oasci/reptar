@@ -27,6 +27,7 @@ from collections.abc import Iterable
 import numpy as np
 import qcelemental as qcel
 from .cube import get_R_span, get_max_grid_points
+from .. import File
 from ..utils import common_elements
 from ..logger import ReptarLogger
 
@@ -60,7 +61,7 @@ class Data:
 
     def __init__(
         self,
-        rfile: "File" | None = None,
+        rfile: File | None = None,
         idxs_source: np.ndarray | None = None,
     ) -> None:
         r"""

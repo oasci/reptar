@@ -27,6 +27,7 @@ from collections.abc import Iterable
 import numpy as np
 from . import Data
 from .cube import initialize_grid_arrays
+from .. import File
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
@@ -132,7 +133,7 @@ def prep_xtb_input_lines(
 # pylint: disable=invalid-name
 def prep_calc_data(
     tasks: Iterable[str],
-    rfile: "File",
+    rfile: File,
     source_key: str,
     source_labels: dict[str, str],
     dest_key: str,
