@@ -103,7 +103,7 @@ class Data:
 
     def add_subset(self, prop: str, idxs: np.ndarray, values: np.ndarray) -> None:
         r"""Add a subset of values to a property.
-        
+
         Parameters
         ----------
         prop

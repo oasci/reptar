@@ -156,17 +156,6 @@ class Driver:
             Trims ``R`` to start at this index.
         end_slice
             Trims ``R`` to end at this index.
-
-        Notes
-        -----
-        If ``data`` is starting calculations from scratch, it needs to have initialized
-        arrays with :obj:`numpy.NaN` in the correct shape. Each ``job_type`` requires
-        different data listed below. ``Z`` and ``R`` can never contain :obj:`numpy.NaN`.
-
-        - ``E``: ``Z``, ``R``, ``E``.
-        - ``G``: ``Z``, ``R``, ``E``, ``G``.
-        - ``opt``: ``Z``, ``R``, ``E``, ``conv_opt``, ``R_opt``.
-        - ``cube``: ``Z``, ``R``, ``cube_R``, ``cube_V``.
         """
         idxs_todo = data.get_idxs_todo(tasks, start_slice, end_slice)
 
