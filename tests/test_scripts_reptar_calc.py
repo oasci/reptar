@@ -148,6 +148,9 @@ def test_script_psi4_engrad():
 
 
 def test_script_xtb_opt():
+    if shutil.which("xtb") is None:
+        pytest.skip("xtb package not installed")
+
     exdir_path_source = get_140h2o_samples_path()
     rfile_source = File(exdir_path_source, mode="r")
 
