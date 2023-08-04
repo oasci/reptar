@@ -19,11 +19,11 @@ We use `ray <https://docs.ray.io/en/latest/ray-overview/installation.html>`__ to
 Drivers and workers
 ===================
 
-Reptar uses a driver/supervisor and worker workflow where the results are directly stored in a reptar :class:`~reptar.File`.
-When running calculations, you first create a property (e.g., energy) array where all values are ``NaN``.
-Each ``NaN`` value represents a calculation that still needs to run.
+Reptar uses a driver (supervisor) and worker workflow where the results are stored in a reptar :class:`~reptar.File`.
+When running calculations, an array is initialized for a desired property (e.g., energy) where all values are ``NaN``.
+``NaN`` values represents a calculation that still needs to run.
 The driver then spawns workers with batches of calculations to run.
-Once a worker is finished, we use the :meth:`~reptar.calculators.Data.save` method to store the results in case the job terminates early.
+Results are stored as soon as a worker finishes.
 
 .. mermaid::
 
@@ -43,8 +43,40 @@ Once a worker is finished, we use the :meth:`~reptar.calculators.Data.save` meth
         batchResults -- update --> file
 
 
+Data
+====
+
+In order to track and manage calculations, we store relevant data using :class:`~reptar.calculators.Data`.
+It contains all supported properties such as atomic positions, energies, gradients, and grid data.
+Methods such as :meth:`~reptar.calculators.Data.prepare_tasks` and :meth:`~reptar.calculators.Data.validate` help assemble and validate data required for various calculations.
 
 
+Tasks
+=====
+
+Each worker has a number of ``tasks`` they can compute based on the external code and reptar support.
+
+
+``E``
+-----
+
+TODO
+
+
+``G``
+-----
+
+TODO
+
+``opt``
+-------
+
+TODO
+
+``cube``
+--------
+
+TODO
 
 
 Examples
