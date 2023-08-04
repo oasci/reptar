@@ -48,8 +48,9 @@ Data
 
 In order to track and manage calculations, we store relevant data using :class:`~reptar.calculators.Data`.
 It contains all supported properties such as atomic positions, energies, gradients, and grid data.
-Methods such as :meth:`~reptar.calculators.Data.prepare_tasks` and :meth:`~reptar.calculators.Data.validate` help assemble and validate data required for various calculations.
 
+Most calculations involve taking :attr:`~reptar.calculators.Data.Z` and :attr:`~reptar.calculators.Data.R` from a ``source`` group and then storing calculations in a destination (``dest``) group.
+:attr:`~reptar.calculators.Data.prepare_tasks` can assist you with copying over data to the destination and initializing arrays for computed data.
 
 Tasks
 =====
@@ -60,23 +61,31 @@ Each worker has a number of ``tasks`` they can compute based on the external cod
 ``E``
 -----
 
-TODO
+Computes the total energy of a structure with respect to the provided worker and options.
 
+**Required data:** :attr:`~reptar.calculators.Data.E`
 
 ``G``
 -----
 
 TODO
 
+**Required data:** :attr:`~reptar.calculators.Data.E` and :attr:`~reptar.calculators.Data.G`
+
+
 ``opt``
 -------
 
 TODO
 
+**Required data:** :attr:`~reptar.calculators.Data.E`, :attr:`~reptar.calculators.Data.conv_opt`, and :attr:`~reptar.calculators.Data.R_opt`
+
 ``cube``
 --------
 
 TODO
+
+**Required data:** :attr:`~reptar.calculators.Data.cube_R` and :attr:`~reptar.calculators.Data.cube_V`
 
 
 Examples

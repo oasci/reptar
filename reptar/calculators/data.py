@@ -102,7 +102,17 @@ class Data:
                 self.add_subset(data_label, data.idxs_source, data_attr)
 
     def add_subset(self, prop: str, idxs: np.ndarray, values: np.ndarray) -> None:
-        r"""Add a subset of values to a property"""
+        r"""Add a subset of values to a property.
+        
+        Parameters
+        ----------
+        prop
+            The name of the data attribute (e.g., :attr:`~reptar.calculators.Data.E`).
+        idxs
+            Array indices of the data attribute to update with ``values``.
+        values
+            The data to add to the data attribute.
+        """
         data_original = getattr(self, prop)
         data_original[idxs] = values
         setattr(self, prop, data_original)
@@ -179,7 +189,8 @@ class Data:
         return None
 
     def initialize_array(self, label: str) -> np.ndarray:
-        r"""Initialize array given ``Z`` and ``R``.
+        r"""Initialize arrays with the shape determined by
+        :attr:`~reptar.calculators.Data.Z` and :attr:`~reptar.calculators.Data.R`.
 
         Parameters
         ----------
@@ -248,7 +259,12 @@ class Data:
         dest_key: str,
         dest_labels: dict[str, str],
     ) -> None:
-        r"""Prepare group and data for reptar calculations
+        r"""Prepare group and data for reptar calculations.
+
+        This will retrieve and populate this object with all source data. It will also
+        try to :meth:`~reptar.File.get` ``dest`` data. However, if the array does not
+        exist this method will create it with the proper shape full of :obj:`numpy.NaN`
+        or ``False``.
 
         Parameters
         ----------
@@ -268,6 +284,42 @@ class Data:
             that is not provided will be initialized here based on ``tasks``.
             ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
             this ``dict``.
+
+        Notes
+        -----
+        Each task requires specific arrays to either get from ``dest_key`` or
+        initialize. Every task requires :attr:`~reptar.calculators.Data.Z` and
+        :attr:`~reptar.calculators.Data.R` whereas the additional data for each **task**
+        is below.
+
+        - **E:** :attr:`~reptar.calculators.Data.E`
+        - **G:** :attr:`~reptar.calculators.Data.E`
+          and :attr:`~reptar.calculators.Data.G`
+        - **opt:** :attr:`~reptar.calculators.Data.E`,
+          :attr:`~reptar.calculators.Data.conv_opt`,
+          and :attr:`~reptar.calculators.Data.R_opt`
+        - **cube:** :attr:`~reptar.calculators.Data.cube_R`
+          and :attr:`~reptar.calculators.Data.cube_V`
+
+        Examples
+        --------
+        The following code block shows an example of preparing a
+        :class:`~reptar.calculators.Data` object for computing energies and
+        atomic gradients. Since both ``source_key`` and ``dest_key`` are the same,
+        all data is stored in the root group of the :class:`~reptar.File`.
+
+        .. code-block:: python
+
+            data.prepare_tasks(
+                tasks=["E", "G"],
+                source_key="/",
+                source_labels={"Z": "atomic_numbers", "R": "geometry"},
+                dest_key="/",
+                dest_labels={
+                    "E": "energy_ele_df.mp2.def2tzvppd",
+                    "G": "grads_df.mp2.def2tzvppd"
+                },
+            )
         """
         log.debug("Retrieving source data")
         for data_attr, label in source_labels.items():
@@ -506,7 +558,9 @@ class Data:
 
     @property
     def cube_V(self) -> np.ndarray | None:
-        r"""Property values on a grid specified by ``cube_R``."""
+        r"""Property values on a grid specified by
+        :attr:`~reptar.calculators.Data.cube_R`.
+        """
         if hasattr(self, "_cube_V"):
             return self._cube_V
         return None
