@@ -22,16 +22,18 @@
 
 from __future__ import annotations
 import os
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from collections.abc import Iterable
 import numpy as np
 import qcelemental as qcel
 from .cube import get_R_span, get_max_grid_points
-from .. import File
 from ..utils import common_elements
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
+
+if TYPE_CHECKING:
+    from .. import File
 
 
 class MissingDataException(Exception):

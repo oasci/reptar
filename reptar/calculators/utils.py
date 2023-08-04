@@ -27,7 +27,6 @@ from collections.abc import Iterable
 import numpy as np
 from . import Data
 from .cube import initialize_grid_arrays
-from .. import File
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
@@ -128,74 +127,6 @@ def prep_xtb_input_lines(
         xtb_input_lines.extend(["$opt", "    logfile=xtbopt.trj", "$end"])
     xtb_input_lines = [i + "\n" for i in xtb_input_lines]
     return xtb_input_lines
-
-
-# pylint: disable=invalid-name
-def prep_calc_data(
-    tasks: Iterable[str],
-    rfile: File,
-    source_key: str,
-    source_labels: dict[str, str],
-    dest_key: str,
-    dest_labels: dict[str, str],
-) -> Data:
-    """Prepare group and data for reptar calculations
-
-    Parameters
-    ----------
-    tasks
-        Reptar calculations that will be ran with :class:`~reptar.calculators.Driver`.
-    rfile
-        File to prepare a group for optimization-like data.
-    source_key
-        Key to group containing data sources.
-    source_labels
-        Labels of data from group ``source_key`` to populate the data object. No
-        ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
-        this ``dict``.
-    dest_key
-        Key to store calculation results.
-    dest_labels
-        Labels of data in group ``dest_key`` to populate the data object. Any data
-        that is not provided will be initialized here based on ``tasks``.
-        ``_key`` properties in :class:`~reptar.calculators.Data` will be added from
-        this ``dict``.
-
-    Returns
-    -------
-    :obj:`reptar.calculators.Data`
-        Data for calculations.
-    """
-    data = Data()
-    data.rfile = rfile
-
-    log.debug("Retrieving source data")
-    for data_attr, label in source_labels.items():
-        data_key = os.path.join(source_key, label)
-        value = rfile.get(data_key)
-        setattr(data, data_attr, value)
-    data.validate(None)  # Checks for Z and R
-
-    log.debug("Checking calculation data")
-    try:
-        rfile.get(dest_key)
-    except RuntimeError as e:
-        if " does not exist" in str(e):
-            rfile.create_group(dest_key)
-        else:
-            raise RuntimeError from e
-
-    for data_attr, label in dest_labels.items():
-        data_key = os.path.join(dest_key, label)
-        setattr(data, data_attr + "_key", data_key)
-
-        # If included from source, then we may have previous data already.
-        # Check before initializing.
-        if getattr(data, data_attr) is None:
-            data.initialize_array(data_attr)
-    data.validate(tasks)
-    data.save()
-    return data
 
 
 def cleanup_xtb_calc(work_dir: str = "./") -> None:

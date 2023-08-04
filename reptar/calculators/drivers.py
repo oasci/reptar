@@ -21,7 +21,7 @@
 # SOFTWARE.
 
 from __future__ import annotations
-from typing import Any
+from typing import Any, TYPE_CHECKING
 from collections.abc import Callable, Iterator
 from ..utils import chunk_iterable
 from ..logger import ReptarLogger
@@ -33,10 +33,13 @@ try:
 except ImportError:
     pass
 
+if TYPE_CHECKING:
+    from . import Data
+
 
 def add_worker(
     workers_list: list[Callable],
-    worker: Callable[["..."], "Data"],
+    worker: Callable[["..."], Data],
     chunker: Iterator[list[int]],
     worker_args: tuple,
     worker_kwargs: dict,
@@ -117,13 +120,13 @@ class Driver:
 
     def run(
         self,
-        worker: Callable[["..."], "Data"],
+        worker: Callable[["..."], Data],
         worker_kwargs: dict[str, Any],
-        data: "Data",
+        data: Data,
         tasks: Iterator[str],
         start_slice: int = None,
         end_slice: int = None,
-    ) -> "Data":
+    ) -> Data:
         r"""Run tasks with specified workers and parameters.
 
         Parameters
