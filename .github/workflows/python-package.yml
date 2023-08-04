@@ -36,7 +36,7 @@ jobs:
 
     # Have to remove xtb as conda cannot solve the environment.
 
-    - name: Install dependencies
+    - name: Install reptar
       shell: bash -el {0}
       run: |
         conda create -y --name reptar-test
@@ -46,10 +46,7 @@ jobs:
         pip install --upgrade pip
         pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray zarr
         pip install pytest pytest-order pytest-dependency
-
-    - name: Install reptar
-      shell: bash -el {0}
-      run: pip install .
+        pip install .
     
     - name: Test with pytest
       shell: bash -el {0}
