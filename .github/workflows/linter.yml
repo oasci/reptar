@@ -17,7 +17,7 @@ on: [push, pull_request]
 jobs:
   build:
     # Name the Job
-    name: Lint Code Base
+    name: lint
     # Set the agent to run on
     runs-on: ubuntu-latest
 
@@ -63,4 +63,4 @@ jobs:
           # usage easier.
           LINTER_RULES_PATH: .
           PYTHON_PYLINT_CONFIG_FILE: .pylintrc
-          PYTHONPATH: "/opt/hostedtoolcache/Python/3.10.8/x64/lib/python3.10/site-packages"
+          FILTER_REGEX_EXCLUDE: .*docs/.*

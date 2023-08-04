@@ -20,10 +20,14 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
 import os
+from typing import Any
+from collections.abc import Iterable
 from tempfile import TemporaryDirectory
 import numpy as np
-from .cube import initialize_grid_arrays
+from . import Data
+from .utils import initialize_worker_data
 from ..logger import ReptarLogger
 from ..parsers.gaussian_cube import parse_cube
 
@@ -35,215 +39,153 @@ try:
 except ImportError:
     pass
 
-# pylint: disable=invalid-name
-def psi4_energy(
-    idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
-):
-    r"""Worker function for computing total electronic energy using Psi4.
 
-    Parameters
-    ----------
-    idxs : :obj:`numpy.ndarray`, ndim: ``1``
-        Indices of the structures from ``R`` to compute energies and gradients
-        for.
-    Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with respect to ``R``.
-    R : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian coordinates of all structures in group. This includes
-        unused structures.
-    charge : :obj:`int`, default: ``0``
-        Total molecular charge.
-    mult : :obj:`int`, default: ``1``
-        Total molecular multiplicity.
-    method : :obj:`str`, default: ``'b3lyp-d3bj'``
-        Specifies the Psi4 method used for the gradient. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
-        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
-        for your specific version.
-    options : :obj:`dict`
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/
-        psithoninput.html#job-control-keywords>`__
-        using the PsiAPI format. Some common ones are ``basis``,
-        ``e_convergence``, ``d_convergence``, and ``reference``.
-    threads : :obj:`int`, default: ``1``
-        Number of threads for Psi4. This is almost always the number of cores
-        being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
-    mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
-        The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-
-    Returns
-    -------
-    :obj:`numpy.ndarray`
-        ``idxs``
-    :obj:`numpy.ndarray`
-        Total electronic energy of computed structures in the same order as
-        ``idxs``. Units of Hartree.
-
-    Notes
-    -----
-    Psi4 uses QCElemental to build molecules from arrays.
-    There is some postprocessing in the `from_arrays routine
-    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
-    qcelemental.molparse.from_arrays.html#from-arrays>`__.
-    QCElemental will translate and rotate molecules which affects computed gradients.
-    Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
-    """
-    psi4.core.set_num_threads(threads)
-    psi4.set_memory(mem)
-    if options is not None:
-        psi4.set_options(options)
-    R = R[idxs]
-    E = np.empty(R.shape[0])
-    for i, r in enumerate(R):
-        mol = psi4.core.Molecule.from_arrays(
-            geom=r,
-            elez=Z,
-            molecular_charge=charge,
-            molecular_multiplicity=mult,
-            fix_com=True,
-            fix_orientation=True,
-        )
-        E[i] = psi4.energy(method, molecule=mol, return_wfn=False)
-    return idxs, E
+def _do_psi4_energy(
+    method: str, mol: psi4.core.Molecule
+) -> tuple[float, psi4.core.Wavefunction]:
+    r"""Perform energy calculation in Psi4."""
+    e, wfn = psi4.energy(method, molecule=mol, return_wfn=True)
+    return e, wfn
 
 
-def psi4_engrad(
-    idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
-):
-    r"""Worker function for computing total electronic energy and atomic
-    gradients using Psi4.
-
-    Parameters
-    ----------
-    idxs : :obj:`numpy.ndarray`, ndim: ``1``
-        Indices of the structures from ``R`` to compute energies and gradients
-        for.
-    Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with respect to ``R``.
-    R : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian coordinates of all structures in group. This includes
-        unused structures.
-    charge : :obj:`int`, default: ``0``
-        Total molecular charge.
-    mult : :obj:`int`, default: ``1``
-        Total molecular multiplicity.
-    method : :obj:`str`, default: ``'b3lyp-d3bj'``
-        Specifies the Psi4 method used for the gradient. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
-        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
-        for your specific version.
-    options : :obj:`dict`
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html
-        #job-control-keywords>`__
-        using the PsiAPI format. Some common ones are ``basis``,
-        ``e_convergence``, ``d_convergence``, and ``reference``.
-    threads : :obj:`int`, default: ``1``
-        Number of threads for Psi4. This is almost always the number of cores
-        being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
-    mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
-        The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-
-    Returns
-    -------
-    :obj:`numpy.ndarray`
-        ``idxs``
-    :obj:`numpy.ndarray`
-        Total electronic energy of computed structures in the same order as
-        ``idxs``. Units of Hartree.
-    :obj:`numpy.ndarray`
-        Atomic gradients of computed structures in the same order as ``idxs``.
-        Units of Hartree/Angstrom.
-
-    Notes
-    -----
-    Psi4 uses QCElemental to build molecules from arrays.
-    There is some postprocessing in the `from_arrays routine
-    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
-    qcelemental.molparse.from_arrays.html#from-arrays>`__.
-    QCElemental will translate and rotate molecules which affects computed gradients.
-    Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
-    """
-    psi4.core.set_num_threads(threads)
-    psi4.set_memory(mem)
-    if options is not None:
-        psi4.set_options(options)
-    R = R[idxs]
-    G = np.zeros(R.shape)
-    E = np.zeros(R.shape[0])
-    for i, r in enumerate(R):
-        mol = psi4.core.Molecule.from_arrays(
-            geom=r,
-            elez=Z,
-            molecular_charge=charge,
-            molecular_multiplicity=mult,
-            fix_com=True,
-            fix_orientation=True,
-        )
-        g, wfn = psi4.gradient(method, molecule=mol, return_wfn=True)
-        g = g.to_array()
-        g /= psi4.constants.bohr2angstroms
-        G[i] = g
-        E[i] = wfn.energy()
-    return idxs, E, G
+def _do_psi4_grad(
+    method: str, mol: psi4.core.Molecule
+) -> tuple[float, np.ndarray, psi4.core.Wavefunction]:
+    r"""Perform gradient calculation in Psi4."""
+    g, wfn = psi4.gradient(method, molecule=mol, return_wfn=True)
+    g = g.to_array()
+    g /= psi4.constants.bohr2angstroms
+    e = wfn.energy()
+    return e, g, wfn
 
 
-def psi4_opt(
-    idxs, Z, R, charge=0, mult=1, method="mp2", options=None, threads=1, mem="1 GB"
-):
+def _do_psi4_cube(
+    method: str,
+    mol: psi4.core.Molecule,
+    cube_path: str,
+    wfn: psi4.core.Wavefunction | None = None,
+) -> tuple[np.ndarray, np.ndarray, psi4.core.Wavefunction]:
+    r"""Perform cube property calculation in Psi4."""
+    if wfn is None:
+        _, wfn = psi4.energy(method, molecule=mol, return_wfn=True)
+    psi4.cubeprop(wfn)
+    cube_r, cube_v = parse_cube(cube_path)
+
+    return cube_r, cube_v, wfn
+
+
+def _do_psi4_opt(
+    method: str, mol: psi4.core.Molecule
+) -> tuple[psi4.core.Wavefunction, bool, np.ndarray, float]:
+    r"""Perform geometry optimization in Psi4."""
+    try:
+        e, wfn = psi4.opt(method, molecule=mol, return_wfn=True)
+        r_opt = np.asarray(wfn.molecule().geometry())
+        r_conv_opt = True
+    except (psi4.OptimizationConvergenceError, AlgError) as ex:
+        r_conv_opt = False
+        r_opt = np.asarray(ex.wfn.molecule().geometry())
+        e = ex.wfn.energy()
+    finally:
+        r_opt *= psi4.constants.bohr2angstroms  # pylint: disable=undefined-variable
+    return r_conv_opt, r_opt, e, wfn
+
+
+def _do_psi4_task(
+    task: str,
+    data_worker: Data,
+    idx: int,
+    method: str,
+    mol: psi4.core.Molecule,
+    options: dict[str, Any],
+    cube_file_name: str | None,
+    wfn: psi4.core.Wavefunction | None,
+) -> tuple[Data, psi4.core.Wavefunction]:
+    worker_idx = np.array([idx], dtype=np.uint64)
+    if task == "opt":
+        r_conv_opt, r_opt, e, wfn = _do_psi4_opt(method, mol)
+        data_worker.add_subset("R_opt", worker_idx, r_opt)
+        data_worker.add_subset("conv_opt", worker_idx, r_conv_opt)
+        data_worker.add_subset("E", worker_idx, e)
+    elif task == "G":
+        e, g, wfn = _do_psi4_grad(method, mol)
+        data_worker.add_subset("E", worker_idx, e)
+        data_worker.add_subset("G", worker_idx, g)
+    elif task == "E":
+        e, wfn = _do_psi4_energy(method, mol)
+        data_worker.add_subset("E", worker_idx, e)
+    elif task == "cube":
+        with TemporaryDirectory() as temp_dir:
+            options["cubeprop_filepath"] = temp_dir
+            psi4.set_options(options)
+            cube_path = os.path.join(temp_dir, cube_file_name)
+            cube_r, cube_v, wfn = _do_psi4_cube(method, mol, cube_path, wfn)
+
+            cube_r_slice = (
+                slice(None, None, None),
+                slice(None, cube_r.shape[0], None),
+                slice(None, None, None),
+            )
+            cube_v_slice = (slice(None, None, None), slice(None, cube_v.shape[0], None))
+            data_worker.add_subset("cube_R", cube_r_slice, cube_r)
+            data_worker.add_subset("cube_V", cube_v_slice, cube_v)
+    return data_worker, wfn
+
+
+def psi4_worker(
+    idxs: Iterable[int],
+    tasks: Iterable[str],
+    data: Data,
+    charge: int = 0,
+    mult: int = 1,
+    method: str = "mp2",
+    options: dict[str, Any] = None,
+    threads: int = 1,
+    mem: str | float | int = "1 GB",
+    total_grid_points: int | None = None,
+) -> Data:
     r"""Worker function for optimizations using Psi4.
 
     Parameters
     ----------
-    idxs : :obj:`numpy.ndarray`, ndim: ``1``
+    idxs
         Indices of the structures from ``R`` to compute energies and gradients
         for.
-    Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with respect to ``R``.
-    R : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian coordinates of all structures in group. This includes
-        unused structures.
-    charge : :obj:`int`, default: ``0``
-        Total molecular charge.
-    mult : :obj:`int`, default: ``1``
-        Total molecular multiplicity.
-    method : :obj:`str`, default: ``'mp2'``
-        Specifies the Psi4 method used for the gradient. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
-        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
-        for your specific version.
-    options : :obj:`dict`
+    tasks
+        Calculations this worker needs to run in the order specified here. In general,
+        we recommend using this ordering: ``opt``, ``E``, ``G``, ``cube``.
+    data
+        All required data required for computations such as ``Z``, ``R``, ``conv_opt``,
+        etc.
+    charge
+        Total system charge.
+    mult
+        Total system multiplicity.
+    method
+        Specifies the Psi4 method used for all calculations. For more information,
+        please see `the Psi4 documentation <https://psicode.org/psi4manual/master
+        /methods.html>`__ for your specific version.
+    options
         `Psi4 control keywords <https://psicode.org/psi4manual/master/
         psithoninput.html#job-control-keywords>`__
         using the PsiAPI format. Some common ones are ``basis``,
         ``e_convergence``, ``d_convergence``, and ``reference``.
-    threads : :obj:`int`, default: ``1``
+    threads
         Number of threads for Psi4. This is almost always the number of cores
         being used for the worker. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api/
         psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
-    mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
+    mem
         The amount of memory available. For more information, see the
         `documentation <https://psicode.org/psi4manual/master/api/
         psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+    total_grid_points
+        Number of grid points to initialize cube arrays with.
 
     Returns
     -------
-    :obj:`numpy.ndarray`
-        ``idxs``
-    :obj:`numpy.ndarray`
-        If the optimizations converged or not.
-    :obj:`numpy.ndarray`
-        Optimized geometries.
-    :obj:`numpy.ndarray`
-        Total electronic energies of optimized structures. Units of Hartree.
+    :obj:`reptar.calculators.Data`
+        Data object from this worker.
 
     Notes
     -----
@@ -251,154 +193,53 @@ def psi4_opt(
     There is some postprocessing in the `from_arrays routine
     <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
     qcelemental.molparse.from_arrays.html#from-arrays>`__.
-    QCElemental will translate and rotate molecules which affects computed gradients.
-    Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
+    QCElemental will translate and rotate molecules which can affect computed
+    properties. Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid
+    this.
     """
+    implemented_tasks = ["E", "G", "opt", "cube"]
+    for task in tasks:
+        if task not in implemented_tasks:
+            raise ValueError(f"Task ({task}) is not implemented in this worker")
+
     psi4.core.set_num_threads(threads)
     psi4.set_memory(mem)
+
+    # Obtain all required input data
+    Z = data.Z
+    R = data.R[idxs]
+
+    # Initialize data object with resulting arrays
+    data_worker = initialize_worker_data(
+        tasks, Data(), R, total_grid_points=total_grid_points
+    )
+    data_worker.idxs_source = idxs
+
+    cube_file_name = None
+    if "cube" in tasks:
+        assert "cubeprop_tasks" in options
+        if options["cubeprop_tasks"][0].lower() == "esp":
+            cube_file_name = "ESP.cube"
+        elif options["cubeprop_tasks"][0].lower() == "density":
+            cube_file_name = "Dt.cube"
+        with TemporaryDirectory() as temp_dir:
+            options["cubeprop_filepath"] = temp_dir
+
     if options is not None:
         psi4.set_options(options)
-    R = R[idxs]
-    opt_conv = np.full(R.shape[0], False, dtype=np.bool8)
-    R_opt = np.empty(R.shape, dtype=np.float64)
-    E = np.full(R.shape[0], np.nan, dtype=np.float64)
-    for i, r in enumerate(R):
+
+    for i in range(R.shape[0]):
         mol = psi4.core.Molecule.from_arrays(
-            geom=r,
+            geom=R[i],
             elez=Z,
             molecular_charge=charge,
             molecular_multiplicity=mult,
             fix_com=True,
             fix_orientation=True,
         )
-        try:
-            e, wfn = psi4.opt(method, molecule=mol, return_wfn=True)
-            r_opt = np.asarray(wfn.molecule().geometry())
-            r_opt_conv = True
-        except (psi4.OptimizationConvergenceError, AlgError) as ex:
-            r_opt_conv = False
-            r_opt = np.asarray(ex.wfn.molecule().geometry())
-            e = ex.wfn.energy()
-        finally:
-            r_opt *= psi4.constants.bohr2angstroms
-
-            opt_conv[i] = r_opt_conv  # pylint: disable=used-before-assignment
-            R_opt[i] = r_opt
-            E[i] = e  # pylint: disable=used-before-assignment
-
-    return idxs, opt_conv, R_opt, E
-
-
-def psi4_cube(
-    idxs,
-    Z,
-    R,
-    total_n_points,
-    charge=0,
-    mult=1,
-    method="mp2",
-    options=None,
-    threads=1,
-    mem="1 GB",
-    cube_file_name=None,
-):
-    r"""Worker function for computing cube data using Psi4.
-
-    Parameters
-    ----------
-    idxs : :obj:`numpy.ndarray`, ndim: ``1``
-        Indices of the structures from ``R`` to compute energies and gradients
-        for.
-    Z : :obj:`numpy.ndarray`, ndim: ``1``
-        Atomic numbers of the atoms with respect to ``R``.
-    R : :obj:`numpy.ndarray`, ndim: ``3``
-        Cartesian coordinates of all structures in group. This includes
-        unused structures.
-    total_n_points : :obj:`int`
-        Number of points to initialize arrays with.
-    charge : :obj:`int`, default: ``0``
-        Total molecular charge.
-    mult : :obj:`int`, default: ``1``
-        Total molecular multiplicity.
-    method : :obj:`str`, default: ``'b3lyp-d3bj'``
-        Specifies the Psi4 method used for the calculation. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master/
-        opt.html#geometry-optimization-w-w-optimize-and-gradient>`__
-        for your specific version.
-    options : :obj:`dict`
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/psithoninput.html
-        #job-control-keywords>`__ using the PsiAPI format.
-
-        You must specify ``cubeprop_tasks`` (the tasks are
-        listed `here <https://psicode.org/psi4manual/master/cubeprop.html
-        #cubeprop-tasks>`__). If ``cubeprop_filepath`` is not specified then no
-        text-based cube file is saved.
-    threads : :obj:`int`, default: ``1``
-        Number of threads for Psi4. This is almost always the number of cores
-        being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
-    mem : :obj:`int`, :obj:`float`, :obj:`str`, default: ``'1 GB'``
-        The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-    cube_file_name : :obj:`str`, default: ``None``
-        You can manually specify the name of the cube file to parse. Otherwise
-        we will automatically choose. Typical options are ``ESP.cube``, ``Dt.cube``,
-
-
-    Returns
-    -------
-    :obj:`numpy.ndarray`
-        ``idxs``
-    :obj:`numpy.ndarray`
-        Cartesian coordinates of points where a property is probed.
-    :obj:`numpy.ndarray`
-        Property values at the same Cartesian coordinates.
-
-    Notes
-    -----
-    Uses ```CubeProp()`` <https://psicode.org/psi4manual/master/cubeprop.html>`__ to
-    generate a cube file, then parses back into an array.
-
-    Psi4 uses QCElemental to build molecules from arrays.
-    There is some postprocessing in the `from_arrays routine
-    <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
-    qcelemental.molparse.from_arrays.html#from-arrays>`__.
-    QCElemental will translate and rotate molecules which affects computed gradients.
-    Here, we set ``fix_com`` and ``fix_orientation`` to ``True`` to avoid this.
-    """
-    assert "cubeprop_tasks" in options
-    if cube_file_name is None:
-        if options["cubeprop_tasks"][0].lower() == "esp":
-            cube_file_name = "ESP.cube"
-        elif options["cubeprop_tasks"][0].lower() == "density":
-            cube_file_name = "Dt.cube"
-
-    with TemporaryDirectory() as temp_dir:
-        options["cubeprop_filepath"] = temp_dir
-
-        psi4.core.set_num_threads(threads)
-        psi4.set_memory(mem)
-        if options is not None:
-            psi4.set_options(options)
-        R = R[idxs]
-
-        cube_R, cube_V = initialize_grid_arrays(R, max_points=total_n_points)
-
-        for i, r in enumerate(R):
-            mol = psi4.core.Molecule.from_arrays(
-                geom=r,
-                elez=Z,
-                molecular_charge=charge,
-                molecular_multiplicity=mult,
-                fix_com=True,
-                fix_orientation=True,
+        wfn = None
+        for task in tasks:
+            data_worker, wfn = _do_psi4_task(
+                task, data_worker, i, method, mol, options, cube_file_name, wfn
             )
-            _, wfn = psi4.energy(method, molecule=mol, return_wfn=True)
-            psi4.cubeprop(wfn)
-            cube_r, cube_v = parse_cube(os.path.join(temp_dir, cube_file_name))
-
-            cube_R[i, : cube_r.shape[0], :] = cube_r
-            cube_V[i, : cube_v.shape[0]] = cube_v
-    return idxs, cube_R, cube_V
+    return data_worker

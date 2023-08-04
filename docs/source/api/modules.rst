@@ -8,6 +8,7 @@ API
    Creator <Creator>
    Creating <creating-api/creating-module>
    Descriptors <descriptors/descriptors>
+   Exceptions <exceptions/exceptions>
    Extractors <extractors-api/extractors-module>
    File <file>
    Fragment <fragment/fragment>
@@ -16,7 +17,6 @@ API
    Periodic <periodic/periodic_module>
    Sampler <Sampler>
    Sampling <sampling/sampling_module>
-   Saver <Saver>
    Utilities <utils/utils>
    Writers <writers/writers>
    

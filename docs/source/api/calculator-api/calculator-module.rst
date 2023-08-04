@@ -5,10 +5,8 @@
     :glob:
     :maxdepth: 1
 
-    Drivers <drivers/drivers-module>
+    Data <Data>
+    Driver <Driver>
     Cube <cube/cube-module>
-    Psi4 <psi4-workers/psi4-workers-module>
+    Psi4 <psi4_worker>
     xTB <xtb-workers/xtb-workers-module>
-    
-    
-

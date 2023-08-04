@@ -8,6 +8,9 @@ A tool for computing, storing, and analyzing manuscript-scale computational chem
     :target: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml
     :alt: Python package build
 
+.. image:: https://img.shields.io/pypi/pyversions/reptar
+    :alt: PyPI - Python Version
+
 .. image:: https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD
     :target: https://codecov.io/gh/aalexmmaldonado/reptar
     :alt: Codecov test coverage
@@ -129,7 +132,7 @@ Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldon
     Sampling <sampling>
     Calculators <calculators>
     Descriptors <descriptors>
-    Scripts <scripts>
+    Scripts <scripts/scripts>
     Definitions <definitions/definitions>
     API <api/modules>
     Contributing <contributing>

@@ -29,9 +29,10 @@ import shutil
 import os
 import pytest
 import numpy as np
-from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverOpt
-from reptar.calculators.xtb_workers import xtb_python_engrad, xtb_opt
+from reptar import File
+from reptar.calculators import Data
+from reptar.calculators import Driver
+from reptar.calculators.xtb_workers import xtb_python_worker, xtb_worker
 from reptar.calculators.utils import prep_xtb_input_lines
 
 
@@ -50,7 +51,7 @@ def test_calculator_xtb_1h2o_engrad():
     try:
         import xtb
     except ImportError:
-        pytest.skip("xtb package not installed")
+        pytest.skip("xtb-python package not installed")
 
     exdir_path_source = get_140h2o_samples_path()
     rfile_source = File(exdir_path_source, mode="r")
@@ -105,23 +106,21 @@ def test_calculator_xtb_1h2o_engrad():
     # Setup energy and gradient arrays
     method_label = "gfn2xtb"
 
-    E_key = f"{group_key}/energy_ele_{method_label}"
-    E = np.empty(R.shape[0], dtype=np.float64)
-    E[:] = np.nan
-    rfile.put(E_key, E)
-
-    G_key = f"{group_key}/grads_{method_label}"
-    G = np.empty(R.shape, dtype=np.float64)
-    G[:] = np.nan
-    rfile.put(G_key, G)
+    data = Data()
+    data.rfile = rfile
+    data.Z = rfile_source.get(f"{group_key}/atomic_numbers")
+    data.R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
+    data.E_key = f"{group_key}/energy_ele_{method_label}"
+    data.E = np.full(data.R.shape[0], np.nan)
+    data.G_key = f"{group_key}/grads_{method_label}"
+    data.G = np.full(data.R, np.nan)
+    data.save()
 
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -131,12 +130,6 @@ def test_calculator_xtb_1h2o_engrad():
         "max_iterations": 300,
         "params": None,
     }
-
-    saver = Saver(exdir_path_dest, (E_key, G_key))
-
-    driver = DriverEnGrad(xtb_python_engrad, worker_kwargs, **driver_kwargs)
-
-    saver.save(E, G)
 
     E_ref = np.array(
         [
@@ -176,10 +169,12 @@ def test_calculator_xtb_1h2o_engrad():
             ],
         ]
     )
-    E, G = driver.run(Z, R, E, G, saver=saver)
 
-    assert np.allclose(E, E_ref)
-    assert np.allclose(G, G_ref)
+    driver = Driver(xtb_python_worker, worker_kwargs, **driver_kwargs)
+    data = driver.run(xtb_python_worker, worker_kwargs, data, ["G"])
+
+    assert np.allclose(data.E, E_ref)
+    assert np.allclose(data.G, G_ref)
 
 
 def test_calculator_xtb_1h2o_opt():
@@ -201,11 +196,13 @@ def test_calculator_xtb_1h2o_opt():
     start_slice = None
     end_slice = 5
 
-    Z = rfile_source.get(f"{group_key}/atomic_numbers")
-    R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
-    R_opt = np.full(R.shape, np.nan)
-    conv_opt = np.full(R.shape[0], False)
-    E_opt = np.full(R.shape[0], np.nan)
+    data = Data()
+    data.rfile = rfile
+    data.Z = rfile_source.get(f"{group_key}/atomic_numbers")
+    data.R = rfile_source.get(f"{group_key}/geometry")[start_slice:end_slice]
+    data.R_opt = np.full(data.R.shape, np.nan)
+    data.conv_opt = np.full(data.R.shape[0], False)
+    data.E = np.full(data.R.shape[0], np.nan)
 
     # Setup energy and gradient arrays
     method_label = "gfn2xtb"
@@ -215,8 +212,6 @@ def test_calculator_xtb_1h2o_opt():
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     input_lines = prep_xtb_input_lines(
@@ -261,9 +256,10 @@ def test_calculator_xtb_1h2o_opt():
     E_opt_ref = np.array(
         [-5.07054432, -5.07054437, -5.07054445, -5.07054441, -5.07054445]
     )
-    driver = DriverOpt(xtb_opt, worker_kwargs, **driver_kwargs)
-    opt_conv, R_opt, E_opt = driver.run(Z, R, conv_opt, R_opt, E_opt)
 
-    assert np.all(opt_conv == True)
-    assert np.allclose(R_opt, R_opt_ref)
-    assert np.allclose(E_opt, E_opt_ref)
+    driver = Driver(**driver_kwargs)
+    data = driver.run(xtb_worker, worker_kwargs, data, ["opt"])
+
+    assert np.all(data.conv_opt == True)
+    assert np.allclose(data.R_opt, R_opt_ref)
+    assert np.allclose(data.E, E_opt_ref)

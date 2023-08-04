@@ -41,6 +41,7 @@ extensions = [
     "sphinx_design",
     "sphinxcontrib.mermaid",
     "sphinxemoji.sphinxemoji",
+    "sphinx_autodoc_typehints",
 ]
 
 suppress_warnings = ["autosectionlabel.*"]
@@ -62,6 +63,7 @@ intersphinx_mapping = {
         "https://docs.qcarchive.molssi.org/projects/QCElemental/en/stable/",
         None,
     ),
+    "zarr": ("https://zarr.readthedocs.io/en/stable/", None),
 }
 
 # Include __init__ docstring for classes
@@ -101,6 +103,7 @@ html_sidebars = {
 html_extra_path = [
     "./files/30h2o-md/30h2o-gfn2-opt.xyz",
     "./files/30h2o-md/30h2o.pm.xyz",
+    "./files/data/1h2o.zarr.zip",
 ]
 
 
@@ -111,3 +114,4 @@ autoapi_dirs = ["../../reptar"]
 autoapi_add_toctree_entry = False
 autoapi_python_class_content = "both"
 autoapi_keep_files = True
+autodoc_typehints = "description"

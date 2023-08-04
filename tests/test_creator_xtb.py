@@ -71,7 +71,7 @@ def test_1h2o_120meoh_md_exdir():
     comp_ids = gen_comp_ids("MET", num_methanols, add_to=comp_ids)
 
     create = Creator()
-    create.load(exdir_path, mode="w", allow_remove=True)
+    create.load(exdir_path, mode="w")
     create.definitions(definitions=["md", "xtb", "pes"])
     create.from_calc(
         "/eq_1", out_path=out_path_eq, geom_path=geom_path_eq, traj_path=traj_path_eq
@@ -258,7 +258,7 @@ def test_50h2o_opt_to_exdir():
     exdir_path = os.path.join(XTB_DIR, "50h2o-opt.exdir")
 
     create_exdir = Creator()
-    create_exdir.load(exdir_path, mode="w", allow_remove=True)
+    create_exdir.load(exdir_path, mode="w")
     group_key = "0-gfn2-opt"
     rfile = create_exdir.from_calc(group_key, out_path=out_path, traj_path=traj_path)
 

@@ -22,25 +22,19 @@
 
 from random import choice, randrange
 import numpy as np
+import ray
 from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 from qcelemental.exceptions import ValidationError
-from .save import Saver
 from .utils import center_structures as get_center_structures
 from .utils import gen_combs, exists_in_array, chunk_iterable
 from .periodic import Cell
 from . import _version
+from .saver import Saver
 from .logger import ReptarLogger
 
 log = ReptarLogger(__name__)
 
 reptar_version = _version.get_versions()["version"]
-
-try:
-    import ray
-except ImportError:
-    _HAS_RAY = False
-else:
-    _HAS_RAY = True
 
 
 def entity_mask_gen(entity_ids, entities):
@@ -424,8 +418,6 @@ class Sampler:
         self.use_ray = use_ray
         self.n_workers = n_workers
         if self.use_ray:
-            assert _HAS_RAY
-
             if not ray.is_initialized():
                 ray.init(address=ray_address)
 

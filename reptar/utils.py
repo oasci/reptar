@@ -584,160 +584,6 @@ def validate_geometry(R, tooclose=0.1):
     return n_invalid, is_valid
 
 
-def prep_array(rfile, key, shape, dtype=None, fill_with=np.nan):
-    """Prepares array in files by first trying to ``get()`` data, but if it does not
-    exist then initializes with ``put()``.
-
-    Parameters
-    ----------
-    rfile : :obj:`reptar.File`
-        File object to prepare data in.
-    key : :obj:`str`
-        Key to desired data to prepare in ``rfile``.
-    shape : :obj:`tuple`
-        Desired shape of the array if it does not already exist.
-    dtype : :obj:`str`, default: ``None``
-        Desired NumPy data type. If ``None`` then NumPy will try to use a default
-        data type that can represent the values.
-    fill_with : ``various``, default: ``NaN``
-        Fill the array with ``fill_with`` if we are initializing it.
-
-    Returns
-    -------
-    ``various``
-        Requested data.
-    """
-    try:
-        data = rfile.get(key)
-    except RuntimeError as e:
-        if "does not exist" in str(e):
-            data = np.full(shape, fill_with, dtype=dtype)
-            rfile.put(key, data)
-            data = rfile.get(key)
-    return data
-
-
-# pylint: disable=invalid-name
-def prep_group_opt(
-    rfile,
-    Z_key,
-    R_key,
-    dest_key,
-    Z_opt_label="atomic_numbers",
-    conv_opt_label="conv_opt",
-    R_opt_label="geometry",
-    E_opt_label="energy_ele",
-):
-    """Prepare group for geometry optimization calculations in a reptar file.
-
-    Parameters
-    ----------
-    rfile : :obj:`reptar.File`
-        File to prepare a group for optimization-like data.
-    Z_key : :obj:`str`
-        Source key for atomic numbers of structures to optimize.
-    R_key : :obj:`str`
-        Source key for Cartesian coordinates of structures to optimize.
-    dest_key : :obj:`str`
-        Key to create new group for optimization. All data will be stored here.
-    Z_opt_label : :obj:`str`, default: ``atomic_numbers``
-        Label to store atomic numbers of new optimization group.
-    conv_opt_label : :obj:`str`, default: ``conv_opt``
-        Label to store boolean flag if the geometry optimization was successful.
-    R_opt_label : :obj:`str`, default: ``geometry``
-        Label to store the last structure from the optimization. If ``converged_opt``
-        is ``True``, this is the optimized geometry. If ``False``, then it is the last
-        structure before the optimization terminated.
-    E_opt_key : :obj:`str`, default: ``energy_ele``
-        Label to store the last electronic energy after the optimization.
-
-    Returns
-    -------
-    :obj:`tuple`
-        ``Z_opt_key``, ``conv_opt_key``, ``R_opt_key``, and ``E_opt_key``.
-    :obj:`tuple`
-        ``Z_opt``, ``conv_opt``, ``R_opt``, and ``E_opt`` arrays.
-    """
-    log.debug("Retrieving initial configurations")
-    Z = rfile.get(Z_key)
-    R = rfile.get(R_key)
-
-    log.debug("Initializing optimization data")
-    try:
-        rfile.get(dest_key)
-    except RuntimeError as e:
-        if " does not exist" in str(e):
-            rfile.create_group(dest_key)
-        else:
-            raise RuntimeError from e
-
-    Z_opt_key = os.path.join(dest_key, Z_opt_label)
-    rfile.put(Z_opt_key, Z)
-
-    R_opt_key = os.path.join(dest_key, R_opt_label)
-    R_opt = prep_array(rfile, R_opt_key, R.shape, dtype="float64")
-
-    conv_opt_key = os.path.join(dest_key, conv_opt_label)
-    conv_opt = prep_array(
-        rfile, conv_opt_key, R.shape[0], dtype="bool", fill_with=False
-    )
-
-    E_opt_key = os.path.join(dest_key, E_opt_label)
-    E_opt = prep_array(rfile, E_opt_key, R.shape[0], dtype="float64")
-
-    return (Z_opt_key, conv_opt_key, R_opt_key, E_opt_key), (Z, conv_opt, R_opt, E_opt)
-
-
-# pylint: disable=invalid-name
-def prep_group_engrad(
-    rfile,
-    R_key,
-    dest_key,
-    E_label="energy_ele",
-    G_label="grads",
-):
-    """Prepare group for geometry optimization calculations in a reptar file.
-
-    Parameters
-    ----------
-    rfile : :obj:`reptar.File`
-        File to prepare a group for optimization-like data.
-    R_key : :obj:`str`
-        Source key for Cartesian coordinates of structures to optimize.
-    dest_key : :obj:`str`
-        Key to create new group for optimization. All data will be stored here.
-    E_key : :obj:`str`, default: ``energy_ele``
-        Label to store the electronic energy.
-    G_key : :obj:`str`, default: ``grads``
-        Label to store the atomic gradient.
-
-    Returns
-    -------
-    :obj:`tuple`
-        ``E_key`` and ``G_key``.
-    :obj:`tuple`
-        ``E``, and ``G`` arrays.
-    """
-    R = rfile.get(R_key)
-
-    log.debug("Initializing energy and gradient data")
-    try:
-        rfile.get(dest_key)
-    except RuntimeError as e:
-        if " does not exist" in str(e):
-            rfile.create_group(dest_key)
-        else:
-            raise RuntimeError from e
-
-    E_key = os.path.join(dest_key, E_label)
-    E = prep_array(rfile, E_key, R.shape[0], dtype="float64", fill_with=np.nan)
-
-    G_key = os.path.join(dest_key, G_label)
-    G = prep_array(rfile, G_key, R.shape, dtype="float64", fill_with=np.nan)
-
-    return (E_key, G_key), (E, G)
-
-
 def get_obj_from_string(import_string):
     """Retrieves a function object based on an import string and object name.
 
@@ -755,3 +601,23 @@ def get_obj_from_string(import_string):
     module = importlib.import_module(module_name)
     obj = getattr(module, obj_name)
     return obj
+
+
+def common_elements(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
+    r"""Provides only elements that are shared between two arrays.
+
+    Parameters
+    ----------
+    arr1
+        First array.
+    arr2
+        Second array.
+
+    Returns
+    -------
+    :obj:`np.ndarray`
+        Array containing only shared elements between ``arr1`` and ``arr2``.
+    """
+    # pylint: disable-next=invalid-name
+    u, c = np.unique(np.concatenate((arr1, arr2)), return_counts=True)
+    return u[c > 1]

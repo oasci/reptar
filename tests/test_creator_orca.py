@@ -48,7 +48,7 @@ def test_6h2o_temelso_engrad_exdir():
     exdir_path = os.path.join(ORCA_DIR, "6h2o_temelso_pr_engrad.exdir")
 
     create = Creator()
-    create.load(exdir_path, mode="w", allow_remove=True)
+    create.load(exdir_path, mode="w")
     create.definitions(definitions=["qc", "pes", "molprop"])
     create.from_calc("/engrad", out_path=out_path)
 

@@ -29,9 +29,10 @@ import shutil
 import os
 import pytest
 import numpy as np
-from reptar import File, Saver
-from reptar.calculators.drivers import DriverEnergy, DriverEnGrad, DriverCube
-from reptar.calculators.psi4_workers import psi4_energy, psi4_engrad, psi4_cube
+from reptar import File
+from reptar.calculators import Data
+from reptar.calculators import Driver
+from reptar.calculators.psi4_workers import psi4_worker
 from reptar.calculators.cube import initialize_grid_arrays
 import qcelemental as qcel
 
@@ -53,14 +54,14 @@ def test_calculator_psi4_1h2o_engrad():
     except ImportError:
         pytest.skip("psi4 package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -116,13 +117,20 @@ def test_calculator_psi4_1h2o_engrad():
     G[:] = np.nan
     rfile.put(G_key, G)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+    data.G = G
+    data.G_key = G_key
+
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -144,11 +152,7 @@ def test_calculator_psi4_1h2o_engrad():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key, G_key))
-
-    driver = DriverEnGrad(psi4_engrad, worker_kwargs, **driver_kwargs)
-
-    saver.save(E, G)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -188,10 +192,10 @@ def test_calculator_psi4_1h2o_engrad():
             ],
         ]
     )
-    E, G = driver.run(Z, R, E, G, saver=saver)
+    data = driver.run(psi4_worker, worker_kwargs, data, ["G"])
 
-    assert np.allclose(E, E_ref)
-    assert np.allclose(G, G_ref)
+    assert np.allclose(data.E, E_ref)
+    assert np.allclose(data.G, G_ref)
 
 
 def test_ray_calculator_psi4_1h2o_engrad():
@@ -204,14 +208,14 @@ def test_ray_calculator_psi4_1h2o_engrad():
     except ImportError:
         pytest.skip("ray package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -267,13 +271,20 @@ def test_ray_calculator_psi4_1h2o_engrad():
     G[:] = np.nan
     rfile.put(G_key, G)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+    data.G = G
+    data.G_key = G_key
+
     driver_kwargs = {
         "use_ray": True,
         "n_workers": 2,
         "n_cpus_per_worker": 1,
         "chunk_size": 2,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -295,11 +306,7 @@ def test_ray_calculator_psi4_1h2o_engrad():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key, G_key))
-
-    driver = DriverEnGrad(psi4_engrad, worker_kwargs, **driver_kwargs)
-
-    saver.save(E, G)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -339,10 +346,10 @@ def test_ray_calculator_psi4_1h2o_engrad():
             ],
         ]
     )
-    E, G = driver.run(Z, R, E, G, saver=saver)
+    data = driver.run(psi4_worker, worker_kwargs, data, ["G"])
 
-    assert np.allclose(E, E_ref)
-    assert np.allclose(G, G_ref)
+    assert np.allclose(data.E, E_ref)
+    assert np.allclose(data.G, G_ref)
 
 
 def test_calculator_psi4_1h2o_energy():
@@ -351,14 +358,14 @@ def test_calculator_psi4_1h2o_energy():
     except ImportError:
         pytest.skip("psi4 package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -409,13 +416,18 @@ def test_calculator_psi4_1h2o_energy():
     E[:] = np.nan
     rfile.put(E_key, E)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 1,
         "n_cpus_per_worker": 1,
         "chunk_size": 1,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -437,11 +449,7 @@ def test_calculator_psi4_1h2o_energy():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key,))
-
-    driver = DriverEnergy(psi4_energy, worker_kwargs, **driver_kwargs)
-
-    saver.save(E)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -453,9 +461,9 @@ def test_calculator_psi4_1h2o_energy():
         ]
     )
 
-    E = driver.run(Z, R, E, saver=saver)
+    Edata = driver.run(psi4_worker, worker_kwargs, data, ["E"])
 
-    assert np.allclose(E, E_ref)
+    assert np.allclose(data.E, E_ref)
 
 
 def test_ray_calculator_psi4_1h2o_energy():
@@ -468,14 +476,14 @@ def test_ray_calculator_psi4_1h2o_energy():
     except ImportError:
         pytest.skip("ray package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -526,13 +534,18 @@ def test_ray_calculator_psi4_1h2o_energy():
     E[:] = np.nan
     rfile.put(E_key, E)
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.E = E
+    data.E_key = E_key
+
     driver_kwargs = {
         "use_ray": True,
         "n_workers": 2,
         "n_cpus_per_worker": 1,
         "chunk_size": 2,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -554,11 +567,7 @@ def test_ray_calculator_psi4_1h2o_energy():
         },
     }
 
-    saver = Saver(exdir_path_dest, (E_key,))
-
-    driver = DriverEnergy(psi4_energy, worker_kwargs, **driver_kwargs)
-
-    saver.save(E)
+    driver = Driver(**driver_kwargs)
 
     E_ref = np.array(
         [
@@ -570,9 +579,9 @@ def test_ray_calculator_psi4_1h2o_energy():
         ]
     )
 
-    E = driver.run(Z, R, E, saver=saver)
+    data = driver.run(psi4_worker, worker_kwargs, data, ["E"])
 
-    assert np.allclose(E, E_ref)
+    assert np.allclose(data.E, E_ref)
 
 
 def test_ray_calculator_psi4_1h2o_esp():
@@ -585,14 +594,14 @@ def test_ray_calculator_psi4_1h2o_esp():
     except ImportError:
         pytest.skip("ray package not installed")
 
-    exdir_path_source = get_140h2o_samples_path()
-    rfile_source = File(exdir_path_source, mode="r")
+    path_source = get_140h2o_samples_path()
+    rfile_source = File(path_source, mode="r")
 
-    exdir_path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
+    path_dest = os.path.join(WRITING_DIR, "1h2o-psi4.exdir")
 
-    if os.path.exists(exdir_path_dest):
-        shutil.rmtree(exdir_path_dest)
-    rfile = File(exdir_path_dest, mode="w")
+    if os.path.exists(path_dest):
+        shutil.rmtree(path_dest)
+    rfile = File(path_dest, mode="w")
 
     # Copy over a few structures for calculations.
     group_key = "1h2o"
@@ -637,13 +646,20 @@ def test_ray_calculator_psi4_1h2o_esp():
         R / qcel.constants.bohr2angstroms, overage=overage, spacing=spacing
     )
 
+    data = Data()
+    data.rfile = rfile
+    data.Z = Z
+    data.R = R
+    data.cube_R = cube_R
+    data.cube_R_key = cube_R_key
+    data.cube_V = cube_V
+    data.cube_V_key = cube_V_key
+
     driver_kwargs = {
         "use_ray": False,
         "n_workers": 2,
         "n_cpus_per_worker": 1,
         "chunk_size": 2,
-        "start_slice": None,
-        "end_slice": None,
     }
 
     worker_kwargs = {
@@ -663,21 +679,14 @@ def test_ray_calculator_psi4_1h2o_esp():
             "qc_module": "dfmp2",
             "print": 2,
             "cubeprop_tasks": ["esp"],
-            "cubic_grid_spacing": spacing,
-            "cubic_grid_overage": overage,
+            "cubic_grid_spacing": spacing,  # Needs to be Bohr
+            "cubic_grid_overage": overage,  # Needs to be Bohr
         },
+        "total_grid_points": cube_V.shape[-1],
     }
 
-    saver = Saver(
-        exdir_path_dest,
-        (
-            cube_R_key,
-            cube_V_key,
-        ),
-    )
+    driver = Driver(**driver_kwargs)
 
-    driver = DriverCube(psi4_cube, worker_kwargs, **driver_kwargs)
-
-    cube_R, cube_V = driver.run(Z, R, cube_R, cube_V, saver=saver)
-    assert cube_R[0][0][0] == -4.12824
-    assert cube_V[0][0] == -0.00174447
+    data = driver.run(psi4_worker, worker_kwargs, data, ["cube"])
+    assert data.cube_R[0][0][0] == -4.12824
+    assert data.cube_V[0][0] == -0.00174447

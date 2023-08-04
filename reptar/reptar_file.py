@@ -20,6 +20,9 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
+from __future__ import annotations
+from typing import Any
+from collections.abc import Iterable
 import os
 import json
 import exdir
@@ -33,49 +36,68 @@ log = ReptarLogger(__name__)
 
 
 class File:
-    r"""Create, store, and access data from a variety of formats."""
+    r"""Create, store, and access data from a variety of formats.
+
+    .. note::
+
+        To serialize these objects we need to close the file. The de-serialization
+        process does not automatically re-open the file. :meth:`~reptar.File.open` must
+        be used directly.
+    """
 
     # pylint: disable=unnecessary-dunder-call
 
     def __init__(
-        self, file_path, mode="r", allow_remove=False, plugins=None, from_dict=None
-    ):
+        self,
+        file_path: str,
+        mode: str = "r",
+        plugins: list[Any] | None = None,
+        from_dict: dict | None = None,
+    ) -> None:
         """
         Parameters
         ----------
-        file_path : :obj:`str`
+        file_path
             Path to a file supported by reptar. If it does not exist, then one will
             be created if possible.
-        mode : :obj:`str`, default: ``'r'``
+        mode
             A file mode string that defines the read/write behavior.
-        allow_remove : :obj:`bool`, default: ``False``
-            Allow the removal of exdir groups in ``'w'`` operation.
-        plugins : :obj:`list`, default: ``None``
+        plugins
             A list of instantiated exdir plugins.
-        from_dict : :obj:`dict`, default: ``None``
+        from_dict
             Load data from a dictionary.
         """
-        if from_dict is None:
-            self._from_path(file_path, mode, allow_remove, plugins)
-        else:
-            self._from_dict(file_path, from_dict, mode, allow_remove, plugins)
+        self.fpath = os.path.abspath(file_path)
+        self.fmode = mode
+        self.plugins = plugins
+        self.from_dict = from_dict
+        if ("w" in mode) or ("a" in mode):
+            allow_remove = True
+        elif "r" in mode:
+            allow_remove = False
+        self.allow_remove = allow_remove
+        log.debug("Setting allow_remove to %r", allow_remove)
 
-    def _from_path(self, file_path, mode, allow_remove, plugins):
+        self.open()
+
+    def _from_path(
+        self, file_path: str, mode: str, allow_remove: bool, plugins: Iterable | None
+    ) -> None:
         r"""Populates the File object from a file path.
 
         Parameters
         ----------
-        file_path : :obj:`str`
+        file_path
             Path to a file supported by reptar. If it does not exist, then one will
             be created if possible.
-        mode : :obj:`str`, default: ``'r'``
+        mode
             A file mode string that defines the read/write behavior.
-        allow_remove : :obj:`bool`, default: ``False``
+        allow_remove
             Allow the removal of exdir groups in ``'w'`` operation.
-        plugins : :obj:`list`, default: ``None``
+        plugins
             A list of instantiated exdir plugins.
         """
-        log.debug("Opening file from path")
+        log.debug("Opening file from %s", file_path)
         exists = os.path.exists(file_path)
         _, f_ext = os.path.splitext(file_path)
 
@@ -107,21 +129,28 @@ class File:
         self.fmode = mode
         self.File_ = File_
 
-    def _from_dict(self, file_path, group_dict, mode, allow_remove, plugins):
+    def _from_dict(
+        self,
+        file_path: str,
+        group_dict: dict,
+        mode: str,
+        allow_remove: bool,
+        plugins: Iterable | None,
+    ) -> None:
         r"""Populates the File object from a dictionary.
 
         Parameters
         ----------
-        file_path : :obj:`str`
+        file_path
             Path to a file supported by reptar. If it does not exist, then one
             will be created if possible.
         group_dict : :obj:`dict`
             Dictionary to populate the File object with.
-        mode : :obj:`str`, default: ``'r'``
+        mode
             A file mode string that defines the read/write behavior.
-        allow_remove : :obj:`bool`, default: ``False``
+        allow_remove
             Allow the removal of exdir groups in ``'w'`` operation.
-        plugins : :obj:`list`, default: ``None``
+        plugins
             A list of instantiated exdir plugins.
         """
         log.debug("Opening file from dictionary")
@@ -133,7 +162,7 @@ class File:
             self.File_ = {}
         elif f_ext == ".zarr":
             self.File_ = zarr.open(file_path, mode)
-        self.fpath = os.path.abspath(file_path)
+        self.fpath = file_path
         self.ftype = f_ext[1:]
         self.fmode = mode
 
@@ -142,8 +171,27 @@ class File:
             data = item[-1]
             self.put(key, data)
 
+    def __getstate__(self):
+        r"""Having File_ makes this not serializable."""
+        state = self.__dict__.copy()
+        del state["File_"]
+        return state
+
+    def __setstate__(self, state):
+        log.debug("Setting state of object")
+        self.__dict__.update(state)
+
+    def open(self) -> None:
+        r"""Opens and prepares the ``File_`` attribute."""
+        if self.from_dict is None:
+            self._from_path(self.fpath, self.fmode, self.allow_remove, self.plugins)
+        else:
+            self._from_dict(
+                self.fpath, self.from_dict, self.fmode, self.allow_remove, self.plugins
+            )
+
     @staticmethod
-    def clean_key(key):
+    def clean_key(key: str) -> str:
         r"""Clean key and remove any common mistakes.
 
         This corrects instances of ``//`` and enforces instances where the start of the
@@ -151,26 +199,27 @@ class File:
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data.
 
         Returns
         -------
-        :obj:`str`
+
             Cleaned key.
         """
-        log.debug("Cleaning key")
         log.debug("Original key: %s", key)
         if "//" in key:
             key = key.replace("//", "/")
+        if key == "":
+            key = "/"
         while key[0] == ".":
             log.debug("Removing . at beginning")
             key = key[1:]
-        log.debug("Cleaned key: %s", key)
+        log.debug("Cleaned key:  %s", key)
         return key
 
     @staticmethod
-    def split_key(key):
+    def split_key(key: str) -> tuple(str, str):
         r"""Split the key into a parent and data key.
 
         Parameters
@@ -185,17 +234,16 @@ class File:
         :obj:`str`
             Data key.
         """
-        log.debug("Splitting key")
         if key[0] != "/":
             key = "/" + key
         key_split = key.rsplit("/", 1)
         if key_split[0] == "":
             key_split[0] = "/"
         log.debug("Parent key: %s", key_split[0])
-        log.debug("Data key: %s", key_split[1])
+        log.debug("Data key:   %s", key_split[1])
         return key_split
 
-    def _get_from_dict(self, key):
+    def _get_from_dict(self, key: str) -> Any:
         r"""Get data from dictionary-like file (e.g., json, npz).
 
         Parameters
@@ -208,8 +256,6 @@ class File:
         ``various``
             Requested data from a dictionary source.
         """
-        log.debug("Getting data from dictionary")
-
         keys = key.split("/")
         if keys[0] == "":
             del keys[0]
@@ -223,7 +269,7 @@ class File:
                 data = data_array
         return data
 
-    def _get_from_exdir(self, key, as_memmap=False):
+    def _get_from_exdir(self, key: str, as_memmap: bool = False) -> Any:
         r"""Get data from exdir file.
 
         Parameters
@@ -238,8 +284,6 @@ class File:
         ``various``
             Requested data from a exdir source.
         """
-        log.debug("Getting data from exdir")
-
         key_parent, key_data = self.split_key(key)
         parent = self.File_[key_parent]
         if key_data in list(parent):
@@ -259,36 +303,39 @@ class File:
 
         return data
 
-    def _get_from_zarr(self, key):
+    def _get_from_zarr(self, key: str, to_numpy: bool = True) -> Any:
         r"""Get data from zarr file.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data. Nested keys should be separated by ``/``.
+        to_numpy
+            Will return :obj:`numpy.ndarray` instead of :obj:`zarr.core.Array` and thus
+            load the entire array into memory.
 
         Returns
         -------
         ``various``
             Requested data from a zarr source.
         """
-        log.debug("Getting data from zarr")
-
         # Check if key is attribute
         key_parent, key_data = self.split_key(key)
         attr_keys = list(self.File_[key_parent].attrs.keys())
         if key_data in attr_keys:
             data = self.File_[key_parent].attrs[key_data]
         else:
-            # Should be array.
             try:
                 data = self.File_[key]
             except KeyError as e:
                 raise RuntimeError(f"{key} does not exist") from e
 
+        if isinstance(data, zarr.core.Array) and to_numpy:
+            data = data[...]  # Converts to numpy
+
         return data
 
-    def get_keys(self, group_key):
+    def get_keys(self, group_key: str) -> list[str]:
         r"""A list of keys in a group.
 
         Does not include keys of nested groups.
@@ -318,22 +365,34 @@ class File:
                     )
                 )
             )
+        elif self.ftype == "zarr":
+            keys.extend(list(group.array_keys()))
+            keys.extend(group.attrs.keys())
         elif self.ftype in ("json", "npz"):
             keys.extend(list(group.keys()))
         return keys
 
-    def get(self, key, as_memmap=False, missing_is_none=False):
+    def get(
+        self,
+        key: str,
+        as_memmap: bool = False,
+        missing_is_none: bool = False,
+        zarr_to_numpy: bool = True,
+    ) -> Any:
         r"""Retrieve data.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data. Nested keys should be separated by ``/``.
-        as_memmap : :obj:`bool`, default: ``False``
+        as_memmap
             Keep NumPy memmap (from exdir files) instead of converting to arrays.
-        missing_is_none : :obj:`bool`, default: ``False``
+        missing_is_none
             Catch the ``RuntimeError`` and return ``None`` if the key does not
             exits.
+        zarr_to_numpy
+            Load :obj:`zarr.core.Array` objects into memory and return as
+            :obj:`numpy.ndarray`.
 
         Examples
         --------
@@ -342,6 +401,7 @@ class File:
         >>> rfile.get('energy_scf')
         -12419.360138637763
         """
+        log.debug("Getting data with key: %s", key)
         key = self.clean_key(key)
 
         if key == "/":
@@ -354,7 +414,7 @@ class File:
             elif self.ftype in ("json", "npz"):
                 data = self._get_from_dict(key)
             elif self.ftype == "zarr":
-                data = self._get_from_zarr(key)
+                data = self._get_from_zarr(key, to_numpy=zarr_to_numpy)
         except RuntimeError as e:
             if "does not exist" in str(e) and missing_is_none:
                 data = None
@@ -363,7 +423,7 @@ class File:
         return data
 
     @staticmethod
-    def _is_iter(data):
+    def _is_iter(data: Any) -> bool:
         r"""If data is iterative (i.e., array, list, or tuple).
 
         Returns
@@ -376,7 +436,7 @@ class File:
         return False
 
     @staticmethod
-    def simplify_iter_data(data, data_key):
+    def simplify_iter_data(data: Iterable, data_key: str) -> Any:
         r"""Checks contents of lists, tuples, and arrays to see if we can simplify.
 
         Parameters
@@ -447,14 +507,14 @@ class File:
 
         return data
 
-    def _put_to_dict(self, key, data):
+    def _put_to_dict(self, key: str, data: Any) -> None:
         r"""Add data to dictionary-like file.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Where to put the data. Can be a nested key.
-        data : ``various``
+        data
             Data to add to file.
         """
         if isinstance(data, np.ndarray):
@@ -476,14 +536,14 @@ class File:
         self.File_ = combine_dicts(self.File_, add_dic)
 
     # pylint: disable-next=too-many-branches
-    def _put_to_exdir(self, key, data):
+    def _put_to_exdir(self, key: str, data: Any) -> None:
         r"""Add data to an exdir group.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Where to put the data. Can be a nested key.
-        data : ``various``
+        data
             Data to add to exdir file.
         """
         parent_key, data_key = self.split_key(key)
@@ -542,14 +602,14 @@ class File:
                 group.create_dataset(data_key, data=data)
         return None
 
-    def _put_to_zarr(self, key, data):
+    def _put_to_zarr(self, key: str, data: Any) -> None:
         r"""Add data to an zarr group.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Where to put the data. Can be a nested key.
-        data : ``various``
+        data
             Data to add to zarr file.
         """
         parent_key, data_key = self.split_key(key)
@@ -590,7 +650,7 @@ class File:
             group[data_key] = data
         return None
 
-    def put(self, key, data, with_md5_update=False):
+    def put(self, key: str, data: Any, with_md5_update: bool = False) -> None:
         r"""Put data to file in a specific location.
 
         Note that there is some data postprocessing using
@@ -598,12 +658,12 @@ class File:
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
-        data : ``obj``
+        data
             Data to add to file.
-        with_md5_update : :obj:`bool`, default: ``False``
+        with_md5_update
             Update MD5 hashes after putting data.
         """
         log.debug("Putting data with key %s", key)
@@ -620,19 +680,19 @@ class File:
             group_key, _ = self.split_key(key)
             self.update_md5(group_key)
 
-    def put_all(self, group_key, data, nested=False):
+    def put_all(self, group_key: str, data: Any, nested: bool = False) -> Any:
         r"""Adds all data from :obj:`dict` to group.
 
         This is just a loop over :meth:`~reptar.File.put` for each key-value pair.
 
         Parameters
         ----------
-        group_key : :obj:`str`
+        group_key
             Key to the desired new group.
-        data : :obj:`dict`
+        data
             Key-value pairs of data to add to group. For example, the
             ``parsed_info`` attribute after parsing a calculation.
-        nested : :obj:`bool`, default: ``True``
+        nested
             If``data`` contains one level of nested dictionaries. This is the
             case for ``parsed_info``.
         """
@@ -648,12 +708,12 @@ class File:
 
         return self.File_
 
-    def _remove_dict(self, key):
+    def _remove_dict(self, key: str) -> Any:
         r"""Delete dictionary data under ``key``.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
         """
@@ -664,12 +724,12 @@ class File:
         # Any other file type we assume could be nested.
         remove_nested_key(self.File_, [k for k in key.split("/") if k != ""])
 
-    def _remove_exdir(self, key):
+    def _remove_exdir(self, key: str) -> Any:
         r"""Delete exdir data under ``key``.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
         """
@@ -694,12 +754,12 @@ class File:
             with open(yaml_path, "w", encoding="utf-8") as f:
                 yaml.dump(attrs, f)
 
-    def _remove_zarr(self, key):
+    def _remove_zarr(self, key: str) -> None:
         r"""Delete zarr data under ``key``.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
         """
@@ -727,15 +787,15 @@ class File:
             with open(json_path, "w", encoding="utf-8") as f:
                 f.write(json_string)
 
-    def remove(self, key, with_md5_update=False):
+    def remove(self, key: str, with_md5_update: bool = False) -> None:
         r"""Delete data under ``key``.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
-        with_md5_update : :obj:`bool`, default: ``False``
+        with_md5_update
             Update MD5 hashes after putting data.
         """
         key = self.clean_key(key)
@@ -752,25 +812,29 @@ class File:
             group_key, _ = self.split_key(key)
             self.update_md5(group_key)
 
-    def copy(self, source_key, dest_key, with_md5_update=False):
+    def copy(
+        self, source_key: str, dest_key: str, with_md5_update: bool = False
+    ) -> None:
         r"""Copy data from a source to a destination.
 
         Parameters
         ----------
-        source_key : :obj:`str`
+        source_key
             Key of the data to copy.
-        dest_key : :obj:`str`
+        dest_key
             Where to copy the data do.
+        with_md5_update
+            Update MD5 hashes after putting data.
         """
         self.put(dest_key, self.get(source_key), with_md5_update)
 
-    def create_group(self, key):
-        r"""Initialize/create a group in heigherarcal files with the specified key.
+    def create_group(self, key: str) -> "exdir.core.Group":
+        r"""Initialize/create a group in hierarchical files with the specified key.
         This can handle creating nested groups.
 
         Parameters
         ----------
-        key : :obj:`str`
+        key
             Key of the desired data (including parent). Nested keys should be
             separated by ``/``.
 
@@ -786,12 +850,12 @@ class File:
             self.File_.create_group(key)
         return self.get(key)
 
-    def as_dict(self, group_key):
+    def as_dict(self, group_key: str) -> dict[str, Any]:
         r"""Get a group as a dictionary.
 
         Parameters
         ----------
-        group_key : :obj:`str`
+        group_key
             Desired group.
 
         Returns
@@ -811,7 +875,7 @@ class File:
         # json or npz
         return group
 
-    def update_md5(self, group_key):
+    def update_md5(self, group_key: str) -> None:
         r"""Update all possible MD5 hashes of a specific group.
 
         Parameters
@@ -836,7 +900,7 @@ class File:
         except Exception:
             pass
 
-    def save(self, json_prettify=True):
+    def save(self, json_prettify: bool = True) -> None:
         r"""Saves non-exdir files.
 
         Parameters

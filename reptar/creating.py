@@ -97,7 +97,7 @@ class Creator:
         if rfile is not None:
             self.rfile = rfile
 
-    def load(self, file_path, mode="r", allow_remove=False, plugins=None):
+    def load(self, file_path, mode="r", plugins=None):
         r"""Load a reptar file for creating/adding information.
 
         Parameters
@@ -107,14 +107,10 @@ class Creator:
             will be created if possible.
         mode : :obj:`str`, default: ``'r'``
             A file mode string that defines the read/write behavior.
-        allow_remove : :obj:`bool`, default: ``False``
-            Allow the removal of exdir groups in ``w`` operation.
         plugins : :obj:`list`, default: ``None``
             A list of instantiated exdir plugins.
         """
-        self.rfile = File(
-            file_path, mode=mode, allow_remove=allow_remove, plugins=plugins
-        )
+        self.rfile = File(file_path, mode=mode, plugins=plugins)
 
     @property
     def rfile(self):

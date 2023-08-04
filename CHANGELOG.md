@@ -6,8 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
-- Functions to prepare groups for different calculations.
-- `DriverCube` and `psi4_cube` for cube property calculations like electrostatic potentials.
+- `common_elements` to determine what elements two arrays share.
+- Methods to prepare groups for different calculations in `Data`.
+- `cube` task for `psi4_worker` for cube property calculations like electrostatic potentials.
 - `parse_cube` parser for Gaussian cube files.
 - `write_qdata` for [ForceBalance](https://github.com/leeping/forcebalance) package.
 - `reptar-calc` script to handle all calculations with example YAML configuration files.
@@ -16,17 +17,23 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Changed
 
-- Redesigned drivers to inherit routine code from a parent `Driver` class.
+- Redesigned drivers and workers to use `Driver` and `tasks` to reduce redundant calculations.
 - Drivers and workers should only return guaranteed values.
 `DriverOpt` and respective workers no longer return gradients.
 - Renamed `xtb_engrad` to `xtb_python_engrad` to reflect the Python interface being used.
 
 ### Fixed
 
+- Made ``File`` serializable.
 - Psi4 optimizations without ray would crash.
 - Zarr arrays were classified as attributes when putting data.
 Now reptar correctly identifies them as iterables and array-like data.
 - Zarr data keys cannot start with ``.``, so ``clean_key`` has been modified to enforce no ``.`` in the beginning.
+
+### Removed
+
+- `Saver` in favor of `Data.save()` for calculations.
+- `allow_remove` is determined from `mode` in `File` instead of a parameter.
 
 ## [0.1.0] - 2023-04-21
 
