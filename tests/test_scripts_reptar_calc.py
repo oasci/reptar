@@ -141,11 +141,7 @@ def test_script_psi4_engrad():
         "--log_level",
         "debug",
     ]
-    subprocess.run(
-        command,
-        check=True,
-        shell=False
-    )
+    subprocess.run(command, check=True, shell=False)
 
     assert np.allclose(rfile.get(f"{group_key}/energy_ele_mp2.def2tzvp"), E_ref)
     assert np.allclose(rfile.get(f"{group_key}/grads_mp2.def2tzvp"), G_ref)
