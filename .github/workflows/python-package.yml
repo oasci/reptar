@@ -42,7 +42,7 @@ jobs:
         conda create -y --name reptar-test
         conda activate reptar-test
         conda install -y python=${{ matrix.python-version }}
-        conda install -y psi4 -c psi4
+        conda install -y psi4 python=${{ matrix.python-version }} -c conda-forge/label/libint_dev -c conda-forge 
         pip install --upgrade pip
         pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray zarr
         pip install pytest pytest-order pytest-dependency
