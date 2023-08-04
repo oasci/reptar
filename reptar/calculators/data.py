@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 import os
+from typing import Any
 from collections.abc import Iterable
 import numpy as np
 import qcelemental as qcel
@@ -210,7 +211,7 @@ class Data:
                 self.rfile.put(data_key, data)
 
     @property
-    def array_init_specs(self) -> dict[str, "Any"]:
+    def array_init_specs(self) -> dict[str, Any]:
         r"""Specifications for initializing arrays."""
         self.validate(None)
         array_specs = {

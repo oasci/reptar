@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from __future__ import annotations
+from typing import Any
 from collections.abc import Iterable
 import os
 import json
@@ -50,7 +51,7 @@ class File:
         self,
         file_path: str,
         mode: str = "r",
-        plugins: list["Any"] | None = None,
+        plugins: list[Any] | None = None,
         from_dict: dict | None = None,
     ) -> None:
         """
@@ -242,7 +243,7 @@ class File:
         log.debug("Data key:   %s", key_split[1])
         return key_split
 
-    def _get_from_dict(self, key: str) -> "Any":
+    def _get_from_dict(self, key: str) -> Any:
         r"""Get data from dictionary-like file (e.g., json, npz).
 
         Parameters
@@ -268,7 +269,7 @@ class File:
                 data = data_array
         return data
 
-    def _get_from_exdir(self, key: str, as_memmap: bool = False) -> "Any":
+    def _get_from_exdir(self, key: str, as_memmap: bool = False) -> Any:
         r"""Get data from exdir file.
 
         Parameters
@@ -302,7 +303,7 @@ class File:
 
         return data
 
-    def _get_from_zarr(self, key: str, to_numpy: bool = True) -> "Any":
+    def _get_from_zarr(self, key: str, to_numpy: bool = True) -> Any:
         r"""Get data from zarr file.
 
         Parameters
@@ -377,7 +378,7 @@ class File:
         as_memmap: bool = False,
         missing_is_none: bool = False,
         zarr_to_numpy: bool = True,
-    ) -> "Any":
+    ) -> Any:
         r"""Retrieve data.
 
         Parameters
@@ -422,7 +423,7 @@ class File:
         return data
 
     @staticmethod
-    def _is_iter(data: "Any") -> bool:
+    def _is_iter(data: Any) -> bool:
         r"""If data is iterative (i.e., array, list, or tuple).
 
         Returns
@@ -435,7 +436,7 @@ class File:
         return False
 
     @staticmethod
-    def simplify_iter_data(data: Iterable, data_key: str) -> "Any":
+    def simplify_iter_data(data: Iterable, data_key: str) -> Any:
         r"""Checks contents of lists, tuples, and arrays to see if we can simplify.
 
         Parameters
@@ -506,7 +507,7 @@ class File:
 
         return data
 
-    def _put_to_dict(self, key: str, data: "Any") -> None:
+    def _put_to_dict(self, key: str, data: Any) -> None:
         r"""Add data to dictionary-like file.
 
         Parameters
@@ -535,7 +536,7 @@ class File:
         self.File_ = combine_dicts(self.File_, add_dic)
 
     # pylint: disable-next=too-many-branches
-    def _put_to_exdir(self, key: str, data: "Any") -> None:
+    def _put_to_exdir(self, key: str, data: Any) -> None:
         r"""Add data to an exdir group.
 
         Parameters
@@ -601,7 +602,7 @@ class File:
                 group.create_dataset(data_key, data=data)
         return None
 
-    def _put_to_zarr(self, key: str, data: "Any") -> None:
+    def _put_to_zarr(self, key: str, data: Any) -> None:
         r"""Add data to an zarr group.
 
         Parameters
@@ -649,7 +650,7 @@ class File:
             group[data_key] = data
         return None
 
-    def put(self, key: str, data: "Any", with_md5_update: bool = False) -> None:
+    def put(self, key: str, data: Any, with_md5_update: bool = False) -> None:
         r"""Put data to file in a specific location.
 
         Note that there is some data postprocessing using
@@ -679,7 +680,7 @@ class File:
             group_key, _ = self.split_key(key)
             self.update_md5(group_key)
 
-    def put_all(self, group_key: str, data: "Any", nested: bool = False) -> "Any":
+    def put_all(self, group_key: str, data: Any, nested: bool = False) -> Any:
         r"""Adds all data from :obj:`dict` to group.
 
         This is just a loop over :meth:`~reptar.File.put` for each key-value pair.
@@ -707,7 +708,7 @@ class File:
 
         return self.File_
 
-    def _remove_dict(self, key: str) -> "Any":
+    def _remove_dict(self, key: str) -> Any:
         r"""Delete dictionary data under ``key``.
 
         Parameters
@@ -723,7 +724,7 @@ class File:
         # Any other file type we assume could be nested.
         remove_nested_key(self.File_, [k for k in key.split("/") if k != ""])
 
-    def _remove_exdir(self, key: str) -> "Any":
+    def _remove_exdir(self, key: str) -> Any:
         r"""Delete exdir data under ``key``.
 
         Parameters
@@ -849,7 +850,7 @@ class File:
             self.File_.create_group(key)
         return self.get(key)
 
-    def as_dict(self, group_key: str) -> dict[str, "Any"]:
+    def as_dict(self, group_key: str) -> dict[str, Any]:
         r"""Get a group as a dictionary.
 
         Parameters

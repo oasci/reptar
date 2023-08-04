@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from __future__ import annotations
+from typing import Any
 from collections.abc import Callable, Iterator
 from ..utils import chunk_iterable
 from ..logger import ReptarLogger
@@ -117,7 +118,7 @@ class Driver:
     def run(
         self,
         worker: Callable[["..."], "Data"],
-        worker_kwargs: dict[str, "Any"],
+        worker_kwargs: dict[str, Any],
         data: "Data",
         tasks: Iterator[str],
         start_slice: int = None,

@@ -124,7 +124,7 @@ def _do_xtb_task(
     if task == "opt":
         xtb_command.append("--opt")
         with open(output_path, "w", encoding="utf-8") as f_out:
-            subprocess.run(xtb_command, check=False, shell=False, stdout=f_out)
+            subprocess.run(xtb_command, check=True, shell=False, stdout=f_out)
 
         _, comments, r_opt = parse_xyz("xtbopt.xyz")
         e = float(comments[0].split()[1])

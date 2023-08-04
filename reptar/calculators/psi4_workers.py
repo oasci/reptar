@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 import os
+from typing import Any
 from collections.abc import Iterable
 from tempfile import TemporaryDirectory
 import numpy as np
@@ -96,7 +97,7 @@ def _do_psi4_task(
     idx: int,
     method: str,
     mol: psi4.core.Molecule,
-    options: dict[str, "Any"],
+    options: dict[str, Any],
     cube_file_name: str | None,
     wfn: psi4.core.Wavefunction | None,
 ) -> tuple[Data, psi4.core.Wavefunction]:
@@ -138,7 +139,7 @@ def psi4_worker(
     charge: int = 0,
     mult: int = 1,
     method: str = "mp2",
-    options: dict[str, "Any"] = None,
+    options: dict[str, Any] = None,
     threads: int = 1,
     mem: str | float | int = "1 GB",
     total_grid_points: int | None = None,

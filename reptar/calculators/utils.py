@@ -22,6 +22,7 @@
 
 from __future__ import annotations
 import os
+from typing import Any
 from collections.abc import Iterable
 import numpy as np
 from . import Data
@@ -31,7 +32,7 @@ from ..logger import ReptarLogger
 log = ReptarLogger(__name__)
 
 
-def _prep_xtb_opt_block(block: dict[str, "Any"]) -> list[str]:
+def _prep_xtb_opt_block(block: dict[str, Any]) -> list[str]:
     """Prepare xTB constrain block lines for input file.
 
     Parameters
