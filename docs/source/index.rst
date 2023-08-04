@@ -8,6 +8,9 @@ A tool for computing, storing, and analyzing manuscript-scale computational chem
     :target: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml
     :alt: Python package build
 
+.. image:: https://img.shields.io/pypi/pyversions/reptar
+    :alt: PyPI - Python Version
+
 .. image:: https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD
     :target: https://codecov.io/gh/aalexmmaldonado/reptar
     :alt: Codecov test coverage

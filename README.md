@@ -8,6 +8,7 @@
     <a href="https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml">
         <img src="https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml/badge.svg" alt="Build Status ">
     </a>
+    <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/reptar">
     <a href="https://codecov.io/gh/aalexmmaldonado/reptar">
         <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD" alt="codecov">
     </a>
