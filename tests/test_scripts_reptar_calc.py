@@ -141,7 +141,7 @@ def test_script_psi4_engrad():
         "--log_level",
         "debug",
     ]
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, shell=True)
 
     assert np.allclose(rfile.get(f"{group_key}/energy_ele_mp2.def2tzvp"), E_ref)
     assert np.allclose(rfile.get(f"{group_key}/grads_mp2.def2tzvp"), G_ref)
@@ -207,7 +207,7 @@ def test_script_xtb_opt():
         "--log_level",
         "debug",
     ]
-    subprocess.run(command, check=True)
+    subprocess.run(command, check=True, shell=True)
 
     R_opt_ref = np.array(
         [
