@@ -40,16 +40,14 @@ worker_kwargs = {
     },
 }
 
-start_slice = None
-end_slice = 5
 t_start = time.time()
 data = driver.run(
     psi4_worker,
     worker_kwargs,
     data,
     tasks,
-    start_slice=start_slice,
-    end_slice=end_slice,
+    start_slice=None,
+    end_slice=5,
 )
 t_stop = time.time()
 print("\n\n")

@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   deploy:
-
+    name: testpypi
     runs-on: ubuntu-latest
 
     steps:

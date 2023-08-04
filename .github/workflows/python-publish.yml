@@ -18,7 +18,7 @@ permissions:
 
 jobs:
   deploy:
-
+    name: pypi
     runs-on: ubuntu-latest
 
     steps:

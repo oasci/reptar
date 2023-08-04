@@ -102,7 +102,7 @@ We use :download:`this zarr file<./files/data/1h2o.zarr.zip>` (make sure to extr
 
     .. tab-item:: Script
 
-        .. literalinclude:: ./files/scripts/1h2o-psi4-engrads.py
+        .. literalinclude:: ./files/scripts/1h2o_psi4_engrads.py
             :language: python
             :linenos:
 
