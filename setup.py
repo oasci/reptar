@@ -32,9 +32,13 @@ setup(
     zip_safe=False,
     version=versioneer.get_version(),
     cmdclass=versioneer.get_cmdclass(),
+    entry_points={
+        "console_scripts": [
+            "reptar-calc=reptar.calculators.run:main",
+        ]
+    },
     scripts=[
         "scripts/reptar-write-xyz",
         "scripts/reptar-xyz-to-file",
-        "scripts/reptar-calc",
     ],
 )

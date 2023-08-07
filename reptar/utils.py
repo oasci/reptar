@@ -27,6 +27,7 @@ import importlib
 import itertools
 import hashlib
 import os
+import yaml
 import numpy as np
 from qcelemental import periodictable as ptable
 from qcelemental.molparse.from_arrays import validate_and_fill_geometry
@@ -621,3 +622,10 @@ def common_elements(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
     # pylint: disable-next=invalid-name
     u, c = np.unique(np.concatenate((arr1, arr2)), return_counts=True)
     return u[c > 1]
+
+
+def _load_config(config_path):
+    log.info("Loading config.yaml")
+    with open(config_path, "r", encoding="utf-8") as stream:
+        config = yaml.safe_load(stream)
+    return config

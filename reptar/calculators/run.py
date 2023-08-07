@@ -7,53 +7,20 @@ import argparse
 import time
 import datetime
 import os
-import yaml
-from reptar import File
-from reptar.calculators import Data, Driver
-from reptar.calculators.utils import prep_xtb_input_lines
-from reptar.utils import get_obj_from_string
-from reptar.logger import ReptarLogger, set_log_level
+from . import Data, Driver
+from .utils import prep_xtb_input_lines
+from .. import File
+from ..utils import get_obj_from_string, _load_config
+from ..logger import ReptarLogger, set_log_level
 
 log = ReptarLogger(__name__)
 
 
-def parse_args():
-    parser = argparse.ArgumentParser(description="Run calculations using reptar")
-    parser.add_argument(
-        "config_path",
-        type=str,
-        nargs="?",
-        help="Path to YAML configuration file",
-    )
-    parser.add_argument(
-        "--ray_address",
-        type=str,
-        nargs="?",
-        default="",
-        help="Desired ray address (will override config file)",
-    )
-    parser.add_argument(
-        "--log_level",
-        type=str,
-        nargs="?",
-        default="info",
-        help="Desired logging level",
-    )
-    return parser.parse_args()
-
-
-def _load_config(config_path):
-    log.info("Loading config.yaml")
-    with open(config_path, "r", encoding="utf-8") as stream:
-        config = yaml.safe_load(stream)
-    return config
-
-
-def _process_worker_kwargs(
+def process_worker_kwargs(
     tasks: Iterable[str],
     config: dict[str, "Any"],
     worker_name: str,
-):
+) -> dict:
     r"""Prepare worker keyword arguments as they are dependent on task and worker.
 
     Parameters
@@ -84,8 +51,7 @@ def _process_worker_kwargs(
     return worker_kwargs
 
 
-def main(args):
-    config = _load_config(args.config_path)
+def run_calcs(config: dict, ray_address: str = "") -> Data:
 
     log.info("Opening file")
     rfile_path = os.path.abspath(config["rfile"]["path"])
@@ -105,8 +71,8 @@ def main(args):
     data.prepare_tasks(tasks, source_key, source_labels, dest_key, dest_labels)
 
     driver_kwargs = config["driver"]["kwargs"]
-    if args.ray_address != "":
-        driver_kwargs["ray_address"] = args.ray_address
+    if ray_address != "":
+        driver_kwargs["ray_address"] = ray_address
     driver = Driver(**driver_kwargs)
     start_slice = config["driver"]["start_slice"]
     end_slice = config["driver"]["end_slice"]
@@ -114,7 +80,7 @@ def main(args):
     worker_obj = get_obj_from_string(config["worker"]["path"])
     worker_name = worker_obj.__name__
     log.info("Selected worker: %s", worker_name)
-    worker_kwargs = _process_worker_kwargs(tasks, config, worker_name)
+    worker_kwargs = process_worker_kwargs(tasks, config, worker_name)
 
     log.info("Requested tasks: %s", ", ".join(tasks))
 
@@ -134,8 +100,37 @@ def main(args):
     n_remaining = data.get_idxs_todo(tasks, start_slice, end_slice).shape[0]
     log.info("There are %r incomplete calculations remaining", n_remaining)
 
+    return data
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run calculations using reptar")
+    parser.add_argument(
+        "config_path",
+        type=str,
+        nargs="?",
+        help="Path to YAML configuration file",
+    )
+    parser.add_argument(
+        "--ray_address",
+        type=str,
+        nargs="?",
+        default="",
+        help="Desired ray address (will override config file)",
+    )
+    parser.add_argument(
+        "--log_level",
+        type=str,
+        nargs="?",
+        default="info",
+        help="Desired logging level",
+    )
+
+    args = parser.parse_args()
+    set_log_level(args.log_level.upper())
+    config = _load_config(args.config_path)
+    run_calcs(config, args.ray_address)
+
 
 if __name__ == "__main__":
-    parsed_args = parse_args()
-    set_log_level(parsed_args.log_level.upper())
-    main(parsed_args)
+    main()
