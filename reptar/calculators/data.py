@@ -255,6 +255,66 @@ class Data:
 
         return array_specs
 
+    def prepare_results(
+        self,
+        dest_key: str,
+        dest_labels: dict[str, str],
+    ) -> None:
+        r"""Prepare arrays to store calculations results.
+
+        This will try to :meth:`~reptar.File.get` ``dest`` data. However, if the array
+        does not exist this method will create it with the proper shape full of
+        :obj:`numpy.NaN` or ``False``.
+
+        Parameters
+        ----------
+        dest_key
+            Key to store calculation results.
+        dest_labels
+            Labels of data in group ``dest_key`` to populate the data object.
+
+        Examples
+        --------
+        The following code block shows an example of preparing a
+        :class:`~reptar.calculators.Data` object for computing energies and
+        atomic gradients.
+
+        .. code-block:: python
+
+            data.prepare_results(
+                dest_key="/",
+                dest_labels={
+                    "E": "energy_ele",
+                    "G": "grads"
+                },
+            )
+        """
+        log.debug("Checking if results group exists")
+        try:
+            self.rfile.get(dest_key)
+        except RuntimeError as e:
+            if " does not exist" in str(e):
+                log.debug("Group at %s does not exist", dest_key)
+                self.rfile.create_group(dest_key)
+            else:
+                raise RuntimeError from e
+
+        for data_attr, label in dest_labels.items():
+            data_key = os.path.join(dest_key, label)
+            log.debug("Working on %s", data_key)
+            setattr(self, data_attr + "_key", data_key)
+
+            # If included from source, then we may have previous data already.
+            if getattr(self, data_attr) is None:
+                # If data does not already exists in destination we will initialize it.
+                data = self.rfile.get(data_key, missing_is_none=True)
+                if data is None:
+                    log.debug("Initializing array")
+                    self.initialize_array(data_attr)
+                else:
+                    log.debug("Found existing array")
+                    setattr(self, data_attr, data)
+
     def prepare_tasks(
         self,
         tasks: Iterable[str],
@@ -332,28 +392,9 @@ class Data:
             setattr(self, data_attr, value[:])
         self.validate(None)  # Checks for Z and R
 
+        self.prepare_results(dest_key, dest_labels)
+
         log.debug("Checking calculation data")
-        try:
-            self.rfile.get(dest_key)
-        except RuntimeError as e:
-            if " does not exist" in str(e):
-                self.rfile.create_group(dest_key)
-            else:
-                raise RuntimeError from e
-
-        for data_attr, label in dest_labels.items():
-            data_key = os.path.join(dest_key, label)
-            setattr(self, data_attr + "_key", data_key)
-
-            # If included from source, then we may have previous data already.
-            if getattr(self, data_attr) is None:
-                # If data does not already exists in destination we will initialize it.
-                data = self.rfile.get(data_key, missing_is_none=True)
-                if data is None:
-                    self.initialize_array(data_attr)
-                else:
-                    setattr(self, data_attr, data)
-
         self.validate(tasks)
         self.save()
 
