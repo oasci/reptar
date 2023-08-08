@@ -35,6 +35,7 @@ setup(
     entry_points={
         "console_scripts": [
             "reptar-calc=reptar.calculators.run:main",
+            "reptar-geometry-scan=reptar.structure.scan:main",
         ]
     },
     scripts=[

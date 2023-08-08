@@ -1,0 +1,168 @@
+
+scan:
+
+  angle:
+
+    - atoms:
+      - 30
+      - 4
+      - 2
+      fragment: 
+        - 30
+      range:
+        start: 100
+        stop: 200
+        step: 100
+
+  dihedral:
+
+      # Atom indices in continuous order along the dihedral.
+    - atoms:
+      - 39
+      - 0
+      - 1
+      - 5
+      # Atom indices of the smallest fragment of molecule to keep fixed. All atoms
+      # not include in `fragment` will be rotated together.
+      fragment:
+        - 39
+        - 41
+        - 40
+        - 22
+        - 33
+        - 42
+      range:
+        start: -180
+        stop: 0
+        step: 180
+
+    - atoms:
+      - 45
+      - 43
+      - 12
+      - 11
+      fragment:
+        - 43
+        - 44
+        - 45
+        - 46
+        - 47
+        - 48
+      range:
+        start: -180
+        stop: 0
+        step: 180
+    
+    - atoms:
+      - 24
+      - 21
+      - 20
+      - 18
+      fragment:
+        - 24
+        - 21
+      range:
+        start: -180
+        stop: 0
+        step: 180
+
+write_xyz: null
+
+# Information about the physical system.
+system:
+
+  # Total charge.
+  charge: 0
+
+  # Multiplicity.
+  multiplicity: 1
+
+
+# Information about the reptar file containing structures to optimize and where
+# to store the results.
+rfile:
+
+  # File path to reptar file.
+  path: ./tmp/calculators/cro-dihedral-scan-script.zarr
+
+  # Information for data sources
+  source:
+
+    # Key to group to retrieve data.
+    key: /
+
+    # Only used to get data.
+    labels:
+      Z: atomic_numbers
+      R: geometry
+    
+    # Select a single structure as a base
+    R_slice: 0
+  
+  # Information for where to store calculated data.
+  # This location can be the same as ``source``
+  destination:
+
+    # Key to group to store data.
+    key: /scan
+
+    # Used to put data.
+    labels:
+      Z: atomic_numbers
+      R_opt: geometry
+      conv_opt: conv_opt
+      E: energy_ele_gfn2
+
+
+do_optimizations: true
+
+# Write xyz file to path. If anything other than a string, no xyz file is written.
+write_xyz: ./tmp/calculators/gfp-cro-scan.xyz
+
+# Driver for the optimizations calculation.
+driver:
+
+  # Keyword arguments for the specified driver in ``class``.
+  # Please refer to the specific driver's API in the documentation.
+  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  kwargs:
+
+    use_ray: false
+    n_workers: 1
+    n_cpus_per_worker: 2
+    chunk_size: 1
+    ray_address: auto
+  
+  start_slice: null
+
+  end_slice: null
+
+# Worker to be used with the driver.
+worker:
+
+  # Import string for the desired worker.
+  path: reptar.calculators.xtb_workers.xtb_worker
+
+  blocks:
+
+    opt:
+      
+      optlevel: verytight
+  
+  # Just need to set the force constant as we can automatically populate
+  # the dihedrals from above. Set constrain to `null` if you want unconstrained
+  # optimizations after geometry changes
+  constrain:
+    -
+      - force constant
+      - 1.0
+
+  kwargs:
+
+    acc: 0.01
+    
+    n_cores: 4
+
+    xtb_path: xtb
+
+    log_dir: /home/alex/Downloads/test

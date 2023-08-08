@@ -135,32 +135,36 @@ Then, while in the repo root directory, you can run all of the tests with the ``
 .. code-block:: bash
 
     $ pytest
-    ======================== test session starts =========================
+    ==================================== test session starts =====================================
     platform linux -- Python 3.10.12, pytest-7.4.0, pluggy-1.2.0
     rootdir: /home/alex/repos/reptar
     configfile: pytest.ini
     plugins: dependency-0.5.1, order-1.1.0
-    collected 35 items                                                   
+    collected 41 items                                                                           
 
-    tests/test_creator_ase.py .                                    [  2%]
-    tests/test_creator_crest.py .                                  [  5%]
-    tests/test_creator_orca.py .                                   [  8%]
-    tests/test_creator_xtb.py .                                    [ 11%]
-    tests/test_calculators_psi4.py ....                            [ 22%]
-    tests/test_calculators_xtb.py s.                               [ 28%]
-    tests/test_creator_ase.py .                                    [ 31%]
-    tests/test_creator_crest.py ...                                [ 40%]
-    tests/test_creator_orca.py ...                                 [ 48%]
-    tests/test_creator_xtb.py ....                                 [ 60%]
-    tests/test_descriptors.py ..                                   [ 65%]
-    tests/test_file.py ...                                         [ 74%]
-    tests/test_sampling.py ....                                    [ 85%]
-    tests/test_writer_ase_db.py .                                  [ 88%]
-    tests/test_writer_pdb.py .                                     [ 91%]
-    tests/test_writer_schnetpack_db.py s                           [ 94%]
-    tests/test_writer_xyz.py .                                     [ 97%]
-    tests/test_writer_xyz_gap.py .                                 [100%]
-    =================== 33 passed, 2 skipped in 36.09s ===================
+    tests/test_creator_ase.py .                                                            [  2%]
+    tests/test_creator_crest.py .                                                          [  4%]
+    tests/test_creator_orca.py .                                                           [  7%]
+    tests/test_creator_xtb.py .                                                            [  9%]
+    tests/test_calculators_cube.py .                                                       [ 12%]
+    tests/test_calculators_psi4.py .....                                                   [ 24%]
+    tests/test_calculators_xtb.py s.                                                       [ 29%]
+    tests/test_creator_ase.py .                                                            [ 31%]
+    tests/test_creator_crest.py ...                                                        [ 39%]
+    tests/test_creator_orca.py ...                                                         [ 46%]
+    tests/test_creator_xtb.py ....                                                         [ 56%]
+    tests/test_descriptors.py ..                                                           [ 60%]
+    tests/test_file.py ...                                                                 [ 68%]
+    tests/test_sampling.py ....                                                            [ 78%]
+    tests/test_scripts_reptar_calc.py ..                                                   [ 82%]
+    tests/test_scripts_reptar_geometry_scan.py .                                           [ 85%]
+    tests/test_writer_ase_db.py .                                                          [ 87%]
+    tests/test_writer_forcebalance.py .                                                    [ 90%]
+    tests/test_writer_pdb.py .                                                             [ 92%]
+    tests/test_writer_schnetpack_db.py s                                                   [ 95%]
+    tests/test_writer_xyz.py .                                                             [ 97%]
+    tests/test_writer_xyz_gap.py .                                                         [100%]
+    ========================== 39 passed, 2 skipped in 61.69s (0:01:01) ==========================
 
 .. hint::
 

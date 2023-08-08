@@ -2,6 +2,7 @@
 
 """Run reptar calculations"""
 
+from __future__ import annotations
 from collections.abc import Iterable
 import argparse
 import time
@@ -86,10 +87,11 @@ def run_calcs(config: dict, ray_address: str = "") -> Data:
 
     n_todo = data.get_idxs_todo(tasks, start_slice, end_slice).shape[0]
     log.info("Running %r calculations", n_todo)
-
     if n_todo > 0:
         t_start = time.perf_counter()
-        driver.run(worker_obj, worker_kwargs, data, tasks, start_slice, end_slice)
+        data = driver.run(
+            worker_obj, worker_kwargs, data, tasks, start_slice, end_slice
+        )
         log.info("Calculations are done")
         t_end = time.perf_counter()
         duration = str(datetime.timedelta(seconds=t_end - t_start))
