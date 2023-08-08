@@ -69,7 +69,7 @@ def run_xyz_to_file(xyz_path, save_path, group_key, overwrite=False):
     log.info("Opening data file")
     if os.path.exists(save_path):
         if overwrite:
-            rfile = File(save_path, mode="w")
+            rfile = File(save_path, mode="a")
         else:
             raise RuntimeError(f"{save_path} exists and overwrite is False")
     else:
