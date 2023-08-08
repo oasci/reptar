@@ -36,10 +36,8 @@ setup(
         "console_scripts": [
             "reptar-calc=reptar.calculators.run:main",
             "reptar-geometry-scan=reptar.structure.scan:main",
+            "reptar-xyz-to-file=reptar.writers.xyz:main_xyz_to_file",
+            "reptar-write-xyz=reptar.writers.xyz:main_write_xyz",
         ]
     },
-    scripts=[
-        "scripts/reptar-write-xyz",
-        "scripts/reptar-xyz-to-file",
-    ],
 )
