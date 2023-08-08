@@ -135,4 +135,4 @@ worker:
 
     xtb_path: xtb
 
-    log_dir: /home/alex/Downloads/test
+    log_dir: null
