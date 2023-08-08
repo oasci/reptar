@@ -45,6 +45,10 @@ os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_script_gfp_cro_dihedral_scan():
+    has_xtb_in_path = shutil.which("xtb")
+    if has_xtb_in_path is None:
+        pytest.skip("xtb package not installed")
+
     rfile_source = File("./data/gfp-cro.zarr", mode="r")
 
     path_dest = os.path.join(WRITING_DIR, "cro-dihedral-scan-script.zarr")
