@@ -135,11 +135,17 @@ def geometry_scan(config: dict, ray_address: str = "") -> None:
         log.info("No geometry optimizations will be performed")
 
     if isinstance(config["write_xyz"], str):
+        if config["do_optimizations"]:
+            R = data.R_opt
+            comments = [str(e) for e in data.E]
+        else:
+            R = data.R
+            comments = None
         write_xyz(
             os.path.abspath(config["write_xyz"]),
             data.Z,
-            data.R_opt,
-            comments=[str(e) for e in data.E],
+            R,
+            comments=comments,
         )
 
 
