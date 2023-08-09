@@ -123,21 +123,26 @@ def _do_xtb_task(
     worker_idx = np.array([idx], dtype=np.uint64)
     if task == "opt":
         xtb_command.append("--opt")
-        with open(output_path, "w", encoding="utf-8") as f_out:
-            subprocess.run(xtb_command, check=True, shell=False, stdout=f_out)
+        try:
+            with open(output_path, "w", encoding="utf-8") as f_out:
+                subprocess.run(xtb_command, check=True, shell=False, stdout=f_out)
+        except subprocess.CalledProcessError:
+            e = np.nan
+            r_conv_opt = False
+            # TODO: Retrieve the last coords?
+        else:
+            _, comments, r_opt = parse_xyz("xtbopt.xyz")
+            e = float(comments[0].split()[1])
 
-        _, comments, r_opt = parse_xyz("xtbopt.xyz")
-        e = float(comments[0].split()[1])
+            r_conv_opt = False
+            with open(output_path, "r", encoding="utf-8") as f_out:
+                for line in reversed(list(f_out)):
+                    if "*** GEOMETRY OPTIMIZATION CONVERGED AFTER" in line:
+                        r_conv_opt = True
+                        break
+            r_opt = np.array(r_opt)[0]
 
-        r_conv_opt = False
-        with open(output_path, "r", encoding="utf-8") as f_out:
-            for line in reversed(list(f_out)):
-                if "*** GEOMETRY OPTIMIZATION CONVERGED AFTER" in line:
-                    r_conv_opt = True
-                    break
-        r_opt = np.array(r_opt)[0]
-
-        data_worker.add_subset("R_opt", worker_idx, r_opt)
+            data_worker.add_subset("R_opt", worker_idx, r_opt)
         data_worker.add_subset("conv_opt", worker_idx, r_conv_opt)
         data_worker.add_subset("E", worker_idx, e)
     return data_worker
