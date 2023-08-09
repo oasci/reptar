@@ -14,7 +14,7 @@ requirements = [
     "pyyaml",
     "ase",
     "zarr",
-    "ray[data]>=2.0.0",
+    "ray[data]>=2.6.1",
 ]
 
 setup_requirements = ["versioneer"]
