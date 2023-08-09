@@ -24,7 +24,6 @@
 
 from __future__ import annotations
 from collections.abc import Iterable
-import itertools
 from ase import Atoms
 import numpy as np
 import ray
@@ -88,7 +87,7 @@ def set_angles(
     Notes
     -----
     For more information, see
-    https://wiki.fysik.dtu.dk/ase/ase/atoms.html#ase.Atoms.set_dihedral
+    `here <https://wiki.fysik.dtu.dk/ase/ase/atoms.html#ase.Atoms.set_dihedral>`__.
     """
     if R.ndim != 2:
         raise ValueError(f"R must be two dimensional, but contains {R.ndim}")
@@ -161,14 +160,13 @@ class SetAngles:
         R, angle_values = batch["data"], batch["data_1"]
         if R.ndim == 2:
             R = R[None, ...]
-        gen_angles = itertools.cycle(angle_values)
         for i, r in enumerate(R):
             R[i] = set_angles(
                 self.Z,
                 r,
                 self.angle_types,
                 self.atoms,
-                next(gen_angles),
+                angle_values[i],
                 self.masks,
             )
         return {"data": R}
@@ -227,8 +225,8 @@ def sample_angles(
     if R.ndim == 2:
         R = R[None, ...]
 
-    n_angle_sets = angles.shape[0]
-    R_rotated = np.tile(R, (n_angle_sets, 1, 1))  # pylint: disable=invalid-name
+    R_rotated = np.tile(R, (angles.shape[0], 1, 1))  # pylint: disable=invalid-name
+    angles = np.tile(angles, (R.shape[0], 1))
 
     if not use_ray:
         sa = SetAngles(Z, angle_types, atoms, masks)
@@ -238,7 +236,7 @@ def sample_angles(
         ds = ds.zip(
             ray.data.from_numpy(np.array_split(angles, n_workers))
         ).materialize()
-        ds = ds.map_batches(
+        results = ds.map_batches(
             SetAngles,
             batch_size=None,
             batch_format="numpy",
@@ -248,7 +246,8 @@ def sample_angles(
             fn_constructor_args=(Z, angle_types, atoms, masks),
             num_cpus=1,
         )
-        results = ds.materialize()
-        R_rotated = ray.get(results.to_numpy_refs()[0])["data"]
+        results = results.materialize()
+        block_refs = results.to_numpy_refs()
+        R_rotated = np.vstack([ray.get(block_ref)["data"] for block_ref in block_refs])
 
     return R_rotated

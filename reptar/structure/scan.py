@@ -47,7 +47,7 @@ def gen_scan_range(range_info: dict[str, float]):
     return range_scan
 
 
-def get_dihedral_info(
+def _get_dihedral_info(
     info, n_atoms, angle_type, angle_types, angle_atoms, angle_ranges, angle_masks
 ):
     for i in info:
@@ -58,18 +58,117 @@ def get_dihedral_info(
     return angle_types, angle_atoms, angle_ranges, angle_masks
 
 
-def _prep_angle_constraints(angle_type, config, constrain=None):
+def _prep_angle_constraints(angle_type, angle_atoms, worker_path, constrain=None):
     if constrain is None:
         constrain = []
     angle_type = angle_type.strip().lower()
-    if config["worker"]["path"] == "reptar.calculators.xtb_workers.xtb_worker":
-        constrain.extend(
-            [[angle_type, [*v["atoms"], "auto"]] for v in config["scan"][angle_type]]
-        )
+    if worker_path == "reptar.calculators.xtb_workers.xtb_worker":
+        for angle_atom in angle_atoms:
+            constrain.append([angle_type, [*angle_atom, "auto"]])
     return constrain
 
 
-# pylint: disable=too-many-statements
+def _get_constraints(
+    scan_info: dict[str, dict[str, list]], worker_path: str, force_constant: float = 1.0
+):
+    constraints = [["force constant", force_constant]]
+    for angle_type in ["dihedral", "angle"]:
+        if angle_type in scan_info.keys():
+            atoms = [v["atoms"] for v in scan_info[angle_type]]
+            constraints = _prep_angle_constraints(
+                angle_type, atoms, worker_path, constraints
+            )
+    return constraints
+
+
+def create_grid(
+    Z: np.ndarray,
+    R: np.ndarray,
+    scan_info: dict[str, dict[str, list]],
+    use_ray: bool = False,
+    n_workers: int = 4,
+) -> np.ndarray:
+    r"""Use :func:`~reptar.structure.angles.sample_angles` to generate structures
+    on a grid of angles.
+
+    Parameters
+    ----------
+    Z
+        Atomic numbers.
+    R
+        Cartesian coordinates of structures. If ``R`` contains more than one structure,
+        the grid as defined by ``scan_info`` will be applied to each structure.
+    scan_info
+        Specifies angle information to scan.
+
+        .. code-block:: python
+
+            scan_info = {
+                "angle": [
+                    {
+                        "atoms": [30, 4, 2],
+                        "fragment": [30],
+                        "range": {"start": 100, "stop": 200, "step": 100},
+                    }
+                ],
+                "dihedral": [
+                    {
+                        "atoms": [39, 0, 1, 5],
+                        "fragment": [39, 41, 40, 22, 33, 42],
+                        "range": {"start": -180, "stop": 0, "step": 180},
+                    }
+                ],
+            }
+
+    use_ray
+        Parallelize geometry generation using ray.
+    n_workers
+        Number of parallel processes if ``use_ray`` is ``True``.
+
+    Returns
+    -------
+
+        Geometries with the specified angles.
+    """
+    if R.ndim == 2:
+        R = R[None, ...]
+
+    angle_types = []
+    angle_atoms = []
+    angle_ranges = []
+    angle_masks = []
+    n_atoms = R.shape[1]
+    for angle_type in ["dihedral", "angle"]:
+        if angle_type in scan_info.keys():
+            angle_types, angle_atoms, angle_ranges, angle_masks = _get_dihedral_info(
+                scan_info[angle_type],
+                n_atoms,
+                angle_type,
+                angle_types,
+                angle_atoms,
+                angle_ranges,
+                angle_masks,
+            )
+
+    angle_values = np.array(tuple(itertools.product(*angle_ranges)), dtype=np.float64)
+
+    log.info("Generating %i geometries", int(len(angle_values)) * R.shape[0])
+    t_start = log.t_start()
+    R_rotated = sample_angles(  # pylint: disable=invalid-name
+        Z,
+        R,
+        angle_types,
+        angle_atoms,
+        angle_values,
+        angle_masks,
+        use_ray=use_ray,
+        n_workers=n_workers,
+    )
+    log.t_stop(t_start, precision=2)
+
+    return R_rotated
+
+
 def geometry_scan(config: dict, ray_address: str = "") -> None:
 
     log.info("Opening file")
@@ -80,54 +179,27 @@ def geometry_scan(config: dict, ray_address: str = "") -> None:
     data = Data(rfile)
     source_info = config["rfile"]["source"]
     data.Z = rfile.get(os.path.join(source_info["key"], source_info["labels"]["Z"]))
-    data.R = rfile.get(os.path.join(source_info["key"], source_info["labels"]["R"]))
-    if data.R.ndim == 2:
+    R = rfile.get(os.path.join(source_info["key"], source_info["labels"]["R"]))
+    if R.ndim == 2:
         R = R[None, ...]
-    data.R = data.R[source_info["R_slice"]][None, ...]  # Slice a single structure
-    if data.R.shape[0] != 1:
-        raise ValueError(
-            f"R can only contain one structure, but contains {data.R.shape[0]}"
-        )
+    data.R = R
 
     log.info("Defining grid")
-    scan_info = config["scan"]
-
-    angle_types = []
-    angle_atoms = []
-    angle_ranges = []
-    angle_masks = []
-    n_atoms = data.R.shape[1]
-    constraints = config["worker"]["constrain"]
-    for angle_type in ["dihedral", "angle"]:
-        if angle_type in scan_info.keys():
-            angle_types, angle_atoms, angle_ranges, angle_masks = get_dihedral_info(
-                scan_info[angle_type],
-                n_atoms,
-                angle_type,
-                angle_types,
-                angle_atoms,
-                angle_ranges,
-                angle_masks,
-            )
-            constraints = _prep_angle_constraints(angle_type, config, constraints)
-    angle_values = np.array(tuple(itertools.product(*angle_ranges)), dtype=np.float64)
-    if len(angle_types) != 0:
-        log.info("Generating %i geometries", int(len(angle_values)))
-        t_start = log.t_start()
-        data.R = sample_angles(
-            data.Z,
-            data.R,
-            angle_types,
-            angle_atoms,
-            angle_values,
-            angle_masks,
-            use_ray=config["driver"]["kwargs"]["use_ray"],
-            n_workers=int(
-                config["driver"]["kwargs"]["n_workers"]
-                * config["driver"]["kwargs"]["n_cpus_per_worker"]
-            ),
-        )
-        log.t_stop(t_start, precision=2)
+    data.R = create_grid(
+        data.Z,
+        data.R,
+        config["scan"],
+        use_ray=config["driver"]["kwargs"]["use_ray"],
+        n_workers=int(
+            config["driver"]["kwargs"]["n_workers"]
+            * config["driver"]["kwargs"]["n_cpus_per_worker"]
+        ),
+    )
+    constraints = _get_constraints(
+        config["scan"],
+        config["worker"]["path"],
+        config["worker"].get(["constrain"][0][1], 1.0),
+    )
 
     log.info("Saving structures to file")
     dest_info = config["rfile"]["destination"]
