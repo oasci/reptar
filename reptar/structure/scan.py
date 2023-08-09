@@ -134,7 +134,6 @@ def geometry_scan(config: dict, ray_address: str = "") -> None:
     data.Z_key = os.path.join(dest_info["key"], dest_info["labels"]["Z"])
     data.R_key = os.path.join(dest_info["key"], dest_info["labels"]["R_opt"])
     data.save()
-    del data
 
     # Need to update values
     if config["do_optimizations"]:

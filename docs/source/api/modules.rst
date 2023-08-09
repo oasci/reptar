@@ -17,6 +17,7 @@ API
    Periodic <periodic/periodic_module>
    Sampler <Sampler>
    Sampling <sampling/sampling_module>
+   Structure <structure/structure_module>
    Utilities <utils/utils>
    Writers <writers/writers>
    

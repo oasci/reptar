@@ -33,7 +33,7 @@ from ..logger import ReptarLogger
 log = ReptarLogger(__name__)
 
 
-def get_angle_mask(n_atoms: int, fragment_indices: Iterable[int]):
+def get_angle_mask(n_atoms: int, fragment_indices: Iterable[int]) -> np.ndarray:
     """Specify boolean mask for which atoms to rotate.
 
     Parameters
@@ -41,14 +41,15 @@ def get_angle_mask(n_atoms: int, fragment_indices: Iterable[int]):
     n_atoms
         Total number of atoms in the structure.
     fragment_indices
-        Atom indices of one fragment involved in rotating the dihedral.
+        Atom indices of one fragment involved in rotating the angle. Atoms specified
+        here will remain stationary while all others are rotated together. We recommend
+        this being the smaller portion of the structure.
 
     Returns
     -------
-    :obj:`numpy.ndarray`
-        Mask of which atoms to rotate for the dihedral. ``0`` for cap and ``1`` for
-        all other atoms. We keep the cap stationary so that the likely larger section
-        of the residue is rotated to minimize chance of clashes.
+
+        Mask of which atoms to rotate. ``0`` for stationary and ``1`` for
+        all other atoms.
     """
     mask = np.ones(n_atoms, dtype=np.uint64)
     mask[np.array(fragment_indices)] = 0
@@ -182,7 +183,6 @@ def sample_angles(
     masks: Iterable[Iterable[int]],
     use_ray: bool = False,
     n_workers: int = 4,
-    batch_size: int = 100,
 ) -> np.ndarray:
     r"""Generate structures with different sets of dihedral angels. No optimizations or
     energy calculations are performed.
@@ -197,16 +197,26 @@ def sample_angles(
     angle_types
         Type of angle. Can be either ``angle`` or ``dihedral``.
     atoms
-        Atom indices in continuous order along the dihedral. Each row defines the four
-        atoms that make up that dihedral.
+        Atom indices in continuous order along the dihedral. Each row defines the
+        atoms that make up that angle.
     angles
-        Angles to set for all dihedrals. Columns correspond to a single dihedral where
-        each row is a unique set of angles.
+        Values to set for all angles. Columns correspond to a single angle where
+        each row is a unique set of values.
     masks
         Describes the two subgroups to move based on the angle. This reduces the chances
-        of a clash or greatly distorting the geometry.
+        of a clash or greatly distorting the geometry. See
+        :func:`~reptar.structure.angles.get_angle_mask` for more information.
     use_ray
         Parallelize geometry modifications using ray.
+
+        .. attention::
+
+            Parallelizing computations has some overhead associated with spawning
+            additional processes. It is much slower than serial processing if you have
+            a handful of structures. We recommend only setting to ``True`` if you
+            have more than a few hundred structures and multiple angles.
+    n_workers
+        Number of parallel tasks to use if ``use_ray`` is ``True``.
 
     Returns
     -------
@@ -230,7 +240,7 @@ def sample_angles(
         ).materialize()
         ds = ds.map_batches(
             SetAngles,
-            batch_size=batch_size,
+            batch_size=None,
             batch_format="numpy",
             # pylint: disable-next=unexpected-keyword-arg
             compute=ray.data.ActorPoolStrategy(size=n_workers),
