@@ -53,7 +53,7 @@ def pytest_sessionstart(session):  # pytest_configure(config)
         pass
     else:
         if not ray.is_initialized():
-            ray.init()
+            ray.init(num_cpus=3)
 
 
 def pytest_sessionfinish(session, exitstatus):
