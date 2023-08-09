@@ -99,7 +99,7 @@ driver:
 
     use_ray: false
     n_workers: 1
-    n_cpus_per_worker: 2
+    n_cpus_per_worker: 1
     chunk_size: 1
     ray_address: auto
   

@@ -26,6 +26,7 @@ from __future__ import annotations
 import argparse
 import itertools
 import os
+import numpy as np
 from .angles import get_angle_mask, sample_angles
 from .. import File
 from ..writers import write_xyz
@@ -68,6 +69,7 @@ def _prep_angle_constraints(angle_type, config, constrain=None):
     return constrain
 
 
+# pylint: disable=too-many-statements
 def geometry_scan(config: dict, ray_address: str = "") -> None:
 
     log.info("Opening file")
@@ -108,25 +110,41 @@ def geometry_scan(config: dict, ray_address: str = "") -> None:
                 angle_masks,
             )
             constraints = _prep_angle_constraints(angle_type, config, constraints)
-    angle_values = tuple(itertools.product(*angle_ranges))
+    angle_values = np.array(tuple(itertools.product(*angle_ranges)), dtype=np.float64)
     if len(angle_types) != 0:
+        log.info("Generating %i geometries", int(len(angle_values)))
+        t_start = log.t_start()
         data.R = sample_angles(
-            data.Z, data.R, angle_types, angle_atoms, angle_values, angle_masks
+            data.Z,
+            data.R,
+            angle_types,
+            angle_atoms,
+            angle_values,
+            angle_masks,
+            use_ray=config["driver"]["kwargs"]["use_ray"],
+            n_workers=int(
+                config["driver"]["kwargs"]["n_workers"]
+                * config["driver"]["kwargs"]["n_cpus_per_worker"]
+            ),
         )
+        log.t_stop(t_start, precision=2)
 
     log.info("Saving structures to file")
     dest_info = config["rfile"]["destination"]
     data.Z_key = os.path.join(dest_info["key"], dest_info["labels"]["Z"])
     data.R_key = os.path.join(dest_info["key"], dest_info["labels"]["R_opt"])
     data.save()
+    del data
 
     # Need to update values
     if config["do_optimizations"]:
         log.info("Setting up geometry optimizations configuration")
+
         config_calc = config.copy()
         config_calc["tasks"] = ["opt"]
         config_calc["rfile"]["source"]["key"] = dest_info["key"]
         del config_calc["rfile"]["source"]["R_slice"]
+        del config_calc["scan"]
 
         config_calc["worker"]["constrain"] = constraints
 

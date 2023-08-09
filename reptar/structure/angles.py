@@ -24,8 +24,10 @@
 
 from __future__ import annotations
 from collections.abc import Iterable
+import itertools
 from ase import Atoms
 import numpy as np
+import ray
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
@@ -72,7 +74,7 @@ def set_angles(
     atoms
         Atomic indices of the four atoms that make up the dihedral angle to change.
     angles
-        Desired angle (degrees) to set the dihedral to.
+        Desired angle (degrees) to set.
     masks
         Describes the two subgroups to move based on the angle. This reduces the chances
         of a clash or greatly distorting the geometry.
@@ -103,13 +105,84 @@ def set_angles(
     return ase_atoms.get_positions()
 
 
+class SetAngles:
+    r"""Set angles of structures"""
+
+    def __init__(
+        self,
+        Z,
+        angle_types: Iterable[str],
+        atoms: Iterable[Iterable[int]],
+        masks: Iterable[Iterable[int]],
+    ) -> None:
+        r"""Set any number of dihedral angles of a single structure.
+
+        Parameters
+        ----------
+        Z
+            Atomic numbers that are shared with every structure in ``R``.
+        angle_types
+            Type of angle. Can be either ``angle`` or ``dihedral``.
+        atoms
+            Atomic indices of the four atoms that make up the dihedral angle to change.
+        masks
+            Describes the two subgroups to move based on the angle. This reduces the
+            chances of a clash or greatly distorting the geometry.
+
+        Returns
+        -------
+
+            Cartesian coordinates with new dihedral angles.
+
+        Notes
+        -----
+        For more information, see
+        https://wiki.fysik.dtu.dk/ase/ase/atoms.html#ase.Atoms.set_dihedral
+        """
+        self.Z = Z
+        self.angle_types = angle_types
+        self.atoms = atoms
+        self.masks = masks
+
+    def __call__(self, batch: dict[str, np.ndarray]) -> dict[str, np.ndarray]:
+        r"""Rotate structures on a batch basis.
+
+        Parameters
+        ----------
+        batch
+            Contains ``{"data": R, "data_1": angle_values}``.
+
+        Returns
+        -------
+
+            Dictionary containing rotated structures under ``"data"`` key.
+        """
+        R, angle_values = batch["data"], batch["data_1"]
+        if R.ndim == 2:
+            R = R[None, ...]
+        gen_angles = itertools.cycle(angle_values)
+        for i, r in enumerate(R):
+            R[i] = set_angles(
+                self.Z,
+                r,
+                self.angle_types,
+                self.atoms,
+                next(gen_angles),
+                self.masks,
+            )
+        return {"data": R}
+
+
 def sample_angles(
     Z: np.ndarray,
     R: np.ndarray,
     angle_types: Iterable[str],
     atoms: Iterable[Iterable[int]],
-    angles: Iterable[Iterable[float]],
-    masks: Iterable[Iterable[int]] = None,
+    angles: np.ndarray,
+    masks: Iterable[Iterable[int]],
+    use_ray: bool = False,
+    n_workers: int = 4,
+    batch_size: int = 100,
 ) -> np.ndarray:
     r"""Generate structures with different sets of dihedral angels. No optimizations or
     energy calculations are performed.
@@ -132,22 +205,40 @@ def sample_angles(
     masks
         Describes the two subgroups to move based on the angle. This reduces the chances
         of a clash or greatly distorting the geometry.
+    use_ray
+        Parallelize geometry modifications using ray.
 
     Returns
     -------
 
         Coordinates of each dihedral set.
     """
+    # pylint: disable=invalid-name,no-member
     if R.ndim == 2:
         R = R[None, ...]
 
-    n_angle_sets = len(angles)
+    n_angle_sets = angles.shape[0]
     R_rotated = np.tile(R, (n_angle_sets, 1, 1))  # pylint: disable=invalid-name
-    i_angle = 0
-    for i, r in enumerate(R_rotated):
-        # Reset angle counter if we are setting angles to multiple structures.
-        if i_angle == n_angle_sets:
-            i_angle = 0
-        R_rotated[i] = set_angles(Z, r, angle_types, atoms, angles[i_angle], masks)
-        i_angle += 1
+
+    if not use_ray:
+        sa = SetAngles(Z, angle_types, atoms, masks)
+        R_rotated = sa({"data": R_rotated, "data_1": angles})["data"]
+    else:
+        ds = ray.data.from_numpy(np.array_split(R_rotated, n_workers))
+        ds = ds.zip(
+            ray.data.from_numpy(np.array_split(angles, n_workers))
+        ).materialize()
+        ds = ds.map_batches(
+            SetAngles,
+            batch_size=batch_size,
+            batch_format="numpy",
+            # pylint: disable-next=unexpected-keyword-arg
+            compute=ray.data.ActorPoolStrategy(size=n_workers),
+            zero_copy_batch=True,
+            fn_constructor_args=(Z, angle_types, atoms, masks),
+            num_cpus=1,
+        )
+        results = ds.materialize()
+        R_rotated = ray.get(results.to_numpy_refs()[0])["data"]
+
     return R_rotated
