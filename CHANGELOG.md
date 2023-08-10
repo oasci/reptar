@@ -6,6 +6,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 
 ### Added
 
+- Topology and bond information routines.
 - `reptar-geometry-scan` for angles and dihedrals.
 - `common_elements` to determine what elements two arrays share.
 - Methods to prepare groups for different calculations in `Data`.

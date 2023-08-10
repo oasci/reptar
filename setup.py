@@ -15,6 +15,7 @@ requirements = [
     "ase",
     "zarr",
     "ray[data]>=2.6.1",
+    "mendeleev",
 ]
 
 setup_requirements = ["versioneer"]
