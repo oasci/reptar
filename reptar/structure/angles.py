@@ -20,7 +20,7 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-"""Interact with dihedral angles of structures."""
+"""Interact with angles of structures."""
 
 from __future__ import annotations
 from collections.abc import Iterable
@@ -181,6 +181,7 @@ def sample_angles(
     masks: Iterable[Iterable[int]],
     use_ray: bool = False,
     n_workers: int = 4,
+    preserve_order: bool = False,
 ) -> np.ndarray:
     r"""Generate structures with different sets of dihedral angels. No optimizations or
     energy calculations are performed.
@@ -215,6 +216,8 @@ def sample_angles(
             have more than a few hundred structures and multiple angles.
     n_workers
         Number of parallel tasks to use if ``use_ray`` is ``True``.
+    preserve_order
+        Rotated structures will be in the same order as ``angles``.
 
     Returns
     -------
@@ -236,6 +239,11 @@ def sample_angles(
         ds = ds.zip(
             ray.data.from_numpy(np.array_split(angles, n_workers))
         ).materialize()
+
+        context = ray.data.DataContext.get_current()
+        context.execution_options = ray.data.ExecutionOptions(
+            preserve_order=preserve_order
+        )
         results = ds.map_batches(
             SetAngles,
             batch_size=None,
