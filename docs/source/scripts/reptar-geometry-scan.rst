@@ -12,7 +12,7 @@ You can then follow up with a constrained geometry optimization.
     usage: reptar-geometry-scan [-h] [--ray_address [RAY_ADDRESS]] [--log_level [LOG_LEVEL]]
                             [config_path]
 
-    Scan dihedral angles with an optional geometry optimization
+    Scan internal coordinates with an optional geometry optimization
 
     positional arguments:
     config_path           Path to YAML configuration file

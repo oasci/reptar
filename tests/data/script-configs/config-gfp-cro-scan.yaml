@@ -1,4 +1,13 @@
 
+do_optimizations: true
+
+# Add distance constraints on X-H bonds during optimization.
+# Prevents hydrogen transfers.
+constrain_hydrogens: true
+
+# Write xyz file to path. If anything other than a string, no xyz file is written.
+write_xyz: ./tmp/calculators/gfp-cro-scan.xyz
+
 scan:
 
   angle:
@@ -82,12 +91,6 @@ rfile:
       R_opt: geometry
       conv_opt: conv_opt
       E: energy_ele_gfn2
-
-
-do_optimizations: true
-
-# Write xyz file to path. If anything other than a string, no xyz file is written.
-write_xyz: ./tmp/calculators/gfp-cro-scan.xyz
 
 # Driver for the optimizations calculation.
 driver:

@@ -27,6 +27,7 @@ import argparse
 import itertools
 import os
 import numpy as np
+from .bond import get_covalent_h_bonds, is_bonded_atomic_radii
 from .angles import get_angle_mask, sample_angles
 from .. import File
 from ..writers import write_xyz
@@ -78,6 +79,19 @@ def _get_constraints(
             constraints = _prep_angle_constraints(
                 angle_type, atoms, worker_path, constraints
             )
+    return constraints
+
+
+def _add_h_constraints(
+    Z: np.ndarray, R: np.ndarray, constraints: list[str] | None = None
+) -> list[str]:
+    if R.ndim == 3:
+        R = R[0]
+    if constraints is None:
+        constraints = []
+    h_covalent_bonds = get_covalent_h_bonds(Z, R, is_bonded_atomic_radii)
+    for bond in h_covalent_bonds:
+        constraints.append(["distance", [*bond[1:], "auto"]])
     return constraints
 
 
@@ -200,6 +214,8 @@ def geometry_scan(config: dict, ray_address: str = "") -> None:
         config["worker"]["path"],
         config["worker"].get(["constrain"][0][1], 1.0),
     )
+    if config["constrain_hydrogens"]:
+        constraints = _add_h_constraints(data.Z, data.R, constraints)
 
     log.info("Saving structures to file")
     dest_info = config["rfile"]["destination"]
@@ -241,7 +257,7 @@ def geometry_scan(config: dict, ray_address: str = "") -> None:
 # pylint: disable=duplicate-code
 def main():
     parser = argparse.ArgumentParser(
-        description="Scan dihedral angles with an optional geometry optimization"
+        description="Scan internal coordinates with an optional geometry optimization"
     )
     parser.add_argument(
         "config_path",

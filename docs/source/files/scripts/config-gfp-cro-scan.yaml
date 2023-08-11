@@ -1,3 +1,13 @@
+do_optimizations: true
+
+# Add distance constraints on X-H bonds during optimization.
+# Prevents hydrogen transfers.
+constrain_hydrogens: true
+
+# Write xyz file to path. If anything other than a string, no xyz file is written.
+write_xyz: ./tmp/calculators/gfp-cro-scan.xyz
+
+
 
 scan:
 
@@ -66,7 +76,7 @@ scan:
         stop: 0
         step: 180
 
-write_xyz: null
+
 
 # Information about the physical system.
 system:
@@ -76,6 +86,7 @@ system:
 
   # Multiplicity.
   multiplicity: 1
+
 
 
 # Information about the reptar file containing structures to optimize and where
@@ -114,10 +125,6 @@ rfile:
       E: energy_ele_gfn2
 
 
-do_optimizations: true
-
-# Write xyz file to path. If anything other than a string, no xyz file is written.
-write_xyz: ./tmp/calculators/gfp-cro-scan.xyz
 
 # Driver for the optimizations calculation.
 driver:
@@ -136,6 +143,8 @@ driver:
   start_slice: null
 
   end_slice: null
+
+
 
 # Worker to be used with the driver.
 worker:
@@ -165,4 +174,4 @@ worker:
 
     xtb_path: xtb
 
-    log_dir: /home/alex/Downloads/test
+    log_dir: null

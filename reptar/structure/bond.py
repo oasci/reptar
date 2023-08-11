@@ -126,7 +126,7 @@ def identify_bonds(
 
 
 def get_covalent_h_bonds(
-    Z: np.ndarray, R: np.ndarray, f_is_bonded: callable, f_kwargs: dict | None
+    Z: np.ndarray, R: np.ndarray, f_is_bonded: callable, f_kwargs: dict | None = None
 ) -> np.ndarray:
     r"""All covalent bonds between hydrogen and non-hydrogen atoms.
 
@@ -141,14 +141,14 @@ def get_covalent_h_bonds(
         :func:`~reptar.structure.bond.is_bonded_atomic_radii` for an example.
     f_kwargs
         Keyword arguments for ``f_is_bonded``.
-    
+
     Returns
     -------
 
         A two-dimensional array where column ``0`` is the structure index, column ``2``
-        is the atom index of a hydrogen atom, and column ``1`` is the atom index of 
+        is the atom index of a hydrogen atom, and column ``1`` is the atom index of
         covalently bond atoms.
-    
+
     Examples
     --------
     >>> get_covalent_h_bonds(Z, R, is_bonded_atomic_radii)
@@ -167,7 +167,7 @@ def get_covalent_h_bonds(
         f_kwargs = {}
 
     is_bonded = f_is_bonded(Z=Z, R=R, **f_kwargs)
-    is_bonded = np.triu(is_bonded, k=1) # remove bonding with self
+    is_bonded = np.triu(is_bonded, k=1)  # remove bonding with self
     bond_indices = np.argwhere(is_bonded == 1)
     h_idxs = np.nonzero(Z == 1)[0]
     h_mask = np.isin(bond_indices[:, -1], h_idxs)
