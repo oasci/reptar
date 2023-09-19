@@ -4,27 +4,27 @@ reptar
 
 A tool for computing, storing, and analyzing manuscript-scale computational chemistry and biology data.
 
-.. image:: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml/badge.svg
-    :target: https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml
+.. image:: https://github.com/OASCI/reptar/actions/workflows/python-package.yml/badge.svg
+    :target: https://github.com/OASCI/reptar/actions/workflows/python-package.yml
     :alt: Python package build
 
 .. image:: https://img.shields.io/pypi/pyversions/reptar
     :alt: PyPI - Python Version
 
-.. image:: https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD
-    :target: https://codecov.io/gh/aalexmmaldonado/reptar
+.. image:: https://codecov.io/gh/OASCI/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD
+    :target: https://codecov.io/gh/OASCI/reptar
     :alt: Codecov test coverage
 
-.. image:: https://img.shields.io/github/v/release/aalexmmaldonado/reptar
-    :target: https://github.com/aalexmmaldonado/reptar/releases
+.. image:: https://img.shields.io/github/v/release/OASCI/reptar
+    :target: https://github.com/OASCI/reptar/releases
     :alt: Latest GitHub release
 
 .. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.6508586.svg
    :target: https://doi.org/10.5281/zenodo.6508586
    :alt: Zenodo doi
 
-.. image:: https://img.shields.io/github/license/aalexmmaldonado/reptar
-    :target: https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE
+.. image:: https://img.shields.io/github/license/OASCI/reptar
+    :target: https://github.com/OASCI/reptar/blob/main/LICENSE
 
 .. image:: https://img.shields.io/badge/code%20style-black-000000.svg
    :target: https://github.com/psf/black
@@ -53,11 +53,11 @@ Installation
 ============
 
 You can install reptar from `PyPI <https://pypi.org/project/reptar/>`__ by using ``pip install reptar``.
-Or, the latest development version can be installed directly from the `GitHub repository <https://github.com/aalexmmaldonado/reptar>`__ or from `TestPyPI <https://test.pypi.org/project/reptar/>`__.
+Or, the latest development version can be installed directly from the `GitHub repository <https://github.com/OASCI/reptar>`__ or from `TestPyPI <https://test.pypi.org/project/reptar/>`__.
 
 .. code-block:: bash
 
-    git clone https://github.com/aalexmmaldonado/reptar
+    git clone https://github.com/OASCI/reptar
     cd reptar
     pip install .
 
@@ -120,7 +120,7 @@ Reptar currently automates the creation of:
 License
 =======
 
-Distributed under the MIT License. See `LICENSE <https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE>`__ for more information.
+Distributed under the MIT License. See `LICENSE <https://github.com/OASCI/reptar/blob/main/LICENSE>`__ for more information.
 
 .. toctree::
     :hidden:

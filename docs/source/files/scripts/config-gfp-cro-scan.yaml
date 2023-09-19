@@ -124,7 +124,7 @@ driver:
 
   # Keyword arguments for the specified driver in ``class``.
   # Please refer to the specific driver's API in the documentation.
-  # https://www.aalexmmaldonado.com/reptar/main/index.html
+  # https://reptar.oasci.org/main/index.html
   kwargs:
 
     use_ray: false

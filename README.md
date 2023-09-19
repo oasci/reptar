@@ -2,27 +2,27 @@
 
 <h4 align="center">A tool for computing, storing, and analyzing manuscript-scale computational chemistry and biology data</h4>
 
-<h4 align="center" style="padding-bottom: 0.5em;"><a href="https://www.aalexmmaldonado.com/reptar/">Documentation</a></h4>
+<h4 align="center" style="padding-bottom: 0.5em;"><a href="https://reptar.oasci.org">Documentation</a></h4>
 
 <p align="center">
-    <a href="https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml">
-        <img src="https://github.com/aalexmmaldonado/reptar/actions/workflows/python-package.yml/badge.svg" alt="Build Status ">
+    <a href="https://github.com/OASCI/reptar/actions/workflows/python-package.yml">
+        <img src="https://github.com/OASCI/reptar/actions/workflows/python-package.yml/badge.svg" alt="Build Status ">
     </a>
     <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/reptar">
-    <a href="https://codecov.io/gh/aalexmmaldonado/reptar">
-        <img src="https://codecov.io/gh/aalexmmaldonado/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD" alt="codecov">
+    <a href="https://codecov.io/gh/OASCI/reptar">
+        <img src="https://codecov.io/gh/OASCI/reptar/branch/main/graph/badge.svg?token=74wLrsOMTD" alt="codecov">
     </a>
-    <a href="https://github.com/aalexmmaldonado/reptar/releases">
-        <img src="https://img.shields.io/github/v/release/aalexmmaldonado/reptar" alt="GitHub release (latest by date)">
+    <a href="https://github.com/OASCI/reptar/releases">
+        <img src="https://img.shields.io/github/v/release/OASCI/reptar" alt="GitHub release (latest by date)">
     </a>
     <a href="https://doi.org/10.5281/zenodo.6508586">
         <img src="https://zenodo.org/badge/DOI/10.5281/zenodo.6508586.svg" alt="DOI">
     </a>
-    <a href="https://github.com/aalexmmaldonado/reptar/blob/main/LICENSE" target="_blank">
-        <img src="https://img.shields.io/github/license/aalexmmaldonado/reptar" alt="License">
+    <a href="https://github.com/OASCI/reptar/blob/main/LICENSE" target="_blank">
+        <img src="https://img.shields.io/github/license/OASCI/reptar" alt="License">
     </a>
-    <a href="https://github.com/aalexmmaldonado/reptar/" target="_blank">
-        <img src="https://img.shields.io/github/repo-size/aalexmmaldonado/reptar" alt="GitHub repo size">
+    <a href="https://github.com/OASCI/reptar/" target="_blank">
+        <img src="https://img.shields.io/github/repo-size/OASCI/reptar" alt="GitHub repo size">
     </a>
     <a href="https://github.com/psf/black" target="_blank">
         <img src="https://img.shields.io/badge/code%20style-black-000000.svg" alt="Black style">
@@ -60,10 +60,10 @@ The result is a user-specified file streamlined for analysis in Python and archi
 # Installation
 
 You can install reptar from [PyPI](https://pypi.org/project/reptar/) by using `pip install reptar`.
-Or, the latest development version can be installed directly from the [GitHub repository](https://github.com/aalexmmaldonado/reptar) or from [TestPyPI](https://test.pypi.org/project/reptar/).
+Or, the latest development version can be installed directly from the [GitHub repository](https://github.com/OASCI/reptar) or from [TestPyPI](https://test.pypi.org/project/reptar/).
 
 ```bash
-git clone https://github.com/aalexmmaldonado/reptar
+git clone https://github.com/OASCI/reptar
 cd reptar
 pip install .
 ```
