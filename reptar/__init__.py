@@ -1,4 +1,4 @@
-__author__ = """Alex M. Maldonado"""
+__author__ = """OASCI"""
 
 from . import _version
 
