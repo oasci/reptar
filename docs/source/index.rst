@@ -2,7 +2,7 @@
 reptar
 ======
 
-A tool for computing, storing, and analyzing manuscript-scale computational chemistry and biology data.
+Compute, store, and analyze manuscript-scale data for computational chemistry and biology
 
 .. image:: https://github.com/oasci/reptar/actions/workflows/python-package.yml/badge.svg
     :target: https://github.com/oasci/reptar/actions/workflows/python-package.yml

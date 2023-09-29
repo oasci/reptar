@@ -1,6 +1,6 @@
 <h1 align="center">reptar</h1>
 
-<h4 align="center">A tool for computing, storing, and analyzing manuscript-scale computational chemistry and biology data</h4>
+<h4 align="center">Compute, store, and analyze manuscript-scale data for computational chemistry and biology</h4>
 
 <h4 align="center" style="padding-bottom: 0.5em;"><a href="https://reptar.oasci.org">Documentation</a></h4>
 
