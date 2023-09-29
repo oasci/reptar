@@ -104,7 +104,7 @@ of CPU cores per worker (also defaults to ``1``).
 - Calculators now use keyword arguments.
 - Cleaned up ray calculations.
 - Convert scf energies from cclib to Hartree by default.
-- Moved example calculations to [reptar-data](https://github.com/OASCI/reptar-data).
+- Moved example calculations to [reptar-data](https://github.com/oasci/reptar-data).
 - Manual ``api`` documents with ``sphinx-multiversion``.
 - Raise ``RuntimeError`` when key does not exist in exdir.
 - PDB writer numbers each atom name.

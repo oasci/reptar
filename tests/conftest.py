@@ -38,7 +38,7 @@ def pytest_sessionstart(session):  # pytest_configure(config)
         pytest.exit(
             4,
             f"\nreptar-data repository not found at {reptar_data_path}"
-            "\nPlease clone https://github.com/OASCI/reptar-data"
+            "\nPlease clone https://github.com/oasci/reptar-data"
             "\nin the reptar/examples/ directory",
         )
 

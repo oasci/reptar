@@ -162,7 +162,7 @@ An example input and water xyz structure is shown below.
     </div>
     <!--
         Change data-href from ./30h2o.pm.xyz to
-        https://raw.githubusercontent.com/OASCI/reptar/main/docs/source/files/30h2o-md/30h2o.pm.xyz
+        https://raw.githubusercontent.com/oasci/reptar/main/docs/source/files/30h2o-md/30h2o.pm.xyz
         for local development
     -->
 
@@ -288,7 +288,7 @@ First, we need to optimize the structure.
     </div>
     <!--
         Change data-href from ./30h2o-gfn2-opt.xyz to
-        https://raw.githubusercontent.com/OASCI/reptar/main/docs/source/files/30h2o-md/30h2o-gfn2-opt.xyz
+        https://raw.githubusercontent.com/oasci/reptar/main/docs/source/files/30h2o-md/30h2o-gfn2-opt.xyz
         for local development
     -->
 

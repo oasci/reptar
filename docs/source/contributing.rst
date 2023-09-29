@@ -19,7 +19,7 @@ Types of contributions
 Report bugs
 -----------
 
-Report bugs at https://github.com/OASCI/reptar/issues.
+Report bugs at https://github.com/oasci/reptar/issues.
 
 If you are reporting a bug, please include:
 
@@ -30,13 +30,13 @@ If you are reporting a bug, please include:
 Fix bugs
 --------
 
-Look through the `GitHub issues <https://github.com/OASCI/reptar/issues>`__ for bugs.
+Look through the `GitHub issues <https://github.com/oasci/reptar/issues>`__ for bugs.
 Anything tagged with ``bug`` and ``help wanted`` is open to whoever wants to implement it.
 
 Implement features
 ------------------
 
-Look through the `GitHub issues <https://github.com/OASCI/reptar/issues>`__ for features.
+Look through the `GitHub issues <https://github.com/oasci/reptar/issues>`__ for features.
 Anything tagged with ``enhancement`` and ``help wanted`` is open to whoever wants to implement it.
 
 Write documentation
@@ -47,7 +47,7 @@ Reptar could always use more documentation, whether as part of the official rept
 Propose a new feature
 ---------------------
 
-The best way to propose a new feature is by starting a discussion at https://github.com/OASCI/reptar/discussions.
+The best way to propose a new feature is by starting a discussion at https://github.com/oasci/reptar/discussions.
 
 - Create a discussion in the |:bulb:| Ideas category.
 - Explain in detail how it would work.
@@ -59,7 +59,7 @@ The best way to propose a new feature is by starting a discussion at https://git
 Discussions
 ===========
 
-If you have any questions, comments, concerns, or criticisms please start a `discussion <https://github.com/OASCI/reptar/discussions>`__ so we can improve reptar!
+If you have any questions, comments, concerns, or criticisms please start a `discussion <https://github.com/oasci/reptar/discussions>`__ so we can improve reptar!
 
 
 *Black* style
@@ -96,7 +96,7 @@ Get Started!
 Ready to contribute?
 Here's how to set up ``reptar`` for local development.
 
-1. Fork the `reptar repo on GitHub <https://github.com/OASCI/reptar>`__.
+1. Fork the `reptar repo on GitHub <https://github.com/oasci/reptar>`__.
 2. Clone your fork locally.
 
 .. code-block:: bash
@@ -120,14 +120,14 @@ Now you can make your changes locally.
 
 5. When you're done making changes, check that your changes pass the tests.
 
-Because parsing is a large part of reptar, we have stored the large output files in a separate `GitHub repo <https://github.com/OASCI/reptar-data>`__.
+Because parsing is a large part of reptar, we have stored the large output files in a separate `GitHub repo <https://github.com/oasci/reptar-data>`__.
 The ``tests/`` is setup to search for files in the ``examples/reptar-data/`` directory.
 So, to properly set this up you need to clone this repo into your local repo.
 
 .. code-block:: bash
 
     $ cd examples
-    $ clone https://github.com/OASCI/reptar-data
+    $ clone https://github.com/oasci/reptar-data
 
 Files in ``examples/reptar-data/``, and changes made to it, are not tracked by reptar.
 Then, while in the repo root directory, you can run all of the tests with the ``pytest`` command (after running ``pip install .``).
@@ -176,8 +176,8 @@ Then, while in the repo root directory, you can run all of the tests with the ``
 
     If you are implementing new parsers or calculation types you need to include output files for your tests.
     Locally, you can store the files in your cloned ``reptar-data`` directory and run tests that way.
-    Once you are ready for merge your changes, you need to add new data to ``reptar-data`` by forking and creating a `pull request <https://github.com/OASCI/reptar-data>`__.
-    If you need any help doing this, please search the `discussions <https://github.com/OASCI/reptar/discussions>`__ or start a new one. 
+    Once you are ready for merge your changes, you need to add new data to ``reptar-data`` by forking and creating a `pull request <https://github.com/oasci/reptar-data>`__.
+    If you need any help doing this, please search the `discussions <https://github.com/oasci/reptar/discussions>`__ or start a new one. 
 
 6. Write any additional documentation in ``docs/source/``.
 You can easily build and view the documentation locally by running the ``docs/branch-build-docs.sh`` script then opening ``docs/html/index.html`` in your favorite browser.
@@ -225,7 +225,7 @@ This script is also called in ``docs/branch-build-docs.sh``.
     $ git commit -m "Your detailed description of your changes."
     $ git push origin name-of-your-branch
 
-10. Submit a pull request through the `GitHub website <https://github.com/OASCI/reptar>`__.
+10. Submit a pull request through the `GitHub website <https://github.com/oasci/reptar>`__.
 
 
 
@@ -252,7 +252,7 @@ Make sure you have the most recent tags by running ``git fetch --tags --all``.
 Our versions are manged with `versioneer <https://github.com/python-versioneer/python-versioneer>`__.
 This primarily relies on tags and distance from the most recent tag.
 Creating a new version is automated with ``bump2version`` (which can be installed with ``pip install bump2version``) and controlled with ``.bumpversion.cfg``.
-Then, the `Upload Python Package <https://github.com/OASCI/reptar/actions/workflows/python-publish.yml>`__ GitHub Action will take care of deploying to PyPI.
+Then, the `Upload Python Package <https://github.com/oasci/reptar/actions/workflows/python-publish.yml>`__ GitHub Action will take care of deploying to PyPI.
 
 .. note::
 
@@ -271,4 +271,4 @@ Push the commit and tags.
 
     $ git push --follow-tags
 
-Then, create a new release on `GitHub <https://github.com/OASCI/reptar/releases>`__.
+Then, create a new release on `GitHub <https://github.com/oasci/reptar/releases>`__.
