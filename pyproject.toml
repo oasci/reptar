@@ -31,6 +31,12 @@ reptar-write-xyz = "reptar.writers.xyz:main_write_xyz"
 python = "<3.13,>=3.9"
 poetry-version-plugin = {git = "https://github.com/oasci/poetry-version-plugin", rev = "support-versioneer"}
 numpy = "^1.26.0"
+pyyaml = "^6.0.1"
+scipy = "^1.11.3"
+cclib = "^1.8"
+qcelemental = "^0.26.0"
+ase = "^3.22.1"
+ray = {extras = ["data"], version = "^2.7.0"}
 
 
 [tool.poetry.group.dev.dependencies]

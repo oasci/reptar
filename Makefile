@@ -22,7 +22,6 @@ pre-commit-install:
 from-conda-lock:
 	$(CONDA) conda-lock install -p $(REPO_PATH)/.venv $(REPO_PATH)/conda-lock.yml
 
-# TODO: Does not work?
 .PHONY: write-conda-lock
 write-conda-lock:
 	$(CONDA) conda env export --from-history | grep -v "^prefix" > environment.yml
@@ -40,7 +39,7 @@ install:
 
 .PHONY: validate
 validate:
-	pre-commit run --all-files
+	$(CONDA) pre-commit run --all-files
 
 
 
