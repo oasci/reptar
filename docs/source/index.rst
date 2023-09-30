@@ -134,5 +134,5 @@ Distributed under the MIT License. See `LICENSE <https://github.com/oasci/reptar
     Descriptors <descriptors>
     Scripts <scripts/scripts>
     Definitions <definitions/definitions>
+    Developing <developing/index>
     API <api/modules>
-    Contributing <contributing>
