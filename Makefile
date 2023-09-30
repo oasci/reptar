@@ -20,7 +20,7 @@ pre-commit-install:
 
 .PHONY: from-conda-lock
 from-conda-lock:
-	$(CONDA) conda-lock install --prefix $(REPO_PATH)/.venv --file $(REPO_PATH)/conda-lock.yml
+	$(CONDA) conda-lock install -p $(REPO_PATH)/.venv $(REPO_PATH)/conda-lock.yml
 
 # TODO: Does not work?
 .PHONY: write-conda-lock
