@@ -14,6 +14,13 @@ conda-setup:
 	$(CONDA) conda config --set solver libmamba
 	conda install -y -c conda-forge poetry pre-commit -p $(REPO_PATH)/.venv
 
+.PHONY: conda-dependencies
+conda-dependencies:
+	$(CONDA) conda config --add channels conda-forge
+	$(CONDA) conda config --add channels conda-forge/label/libint_dev
+	$(CONDA) conda install psi4 python=$(PYTHON_VERSION) -c conda-forge/label/libint_dev -c conda-forge -y
+	$(CONDA) conda install xtb -c conda-forge
+
 .PHONY: pre-commit-install
 pre-commit-install:
 	$(CONDA) pre-commit install
@@ -37,6 +44,14 @@ install:
 	$(CONDA) poetry install --no-interaction
 	-$(CONDA) mypy --install-types --non-interactive ./reptar
 
+.PHONY: update-poetry
+update-poetry:
+	$(CONDA) poetry update --no-interaction
+
+.PHONY: update
+update: update-poetry install
+
+
 .PHONY: validate
 validate:
 	$(CONDA) pre-commit run --all-files
@@ -59,7 +74,7 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	PYTHONPATH=$(PYTHONPATH) $(CONDA) pytest -c pyproject.toml --cov-report=html --cov=reptar tests/
+	PYTHONPATH=$(PYTHONPATH) $(CONDA) pytest -c pyproject.toml --cov=reptar --cov-report=xml tests/
 
 .PHONY: check-codestyle
 check-codestyle:
