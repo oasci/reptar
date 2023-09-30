@@ -142,6 +142,28 @@ class-const-naming-style = "UPPER_CASE"
 class-naming-style = "PascalCase"
 const-naming-style = "UPPER_CASE"
 function-naming-style = "snake_case"
+disable = [
+  "raw-checker-failed",
+  "bad-inline-option",
+  "locally-disabled",
+  "file-ignored",
+  "suppressed-message",
+  "useless-suppression",
+  "deprecated-pragma",
+  "use-symbolic-message-instead",
+  "too-many-arguments",
+  "too-many-public-methods",
+  "missing-module-docstring",
+  "missing-function-docstring",
+  "too-many-lines",
+  "fixme",
+  "too-many-instance-attributes",
+  "too-few-public-methods",
+  "too-many-locals",
+  "attribute-defined-outside-init",
+  "broad-except",
+  "import-error"
+]
 
 [tool.black]
 # https://github.com/psf/black

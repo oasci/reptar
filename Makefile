@@ -77,7 +77,7 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	PYTHONPATH=$(PYTHONPATH) $(CONDA) pytest -c pyproject.toml --cov=reptar --cov-report=xml tests/
+	$(CONDA) pytest -c pyproject.toml --cov=reptar --cov-report=xml tests/
 
 .PHONY: check-codestyle
 check-codestyle:
@@ -140,6 +140,10 @@ docs:
 .PHONY: open-docs
 open-docs:
 	xdg-open ./docs/html/index.html 2>/dev/null
+
+.PHONY: update-defs
+update-defs:
+	$(CONDA) ./docs/convert_definitions.py
 
 .PHONY: docs-multiversion
 docs-multiversion:
