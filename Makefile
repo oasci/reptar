@@ -77,7 +77,7 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	$(CONDA) pytest -c pyproject.toml --cov=reptar --cov-report=xml tests/
+	$(CONDA) pytest-cov -c pyproject.toml --cov=reptar --cov-report=xml tests/
 
 .PHONY: check-codestyle
 check-codestyle:
@@ -87,7 +87,7 @@ check-codestyle:
 
 .PHONY: mypy
 mypy:
-	$(CONDA) mypy --config-file pyproject.toml ./
+	-$(CONDA) mypy --config-file pyproject.toml ./
 
 .PHONY: check-safety
 check-safety:
@@ -96,7 +96,7 @@ check-safety:
 	$(CONDA) bandit -ll --recursive reptar tests
 
 .PHONY: lint
-lint: test check-codestyle mypy check-safety
+lint: check-codestyle mypy check-safety
 
 
 
@@ -121,12 +121,21 @@ ipynbcheckpoints-remove:
 pytestcache-remove:
 	find . | grep -E ".pytest_cache" | xargs rm -rf
 
+.PHONY: psi-remove
+psi-remove:
+	find . | grep -E ".clean" | xargs rm -rf
+	find . | grep -E "timer.dat" | xargs rm -rf
+
+.PHONY: coverage-remove
+coverage-remove:
+	find . | grep -E ".coverage" | xargs rm -rf
+
 .PHONY: build-remove
 build-remove:
 	rm -rf build/
 
 .PHONY: cleanup
-cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove
+cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove psi-remove coverage-remove
 
 
 

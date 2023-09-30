@@ -274,7 +274,10 @@ source = "reptar"
 
 [coverage.run]
 branch = true
-
+omit = [
+  "*/__init__.py",
+  "*/_version.py",
+]
 
 [coverage.report]
 fail_under = 50

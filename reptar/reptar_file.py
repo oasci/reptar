@@ -24,12 +24,25 @@ from __future__ import annotations
 
 from typing import Any
 
-import importlib
+import json
 import os
 from collections.abc import Iterable
 
 import numpy as np
 import yaml
+
+try:
+    import exdir
+
+    HAS_EXDIR = True
+except ImportError:
+    HAS_EXDIR = False
+try:
+    import zarr
+
+    HAS_ZARR = True
+except ImportError:
+    HAS_ZARR = False
 
 from .logger import ReptarLogger
 from .utils import combine_dicts, dict_iterator, get_md5, remove_nested_key
@@ -183,16 +196,8 @@ class File:
         log.debug("Setting state of object")
         self.__dict__.update(state)
 
-    def _load_ftypes(self) -> None:
-        r"""Loads module for desired file."""
-        _, f_ext = os.path.splitext(self.fpath)
-        f_ext = f_ext[1:]
-        if f_ext in ("exdir", "zarr", "json"):
-            module = importlib.import_module(f_ext)
-
     def open(self) -> None:
         r"""Opens and prepares the ``File_`` attribute."""
-        self._load_ftypes()
         if self.from_dict is None:
             self._from_path(self.fpath, self.fmode, self.allow_remove, self.plugins)
         else:
