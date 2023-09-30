@@ -42,6 +42,3 @@ Psi4
   .. literalinclude:: ../files/scripts/reptar-calc-psi4-engrads.yml
     :language: yaml
     :linenos:
-
-
-

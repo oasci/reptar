@@ -21,10 +21,13 @@
 # SOFTWARE.
 
 from __future__ import annotations
-from typing import Any, TYPE_CHECKING
+
+from typing import TYPE_CHECKING, Any
+
 from collections.abc import Callable, Iterator
-from ..utils import chunk_iterable
+
 from ..logger import ReptarLogger
+from ..utils import chunk_iterable
 
 log = ReptarLogger(__name__)
 
@@ -39,7 +42,7 @@ if TYPE_CHECKING:
 
 def add_worker(
     workers_list: list[Callable],
-    worker: Callable[["..."], Data],
+    worker: Callable[[...], Data],
     chunker: Iterator[list[int]],
     worker_args: tuple,
     worker_kwargs: dict,
@@ -120,7 +123,7 @@ class Driver:
 
     def run(
         self,
-        worker: Callable[["..."], Data],
+        worker: Callable[[...], Data],
         worker_kwargs: dict[str, Any],
         data: Data,
         tasks: Iterator[str],

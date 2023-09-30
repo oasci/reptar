@@ -24,11 +24,13 @@
 
 # pylint: skip-file
 
-import sys
-import shutil
 import os
-import pytest
+import shutil
+import sys
+
 import numpy as np
+import pytest
+
 from reptar import File
 
 sys.path.append("..")

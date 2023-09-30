@@ -72,5 +72,3 @@ outputs
         Atomic velocities in Angstrom/fs.
 
         **Type:** :obj:`float`
-
-

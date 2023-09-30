@@ -21,17 +21,19 @@
 # SOFTWARE.
 
 import collections
-from functools import reduce
-import operator
+import hashlib
 import importlib
 import itertools
-import hashlib
+import operator
 import os
-import yaml
+from functools import reduce
+
 import numpy as np
+import yaml
 from qcelemental import periodictable as ptable
-from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 from qcelemental.exceptions import ValidationError
+from qcelemental.molparse.from_arrays import validate_and_fill_geometry
+
 from .descriptors import get_center_of_mass
 from .logger import ReptarLogger
 
@@ -63,7 +65,7 @@ def get_files(path, expression, recursive=True):
         path += "/"
     if recursive:
         all_files = []
-        for (dirpath, _, filenames) in os.walk(path):
+        for dirpath, _, filenames in os.walk(path):
             index = 0
             while index < len(filenames):
                 if dirpath[-1] != "/":
@@ -138,7 +140,7 @@ def parse_xyz(xyz_path):
         :obj:`float` from string file.
     """
     Z, comments, data = [], [], []
-    with open(xyz_path, "r", encoding="utf-8") as f:
+    with open(xyz_path, encoding="utf-8") as f:
         for _, line in enumerate(f):
             line = line.strip()
             if not line:
@@ -626,6 +628,6 @@ def common_elements(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
 
 def _load_config(config_path):
     log.info("Loading config.yaml")
-    with open(config_path, "r", encoding="utf-8") as stream:
+    with open(config_path, encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     return config

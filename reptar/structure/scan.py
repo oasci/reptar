@@ -23,17 +23,20 @@
 """Interact with dihedral angles of structures."""
 
 from __future__ import annotations
+
 import argparse
 import itertools
 import os
+
 import numpy as np
-from .angles import get_angle_mask, sample_angles
+
 from .. import File
-from ..writers import write_xyz
 from ..calculators import Data
 from ..calculators.run import run_calcs
-from ..utils import _load_config
 from ..logger import ReptarLogger, set_log_level
+from ..utils import _load_config
+from ..writers import write_xyz
+from .angles import get_angle_mask, sample_angles
 
 log = ReptarLogger(__name__)
 
@@ -170,7 +173,6 @@ def create_grid(
 
 
 def geometry_scan(config: dict, ray_address: str = "") -> None:
-
     log.info("Opening file")
     rfile_path = os.path.abspath(config["rfile"]["path"])
     rfile = File(rfile_path, mode="a")

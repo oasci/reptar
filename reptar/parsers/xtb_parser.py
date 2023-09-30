@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 import numpy as np
+
 from ..extractors import ExtractorXTB
-from .parser import Parser
 from ..utils import atoms_by_number, parse_xyz
+from .parser import Parser
 
 
 class ParserXTB(Parser):
@@ -90,7 +91,7 @@ class ParserXTB(Parser):
                     self.parsed_info["outputs"]["energy_pot"] = []
                 self.parsed_info["outputs"]["energy_pot"].extend(energy_pot)
 
-        if len(set(tuple(i) for i in Z)) == 1:
+        if len({tuple(i) for i in Z}) == 1:
             Z = Z[0]
         else:
             raise ValueError("Atomic numbers are not consistent.")

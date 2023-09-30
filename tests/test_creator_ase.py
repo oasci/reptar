@@ -26,10 +26,12 @@
 
 import os
 import sys
-import pytest
+
 import numpy as np
+import pytest
+
 from reptar import Creator, File
-from reptar.utils import gen_entity_ids, gen_comp_ids
+from reptar.utils import gen_comp_ids, gen_entity_ids
 
 sys.path.append("..")
 from .paths import get_1h2o_57h2o_pm_periodic_paths

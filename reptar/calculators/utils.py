@@ -21,13 +21,17 @@
 # SOFTWARE.
 
 from __future__ import annotations
-import os
+
 from typing import Any
+
+import os
 from collections.abc import Iterable
+
 import numpy as np
+
+from ..logger import ReptarLogger
 from . import Data
 from .cube import initialize_grid_arrays
-from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
 

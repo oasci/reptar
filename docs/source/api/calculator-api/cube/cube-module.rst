@@ -6,4 +6,3 @@
     :maxdepth: 1
 
     *
-

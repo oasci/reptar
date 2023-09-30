@@ -108,5 +108,3 @@ runtime_info
         TODO
 
         **Type:** :obj:`bool`
-
-

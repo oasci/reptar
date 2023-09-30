@@ -22,8 +22,8 @@
 
 # pylint: disable=line-too-long
 
-from .extractor import Extractor
 from ..logger import ReptarLogger
+from .extractor import Extractor
 
 log = ReptarLogger(__name__)
 
@@ -308,7 +308,6 @@ class ExtractorXTB(Extractor):
         """
         line = self.skip_lines(f, 2)
         while ".............................." not in line.strip():
-
             # :  # basis functions                1446          :
             if " # basis functions" in line:
                 self.parsed_info["runtime_info"]["basis_n_func"] = int(
@@ -441,7 +440,6 @@ class ExtractorXTB(Extractor):
         self.parsed_info["runtime_info"]["md_steps_dump_traj"] = float(line.split()[4])
 
         while "time (ps)    <Epot>" not in line:
-
             #  H atoms mass (amu) :     1
             if "H atoms mass (amu) :" == line.strip()[:20]:
                 self.parsed_info["runtime_info"]["mass_h"] = float(line.split()[-1])

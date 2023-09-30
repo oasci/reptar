@@ -66,8 +66,6 @@ scan:
         stop: 0
         step: 180
 
-write_xyz: null
-
 # Information about the physical system.
 system:
 

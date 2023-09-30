@@ -21,5 +21,3 @@ runtime_info
         Mass of Hydrogen atoms in atomic mass units (if specified).
 
         **Type:** :obj:`float`
-
-

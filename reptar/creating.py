@@ -22,17 +22,19 @@
 
 import os
 import shutil
+
 import ase
-from ase.io.ulm import InvalidULMFileError
 import numpy as np
-from pkg_resources import resource_stream
 import yaml
+from ase.io.ulm import InvalidULMFileError
+from pkg_resources import resource_stream
+
 from . import _version
-from .reptar_file import File
 from .logger import ReptarLogger
 
 # pylint: disable=no-name-in-module
-from .parsers import ParserORCA, ParserXTB, ParserASE, ParserCREST
+from .parsers import ParserASE, ParserCREST, ParserORCA, ParserXTB
+from .reptar_file import File
 
 log = ReptarLogger(__name__)
 __version__ = _version.get_versions()["version"]
@@ -54,7 +56,7 @@ def identify_parser(out_path):
     :obj:`reptar.Creator`
         One of the supported creator classes.
     """
-    with open(out_path, "r", encoding="utf-8") as f:
+    with open(out_path, encoding="utf-8") as f:
         for line in f:
             for parser, phrases, do_break in triggers:
                 if all(line.lower().find(p.lower()) >= 0 for p in phrases):

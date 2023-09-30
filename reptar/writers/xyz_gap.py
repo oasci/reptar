@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
+
 from .writing_utils import string_xyz_arrays
 
 

@@ -24,10 +24,12 @@
 
 # pylint: skip-file
 
-import sys
 import os
-import pytest
+import sys
+
 import numpy as np
+import pytest
+
 from reptar import File
 from reptar.writers import write_xyz_gap
 

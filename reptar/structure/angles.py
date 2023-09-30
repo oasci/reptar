@@ -23,10 +23,13 @@
 """Interact with dihedral angles of structures."""
 
 from __future__ import annotations
+
 from collections.abc import Iterable
-from ase import Atoms
+
 import numpy as np
 import ray
+from ase import Atoms
+
 from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)

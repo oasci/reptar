@@ -172,5 +172,3 @@ outputs
         TODO
 
         **Type:** :obj:`float`
-
-

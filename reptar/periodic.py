@@ -22,9 +22,10 @@
 
 """Periodic boundary conditions."""
 
-from ase.geometry import find_mic
 import numpy as np
+from ase.geometry import find_mic
 from scipy.spatial.distance import pdist
+
 from .logger import ReptarLogger
 
 log = ReptarLogger(__name__)

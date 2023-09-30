@@ -1,11 +1,11 @@
 # pylint: disable=no-name-in-module
 
-from .parser import Parser
-from .orca_parser import ParserORCA
-from .xtb_parser import ParserXTB
 from .ase_parser import ParserASE
 from .crest_parser import ParserCREST
 from .gaussian_cube import parse_cube
+from .orca_parser import ParserORCA
+from .parser import Parser
+from .xtb_parser import ParserXTB
 
 __all__ = [
     "Parser",

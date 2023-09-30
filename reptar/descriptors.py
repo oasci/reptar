@@ -23,8 +23,10 @@
 """Implementations of structural descriptors and criteria."""
 
 import itertools
+
 import numpy as np
 from qcelemental import periodictable as ptable
+
 from .logger import ReptarLogger
 
 log = ReptarLogger(__name__)

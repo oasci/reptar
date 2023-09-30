@@ -21,16 +21,18 @@
 # SOFTWARE.
 
 from random import choice, randrange
+
 import numpy as np
 import ray
-from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 from qcelemental.exceptions import ValidationError
-from .utils import center_structures as get_center_structures
-from .utils import gen_combs, exists_in_array, chunk_iterable
-from .periodic import Cell
+from qcelemental.molparse.from_arrays import validate_and_fill_geometry
+
 from . import _version
-from .saver import Saver
 from .logger import ReptarLogger
+from .periodic import Cell
+from .saver import Saver
+from .utils import center_structures as get_center_structures
+from .utils import chunk_iterable, exists_in_array, gen_combs
 
 log = ReptarLogger(__name__)
 
@@ -561,7 +563,6 @@ class Sampler:
         # information. Need to check for overlap of ids and specifications.
         # Just need to shift the new source IDs up by the maximum destination ID.
         if r_prov_ids is not None:
-
             # Check and remove any IDs already in the destination.
             present_ids = tuple(key for key in r_prov_ids.keys())
             present_md5s = tuple(value for value in r_prov_ids.values())
@@ -914,7 +915,6 @@ class Sampler:
         stop_sampling = False
 
         if not self.use_ray:
-
             # Serial operation
             for selections in chunk_iterable(selection_gen, chunk_size):
                 # Sample selections with the worker.

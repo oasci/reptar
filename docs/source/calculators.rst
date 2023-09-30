@@ -112,4 +112,3 @@ We use :download:`this zarr file<./files/data/1h2o.zarr.zip>` (make sure to extr
         .. literalinclude:: ./files/scripts/1h2o-psi4-engrads.txt
             :language: text
             :linenos:
-

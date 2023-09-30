@@ -26,10 +26,12 @@
 
 import os
 import shutil
+
 import yaml
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 
 # Collect paths of all YAML files
 def get_files(path, expression, recursive=True):
@@ -58,7 +60,7 @@ def get_files(path, expression, recursive=True):
         path += "/"
     if recursive:
         all_files = []
-        for (dirpath, _, filenames) in os.walk(path):
+        for dirpath, _, filenames in os.walk(path):
             index = 0
             while index < len(filenames):
                 if dirpath[-1] != "/":
@@ -90,7 +92,7 @@ yaml_files = {}
 for file_path in yaml_file_paths:
     file_name = os.path.splitext(os.path.basename(file_path))[0]
 
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         yaml_files[file_name] = yaml.safe_load(f)
 
 
