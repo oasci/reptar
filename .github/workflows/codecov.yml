@@ -8,47 +8,37 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout reptar
+      - name: Checkout code
         uses: actions/checkout@v3
       
-      - name: Checkout reptar-data
+      - name: Checkout test-data
         uses: actions/checkout@v3
         with:
           repository: 'oasci/reptar-data'
           lfs: true
           path: examples/reptar-data
-      
-      - uses: conda-incubator/setup-miniconda@v2
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
         with:
           miniconda-version: "latest"
           auto-update-conda: true
-          python-version: "3.10"
+          python-version: "3.11"
       
-      # Have to remove xtb as conda cannot solve the environment.
+      - name: Initialize conda environment
+        run: make conda-setup
       
-      - name: Install dependencies
+      - name: Install conda packages
+        run: make from-conda-lock
+      
+      - name: Poetry install
+        run: make install
+      
+      - name: Run tests and coverage
         shell: bash -el {0}
-        run: |
-          conda create -y --name reptar-test
-          conda activate reptar-test
-          conda install -y python=3.10
-          conda install -y psi4 python=3.10 -c conda-forge/label/libint_dev -c conda-forge 
-          pip install --upgrade pip
-          pip install numpy exdir>=0.4.2 cclib>=1.7.0 scipy qcelemental>=0.25.1 pyyaml ase ray[data] zarr
-          pip install pytest-cov pytest-order pytest-dependency
-          pip install .
-          cd ${HOME}
-          wget https://github.com/grimme-lab/xtb/releases/download/v6.6.1/xtb-6.6.1-linux-x86_64.tar.xz
-          tar -xf xtb-6.6.1-linux-x86_64.tar.xz
-          echo "${HOME}/xtb-6.6.1/bin" >> $GITHUB_PATH
+        run: make test
       
-      - name: Run tests and collect coverage
-        shell: bash -el {0}
-        run: |
-          conda activate reptar-test
-          pytest --cov=reptar --cov-report=xml
-      
-      - name: Upload coverage to Codecov
+      - name: Upload to Codecov
         uses: codecov/codecov-action@v3
         with:
           env_vars: OS,PYTHON
