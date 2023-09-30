@@ -4,22 +4,26 @@ PYTHON_VERSION := 3.11
 PYTHONPATH := `pwd`
 DOCS_URL := https://reptar.oasci.org
 REPO_PATH := $(shell git rev-parse --show-toplevel)
-CONDA := conda run -p $(REPO_PATH)/.venv
+CONDA_PATH := $(REPO_PATH)/.venv
+CONDA := conda run -p $(CONDA_PATH)
 
 #* Setup
 .PHONY: conda-setup
 conda-setup:
-	conda create -y --prefix $(REPO_PATH)/.venv python=$(PYTHON_VERSION)
-	conda install -y conda-lock conda-libmamba-solver -p $(REPO_PATH)/.venv
+	conda create -y -p $(CONDA_PATH) python=$(PYTHON_VERSION)
+	conda install -y conda-lock conda-libmamba-solver -p $(CONDA_PATH)
 	$(CONDA) conda config --set solver libmamba
-	conda install -y -c conda-forge poetry pre-commit -p $(REPO_PATH)/.venv
+	conda install -y -c conda-forge poetry=1.6.1 pre-commit -p $(CONDA_PATH)
 
+# The find command is because of this:
+# https://github.com/python-poetry/poetry/issues/6408#issuecomment-1513131650
 .PHONY: conda-dependencies
 conda-dependencies:
 	$(CONDA) conda config --add channels conda-forge
 	$(CONDA) conda config --add channels conda-forge/label/libint_dev
 	$(CONDA) conda install psi4 python=$(PYTHON_VERSION) -c conda-forge/label/libint_dev -c conda-forge -y
 	$(CONDA) conda install xtb -c conda-forge
+	find $(CONDA_PATH) -name direct_url.json -delete
 
 .PHONY: pre-commit-install
 pre-commit-install:
@@ -27,7 +31,8 @@ pre-commit-install:
 
 .PHONY: from-conda-lock
 from-conda-lock:
-	$(CONDA) conda-lock install -p $(REPO_PATH)/.venv $(REPO_PATH)/conda-lock.yml
+	$(CONDA) conda-lock install -p $(CONDA_PATH) $(REPO_PATH)/conda-lock.yml
+	find $(CONDA_PATH) -name direct_url.json -delete
 
 .PHONY: write-conda-lock
 write-conda-lock:
@@ -37,7 +42,8 @@ write-conda-lock:
 
 
 #* Installation
-.PHONY: lock-poetry
+# Reads `pyproject.toml`, solves environment, then writes lock file.
+.PHONY: poetry-lock
 lock-poetry:
 	$(CONDA) poetry lock --no-interaction
 	$(CONDA) poetry export --without-hashes > requirements.txt

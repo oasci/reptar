@@ -29,7 +29,6 @@ reptar-write-xyz = "reptar.writers.xyz:main_write_xyz"
 
 [tool.poetry.dependencies]
 python = "<3.13,>=3.9"
-poetry-version-plugin = {git = "https://github.com/oasci/poetry-version-plugin", rev = "support-versioneer"}
 numpy = "^1.26.0"
 pyyaml = "^6.0.1"
 scipy = "^1.11.3"
@@ -40,6 +39,7 @@ ray = {extras = ["data"], version = "^2.7.0"}
 
 
 [tool.poetry.group.dev.dependencies]
+poetry = "^1.6.1"
 black = "^23.9.0"
 isort = "^5.12.0"
 pre-commit = "^3.4.0"
@@ -64,6 +64,7 @@ pytest-dependency = "^0.5.1"
 
 
 [tool.poetry.group.docs.dependencies]
+poetry-version-plugin = {git = "https://github.com/oasci/poetry-version-plugin", rev = "support-versioneer"}
 sphinx-multiversion = "^0.2.4"
 furo = "^2023.9.10"
 sphinx-design = "^0.5.0"
