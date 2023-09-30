@@ -1468,7 +1468,7 @@ package:
   category: main
   optional: false
 - name: cffi
-  version: 1.15.1
+  version: 1.16.0
   manager: conda
   platform: linux-64
   dependencies:
@@ -1477,10 +1477,10 @@ package:
     pycparser: ''
     python: '>=3.11,<3.12.0a0'
     python_abi: 3.11.*
-  url: https://conda.anaconda.org/conda-forge/linux-64/cffi-1.15.1-py311hb3a22ac_5.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/cffi-1.16.0-py311hb3a22ac_0.conda
   hash:
-    md5: 75d52ef1d318d18e554aadd13ce91b9d
-    sha256: 099c1f624ef07265c775f539411271acb8054e1c6597cd3ee8089717de8d932a
+    md5: b3469563ac5e808b0cd92810d0697043
+    sha256: b71c94528ca0c35133da4b7ef69b51a0b55eeee570376057f3d2ad60c3ab1444
   category: main
   optional: false
 - name: click-default-group
@@ -1711,10 +1711,10 @@ package:
     python_abi: 3.11.*
     ruamel.yaml.clib: '>=0.1.2'
     setuptools: ''
-  url: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml-0.17.33-py311h459d7ec_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/ruamel.yaml-0.17.33-py311h459d7ec_1.conda
   hash:
-    md5: 9ead276061875f86bfa616e5b3b923df
-    sha256: 0d109e592edcc5c52881eb819c5ff231202e0a2f7e6b3a63b53473414a33f768
+    md5: 755015729515dfa4912fd4dede2c060d
+    sha256: b5db3ebbb22fdfd8a92c3c887a6c4e54f31505e509e7ae96581d32419d5c07a5
   category: main
   optional: false
 - name: tqdm
@@ -2216,10 +2216,10 @@ package:
     python: '>=3.11,<3.12.0a0'
     python_abi: 3.11.*
     secretstorage: '>=3.2'
-  url: https://conda.anaconda.org/conda-forge/linux-64/keyring-24.2.0-py311h38be061_0.conda
+  url: https://conda.anaconda.org/conda-forge/linux-64/keyring-24.2.0-py311h38be061_1.conda
   hash:
-    md5: b8eedb6181eff2dfeb34182330db1240
-    sha256: 0cca007d39351cada97570660505e4a5be09eda7b1a9fa4027707f4304dda98e
+    md5: 656d1107cb4934fd950eea244affd3c5
+    sha256: 495b04b64d897361b4336e6954ef66a2287191344c573d37c4217738b75bbc44
   category: main
   optional: false
 - name: numpy
@@ -2251,10 +2251,10 @@ package:
     python: '>=3.8'
     pyyaml: '>=5.1'
     virtualenv: '>=20.10.0'
-  url: https://conda.anaconda.org/conda-forge/noarch/pre-commit-3.4.0-pyha770c72_1.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pre-commit-3.4.0-pyha770c72_2.conda
   hash:
-    md5: 3fb5ba328a77c9fd71197a46e7f2469a
-    sha256: 262292801e1fceb137b2660305a095c4a139b095657aa8c7c7a6d430ec47d049
+    md5: 09cd3006f61e7a7054405f81362e0a5f
+    sha256: b4ffac42cec8a6c38c528d7c0c5023557ea97b581dbe61bb290d8e630a246e1b
   category: main
   optional: false
 - name: conda
@@ -3756,7 +3756,7 @@ package:
   category: main
   optional: false
 - name: cffi
-  version: 1.15.1
+  version: 1.16.0
   manager: conda
   platform: osx-64
   dependencies:
@@ -3764,10 +3764,10 @@ package:
     pycparser: ''
     python: '>=3.11,<3.12.0a0'
     python_abi: 3.11.*
-  url: https://conda.anaconda.org/conda-forge/osx-64/cffi-1.15.1-py311hc0b63fd_5.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/cffi-1.16.0-py311hc0b63fd_0.conda
   hash:
-    md5: 9563edca3a1f213ebd96a624c817caf2
-    sha256: 84cfbfaa9b746a862d7fddee997151621515218af4ec57b5b80932a13ca7f466
+    md5: 15d07b82223cac96af629e5e747ba27a
+    sha256: 1f13a5fa7f310fdbd27f5eddceb9e62cfb10012c58a58c923dd6f51fa979748a
   category: main
   optional: false
 - name: click-default-group
@@ -4033,10 +4033,10 @@ package:
     python_abi: 3.11.*
     ruamel.yaml.clib: '>=0.1.2'
     setuptools: ''
-  url: https://conda.anaconda.org/conda-forge/osx-64/ruamel.yaml-0.17.33-py311h2725bcf_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/ruamel.yaml-0.17.33-py311h2725bcf_1.conda
   hash:
-    md5: f13bc9417ace0215ea206f59b3ca0400
-    sha256: a3b37b4a6106bc295fec6dc4329dba9c5f1eee91393cf15a218d10b2b0dd4eb2
+    md5: 9e51cae7d54f883ebf1510be8d0ae184
+    sha256: 265a60d1a3a95e9b5ad8c0ee42e377f4d9fce48400ea1c559c5f63225bb2e6a3
   category: main
   optional: false
 - name: simple-dftd3
@@ -4389,10 +4389,10 @@ package:
     jaraco.classes: ''
     python: '>=3.11,<3.12.0a0'
     python_abi: 3.11.*
-  url: https://conda.anaconda.org/conda-forge/osx-64/keyring-24.2.0-py311h6eed73b_0.conda
+  url: https://conda.anaconda.org/conda-forge/osx-64/keyring-24.2.0-py311h6eed73b_1.conda
   hash:
-    md5: 8ba03d96e54958cd02110dc032d0bda2
-    sha256: 2ba79400b7ab0812130b517ba65e0a5ef09a25944480904bd4c8c7da01d0aed4
+    md5: dc0383887b837540194b65204521b8b3
+    sha256: dedbbb7d109ad054eb80419aaa9aae6f86d39c892bc278aa04a3980c3bddbbea
   category: main
   optional: false
 - name: pydantic
@@ -4578,10 +4578,10 @@ package:
     nodeenv: '>=0.11.1'
     cfgv: '>=2.0.0'
     virtualenv: '>=20.10.0'
-  url: https://conda.anaconda.org/conda-forge/noarch/pre-commit-3.4.0-pyha770c72_1.conda
+  url: https://conda.anaconda.org/conda-forge/noarch/pre-commit-3.4.0-pyha770c72_2.conda
   hash:
-    md5: 3fb5ba328a77c9fd71197a46e7f2469a
-    sha256: 262292801e1fceb137b2660305a095c4a139b095657aa8c7c7a6d430ec47d049
+    md5: 09cd3006f61e7a7054405f81362e0a5f
+    sha256: b4ffac42cec8a6c38c528d7c0c5023557ea97b581dbe61bb290d8e630a246e1b
   category: main
   optional: false
 - name: qcelemental
