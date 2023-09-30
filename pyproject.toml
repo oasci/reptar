@@ -90,11 +90,54 @@ source = "versioneer"
 good-names = [
   "i",
   "j",
+  "k",
   "e",
-  "ex"
+  "_",
+  "Z",
+  "z",
+  "R",
+  "r",
+  "E",
+  "e",
+  "G",
+  "g",
+  "F",
+  "f",
+  "n",
+  "Q",
+  "q",
+  "d",
+  "v",
+  "ex",
+  "Run",
+  "db",
+  "Z_source",
+  "R_source",
+  "E_source",
+  "G_source",
+  "Z_sample",
+  "R_sample",
+  "E_sample",
+  "G_sample",
+  "R_selection",
+  "E_selection",
+  "G_selection",
+  "R_source_idxs",
+  "R_selection_idx",
+  "n_Z",
+  "n_R",
+  "R_masses",
+  "File_"
 ]
 ignore = ["CVS", "_version.py", "conf.py"]
-
+jobs = 0
+py-version = 3.9
+argument-naming-style = "snake_case"
+attr-naming-style = "snake_case"
+class-const-naming-style = "UPPER_CASE"
+class-naming-style = "PascalCase"
+const-naming-style = "UPPER_CASE"
+function-naming-style = "snake_case"
 
 [tool.black]
 # https://github.com/psf/black
