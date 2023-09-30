@@ -27,7 +27,6 @@ identification
 
         **Type:** :obj:`str`
 
-
 system_info
 -----------
 
@@ -82,7 +81,6 @@ system_info
         The three cell vectors defining the periodic cell.
 
         **Type:** :obj:`float`
-
 
 runtime_info
 ------------

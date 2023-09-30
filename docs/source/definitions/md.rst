@@ -42,7 +42,6 @@ runtime_info
 
         **Type:** :obj:`int`
 
-
 outputs
 -------
 

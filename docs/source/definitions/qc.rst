@@ -62,7 +62,6 @@ runtime_info
 
         **Type:** :obj:`str`
 
-
 outputs
 -------
 
