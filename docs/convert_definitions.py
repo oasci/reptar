@@ -125,7 +125,6 @@ We further separate definitions into the following categories.
 
 .. toctree::
     :maxdepth: 1
-    
 
 """
 
@@ -147,19 +146,17 @@ for file_name, defs in yaml_files.items():
     with open(file_path, mode="w", encoding="utf-8") as f:
         f.write(header_string + "\n")
         f.write(file_name + "\n")
-        f.write(header_string + "\n\n")
+        f.write(header_string + "\n")
 
         for defs_cat_name, defs_dicts in defs.items():
             cat_len = int(len(defs_cat_name))
             cat_string = "-" * cat_len
 
-            f.write(defs_cat_name + "\n")
+            f.write("\n" + defs_cat_name + "\n")
             f.write(cat_string + "\n\n")
 
-            f.write(".. glossary::\n\n")
+            f.write(".. glossary::\n")
             for def_name, def_dict in defs_dicts.items():
-                f.write(" " * 4 + def_name + "\n")
+                f.write("\n" + " " * 4 + def_name + "\n")
                 f.write(" " * 8 + def_dict["description"] + "\n")
-                f.write(" " * 8 + "**Type:** :obj:`" + def_dict["type"] + "`" + "\n\n")
-
-            f.write("\n")
+                f.write(" " * 8 + "**Type:** :obj:`" + def_dict["type"] + "`" + "\n")
