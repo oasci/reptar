@@ -678,22 +678,6 @@ files = [
 test = ["pytest (>=6)"]
 
 [[package]]
-name = "exdir"
-version = "0.4.2"
-description = ""
-optional = false
-python-versions = "*"
-files = [
-    {file = "exdir-0.4.2-py3-none-any.whl", hash = "sha256:e22d9db6ec02e0c3b66272803189179e10abb64d27e04842241d6ac35dccdb6f"},
-    {file = "exdir-0.4.2.tar.gz", hash = "sha256:0bed9534576ccd2475f1e9e6b333bdff9fc90f093baef83a1bdb97c3f24db343"},
-]
-
-[package.dependencies]
-numpy = ">=1.20"
-"ruamel.yaml" = ">=0.16"
-six = ">=1.15"
-
-[[package]]
 name = "filelock"
 version = "3.12.4"
 description = "A platform independent file lock."
@@ -2873,4 +2857,4 @@ testing = ["big-O", "jaraco.functools", "jaraco.itertools", "more-itertools", "p
 [metadata]
 lock-version = "2.0"
 python-versions = "<3.13,>=3.9"
-content-hash = "361c4b945d9ed2eb11e8969130953f2bd34ba7a8b9195c127bedc52d3404aeb0"
+content-hash = "d3d38b4501f3fc9e6bed3d1d6cf257b9f1e6005129e8098aecb5554f66b926fa"
