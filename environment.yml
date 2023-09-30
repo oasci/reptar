@@ -1,0 +1,14 @@
+name: /home/alex/repos/reptar/.venv
+channels:
+  - conda-forge/label/libint_dev
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.11
+  - conda-libmamba-solver
+  - conda-lock
+  - poetry
+  - pre-commit
+  - psi4
+  - xtb
+
