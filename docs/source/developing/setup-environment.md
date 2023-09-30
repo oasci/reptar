@@ -80,6 +80,14 @@ make write-conda-lock
 
 <!-- conda list -e -p .venv/ | sed '1,3d ; s/=[a-z][A-Za-z0-9].*$//g ; s/^_[A-Za-z0-9].*$//g ; s/=/==/g' -->
 
+### `pre-commit`
+
+TODO:
+
+```bash
+make pre-commit-install
+```
+
 ### Poetry-tracked packages
 
 After installing all `conda` packages, we switch over to exclusively using `poetry`.
@@ -89,10 +97,15 @@ The following command uses `poetry` to install all packages specified in `pyproj
 make install
 ```
 
-### `pre-commit`
-
-TODO:
+To add dependencies using the `poetry add` command, you need to first activate the conda environment.
 
 ```bash
-make pre-commit-install
+conda activate ./.venv
+```
+
+Now you can run any `poetry` commands within the local `conda` environment.
+After making any changes to `pyproject.toml` you need to write a new `poetry.lock` file.
+
+```bash
+make lock-poetry
 ```

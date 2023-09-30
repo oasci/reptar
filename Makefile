@@ -37,10 +37,13 @@ write-conda-lock:
 
 
 #* Installation
-.PHONY: install
-install:
+.PHONY: lock-poetry
+lock-poetry:
 	$(CONDA) poetry lock --no-interaction
 	$(CONDA) poetry export --without-hashes > requirements.txt
+
+.PHONY: install
+install:
 	$(CONDA) poetry install --no-interaction
 	-$(CONDA) mypy --install-types --non-interactive ./reptar
 
