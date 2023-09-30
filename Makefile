@@ -83,7 +83,7 @@ formatting: codestyle
 #* Linting
 .PHONY: test
 test:
-	$(CONDA) pytest-cov -c pyproject.toml --cov=reptar --cov-report=xml tests/
+	$(CONDA) pytest -c pyproject.toml --cov=reptar --cov-report=xml tests/
 
 .PHONY: check-codestyle
 check-codestyle:
