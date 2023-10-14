@@ -48,7 +48,7 @@ jobs:
         run: make install
 
       - name: Build documentation
-        run: make documentation-multiversion
+        run: make docs-multiversion
 
       - name: Setup Pages
         uses: actions/configure-pages@v3
