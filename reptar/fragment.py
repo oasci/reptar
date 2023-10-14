@@ -24,6 +24,7 @@
 
 import numpy as np
 from scipy.spatial.distance import cdist
+
 from .logger import ReptarLogger
 
 log = ReptarLogger(__name__)

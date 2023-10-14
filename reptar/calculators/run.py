@@ -3,23 +3,25 @@
 """Run reptar calculations"""
 
 from __future__ import annotations
-from collections.abc import Iterable
+
 import argparse
-import time
 import datetime
 import os
+import time
+from collections.abc import Iterable
+
+from .. import File
+from ..logger import ReptarLogger, set_log_level
+from ..utils import _load_config, get_obj_from_string
 from . import Data, Driver
 from .utils import prep_xtb_input_lines
-from .. import File
-from ..utils import get_obj_from_string, _load_config
-from ..logger import ReptarLogger, set_log_level
 
 log = ReptarLogger(__name__)
 
 
 def process_worker_kwargs(
     tasks: Iterable[str],
-    config: dict[str, "Any"],
+    config: dict[str, Any],
     worker_name: str,
 ) -> dict:
     r"""Prepare worker keyword arguments as they are dependent on task and worker.
@@ -53,7 +55,6 @@ def process_worker_kwargs(
 
 
 def run_calcs(config: dict, ray_address: str = "") -> Data:
-
     log.info("Opening file")
     rfile_path = os.path.abspath(config["rfile"]["path"])
     rfile = File(rfile_path, mode="a")

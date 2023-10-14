@@ -27,7 +27,6 @@ identification
 
         **Type:** :obj:`str`
 
-
 system_info
 -----------
 
@@ -83,7 +82,6 @@ system_info
 
         **Type:** :obj:`float`
 
-
 runtime_info
 ------------
 
@@ -108,5 +106,3 @@ runtime_info
         TODO
 
         **Type:** :obj:`bool`
-
-

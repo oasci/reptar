@@ -21,16 +21,31 @@
 # SOFTWARE.
 
 from __future__ import annotations
+
 from typing import Any
-from collections.abc import Iterable
-import os
+
 import json
-import exdir
+import os
+from collections.abc import Iterable
+
 import numpy as np
 import yaml
-import zarr
-from .utils import combine_dicts, dict_iterator, get_md5, remove_nested_key
+
+try:
+    import exdir
+
+    HAS_EXDIR = True
+except ImportError:
+    HAS_EXDIR = False
+try:
+    import zarr
+
+    HAS_ZARR = True
+except ImportError:
+    HAS_ZARR = False
+
 from .logger import ReptarLogger
+from .utils import combine_dicts, dict_iterator, get_md5, remove_nested_key
 
 log = ReptarLogger(__name__)
 
@@ -105,7 +120,7 @@ class File:
             File_ = exdir.File(file_path, mode, allow_remove, plugins)
         elif f_ext == ".json":
             if exists:
-                with open(file_path, "r", encoding="utf-8") as f:
+                with open(file_path, encoding="utf-8") as f:
                     File_ = json.load(f)
             else:
                 File_ = {}
@@ -746,7 +761,7 @@ class File:
                 group_key = group_key[1:]
             yaml_path = os.path.join(self.fpath, group_key, "attributes.yaml")
 
-            with open(yaml_path, "r", encoding="utf-8") as f:
+            with open(yaml_path, encoding="utf-8") as f:
                 attrs = yaml.safe_load(f)
 
             del attrs[attr_key]
@@ -777,7 +792,7 @@ class File:
             json_path = os.path.join(self.fpath, group_key, ".zattrs")
             log.debug("Loading attribute file at %s", json_path)
 
-            with open(json_path, "r", encoding="utf-8") as f:
+            with open(json_path, encoding="utf-8") as f:
                 attrs = json.load(f)
 
             del attrs[attr_key]
@@ -828,7 +843,7 @@ class File:
         """
         self.put(dest_key, self.get(source_key), with_md5_update)
 
-    def create_group(self, key: str) -> "exdir.core.Group":
+    def create_group(self, key: str) -> exdir.core.Group:
         r"""Initialize/create a group in hierarchical files with the specified key.
         This can handle creating nested groups.
 

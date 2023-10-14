@@ -21,8 +21,8 @@
 # SOFTWARE.
 
 from ase import Atoms
-from ase.db import connect
 from ase.calculators.singlepoint import SinglePointCalculator
+from ase.db import connect
 
 
 def write_ase_db(db_path, Z, R, energy=None, forces=None):

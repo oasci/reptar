@@ -22,8 +22,8 @@
 
 # pylint: disable=line-too-long
 
-from .extractor import Extractor
 from ..logger import ReptarLogger
+from .extractor import Extractor
 
 log = ReptarLogger(__name__)
 

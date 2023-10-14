@@ -42,7 +42,6 @@ runtime_info
 
         **Type:** :obj:`int`
 
-
 outputs
 -------
 
@@ -72,5 +71,3 @@ outputs
         Atomic velocities in Angstrom/fs.
 
         **Type:** :obj:`float`
-
-

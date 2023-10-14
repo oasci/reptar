@@ -21,16 +21,19 @@
 # SOFTWARE.
 
 from __future__ import annotations
-from collections.abc import Iterable
+
 import os
 import subprocess
+from collections.abc import Iterable
 from tempfile import TemporaryDirectory
+
 import numpy as np
+
+from ..logger import ReptarLogger
+from ..utils import parse_xyz
+from ..writers.xyz import write_xyz
 from . import Data
 from .utils import initialize_worker_data
-from ..writers.xyz import write_xyz
-from ..utils import parse_xyz
-from ..logger import ReptarLogger
 
 log = ReptarLogger(__name__)
 
@@ -89,7 +92,7 @@ def xtb_python_worker(
         Calculation results from this worker
     """
     if not _HAS_XTB:
-        raise EnvironmentError("xtb-python not installed for this worker")
+        raise OSError("xtb-python not installed for this worker")
 
     implemented_tasks = ["E", "G"]
     for task in tasks:
@@ -135,7 +138,7 @@ def _do_xtb_task(
             e = float(comments[0].split()[1])
 
             r_conv_opt = False
-            with open(output_path, "r", encoding="utf-8") as f_out:
+            with open(output_path, encoding="utf-8") as f_out:
                 for line in reversed(list(f_out)):
                     if "*** GEOMETRY OPTIMIZATION CONVERGED AFTER" in line:
                         r_conv_opt = True

@@ -32,5 +32,3 @@ identification
         But this structure does not contain every atom from the original ``Group`` structure; it only contains the atoms from ``0`` and ``12`` ``entity_id``.
 
         **Type:** :obj:`numpy.ndarray`
-
-

@@ -24,16 +24,17 @@
 
 # pylint: skip-file
 
+import os
+import shutil
 import subprocess
 import sys
-import shutil
-import os
-import pytest
+
 import numpy as np
-from reptar import File
-from reptar.structure.scan import create_grid
+import pytest
 import qcelemental as qcel
 
+from reptar import File
+from reptar.structure.scan import create_grid
 
 sys.path.append("..")
 
@@ -46,7 +47,6 @@ os.makedirs(WRITING_DIR, exist_ok=True)
 
 
 def test_script_gfp_cro_geom_scan_gen():
-
     R = np.array(
         [
             [-2.59295103e00, -1.94121745e00, 8.36369574e-03],

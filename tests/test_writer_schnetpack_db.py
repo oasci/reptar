@@ -26,8 +26,10 @@
 
 import os
 import sys
-import pytest
+
 import numpy as np
+import pytest
+
 from reptar import File
 from reptar.writers import write_schnetpack_db
 

@@ -1,0 +1,102 @@
+
+
+@media print {
+
+    @page {
+        size: letter portrait;
+        margin: 0.5in 0.5in 0.5in 0.5in; /* Apply margin to the content area */
+    }
+
+    .content {
+        margin-left: 2rem;
+        height: auto;
+    }
+
+    .content .bd-article {
+        padding-top: 0;
+    }
+
+    .content .bd-article h1:first-of-type {
+        display: none;
+    }
+
+    .content .container {
+        min-width: 0% !important;
+    }
+
+    .content h1 {
+        margin-top: 1em;
+        margin-bottom: 1em;
+    }
+
+    .content table {
+        break-inside: avoid;
+    }
+
+    .content pre {
+        word-wrap: break-word;
+    }
+    
+    .content a.headerlink {
+        display: none;
+    }
+
+    .content  {
+        margin-bottom: 1.5rem;
+        margin-left: 0rem;
+    }
+
+    .content .section-nav {
+        border-left: 0px !important;
+        list-style-type: disc !important;
+        margin-left: 3em !important;
+    }
+
+    .content .section-nav a {
+        text-decoration: none !important;
+    }
+
+    .content .section-nav li {
+        display: list-item !important;
+    }
+
+    .content .section-nav .nav {
+        display: none;
+    }
+
+    .content .bd-footer-content {
+        display: none !important;
+    }
+    
+
+    div.h2, div.h3, div.h4 {
+        page-break-after: avoid;
+        page-break-inside: avoid;
+    }
+
+    div.pre, div.blockquote {
+        page-break-inside: avoid;
+    }
+
+    div.table {
+        page-break-before: auto;
+        page-break-inside: auto;
+        display: table;
+        position: relative;
+    }
+
+    div.admonition, div.sd-card, div.sd-card-body div.notranslate {
+        page-break-before: avoid;
+        page-break-inside: auto;
+    }
+
+    div.sd-card {
+        page-break-inside: auto;
+    }
+
+    div.sd-card-body {
+        page-break-before: avoid;
+        page-break-inside: auto;
+    }
+    
+}

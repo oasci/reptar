@@ -62,7 +62,6 @@ runtime_info
 
         **Type:** :obj:`str`
 
-
 outputs
 -------
 
@@ -172,5 +171,3 @@ outputs
         TODO
 
         **Type:** :obj:`float`
-
-

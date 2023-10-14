@@ -21,15 +21,19 @@
 # SOFTWARE.
 
 from __future__ import annotations
-import os
+
 from typing import Any
+
+import os
 from collections.abc import Iterable
 from tempfile import TemporaryDirectory
+
 import numpy as np
-from . import Data
-from .utils import initialize_worker_data
+
 from ..logger import ReptarLogger
 from ..parsers.gaussian_cube import parse_cube
+from . import Data
+from .utils import initialize_worker_data
 
 log = ReptarLogger(__name__)
 

@@ -24,18 +24,18 @@
 
 # pylint: skip-file
 
-import sys
-import shutil
 import os
-import pytest
+import shutil
+import sys
+
 import numpy as np
-from reptar import File
-from reptar.calculators import Data
-from reptar.calculators import Driver
-from reptar.calculators.psi4_workers import psi4_worker
-from reptar.calculators.cube import initialize_grid_arrays
+import pytest
 import qcelemental as qcel
 
+from reptar import File
+from reptar.calculators import Data, Driver
+from reptar.calculators.cube import initialize_grid_arrays
+from reptar.calculators.psi4_workers import psi4_worker
 
 sys.path.append("..")
 from .paths import get_140h2o_samples_path

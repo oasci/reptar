@@ -23,10 +23,12 @@
 # pylint: disable=line-too-long
 
 from math import sqrt
+
 import numpy as np
 import qcelemental as qcel
-from .extractor import Extractor
+
 from ..logger import ReptarLogger
+from .extractor import Extractor
 
 log = ReptarLogger(__name__)
 

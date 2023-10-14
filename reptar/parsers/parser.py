@@ -110,7 +110,7 @@ class Parser(ABC):
 
     def extract_data_out(self):
         r"""Extract data from ``out_path`` using all extractors"""
-        with open(self.out_path, mode="r", encoding="utf-8") as f:
+        with open(self.out_path, encoding="utf-8") as f:
             for line in f:
                 for extractor in self.extractors:
                     for trigger in extractor.triggers:

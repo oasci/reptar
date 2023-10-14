@@ -20,8 +20,8 @@
 # OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 # SOFTWARE.
 
-from .parser import Parser
 from ..extractors import ExtractorORCA
+from .parser import Parser
 
 
 class ParserORCA(Parser):

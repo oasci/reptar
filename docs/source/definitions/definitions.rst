@@ -15,7 +15,6 @@ We further separate definitions into the following categories.
 
 .. toctree::
     :maxdepth: 1
-    
 
     base
     md

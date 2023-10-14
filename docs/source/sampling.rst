@@ -445,4 +445,3 @@ We can use the :func:`~reptar.descriptors.com_distance_sum` descriptor and the :
         center_structures=center_structures
     )
     sampler.sample(sample_comp_ids, quantity)
-

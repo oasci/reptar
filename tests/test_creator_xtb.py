@@ -24,12 +24,14 @@
 
 # pylint: skip-file
 
-import sys
 import os
-import pytest
+import sys
+
 import numpy as np
+import pytest
+
 from reptar import Creator, File
-from reptar.utils import gen_entity_ids, gen_comp_ids
+from reptar.utils import gen_comp_ids, gen_entity_ids
 
 sys.path.append("..")
 from .paths import (

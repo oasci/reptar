@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 import numpy as np
+
 from ..calculators.cube import get_grid_points
 
 
@@ -71,7 +72,7 @@ def parse_cube(file_path):
     :obj:`numpy.ndarray`
         Property values at the same Cartesian coordinates.
     """
-    with open(file_path, "r", encoding="utf-8") as f_cube:
+    with open(file_path, encoding="utf-8") as f_cube:
         f_cube.readline()
         f_cube.readline()
         n_atoms, cube_R = _get_cube_coords(f_cube)  # pylint: disable=invalid-name

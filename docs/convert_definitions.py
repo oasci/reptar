@@ -26,10 +26,12 @@
 
 import os
 import shutil
+
 import yaml
 
 # Ensures we execute from file directory (for relative paths).
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
+
 
 # Collect paths of all YAML files
 def get_files(path, expression, recursive=True):
@@ -58,7 +60,7 @@ def get_files(path, expression, recursive=True):
         path += "/"
     if recursive:
         all_files = []
-        for (dirpath, _, filenames) in os.walk(path):
+        for dirpath, _, filenames in os.walk(path):
             index = 0
             while index < len(filenames):
                 if dirpath[-1] != "/":
@@ -90,7 +92,7 @@ yaml_files = {}
 for file_path in yaml_file_paths:
     file_name = os.path.splitext(os.path.basename(file_path))[0]
 
-    with open(file_path, "r", encoding="utf-8") as f:
+    with open(file_path, encoding="utf-8") as f:
         yaml_files[file_name] = yaml.safe_load(f)
 
 
@@ -123,7 +125,6 @@ We further separate definitions into the following categories.
 
 .. toctree::
     :maxdepth: 1
-    
 
 """
 
@@ -145,19 +146,17 @@ for file_name, defs in yaml_files.items():
     with open(file_path, mode="w", encoding="utf-8") as f:
         f.write(header_string + "\n")
         f.write(file_name + "\n")
-        f.write(header_string + "\n\n")
+        f.write(header_string + "\n")
 
         for defs_cat_name, defs_dicts in defs.items():
             cat_len = int(len(defs_cat_name))
             cat_string = "-" * cat_len
 
-            f.write(defs_cat_name + "\n")
+            f.write("\n" + defs_cat_name + "\n")
             f.write(cat_string + "\n\n")
 
-            f.write(".. glossary::\n\n")
+            f.write(".. glossary::\n")
             for def_name, def_dict in defs_dicts.items():
-                f.write(" " * 4 + def_name + "\n")
+                f.write("\n" + " " * 4 + def_name + "\n")
                 f.write(" " * 8 + def_dict["description"] + "\n")
-                f.write(" " * 8 + "**Type:** :obj:`" + def_dict["type"] + "`" + "\n\n")
-
-            f.write("\n")
+                f.write(" " * 8 + "**Type:** :obj:`" + def_dict["type"] + "`" + "\n")

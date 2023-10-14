@@ -70,12 +70,6 @@ system_info:
     storage:
       - dataset
     type: int
-  geometry:
-    description: >+
-      Numerical coordinates specifying the three-dimensional positions of each atom.
-    storage:
-      - dataset
-    type: float
   mult:
     description: >+
       System multiplicity.

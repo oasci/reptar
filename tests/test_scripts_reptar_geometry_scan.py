@@ -24,15 +24,16 @@
 
 # pylint: skip-file
 
+import os
+import shutil
 import subprocess
 import sys
-import shutil
-import os
-import pytest
+
 import numpy as np
-from reptar import File
+import pytest
 import qcelemental as qcel
 
+from reptar import File
 
 sys.path.append("..")
 

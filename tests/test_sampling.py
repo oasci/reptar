@@ -24,12 +24,14 @@
 
 # pylint: skip-file
 
-import sys
+import itertools
 import os
 import shutil
-import itertools
+import sys
+
 import numpy as np
 import pytest
+
 from reptar import Creator, Sampler
 from reptar.sampling import r_from_entities
 from reptar.utils import exists_in_array

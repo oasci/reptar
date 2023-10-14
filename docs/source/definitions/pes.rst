@@ -31,5 +31,3 @@ outputs
         Normalized, mass-weighted normal modes, q.
 
         **Type:** :obj:`float`
-
-

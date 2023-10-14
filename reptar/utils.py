@@ -21,17 +21,19 @@
 # SOFTWARE.
 
 import collections
-from functools import reduce
-import operator
+import hashlib
 import importlib
 import itertools
-import hashlib
+import operator
 import os
-import yaml
+from functools import reduce
+
 import numpy as np
+import yaml
 from qcelemental import periodictable as ptable
-from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 from qcelemental.exceptions import ValidationError
+from qcelemental.molparse.from_arrays import validate_and_fill_geometry
+
 from .descriptors import get_center_of_mass
 from .logger import ReptarLogger
 
@@ -63,7 +65,7 @@ def get_files(path, expression, recursive=True):
         path += "/"
     if recursive:
         all_files = []
-        for (dirpath, _, filenames) in os.walk(path):
+        for dirpath, _, filenames in os.walk(path):
             index = 0
             while index < len(filenames):
                 if dirpath[-1] != "/":
@@ -138,7 +140,7 @@ def parse_xyz(xyz_path):
         :obj:`float` from string file.
     """
     Z, comments, data = [], [], []
-    with open(xyz_path, "r", encoding="utf-8") as f:
+    with open(xyz_path, encoding="utf-8") as f:
         for _, line in enumerate(f):
             line = line.strip()
             if not line:
@@ -186,20 +188,20 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
     :obj:`str`
         MD5 hash of a group.
     """
-    md5_hash = hashlib.md5()
+    md5_hash = hashlib.md5(usedforsecurity=False)
     # TODO: Figure out why different formats have different MD5s.
 
     if only_structures:
         try:
             Z = rfile.get(f"{group_key}/atomic_numbers")
             Z = Z.ravel()
-            md5_hash.update(hashlib.md5(Z).digest())
+            md5_hash.update(hashlib.md5(Z, usedforsecurity=False).digest())
         except Exception:
             pass
         try:
             R = rfile.get(f"{group_key}/geometry")
             R = R.ravel()
-            md5_hash.update(hashlib.md5(R).digest())
+            md5_hash.update(hashlib.md5(R, usedforsecurity=False).digest())
         except Exception:
             pass
     else:
@@ -210,7 +212,7 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
             d = rfile.get(f"{group_key}/{key}")
             if isinstance(d, np.ndarray):
                 d = d.ravel()
-                md5_hash.update(hashlib.md5(d).digest())
+                md5_hash.update(hashlib.md5(d, usedforsecurity=False).digest())
             else:
                 if not only_arrays:
                     md5_hash.update(repr(d).encode())
@@ -626,6 +628,6 @@ def common_elements(arr1: np.ndarray, arr2: np.ndarray) -> np.ndarray:
 
 def _load_config(config_path):
     log.info("Loading config.yaml")
-    with open(config_path, "r", encoding="utf-8") as stream:
+    with open(config_path, encoding="utf-8") as stream:
         config = yaml.safe_load(stream)
     return config

@@ -25,7 +25,7 @@
 # pylint: skip-file
 
 import numpy as np
-import scipy as sp
+import scipy
 
 
 def _pdist(r):
@@ -46,6 +46,6 @@ def _pdist(r):
     r = r.reshape(-1, 3)
     n_atoms = r.shape[0]
 
-    pdist = sp.spatial.distance.pdist(r, "euclidean")
+    pdist = scipy.spatial.distance.pdist(r, "euclidean")
     tril_idxs = np.tril_indices(n_atoms, k=-1)
-    return sp.spatial.distance.squareform(pdist, checks=False)[tril_idxs]
+    return scipy.spatial.distance.squareform(pdist, checks=False)[tril_idxs]

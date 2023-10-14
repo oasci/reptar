@@ -22,11 +22,13 @@
 
 import argparse
 import os
+
 import numpy as np
-from .writing_utils import string_xyz_arrays
+
 from .. import File
-from ..utils import parse_xyz, atoms_by_number
 from ..logger import ReptarLogger
+from ..utils import atoms_by_number, parse_xyz
+from .writing_utils import string_xyz_arrays
 
 log = ReptarLogger(__name__)
 
@@ -171,7 +173,6 @@ def run_write_xyz(group_path, group_key, comment_key, save_dir):
 
 
 def main_write_xyz():
-
     parser = argparse.ArgumentParser(
         description="Write XYZ file from a reptar supported file type."
     )

@@ -21,6 +21,7 @@
 # SOFTWARE.
 
 from ase.io.trajectory import Trajectory
+
 from ..extractors import ExtractorASE
 from .parser import Parser
 

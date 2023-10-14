@@ -21,7 +21,9 @@
 # SOFTWARE.
 
 import os
+
 import numpy as np
+
 from ..utils import atoms_by_element
 
 

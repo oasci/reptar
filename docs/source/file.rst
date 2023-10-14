@@ -74,4 +74,3 @@ File conversion
 A group from any file type can be directly converted to a dictionary using :meth:`~reptar.File.as_dict`.
 
 Dictionaries and can also be used to populate a :class:`~reptar.File` object with any specified file type.
-

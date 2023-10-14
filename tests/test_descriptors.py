@@ -24,12 +24,13 @@
 
 # pylint: skip-file
 
-import sys
 import os
-import pytest
+import sys
+
 import numpy as np
-from reptar import File
-from reptar import descriptors
+import pytest
+
+from reptar import File, descriptors
 
 sys.path.append("..")
 from .paths import get_140h2o_samples_path

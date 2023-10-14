@@ -21,9 +21,10 @@
 # SOFTWARE.
 
 import numpy as np
+
 from ..extractors import ExtractorCREST
-from .parser import Parser
 from ..utils import atoms_by_number, parse_xyz
+from .parser import Parser
 
 
 class ParserCREST(Parser):
@@ -92,7 +93,7 @@ class ParserCREST(Parser):
         Z, comments, R = parse_xyz(self.xyz_path)
 
         # pylint: disable-next=R0801
-        if len(set(tuple(i) for i in Z)) == 1:
+        if len({tuple(i) for i in Z}) == 1:
             Z = Z[0]
         else:
             raise ValueError("Atomic numbers are not consistent.")

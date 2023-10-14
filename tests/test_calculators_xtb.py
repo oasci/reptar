@@ -24,17 +24,17 @@
 
 # pylint: skip-file
 
-import sys
-import shutil
 import os
-import pytest
-import numpy as np
-from reptar import File
-from reptar.calculators import Data
-from reptar.calculators import Driver
-from reptar.calculators.xtb_workers import xtb_python_worker, xtb_worker
-from reptar.calculators.utils import prep_xtb_input_lines
+import shutil
+import sys
 
+import numpy as np
+import pytest
+
+from reptar import File
+from reptar.calculators import Data, Driver
+from reptar.calculators.utils import prep_xtb_input_lines
+from reptar.calculators.xtb_workers import xtb_python_worker, xtb_worker
 
 sys.path.append("..")
 from .paths import get_140h2o_samples_path

@@ -24,14 +24,15 @@
 
 # pylint: skip-file
 
-import sys
 import os
-import pytest
+import sys
+
 import numpy as np
+import pytest
 import qcelemental as qcel
+
 from reptar import File
 from reptar.calculators.cube import initialize_grid_arrays
-
 
 sys.path.append("..")
 from .paths import get_140h2o_samples_path

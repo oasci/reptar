@@ -30,28 +30,35 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install sphinx furo sphinx-multiversion sphinx_design sphinxcontrib-mermaid sphinxemoji sphinx-autoapi sphinx-autodoc-typehints
-          python -m pip install .
+
+      - name: Install miniconda
+        uses: conda-incubator/setup-miniconda@v2
+        with:
+          miniconda-version: "latest"
+          auto-update-conda: true
+          python-version: "3.11"
+      
+      - name: Initialize conda environment
+        run: make conda-setup
+      
+      - name: Poetry install
+        run: make install
+
       - name: Build documentation
-        run: |
-          sphinx-multiversion -nT ./docs/source ./docs/html
-          touch ./docs/html/.nojekyll
-          echo "<head>" > ./docs/html/index.html
-          echo "  <meta http-equiv='refresh' content='0; URL=https://reptar.oasci.org/main/index.html'>" >> ./docs/html/index.html
-          echo "</head>" >> ./docs/html/index.html
+        run: make documentation-multiversion
+
       - name: Setup Pages
-        uses: actions/configure-pages@v2
+        uses: actions/configure-pages@v3
+
       - name: Upload artifact
-        uses: actions/upload-pages-artifact@v1
+        uses: actions/upload-pages-artifact@v2
         with:
           # Upload entire repository
           path: './docs/html/'
+
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v1
+        uses: actions/deploy-pages@v2

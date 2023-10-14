@@ -21,14 +21,18 @@
 # SOFTWARE.
 
 from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
+
 import os
-from typing import Any, TYPE_CHECKING
 from collections.abc import Iterable
+
 import numpy as np
 import qcelemental as qcel
-from .cube import get_R_span, get_max_grid_points
-from ..utils import common_elements
+
 from ..logger import ReptarLogger
+from ..utils import common_elements
+from .cube import get_max_grid_points, get_R_span
 
 log = ReptarLogger(__name__)
 
