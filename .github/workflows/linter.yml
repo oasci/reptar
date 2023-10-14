@@ -25,12 +25,10 @@ jobs:
           python-version: '3.11'
       
       - name: Install poetry
-        run: make poetry-download
+        run: conda-setup
 
       - name: Install dependencies
-        run: |
-          poetry config virtualenvs.in-project true
-          poetry install
+        run: make install
 
       - name: Style checks
         run: make check-codestyle
