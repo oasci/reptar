@@ -11,8 +11,7 @@ CONDA := conda run -p $(CONDA_PATH)
 .PHONY: conda-setup
 conda-setup:
 	conda create -y -p $(CONDA_PATH) python=$(PYTHON_VERSION)
-	conda install -y conda-lock conda-libmamba-solver -p $(CONDA_PATH)
-	$(CONDA) conda config --set solver libmamba
+	conda install -y conda-lock -p $(CONDA_PATH)
 	conda install -y -c conda-forge poetry=1.6.1 pre-commit -p $(CONDA_PATH)
 
 # The find command is because of this:
@@ -36,7 +35,7 @@ from-conda-lock:
 
 .PHONY: write-conda-lock
 write-conda-lock:
-	$(CONDA) conda env export --from-history | grep -v "^prefix" > environment.yml
+	$(CONDA) conda env export --from-history | grep -v "^prefix" | grep -v "^name" > environment.yml
 	$(CONDA) conda-lock -f environment.yml -p linux-64 -p osx-64
 
 
@@ -144,6 +143,10 @@ build-remove:
 cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove psi-remove coverage-remove
 
 
+#* Build
+.PHONY: build
+build:
+	$(CONDA) poetry build
 
 #* Documentation
 .PHONY: docs

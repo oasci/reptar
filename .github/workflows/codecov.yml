@@ -23,6 +23,7 @@ jobs:
         with:
           miniconda-version: "latest"
           auto-update-conda: true
+          # Set to the same as `PYTHON_VERSION` in `Makefile`
           python-version: "3.11"
       
       - name: Initialize conda environment
@@ -35,7 +36,6 @@ jobs:
         run: make install
       
       - name: Run tests and coverage
-        shell: bash -el {0}
         run: make test
       
       - name: Upload to Codecov

@@ -18,6 +18,7 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: System :: Archiving",
 ]
+# Change get_config() in _version.py to change any options like style
 
 
 [tool.poetry.scripts]
@@ -288,6 +289,3 @@ show_missing = true
 path = ".venv/"
 create = false
 in-project = false
-
-[tool.versioneer]
-style = "pep440"
