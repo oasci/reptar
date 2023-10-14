@@ -4,9 +4,9 @@ reptar
 
 Compute, store, and analyze manuscript-scale data for computational chemistry and biology
 
-.. image:: https://github.com/oasci/reptar/actions/workflows/python-package.yml/badge.svg
-    :target: https://github.com/oasci/reptar/actions/workflows/python-package.yml
-    :alt: Python package build
+.. image:: https://github.com/oasci/reptar/actions/workflows/python-tests.yml/badge.svg
+    :target: https://github.com/oasci/reptar/actions/workflows/python-tests.yml
+    :alt: Python tests
 
 .. image:: https://img.shields.io/pypi/pyversions/reptar
     :alt: PyPI - Python Version

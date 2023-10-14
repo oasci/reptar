@@ -5,8 +5,8 @@
 <h4 align="center" style="padding-bottom: 0.5em;"><a href="https://reptar.oasci.org">Documentation</a></h4>
 
 <p align="center">
-    <a href="https://github.com/oasci/reptar/actions/workflows/python-package.yml">
-        <img src="https://github.com/oasci/reptar/actions/workflows/python-package.yml/badge.svg" alt="Build Status ">
+    <a href="https://github.com/oasci/reptar/actions/workflows/python-tests.yml">
+        <img src="https://github.com/oasci/reptar/actions/workflows/python-tests.yml/badge.svg" alt="Build Status ">
     </a>
     <img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/reptar">
     <a href="https://codecov.io/gh/oasci/reptar">
