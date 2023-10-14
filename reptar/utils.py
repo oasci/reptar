@@ -188,20 +188,20 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
     :obj:`str`
         MD5 hash of a group.
     """
-    md5_hash = hashlib.md5()
+    md5_hash = hashlib.md5(usedforsecurity=False)
     # TODO: Figure out why different formats have different MD5s.
 
     if only_structures:
         try:
             Z = rfile.get(f"{group_key}/atomic_numbers")
             Z = Z.ravel()
-            md5_hash.update(hashlib.md5(Z).digest())
+            md5_hash.update(hashlib.md5(Z, usedforsecurity=False).digest())
         except Exception:
             pass
         try:
             R = rfile.get(f"{group_key}/geometry")
             R = R.ravel()
-            md5_hash.update(hashlib.md5(R).digest())
+            md5_hash.update(hashlib.md5(R, usedforsecurity=False).digest())
         except Exception:
             pass
     else:
@@ -212,7 +212,7 @@ def get_md5(rfile, group_key, only_arrays=False, only_structures=False):
             d = rfile.get(f"{group_key}/{key}")
             if isinstance(d, np.ndarray):
                 d = d.ravel()
-                md5_hash.update(hashlib.md5(d).digest())
+                md5_hash.update(hashlib.md5(d, usedforsecurity=False).digest())
             else:
                 if not only_arrays:
                     md5_hash.update(repr(d).encode())

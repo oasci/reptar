@@ -167,7 +167,7 @@ def initialize_worker_data(
     if "G" in tasks:
         data.G = np.full(R.shape, np.nan, dtype=np.float64)
     if "opt" in tasks:
-        data.conv_opt = np.full(R.shape[0], False, dtype=np.bool8)
+        data.conv_opt = np.full(R.shape[0], False, dtype=np.bool_)
         data.R_opt = np.full(R.shape, np.nan, dtype=np.float64)
     if "cube" in tasks:
         data.cube_R, data.cube_V = initialize_grid_arrays(

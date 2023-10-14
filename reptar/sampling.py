@@ -256,7 +256,7 @@ def sampler_worker(
         G = None
 
     # True or False to keep these selections based on uniqueness or criteria.
-    keep_idxs = np.empty(n_selections, dtype=np.bool8)
+    keep_idxs = np.empty(n_selections, dtype=np.bool_)
 
     i_sel = 0
     for i_sel, selection in enumerate(selections):
