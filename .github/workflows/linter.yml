@@ -25,7 +25,7 @@ jobs:
           python-version: '3.11'
       
       - name: Install poetry
-        run: conda-setup
+        run: make conda-setup
 
       - name: Install dependencies
         run: make install
