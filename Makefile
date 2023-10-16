@@ -1,7 +1,6 @@
 #* Variables
 SHELL := /usr/bin/env bash
 PYTHON_VERSION := 3.11
-PYTHONPATH := `pwd`
 DOCS_URL := https://reptar.oasci.org
 REPO_PATH := $(shell git rev-parse --show-toplevel)
 CONDA_PATH := $(REPO_PATH)/.venv
@@ -43,7 +42,7 @@ write-conda-lock:
 #* Installation
 # Reads `pyproject.toml`, solves environment, then writes lock file.
 .PHONY: poetry-lock
-lock-poetry:
+poetry-lock:
 	$(CONDA) poetry lock --no-interaction
 	$(CONDA) poetry export --without-hashes > requirements.txt
 
