@@ -92,6 +92,14 @@ format-jinja = """
     {%- endif -%}
 """
 
+[tool.poetry-dynamic-versioning.substitution]
+patterns = [
+    "(^__version__\\s*(?::.*?)?=\\s*['\"])[^'\"]*(['\"])",
+]
+folders = [
+  { path = "reptar" }
+]
+
 [build-system]
 requires = [
     "poetry-core>=1.0.0",
