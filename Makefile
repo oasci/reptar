@@ -11,7 +11,7 @@ CONDA := conda run -p $(CONDA_PATH)
 conda-setup:
 	conda create -y -p $(CONDA_PATH) python=$(PYTHON_VERSION)
 	conda install -y conda-lock -p $(CONDA_PATH)
-	conda install -y -c conda-forge poetry=1.6.1 pre-commit -p $(CONDA_PATH)
+	conda install -y -c conda-forge poetry pre-commit poetry-dynamic-versioning -p $(CONDA_PATH)
 
 # The find command is because of this:
 # https://github.com/python-poetry/poetry/issues/6408#issuecomment-1513131650
