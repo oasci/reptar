@@ -27,7 +27,7 @@ import ray
 from qcelemental.exceptions import ValidationError
 from qcelemental.molparse.from_arrays import validate_and_fill_geometry
 
-from . import _version
+from . import __version__
 from .logger import ReptarLogger
 from .periodic import Cell
 from .saver import Saver
@@ -36,7 +36,7 @@ from .utils import chunk_iterable, exists_in_array, gen_combs
 
 log = ReptarLogger(__name__)
 
-reptar_version = _version.get_versions()["version"]
+reptar_version = __version__
 
 
 def entity_mask_gen(entity_ids, entities):

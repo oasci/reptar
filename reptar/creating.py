@@ -29,7 +29,7 @@ import yaml
 from ase.io.ulm import InvalidULMFileError
 from pkg_resources import resource_stream
 
-from . import _version
+from . import __version__
 from .logger import ReptarLogger
 
 # pylint: disable=no-name-in-module
@@ -37,7 +37,6 @@ from .parsers import ParserASE, ParserCREST, ParserORCA, ParserXTB
 from .reptar_file import File
 
 log = ReptarLogger(__name__)
-__version__ = _version.get_versions()["version"]
 
 defs_reserved = ["base", "md", "molprop", "pes", "qc", "sampl", "solv", "xtb"]
 
