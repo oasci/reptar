@@ -1,12 +1,14 @@
+name: reptar-dev
 channels:
   - conda-forge/label/libint_dev
-  - conda-forge
   - defaults
+  - conda-forge
 dependencies:
   - python=3.11
   - conda-lock
-  - poetry-dynamic-versioning
-  - pre-commit
   - poetry
+  - pre-commit
+  - tomli
+  - tomli-w
   - psi4
   - xtb

@@ -1,9 +1,9 @@
 [tool.poetry]
 name = "reptar"
-version = "0"
+version = "0.0.0"
 description = "Compute, store, and analyze manuscript-scale data for computational chemistry and biology"
 authors = [
-  "Alex M. Maldonado <alex@oasci.org>"
+    "OASCI <us@oasci.org>",
 ]
 license = "MIT"
 readme = "README.md"
@@ -18,15 +18,12 @@ classifiers = [
     "Topic :: Scientific/Engineering :: Chemistry",
     "Topic :: System :: Archiving",
 ]
-# Change get_config() in _version.py to change any options like style
-
 
 [tool.poetry.scripts]
 reptar-calc = "reptar.calculators.run:main"
 reptar-geometry-scan = "reptar.structure.scan:main"
 reptar-xyz-to-file = "reptar.writers.xyz:main_xyz_to_file"
 reptar-write-xyz = "reptar.writers.xyz:main_write_xyz"
-
 
 [tool.poetry.dependencies]
 python = "<3.13,>=3.9"
@@ -36,8 +33,12 @@ scipy = "^1.11.3"
 cclib = "^1.8"
 qcelemental = "^0.26.0"
 ase = "^3.22.1"
-ray = {extras = ["data"], version = "^2.7.0"}
 
+[tool.poetry.dependencies.ray]
+extras = [
+    "data",
+]
+version = "^2.7.0"
 
 [tool.poetry.group.dev.dependencies]
 poetry = "^1.6.1"
@@ -53,7 +54,6 @@ safety = "^2.3.5"
 exdir = "^0.5.0.1"
 zarr = "^2.16.1"
 
-
 [tool.poetry.group.test.dependencies]
 pytest = "^7.4.2"
 pytest-cov = "^4.1.0"
@@ -62,7 +62,6 @@ pytest-html = "^4.0.1"
 colorama = "^0.4.6"
 pytest-order = "^1.1.0"
 pytest-dependency = "^0.5.1"
-
 
 [tool.poetry.group.docs.dependencies]
 sphinx-multiversion = "^0.2.4"
@@ -80,83 +79,70 @@ sphinx-togglebutton = "^0.3.2"
 sphinxcontrib-bibtex = "^2.6.1"
 sphinx-inline-tabs = "^2023.4.21"
 
-
 [tool.poetry-dynamic-versioning]
 enable = true
 vcs = "git"
-format-jinja = """
-    {%- if distance == 0 -%}
-        {{ serialize_pep440(base) }}
-    {%- else -%}
-        {{ serialize_pep440(base, post=distance) }}
-    {%- endif -%}
-"""
+format-jinja = "    {%- if distance == 0 -%}\n        {{ serialize_pep440(base) }}\n    {%- else -%}\n        {{ serialize_pep440(base, post=distance) }}\n    {%- endif -%}\n"
 
 [tool.poetry-dynamic-versioning.substitution]
 patterns = [
     "(^__version__\\s*(?::.*?)?=\\s*['\"])[^'\"]*(['\"])",
 ]
 folders = [
-  { path = "reptar" }
+    { path = "reptar" },
 ]
-
-[build-system]
-requires = [
-    "poetry-core>=1.0.0",
-    "poetry-dynamic-versioning>=1.0.0,<2.0.0"
-]
-build-backend = "poetry_dynamic_versioning.backend"
-
 
 [tool.poetry-version-plugin]
 source = "versioneer"
 
-
 [tool.pylint.messages_control]
-# https://pylint.readthedocs.io/en/latest/
 good-names = [
-  "i",
-  "j",
-  "k",
-  "e",
-  "_",
-  "Z",
-  "z",
-  "R",
-  "r",
-  "E",
-  "e",
-  "G",
-  "g",
-  "F",
-  "f",
-  "n",
-  "Q",
-  "q",
-  "d",
-  "v",
-  "ex",
-  "Run",
-  "db",
-  "Z_source",
-  "R_source",
-  "E_source",
-  "G_source",
-  "Z_sample",
-  "R_sample",
-  "E_sample",
-  "G_sample",
-  "R_selection",
-  "E_selection",
-  "G_selection",
-  "R_source_idxs",
-  "R_selection_idx",
-  "n_Z",
-  "n_R",
-  "R_masses",
-  "File_"
+    "i",
+    "j",
+    "k",
+    "e",
+    "_",
+    "Z",
+    "z",
+    "R",
+    "r",
+    "E",
+    "e",
+    "G",
+    "g",
+    "F",
+    "f",
+    "n",
+    "Q",
+    "q",
+    "d",
+    "v",
+    "ex",
+    "Run",
+    "db",
+    "Z_source",
+    "R_source",
+    "E_source",
+    "G_source",
+    "Z_sample",
+    "R_sample",
+    "E_sample",
+    "G_sample",
+    "R_selection",
+    "E_selection",
+    "G_selection",
+    "R_source_idxs",
+    "R_selection_idx",
+    "n_Z",
+    "n_R",
+    "R_masses",
+    "File_",
 ]
-ignore = ["CVS", "_version.py", "conf.py"]
+ignore = [
+    "CVS",
+    "_version.py",
+    "conf.py",
+]
 jobs = 0
 py-version = 3.9
 argument-naming-style = "snake_case"
@@ -166,92 +152,85 @@ class-naming-style = "PascalCase"
 const-naming-style = "UPPER_CASE"
 function-naming-style = "snake_case"
 disable = [
-  "raw-checker-failed",
-  "bad-inline-option",
-  "locally-disabled",
-  "file-ignored",
-  "suppressed-message",
-  "useless-suppression",
-  "deprecated-pragma",
-  "use-symbolic-message-instead",
-  "too-many-arguments",
-  "too-many-public-methods",
-  "missing-module-docstring",
-  "missing-function-docstring",
-  "too-many-lines",
-  "fixme",
-  "too-many-instance-attributes",
-  "too-few-public-methods",
-  "too-many-locals",
-  "attribute-defined-outside-init",
-  "broad-except",
-  "import-error"
+    "raw-checker-failed",
+    "bad-inline-option",
+    "locally-disabled",
+    "file-ignored",
+    "suppressed-message",
+    "useless-suppression",
+    "deprecated-pragma",
+    "use-symbolic-message-instead",
+    "too-many-arguments",
+    "too-many-public-methods",
+    "missing-module-docstring",
+    "missing-function-docstring",
+    "too-many-lines",
+    "fixme",
+    "too-many-instance-attributes",
+    "too-few-public-methods",
+    "too-many-locals",
+    "attribute-defined-outside-init",
+    "broad-except",
+    "import-error",
 ]
 
 [tool.black]
-# https://github.com/psf/black
-target-version = ["py311"]
+target-version = [
+    "py311",
+]
 line-length = 88
 color = true
-
-exclude = '''
-/(
-    \.git
-    | \.hg
-    | \.mypy_cache
-    | \.tox
-    | \.venv
-    | _build
-    | buck-out
-    | build
-    | dist
-    | env
-    | venv
-)/
-'''
-
+exclude = "/(\n    \\.git\n    | \\.hg\n    | \\.mypy_cache\n    | \\.tox\n    | \\.venv\n    | _build\n    | buck-out\n    | build\n    | dist\n    | env\n    | venv\n)/\n"
 
 [tool.isort]
-# https://github.com/timothycrosley/isort/
 py_version = 311
 line_length = 88
-
-known_typing = ["typing", "types", "typing_extensions", "mypy", "mypy_extensions"]
-sections = ["FUTURE", "TYPING", "STDLIB", "THIRDPARTY", "FIRSTPARTY", "LOCALFOLDER"]
+known_typing = [
+    "typing",
+    "types",
+    "typing_extensions",
+    "mypy",
+    "mypy_extensions",
+]
+sections = [
+    "FUTURE",
+    "TYPING",
+    "STDLIB",
+    "THIRDPARTY",
+    "FIRSTPARTY",
+    "LOCALFOLDER",
+]
 profile = "black"
 include_trailing_comma = true
 multi_line_output = 3
 indent = 4
 color_output = true
 skip = [
-  '.bzr',
-  '.direnv',
-  '.eggs',
-  '.git',
-  '.hg',
-  '.mypy_cache',
-  '.nox',
-  '.pants.d',
-  '.svn',
-  '.tox',
-  '.venv',
-  '__pypackages__',
-  '_build',
-  'buck-out',
-  'build',
-  'dist',
-  'node_modules',
-  'venv',
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
 ]
 
-
 [tool.mypy]
-# https://mypy.readthedocs.io/en/latest/config_file.html#using-a-pyproject-toml-file
 python_version = 3.11
 pretty = true
 show_traceback = true
 color_output = true
-
 allow_redefinition = false
 check_untyped_defs = true
 disallow_any_generics = true
@@ -271,42 +250,148 @@ warn_unreachable = true
 warn_unused_configs = true
 warn_unused_ignores = true
 
-
 [tool.pytest.ini_options]
-# https://docs.pytest.org/en/6.2.x/customize.html#pyproject-toml
-# Directories that are not visited by pytest collector:
-norecursedirs =["reptar", "hooks", "*.egg", ".eggs", "dist", "build", "docs", ".tox", ".git", "__pycache__"]
-doctest_optionflags = ["NUMBER", "NORMALIZE_WHITESPACE", "IGNORE_EXCEPTION_DETAIL"]
-
-# Extra options:
+norecursedirs = [
+    "reptar",
+    "hooks",
+    "*.egg",
+    ".eggs",
+    "dist",
+    "build",
+    "docs",
+    ".tox",
+    ".git",
+    "__pycache__",
+]
+doctest_optionflags = [
+    "NUMBER",
+    "NORMALIZE_WHITESPACE",
+    "IGNORE_EXCEPTION_DETAIL",
+]
 addopts = [
-  "--strict-markers",
-  "--tb=short",
-  "--doctest-modules",
-  "--doctest-continue-on-failure",
+    "--strict-markers",
+    "--tb=short",
+    "--doctest-modules",
+    "--doctest-continue-on-failure",
 ]
 
-
 [tool.coverage.run]
-source = ["tests"]
+source = [
+    "tests",
+]
 
+[build-system]
+requires = [
+    "poetry-core>=1.0.0",
+    "poetry-dynamic-versioning>=1.0.0,<2.0.0",
+]
+build-backend = "poetry_dynamic_versioning.backend"
 
 [coverage.paths]
 source = "reptar"
 
-
 [coverage.run]
 branch = true
 omit = [
-  "*/__init__.py",
-  "*/_version.py",
+    "*/__init__.py",
+    "*/_version.py",
 ]
 
 [coverage.report]
 fail_under = 50
 show_missing = true
 
-[virtualenvs]
-path = ".venv/"
-create = false
-in-project = false
+["tool.poetry.group.conda.dependencies"]
+appdirs = "^1.4.4"
+attrs = "^23.1.0"
+Brotli = "^1.1.0"
+build = "^0.10.0"
+CacheControl = "^0.13.1"
+cachy = "^0.3.0"
+certifi = "^2023.7.22"
+cffi = "^1.16.0"
+cfgv = "^3.3.1"
+charset-normalizer = "^3.3.1"
+cleo = "^2.0.1"
+click = "^8.1.7"
+click-default-group = "^1.2.4"
+clikit = "^0.6.2"
+colorama = "^0.4.6"
+conda_lock = "^1.4.0"
+conda_poetry_liaison = "^0.0.2"
+crashtest = "^0.4.1"
+cryptography = "^41.0.5"
+distlib = "^0.3.7"
+dulwich = "^0.21.6"
+dunamai = "^1.19.0"
+ensureconda = "^1.4.3"
+filelock = "^3.13.0"
+gitdb = "^4.0.7"
+GitPython = "^3.1.40"
+html5lib = "^1.1"
+identify = "^2.5.31"
+idna = "^3.4"
+importlib-metadata = "^6.8.0"
+importlib-resources = "^6.1.0"
+installer = "^0.7.0"
+"jaraco.classes" = "^3.3.0"
+jeepney = "^0.8.0"
+Jinja2 = "^3.1.2"
+jsonschema = "^4.17.3"
+keyring = "^24.2.0"
+MarkupSafe = "^2.1.3"
+more-itertools = "^10.1.0"
+msgpack = "^1.0.6"
+networkx = "^3.2.1"
+nodeenv = "^1.8.0"
+numpy = "^1.26.0"
+OptKing = "^0.2.1"
+packaging = "^23.2"
+pastel = "^0.2.1"
+pexpect = "^4.8.0"
+Pint = "^0.22"
+pip = "^23.3.1"
+pkginfo = "^1.9.6"
+pkgutil_resolve_name = "^1.3.10"
+platformdirs = "^3.11.0"
+poetry = "^1.6.1"
+poetry-core = "^1.7.0"
+poetry-dynamic-versioning = "^1.1.1"
+poetry-plugin-export = "^1.5.0"
+pre-commit = "^3.5.0"
+psutil = "^5.9.5"
+ptyprocess = "^0.7.0"
+py-cpuinfo = "^9.0.0"
+pycparser = "^2.21"
+pydantic = "^2.4.2"
+pydantic_core = "^2.10.1"
+pylev = "^1.4.0"
+pyproject_hooks = "^1.0.0"
+pyrsistent = "^0.19.3"
+PySocks = "^1.7.1"
+PyYAML = "^6.0.1"
+qcelemental = "^0.27.1"
+qcengine = "^0.28.1"
+rapidfuzz = "^2.15.2"
+requests = "^2.31.0"
+requests-toolbelt = "^1.0.0"
+"ruamel.yaml" = "^0.18.3"
+"ruamel.yaml.clib" = "^0.2.7"
+scipy = "^1.11.3"
+SecretStorage = "^3.3.3"
+setuptools = "^68.2.2"
+shellingham = "^1.5.4"
+six = "^1.16.0"
+smmap = "^6.0.0"
+tomli = "^2.0.1"
+tomli_w = "^1.0.0"
+tomlkit = "^0.12.1"
+toolz = "^0.12.0"
+trove-classifiers = "^2023.10.18"
+typing_extensions = "^4.8.0"
+ukkonen = "^1.0.1"
+urllib3 = "^2.0.7"
+virtualenv = "^20.24.6"
+webencodings = "^0.5.1"
+wheel = "^0.41.2"
+zipp = "^3.17.0"
