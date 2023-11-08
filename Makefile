@@ -82,9 +82,14 @@ formatting:
 
 
 #* Linting
+
+.PHONY: download-test-files
+download-test-files:
+	$(CONDA) git clone https://github.com/oasci/reptar-data examples/reptar-data/
+
 .PHONY: test
 test:
-	$(CONDA) pytest -c pyproject.toml --cov=$(PACKAGE_NAME) --cov-report=xml tests/
+	$(CONDA) pytest -c pyproject.toml --cov=$(PACKAGE_NAME) --cov-report=xml --junit-xml=report.xml tests/
 
 .PHONY: check-codestyle
 check-codestyle:

@@ -22,8 +22,25 @@ pages:
   - if: "$CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH"
   stage: deploy
 
-sast:
+
+tests:
   stage: test
+  before_script:
+    - make download-test-files
+  script:
+    - coverage run -m pytest -rsv --junit-xml=report.xml # Generate test report in junit format
+    - coverage report # for displaying coverage in job logs
+    - coverage xml    # for generating coverage.xml report
+  coverage: '/^TOTAL.+?(\d+\%)$/'
+  artifacts:
+    when: always
+    reports:
+      coverage_report:
+        coverage_format: cobertura
+        path: coverage.xml
+      junit: report.xml
+  interruptible: true
+
 
 include:
 - template: Security/SAST.gitlab-ci.yml
