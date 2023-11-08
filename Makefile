@@ -147,13 +147,13 @@ build:
 #* Documentation
 .PHONY: docs
 docs:
-	rm -rf ./docs/html/
-	$(CONDA) sphinx-build -nT ./docs/source/ ./docs/html/
-	touch ./docs/html/.nojekyll
+	rm -rf public/
+	$(CONDA) sphinx-build -nT docs/ public/
+	touch public/.nojekyll
 
 .PHONY: open-docs
 open-docs:
-	xdg-open ./docs/html/index.html 2>/dev/null
+	xdg-open public/index.html 2>/dev/null
 
 .PHONY: update-defs
 update-defs:
@@ -161,11 +161,11 @@ update-defs:
 
 .PHONY: docs-multiversion
 docs-multiversion:
-	rm -rf ./docs/html/
-	$(CONDA) sphinx-multiversion -nT ./docs/source/ ./docs/html/
-	touch ./docs/html/.nojekyll
+	rm -rf public/
+	$(CONDA) sphinx-multiversion -nT docs/ public/
+	touch public/.nojekyll
 
 	# Create html redirect to main
-	echo "<head>" > ./docs/html/index.html
-	echo "  <meta http-equiv='refresh' content='0; URL=$(DOCS_URL)/main/index.html'>" >> ./docs/html/index.html
-	echo "</head>" >> ./docs/html/index.html
+	echo "<head>" > public/index.html
+	echo "  <meta http-equiv='refresh' content='0; URL=$(DOCS_URL)/main/index.html'>" >> public/index.html
+	echo "</head>" >> public/index.html
