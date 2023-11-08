@@ -2,6 +2,7 @@
 image: continuumio/miniconda3
 # Functions that should be executed before the build script is run
 before_script:
+  - apt-get update && apt-get install build-essential -y
   - make refresh
 pages:
   script:
