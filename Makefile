@@ -33,12 +33,15 @@ conda-dependencies:
 	$(CONDA) conda install -y -c conda-forge xtb
 	$(CONDA) conda install -y -c conda-forge/label/libint_dev -c conda-forge psi4
 
+# Add custom command to add unique channel
 .PHONY: conda-lock
 conda-lock:
 	- rm $(REPO_PATH)/conda-lock.yml
+	$(CONDA) conda config --append channels conda-forge/label/libint_dev
 	$(CONDA) conda env export --from-history | grep -v "^prefix" > environment.yml
-	$(CONDA) conda-lock -f environment.yml -p linux-64 -p osx-64 -p win-64
+	$(CONDA) conda-lock -f environment.yml -p linux-64 -p osx-64
 	rm $(REPO_PATH)/environment.yml
+	$(CONDA) conda config --remove channels conda-forge/label/libint_dev
 	$(CONDA) cpl-deps $(REPO_PATH)/pyproject.toml --env_name $(CONDA_NAME)
 	$(CONDA) cpl-clean --env_name $(CONDA_NAME)
 
@@ -64,7 +67,7 @@ install:
 refresh: conda-create from-conda-lock pre-commit-install install
 
 .PHONY: refresh-locks
-refresh-locks: conda-create conda-setup conda-lock pre-commit-install poetry-lock install
+refresh-locks: conda-create conda-setup conda-dependencies conda-lock pre-commit-install poetry-lock install
 
 
 

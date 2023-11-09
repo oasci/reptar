@@ -28,9 +28,8 @@ tests:
   stage: test
   script:
     - make download-test-files
-    - coverage run -m pytest -rsv --junit-xml=report.xml # Generate test report in junit format
+    - make test # Generate test report in junit format
     - coverage report # for displaying coverage in job logs
-    - coverage xml    # for generating coverage.xml report
   coverage: '/^TOTAL.+?(\d+\%)$/'
   artifacts:
     when: always
