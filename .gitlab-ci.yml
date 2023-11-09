@@ -6,11 +6,12 @@
 # Note that environment variables can be set in several places
 # See https://docs.gitlab.com/ee/ci/variables/#cicd-variable-precedence
 
-image: continuumio/miniconda3
 
-before_script:
-- apt-get update && apt-get install build-essential -y
-- make refresh
+default:
+  image: continuumio/miniconda3
+  before_script:
+    - apt-get update && apt-get install build-essential -y
+    - make refresh
 
 pages:
   script:
@@ -25,9 +26,8 @@ pages:
 
 tests:
   stage: test
-  before_script:
-    - make download-test-files
   script:
+    - make download-test-files
     - coverage run -m pytest -rsv --junit-xml=report.xml # Generate test report in junit format
     - coverage report # for displaying coverage in job logs
     - coverage xml    # for generating coverage.xml report
