@@ -26,7 +26,7 @@ reptar-xyz-to-file = "reptar.writers.xyz:main_xyz_to_file"
 reptar-write-xyz = "reptar.writers.xyz:main_write_xyz"
 
 [tool.poetry.dependencies]
-python = "<3.13,>=3.9"
+python = "<3.11,>=3.9"
 numpy = "^1.26.0"
 pyyaml = "^6.0.1"
 scipy = "^1.11.3"
@@ -144,7 +144,7 @@ ignore = [
     "conf.py",
 ]
 jobs = 0
-py-version = 3.9
+py-version = 3.10
 argument-naming-style = "snake_case"
 attr-naming-style = "snake_case"
 class-const-naming-style = "UPPER_CASE"
@@ -176,14 +176,14 @@ disable = [
 
 [tool.black]
 target-version = [
-    "py311",
+    "py310",
 ]
 line-length = 88
 color = true
 exclude = "/(\n    \\.git\n    | \\.hg\n    | \\.mypy_cache\n    | \\.tox\n    | \\.venv\n    | _build\n    | buck-out\n    | build\n    | dist\n    | env\n    | venv\n)/\n"
 
 [tool.isort]
-py_version = 311
+py_version = 310
 line_length = 88
 known_typing = [
     "typing",
@@ -227,7 +227,7 @@ skip = [
 ]
 
 [tool.mypy]
-python_version = 3.11
+python_version = 3.1
 pretty = true
 show_traceback = true
 color_output = true
