@@ -2,14 +2,17 @@ SHELL := /usr/bin/env bash
 PYTHON_VERSION := 3.11
 PYTHON_VERSION_CONDENSED := 311
 PACKAGE_NAME := reptar
-REPO_PATH := $(shell git rev-parse --show-toplevel)
-PACKAGE_PATH := $(REPO_PATH)/$(PACKAGE_NAME)
-TESTS_PATH := $(REPO_PATH)/tests
+PACKAGE_PATH := $(PACKAGE_NAME)/
+TESTS_PATH := tests/
 CONDA_NAME := $(PACKAGE_NAME)-dev
 CONDA := conda run -n $(CONDA_NAME)
+CONDA_LOCK_OPTIONS := -p linux-64 -p osx-64 --channel conda-forge --channel conda-forge/label/libint_dev
 DOCS_URL := https://reptar.oasci.org
 
 ###   ENVIRONMENT   ###
+
+# See https://github.com/pypa/pip/issues/7883#issuecomment-643319919
+export PYTHON_KEYRING_BACKEND := keyring.backends.null.Keyring
 
 .PHONY: conda-create
 conda-create:
@@ -36,18 +39,16 @@ conda-dependencies:
 # Add custom command to add unique channel
 .PHONY: conda-lock
 conda-lock:
-	- rm $(REPO_PATH)/conda-lock.yml
-	$(CONDA) conda config --append channels conda-forge/label/libint_dev
+	- rm conda-lock.yml
 	$(CONDA) conda env export --from-history | grep -v "^prefix" > environment.yml
-	$(CONDA) conda-lock -f environment.yml -p linux-64 -p osx-64
-	rm $(REPO_PATH)/environment.yml
-	$(CONDA) conda config --remove channels conda-forge/label/libint_dev
-	$(CONDA) cpl-deps $(REPO_PATH)/pyproject.toml --env_name $(CONDA_NAME)
+	$(CONDA) conda-lock -f environment.yml $(CONDA_LOCK_OPTIONS)
+	rm environment.yml
+	$(CONDA) cpl-deps pyproject.toml --env_name $(CONDA_NAME)
 	$(CONDA) cpl-clean --env_name $(CONDA_NAME)
 
 .PHONY: from-conda-lock
 from-conda-lock:
-	$(CONDA) conda-lock install -n $(CONDA_NAME) $(REPO_PATH)/conda-lock.yml
+	$(CONDA) conda-lock install -n $(CONDA_NAME) conda-lock.yml
 	$(CONDA) cpl-clean --env_name $(CONDA_NAME)
 
 .PHONY: pre-commit-install
@@ -62,29 +63,17 @@ poetry-lock:
 .PHONY: install
 install:
 	$(CONDA) poetry install --no-interaction
+	- mkdir .mypy_cache
+	- $(CONDA) mypy --install-types --non-interactive --explicit-package-bases $(PACKAGE_NAME)
 
-.PHONY: refresh
-refresh: conda-create from-conda-lock pre-commit-install install
+.PHONY: environment
+environment: conda-create from-conda-lock pre-commit-install install
 
-.PHONY: refresh-locks
-refresh-locks: conda-create conda-setup conda-dependencies conda-lock pre-commit-install poetry-lock install
-
-
-
-.PHONY: validate
-validate:
-	- $(CONDA) pre-commit run --all-files
-
-.PHONY: formatting
-formatting:
-	- $(CONDA) pyupgrade --exit-zero-even-if-changed --py311-plus **/*.py
-	- $(CONDA) isort --settings-path pyproject.toml ./
-	- $(CONDA) black --config pyproject.toml ./
+.PHONY: locks
+locks: conda-create conda-setup conda-dependencies conda-lock pre-commit-install poetry-lock install
 
 
-
-
-#* Linting
+###   TESTING   ###
 
 .PHONY: download-test-files
 download-test-files:
@@ -92,7 +81,26 @@ download-test-files:
 
 .PHONY: test
 test:
-	$(CONDA) pytest -c pyproject.toml --cov=$(PACKAGE_NAME) --cov-report=xml --junit-xml=report.xml tests/
+	$(CONDA) pytest -c pyproject.toml --cov=$(PACKAGE_NAME) --cov-report=xml --junit-xml=report.xml --color=yes $(TESTS_PATH)
+
+.PHONY: coverage
+coverage:
+	$(CONDA) coverage report
+
+
+###   FORMATTING   ###
+
+.PHONY: validate
+validate:
+	- $(CONDA) pre-commit run --all-files
+
+.PHONY: formatting
+formatting:
+	- $(CONDA) isort --settings-path pyproject.toml ./
+	- $(CONDA) black --config pyproject.toml ./
+
+
+###   LINTING   ###
 
 .PHONY: check-codestyle
 check-codestyle:
@@ -102,14 +110,14 @@ check-codestyle:
 
 .PHONY: mypy
 mypy:
-	$(CONDA) mypy --config-file pyproject.toml --explicit-package-bases $(PACKAGE_NAME) tests
+	- $(CONDA) mypy --config-file pyproject.toml --explicit-package-bases $(PACKAGE_NAME) tests
 
 .PHONY: lint
-lint: test check-codestyle mypy
+lint: check-codestyle mypy
 
 
+###   CLEANING   ###
 
-#* Cleaning
 .PHONY: pycache-remove
 pycache-remove:
 	find . | grep -E "(__pycache__|\.pyc|\.pyo$$)" | xargs rm -rf
@@ -147,12 +155,15 @@ build-remove:
 cleanup: pycache-remove dsstore-remove mypycache-remove ipynbcheckpoints-remove pytestcache-remove psi-remove coverage-remove
 
 
-#* Build
+###   BUILD   ###
+
 .PHONY: build
 build:
 	$(CONDA) poetry build
 
-#* Documentation
+
+###   DOCUMENTATION   ###
+
 .PHONY: docs
 docs:
 	rm -rf public/
