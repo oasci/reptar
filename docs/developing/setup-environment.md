@@ -1,4 +1,3 @@
-(setup-environment)=
 # Setup environment
 
 A crucial aspect of consistent development is the standardization of the computational environment.
@@ -12,9 +11,9 @@ If you want to use a new `conda` package down the road, you usually need to recr
 
 If you do not have `conda` installed, follow the instructions [here](https://docs.conda.io/projects/miniconda/en/latest/#quick-command-line-install).
 
-:::{note}
-We recommend using [`libmamba`](https://conda.github.io/conda-libmamba-solver/getting-started/) instead of [`mamba`](https://mamba.readthedocs.io/en/latest/) or [classic `conda`](https://conda.github.io/conda-libmamba-solver/libmamba-vs-classic/).
-:::
+!!! note
+
+  We recommend using [`libmamba`](https://conda.github.io/conda-libmamba-solver/getting-started/) instead of [`mamba`](https://mamba.readthedocs.io/en/latest/) or [classic `conda`](https://conda.github.io/conda-libmamba-solver/libmamba-vs-classic/).
 
 ## Conda environment
 
@@ -26,9 +25,7 @@ make conda-setup
 
 Now we install our desired packages in one of two ways.
 
-::::{tab-set}
-
-:::{tab-item} From `conda-lock.yml`
+### From `conda-lock.yml`
 
 This will install the exact same packages we use to develop this package.
 
@@ -36,14 +33,12 @@ This will install the exact same packages we use to develop this package.
 make from-conda-lock
 ```
 
-```{warning}
-Only `linux-64` and `osx-64` are supported.
-If you must use windows, it is recommended that you build from scratch.
-```
+!!! warning
 
-:::
+    Only `linux-64` and `osx-64` are supported.
+    If you must use windows, it is recommended that you build from scratch.
 
-:::{tab-item} From scratch
+### From scratch
 
 With this procedure, you can install any `conda` packages desired.
 
@@ -71,10 +66,6 @@ If needed, write a new `conda-lock` file if you are proposing code changes.
 ```bash
 make write-conda-lock
 ```
-
-:::
-
-::::
 
 <!-- conda list -e -p .venv/ | sed '1,3d ; s/=[a-z][A-Za-z0-9].*$//g ; s/^_[A-Za-z0-9].*$//g ; s/=/==/g' -->
 

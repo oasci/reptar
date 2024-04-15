@@ -1,13 +1,12 @@
 SHELL := /usr/bin/env bash
-PYTHON_VERSION := 3.10
-PYTHON_VERSION_CONDENSED := 310
+PYTHON_VERSION := 3.11
+PYTHON_VERSION_CONDENSED := 311
 PACKAGE_NAME := reptar
 PACKAGE_PATH := $(PACKAGE_NAME)/
 TESTS_PATH := tests/
 CONDA_NAME := $(PACKAGE_NAME)-dev
 CONDA := conda run -n $(CONDA_NAME)
 CONDA_LOCK_OPTIONS := -p linux-64 -p osx-64 --channel conda-forge --channel conda-forge/label/libint_dev
-DOCS_URL := https://reptar.oasci.org
 
 ###   ENVIRONMENT   ###
 
@@ -36,13 +35,17 @@ conda-dependencies:
 	$(CONDA) conda install -y -c conda-forge xtb
 	$(CONDA) conda install -y -c conda-forge/label/libint_dev -c conda-forge psi4
 
+.PHONY: nodejs-dependencies
+nodejs-dependencies:
+	$(CONDA) conda install -y -c conda-forge nodejs
+	$(CONDA) npm install markdownlint-cli2 --global
+
 # Add custom command to add unique channel
 .PHONY: conda-lock
 conda-lock:
 	- rm conda-lock.yml
 	$(CONDA) conda env export --from-history | grep -v "^prefix" > environment.yml
 	$(CONDA) conda-lock -f environment.yml $(CONDA_LOCK_OPTIONS)
-	rm environment.yml
 	$(CONDA) cpl-deps pyproject.toml --env_name $(CONDA_NAME)
 	$(CONDA) cpl-clean --env_name $(CONDA_NAME)
 
@@ -67,10 +70,10 @@ install:
 	- $(CONDA) mypy --install-types --non-interactive --explicit-package-bases $(PACKAGE_NAME)
 
 .PHONY: environment
-environment: conda-create from-conda-lock pre-commit-install install
+environment: conda-create nodejs-dependencies from-conda-lock pre-commit-install install
 
 .PHONY: locks
-locks: conda-create conda-setup conda-dependencies conda-lock pre-commit-install poetry-lock install
+locks: conda-create conda-setup conda-dependencies nodejs-dependencies conda-lock pre-commit-install poetry-lock install
 
 
 ###   TESTING   ###
@@ -92,6 +95,7 @@ coverage:
 
 .PHONY: validate
 validate:
+	- $(CONDA) markdownlint-cli2 "**.md" --config ./.markdownlint.yaml --fix
 	- $(CONDA) pre-commit run --all-files
 
 .PHONY: formatting
@@ -100,20 +104,23 @@ formatting:
 	- $(CONDA) black --config pyproject.toml ./
 
 
+
 ###   LINTING   ###
 
 .PHONY: check-codestyle
 check-codestyle:
-	$(CONDA) isort --diff --check-only --settings-path pyproject.toml $(PACKAGE_NAME) tests
-	$(CONDA) black --diff --check --config pyproject.toml $(PACKAGE_NAME) tests
-	$(CONDA) pylint $(PACKAGE_NAME) tests
+	$(CONDA) isort --diff --check-only $(PACKAGE_PATH)
+	$(CONDA) black --diff --check --config pyproject.toml $(PACKAGE_PATH)
+	- $(CONDA) pylint --rcfile pyproject.toml $(PACKAGE_PATH)
 
 .PHONY: mypy
 mypy:
-	- $(CONDA) mypy --config-file pyproject.toml --explicit-package-bases $(PACKAGE_NAME) tests
+	- $(CONDA) mypy --config-file pyproject.toml $(PACKAGE_PATH)
 
 .PHONY: lint
 lint: check-codestyle mypy
+
+
 
 
 ###   CLEANING   ###
@@ -162,29 +169,35 @@ build:
 	$(CONDA) poetry build
 
 
-###   DOCUMENTATION   ###
+
+###   DOCS   ###
+
+mkdocs_port := $(shell \
+	start_port=3000; \
+	max_attempts=100; \
+	for i in $$(seq 0 $$(($$max_attempts - 1))); do \
+		current_port=$$(($$start_port + i)); \
+		if ! lsof -i :$$current_port > /dev/null; then \
+			echo $$current_port; \
+			break; \
+		fi; \
+		if [ $$i -eq $$(($$max_attempts - 1)) ]; then \
+			echo "Error: Unable to find an available port after $$max_attempts attempts."; \
+			exit 1; \
+		fi; \
+	done \
+)
+
+.PHONY: serve
+serve:
+	echo "Served at http://127.0.0.1:$(mkdocs_port)/"
+	$(CONDA) mkdocs serve -a localhost:$(mkdocs_port)
 
 .PHONY: docs
 docs:
-	rm -rf public/
-	$(CONDA) sphinx-build -nT docs/ public/
-	touch public/.nojekyll
+	$(CONDA) mkdocs build -d public/
+	- rm -f public/gen_ref_pages.py
 
 .PHONY: open-docs
 open-docs:
 	xdg-open public/index.html 2>/dev/null
-
-.PHONY: update-defs
-update-defs:
-	$(CONDA) ./docs/convert_definitions.py
-
-.PHONY: docs-multiversion
-docs-multiversion:
-	rm -rf public/
-	$(CONDA) sphinx-multiversion -nT docs/ public/
-	touch public/.nojekyll
-
-	# Create html redirect to main
-	echo "<head>" > public/index.html
-	echo "  <meta http-equiv='refresh' content='0; URL=$(DOCS_URL)/main/index.html'>" >> public/index.html
-	echo "</head>" >> public/index.html

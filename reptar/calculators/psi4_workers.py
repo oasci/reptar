@@ -143,56 +143,44 @@ def psi4_worker(
     charge: int = 0,
     mult: int = 1,
     method: str = "mp2",
-    options: dict[str, Any] = None,
+    options: dict[str, Any] | None = None,
     threads: int = 1,
     mem: str | float | int = "1 GB",
     total_grid_points: int | None = None,
 ) -> Data:
     r"""Worker function for optimizations using Psi4.
 
-    Parameters
-    ----------
-    idxs
-        Indices of the structures from ``R`` to compute energies and gradients
-        for.
-    tasks
-        Calculations this worker needs to run in the order specified here. In general,
-        we recommend using this ordering: ``opt``, ``E``, ``G``, ``cube``.
-    data
-        All required data required for computations such as ``Z``, ``R``, ``conv_opt``,
+    Args:
+        idxs: Indices of the structures from ``R`` to compute energies and gradients
+            for.
+        tasks: Calculations this worker needs to run in the order specified here. In general,
+            we recommend using this ordering: ``opt``, ``E``, ``G``, ``cube``.
+        data: All required data required for computations such as ``Z``, ``R``, ``conv_opt``,
         etc.
-    charge
-        Total system charge.
-    mult
-        Total system multiplicity.
-    method
-        Specifies the Psi4 method used for all calculations. For more information,
-        please see `the Psi4 documentation <https://psicode.org/psi4manual/master
-        /methods.html>`__ for your specific version.
-    options
-        `Psi4 control keywords <https://psicode.org/psi4manual/master/
-        psithoninput.html#job-control-keywords>`__
-        using the PsiAPI format. Some common ones are ``basis``,
-        ``e_convergence``, ``d_convergence``, and ``reference``.
-    threads
-        Number of threads for Psi4. This is almost always the number of cores
-        being used for the worker. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
-    mem
-        The amount of memory available. For more information, see the
-        `documentation <https://psicode.org/psi4manual/master/api/
-        psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
-    total_grid_points
-        Number of grid points to initialize cube arrays with.
+        charge: Total system charge.
+        mult: Total system multiplicity.
+        method: Specifies the Psi4 method used for all calculations. For more information,
+            please see
+            [the Psi4 documentation](https://psicode.org/psi4manual/master/methods.html)
+            for your specific version.
+        options: `Psi4 control keywords <https://psicode.org/psi4manual/master/
+            psithoninput.html#job-control-keywords>`__
+            using the PsiAPI format. Some common ones are ``basis``,
+            ``e_convergence``, ``d_convergence``, and ``reference``.
+        threads: Number of threads for Psi4. This is almost always the number of cores
+            being used for the worker. For more information, see the
+            `documentation <https://psicode.org/psi4manual/master/api/
+            psi4.core.set_num_threads.html#psi4.core.set_num_threads>`__.
+        mem: The amount of memory available. For more information, see the
+            `documentation <https://psicode.org/psi4manual/master/api/
+            psi4.driver.set_memory.html#psi4.driver.set_memory>`__.
+        total_grid_points: Number of grid points to initialize cube arrays with.
 
-    Returns
-    -------
-    :obj:`reptar.calculators.Data`
+    Returns:
         Data object from this worker.
 
-    Notes
-    -----
+    ## Notes
+
     Psi4 uses QCElemental to build molecules from arrays.
     There is some postprocessing in the `from_arrays routine
     <http://docs.qcarchive.molssi.org/projects/QCElemental/en/latest/api/
